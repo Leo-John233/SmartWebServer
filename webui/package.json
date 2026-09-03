@@ -1,0 +1,9 @@
+{
+  "name": "smart-web-server-webui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint:comments": "node scripts/check-comments.mjs"
+  }
+}
