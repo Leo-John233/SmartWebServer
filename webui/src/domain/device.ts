@@ -60,6 +60,14 @@ export interface DeviceSnapshot {
   enabled: Readonly<Record<string, boolean>>
 }
 
+export interface NetworkConfig {
+  schemaVersion: 1
+  authenticated: boolean
+  restartRequired: boolean
+  station: { enabled: boolean; ssid: string; dhcp: boolean; ip: string }
+  accessPoint: { enabled: boolean; ssid: string; channel: number; ip: string }
+}
+
 export const disabledCapabilities: Capabilities = {
   mount: false,
   rotator: false,

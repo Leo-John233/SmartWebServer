@@ -1,4 +1,4 @@
-import type { DeviceSnapshot, MountActivity, UiConfig } from '../domain/device'
+import type { DeviceSnapshot, MountActivity, NetworkConfig, UiConfig } from '../domain/device'
 import { safeUiConfig } from '../domain/device'
 import { mergeLegacyDocuments, parseLegacyText, type LegacyDocument } from '../protocol/legacyText'
 import { toLegacyRequest, type DeviceAction } from './deviceActions'
@@ -28,17 +28,29 @@ function inferActivity(document: LegacyDocument): MountActivity {
 export class LegacyClient {
   private readonly fetcher: typeof fetch
   private readonly scenario: () => string
+  private apiAvailable = false
 
   constructor(options: LegacyClientOptions = {}) {
     this.fetcher = options.fetcher ?? ((input, init) => globalThis.fetch(input, init))
     this.scenario = options.scenario ?? (() => 'normal')
   }
 
-  private async request(path: string): Promise<Response> {
-    return this.fetcher(path, { headers: { 'X-WebUI-Scenario': this.scenario() } })
+  private async request(path: string, init: RequestInit = {}): Promise<Response> {
+    const headers = new Headers(init.headers)
+    headers.set('X-WebUI-Scenario', this.scenario())
+    return this.fetcher(path, { ...init, headers })
   }
 
   async getConfig(): Promise<UiConfig> {
+    try {
+      const apiResponse = await this.request('/api/v1/capabilities')
+      if (apiResponse.ok) {
+        this.apiAvailable = true
+        return await apiResponse.json() as UiConfig
+      }
+    } catch {
+      this.apiAvailable = false
+    }
     try {
       const response = await this.request('/ui-config.json')
       if (!response.ok) return safeUiConfig
@@ -49,6 +61,19 @@ export class LegacyClient {
   }
 
   async performAction(action: DeviceAction): Promise<void> {
+    if (this.apiAvailable) {
+      const body = new URLSearchParams({ action: action.type })
+      for (const [key, value] of Object.entries(action)) {
+        if (key !== 'type') body.set(key, value instanceof Date ? value.toISOString() : String(value))
+      }
+      const apiResponse = await this.request('/api/v1/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      })
+      if (apiResponse.ok) return
+      if (apiResponse.status !== 404 && apiResponse.status !== 501) throw new Error('Device rejected the action')
+    }
     const request = toLegacyRequest(action)
     const query = new URLSearchParams(request.params)
     const response = await this.request(`${request.path}?${query}`)
@@ -56,6 +81,27 @@ export class LegacyClient {
   }
 
   async getSnapshot(config: UiConfig): Promise<DeviceSnapshot> {
+    const scopePaths = ['controller']
+    if (config.capabilities.mount) scopePaths.push('mount')
+    if (config.capabilities.rotator) scopePaths.push('rotator')
+    if (config.capabilities.focuserCount) scopePaths.push('focuser')
+    if (config.capabilities.auxiliary) scopePaths.push('auxiliary')
+    if (config.capabilities.encoders) scopePaths.push('encoders')
+
+    if (this.apiAvailable) {
+      try {
+        const documents = await Promise.all(scopePaths.map(async (scope) => {
+          const response = await this.request(`/api/v1/state?scope=${scope}`)
+          if (!response.ok) throw new Error(`API state failed: ${scope}`)
+          const payload = await response.json() as Pick<LegacyDocument, 'values' | 'selected' | 'enabled'>
+          return { entries: [], values: payload.values, selected: payload.selected, enabled: payload.enabled }
+        }))
+        return this.snapshotFromDocument(config, mergeLegacyDocuments(...documents))
+      } catch {
+        this.apiAvailable = false
+      }
+    }
+
     const paths = ['/index-ajax-get.txt']
     if (config.capabilities.mount) paths.push('/mount-ajax-get.txt')
     if (config.capabilities.rotator) paths.push('/rotator-ajax-get.txt')
@@ -69,6 +115,27 @@ export class LegacyClient {
     })
     const document = mergeLegacyDocuments(...await Promise.all(requests))
     if (document.entries.length === 0) throw new Error('Legacy endpoints returned no state')
+    return this.snapshotFromDocument(config, document)
+  }
+
+  async getNetwork(): Promise<NetworkConfig> {
+    const response = await this.request('/api/v1/network')
+    if (!response.ok) throw new Error('Network settings are unavailable')
+    return await response.json() as NetworkConfig
+  }
+
+  async updateNetwork(values: Record<string, string | number | boolean>): Promise<void> {
+    const body = new URLSearchParams()
+    for (const [key, value] of Object.entries(values)) body.set(key, String(value))
+    const response = await this.request('/api/v1/network', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    })
+    if (!response.ok) throw new Error('Network action failed')
+  }
+
+  private snapshotFromDocument(config: UiConfig, document: LegacyDocument): DeviceSnapshot {
     const now = Date.now()
 
     return {

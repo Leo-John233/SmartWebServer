@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 #define KV_GTO_STATUS 0
 #define KV_GTO_I1 1
@@ -187,40 +188,6 @@ void gotoTileAjax(String &data)
 // pass related data back to OnStep
 extern void gotoTileGet()
 {
-  String v;
-  char temp[80];
-
-  v = www.arg("goto");
-  if (!v.equals(EmptyStr)) {
-    if (v.equals("vs")) onStep.commandBool(":SX93,5#");      // very slow, 0.5 x
-    if (v.equals("s"))  onStep.commandBool(":SX93,4#");      // slow,      0.75x
-    if (v.equals("n"))  onStep.commandBool(":SX93,3#");      // normal,    1.0 x
-    if (v.equals("f"))  onStep.commandBool(":SX93,2#");      // fast,      1.5 x
-    if (v.equals("vf")) onStep.commandBool(":SX93,1#");      // very fast, 2.0 x
-
-    if (v.equals("bzr_on"))  onStep.commandBool(":SX97,1#"); // alert buzzer on
-    if (v.equals("bzr_off")) onStep.commandBool(":SX97,0#"); // alert buzzer off
-
-    if (v.equals("af_now")) onStep.commandBool(":MN#");      // auto-flip, now
-    if (v.equals("af_on")) onStep.commandBool(":SX95,1#");   // auto-flip, on
-    if (v.equals("af_off")) onStep.commandBool(":SX95,0#");  // auto-flip, off
-
-    if (v.equals("mp_on")) onStep.commandBool(":SX98,1#");   // meridian-flip, pause at home on
-    if (v.equals("mp_off")) onStep.commandBool(":SX98,0#");  // meridian-flip, pause at home off
-    if (v.equals("mp_cnt")) onStep.commandBool(":SX99,1#");  // meridian flip, pause->continue
-
-    if (status.hasMeridianFlipHomeModes() && (status.mountType == MT_GEM || status.mountType == MT_FORK)) {
-      if (v.equals("mh_off"))   onStep.commandBool(":SX94,0#"); // meridian-flip, direct slew
-      if (v.equals("mh_visit")) onStep.commandBool(":SX94,1#"); // meridian-flip, visit home
-      if (v.equals("mh_pause")) onStep.commandBool(":SX94,2#"); // meridian-flip, pause at home
-    }
-
-    if (v.equals("pps_e")) onStep.commandBool(":SX96,E#");   // meridian-flip, preferred pier side East
-    if (v.equals("pps_w")) onStep.commandBool(":SX96,W#");   // meridian-flip, preferred pier side West
-    if (v.equals("pps_b")) onStep.commandBool(":SX96,B#");   // meridian flip, preferred pier side Best
-    if (v.equals("pps_a")) onStep.commandBool(":SX96,A#");   // meridian flip, preferred pier side Auto
-
-    if (v.equals("go")) onStep.command(":MS#", temp);        // goto start
-    if (v.equals("stop")) onStep.commandBlind(":Q#");        // goto/slew stop
-  }
+  String value = www.arg("goto");
+  if (!value.equals(EmptyStr)) performMountGotoAction(value);
 }

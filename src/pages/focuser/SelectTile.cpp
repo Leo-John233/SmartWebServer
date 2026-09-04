@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void focuserSelectTile(String &data)
@@ -68,16 +69,6 @@ void focuserSelectTileAjax(String &data)
 // pass related data back to OnStep
 extern void focuserSelectTileGet()
 {
-  String v;
-
-  v = www.arg("dr");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("F1")) { onStep.commandBool(":FA1#"); state.focuserSelected = 1; }
-    if (v.equals("F2")) { onStep.commandBool(":FA2#"); state.focuserSelected = 2; }
-    if (v.equals("F3")) { onStep.commandBool(":FA3#"); state.focuserSelected = 3; }
-    if (v.equals("F4")) { onStep.commandBool(":FA4#"); state.focuserSelected = 4; }
-    if (v.equals("F5")) { onStep.commandBool(":FA5#"); state.focuserSelected = 5; }
-    if (v.equals("F6")) { onStep.commandBool(":FA6#"); state.focuserSelected = 6; }
-  }
+  String value = www.arg("dr");
+  if (!value.equals(EmptyStr)) performFocuserAction("dr", value);
 }

@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void rotatorSlewingTile(String &data)
@@ -68,37 +69,8 @@ void rotatorSlewingTileAjax(String &data)
 // pass related data back to OnStep
 extern void rotatorSlewingTileGet()
 {
-  String v;
-
-  // stop movement
-  v = www.arg("rot");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("stop")) onStep.commandBlind(":rQ#");         // stop
-    if (v.equals("ccwf")) onStep.commandBlind(":r3#:rc#:r<#"); // rate 3, move ccw
-    if (v.equals("ccw"))  onStep.commandBlind(":r1#:rc#:r<#"); // rate 1, move ccw
-    if (v.equals("cw"))   onStep.commandBlind(":r1#:rc#:r>#"); // rate 1, move cw
-    if (v.equals("cwf"))  onStep.commandBlind(":r3#:rc#:r>#"); // rate 3, move cw
-
-    if (v.equals("vs"))   onStep.commandBlind(":r5#");         // goto rate very slow
-    if (v.equals("s"))    onStep.commandBlind(":r6#");         // goto rate slow
-    if (v.equals("n"))    onStep.commandBlind(":r7#");         // goto rate normal
-    if (v.equals("f"))    onStep.commandBlind(":r8#");         // goto rate fast
-    if (v.equals("vf"))   onStep.commandBlind(":r9#");         // goto rate very fast
-  }
-
-  // set position
-  v = www.arg("rs");
-  if (!v.equals(EmptyStr))
-  {
-    double f = v.toFloat();
-    if (f >= -360.0 || f <= 360.0)
-    {
-      char temp[80], temp1[40];
-      convert.doubleToDms(temp1, f, true, true, PM_HIGH);
-      snprintf(temp, sizeof(temp), ":rS%s#", temp1);
-      onStep.commandBool(temp);
-    }
-  }
-
+  String value = www.arg("rot");
+  if (!value.equals(EmptyStr)) performRotatorAction("rot", value);
+  value = www.arg("rs");
+  if (!value.equals(EmptyStr)) performRotatorAction("rs", value);
 }

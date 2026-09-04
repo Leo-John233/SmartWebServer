@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 
 const devicePaths = [
   '/ui-config.json',
+  '/api',
   '/index-ajax-get.txt',
   '/index.txt',
   '/mount-ajax-get.txt',

@@ -148,6 +148,11 @@ h3 { font-size: 21px; }
 .empty-state { text-align: center; }
 .empty-state p { color: var(--muted); }
 .sync-panel { margin-top: 14px; display: grid; gap: 18px; }
+.network-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.network-actions { grid-column: 1 / -1; padding: 14px 0; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.network-actions p { margin: 0; }
+.login-panel { max-width: 520px; display: grid; gap: 18px; }
+.legacy-link { color: var(--accent-blue); font-size: 13px; }
 
 @media (max-width: 900px) {
   .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -175,5 +180,7 @@ h3 { font-size: 21px; }
   .monitor-panel { grid-template-columns: 1fr; }
   .emergency { width: 100%; }
   .subsystem-hero, .encoder-grid, .feature-grid { grid-template-columns: 1fr; }
+  .network-grid { grid-template-columns: 1fr; }
+  .network-actions { grid-column: auto; align-items: stretch; flex-direction: column; }
   .wide-card { grid-column: auto; }
 }

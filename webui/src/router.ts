@@ -5,6 +5,7 @@ import RotatorView from './views/RotatorView.vue'
 import FocuserView from './views/FocuserView.vue'
 import AuxiliaryView from './views/AuxiliaryView.vue'
 import EncodersView from './views/EncodersView.vue'
+import NetworkView from './views/NetworkView.vue'
 
 export const router = createRouter({
   history: createWebHashHistory(),
@@ -15,5 +16,6 @@ export const router = createRouter({
     { path: '/focuser', name: 'focuser', component: FocuserView },
     { path: '/auxiliary', name: 'auxiliary', component: AuxiliaryView },
     { path: '/encoders', name: 'encoders', component: EncodersView },
+    { path: '/network', name: 'network', component: NetworkView },
   ],
 })

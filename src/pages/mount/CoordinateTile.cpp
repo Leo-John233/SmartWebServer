@@ -5,6 +5,7 @@
 #if DISPLAY_COORDINATE_ORIGIN == ON
 
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void coordinateTile(String &data)
@@ -22,8 +23,8 @@ void coordinateTile(String &data)
 // pass related data back to OnStep
 void coordinateTileGet()
 {
-  String v = www.arg("ob");
-  if (v.equals("set")) onStep.commandBool(":SEO#");
+  String value = www.arg("ob");
+  if (!value.equals(EmptyStr)) performMountPecAction("ob", value);
 }
 
 #endif

@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void pecTile(String &data)
@@ -86,21 +87,13 @@ void pecTileAjax(String &data)
 // pass related data back to OnStep
 extern void pecTileGet()
 {
-  String v;
-  char temp[40];
+  String value = www.arg("pec");
+  if (!value.equals(EmptyStr)) performMountPecAction("pec", value);
 
-  v = www.arg("pec");
-  if (!v.equals(EmptyStr)) {
-    if (v.equals("play")) onStep.commandBlind(":$QZ+#"); // play
-    if (v.equals("stop")) onStep.commandBlind(":$QZ-#"); // stop
-    if (v.equals("clr")) onStep.commandBlind(":$QZZ#");  // clear
-    if (v.equals("rec")) onStep.commandBlind(":$QZ/#");  // record
-    if (v.equals("wrt")) onStep.commandBlind(":$QZ!#");  // write to eeprom
-  }
-
-  v = www.arg("spwr");
-  if (!v.equals(EmptyStr)) {
-    snprintf(temp, sizeof(temp), ":SXE7,%s#", v.c_str());
-    onStep.commandBool(temp);
+  value = www.arg("spwr");
+  if (!value.equals(EmptyStr)) {
+    char command[40];
+    snprintf(command, sizeof(command), ":SXE7,%s#", value.c_str());
+    onStep.commandBool(command);
   }
 }

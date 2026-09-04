@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 const char *getHomeParkStateStr();
 
@@ -110,35 +111,16 @@ void homeParkTileGet()
   char temp[80] = "";
 
   v = www.arg("pk");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("p")) onStep.commandBool(":hP#"); // park
-    if (v.equals("u")) onStep.commandBool(":hR#"); // un-park
-    if (v.equals("s")) onStep.commandBool(":hQ#"); // set-park
-  }
+  if (!v.equals(EmptyStr)) performMountHomeAction("pk", v);
 
   v = www.arg("qb");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("hf")) onStep.commandBlind(":hF#"); // home, reset
-    if (v.equals("hc")) onStep.commandBlind(":hC#"); // home, find
-  }
+  if (!v.equals(EmptyStr)) performMountHomeAction("qb", v);
 
   v = www.arg("dr");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("qr")) onStep.commandBlind(":hF#"); // home, reset
-    if (v.equals("qh")) onStep.commandBlind(":hC#"); // home, find
-    if (v.equals("pk")) onStep.commandBool(":hP#"); // park
-    if (v.equals("pu")) onStep.commandBool(":hR#"); // un-park
-  }
+  if (!v.equals(EmptyStr)) performMountHomeAction("dr", v);
 
   v = www.arg("ha");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("0")) onStep.commandBlind(":hA0#"); // turn auto home off
-    if (v.equals("1")) onStep.commandBlind(":hA1#"); // turn auto home on
-  }
+  if (!v.equals(EmptyStr)) performMountHomeAction("ha", v);
 
   // home options when home sense is available
   if (status.hasHomeSense) {

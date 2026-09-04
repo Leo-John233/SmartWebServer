@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void rotatorHomeTile(String &data)
@@ -31,11 +32,6 @@ void rotatorHomeTileAjax(String &data)
 // pass related data back to OnStep
 extern void rotatorHomeTileGet()
 {
-  String v;
-  v = www.arg("rot");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("reset")) onStep.commandBlind(":rF#"); // reset rotator at home
-    if (v.equals("home"))  onStep.commandBlind(":rC#"); // move rotator to home
-  }
+  String value = www.arg("rot");
+  if (!value.equals(EmptyStr)) performRotatorAction("rot", value);
 }

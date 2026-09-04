@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void alignTile(String &data)
@@ -101,26 +102,8 @@ void alignTileAjax(String &data)
 // pass related data back to OnStep
 extern void alignTileGet()
 {
-  String v;
-  v = www.arg("al");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("1")) onStep.commandBool(":A1#");
-    if (v.equals("2")) onStep.commandBool(":A2#");
-    if (v.equals("3")) onStep.commandBool(":A3#");
-    if (v.equals("4")) onStep.commandBool(":A4#");
-    if (v.equals("5")) onStep.commandBool(":A5#");
-    if (v.equals("6")) onStep.commandBool(":A6#");
-    if (v.equals("7")) onStep.commandBool(":A7#");
-    if (v.equals("8")) onStep.commandBool(":A8#");
-    if (v.equals("9")) onStep.commandBool(":A9#");
-    if (v.equals("n")) onStep.commandBool(":A+#");
-    if (v.equals("q")) onStep.commandBlind(":Q#");
-  }
-  // refine polar align
-  v = www.arg("rp");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("a")) onStep.commandBool(":MP#");
-  }
+  String value = www.arg("al");
+  if (!value.equals(EmptyStr)) performMountAlignAction("al", value);
+  value = www.arg("rp");
+  if (!value.equals(EmptyStr)) performMountAlignAction("rp", value);
 }

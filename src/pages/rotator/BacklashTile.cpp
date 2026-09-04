@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void rotatorBacklashTile(String &data)
@@ -51,15 +52,6 @@ void rotatorBacklashTileAjax(String &data)
 // pass related data back to OnStep
 extern void rotatorBacklashTileGet()
 {
-  String v;
-  char temp[32] = "";
-
-  v = www.arg("b3");
-  if (!v.equals(EmptyStr)) {
-    if (v.toInt() >= 0 && v.toInt() <= 32767) { 
-      snprintf(temp, sizeof(temp), ":rb%d#", (int16_t)v.toInt());
-      onStep.commandBool(temp);
-    }
-  }
-
+  String value = www.arg("b3");
+  if (!value.equals(EmptyStr)) performRotatorAction("b3", value);
 }

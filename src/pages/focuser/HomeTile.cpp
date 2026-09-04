@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void focuserHomeTile(String &data)
@@ -31,12 +32,6 @@ void focuserHomeTileAjax(String &data)
 // pass related data back to OnStep
 extern void focuserHomeTileGet()
 {
-  String v;
-  v = www.arg("dr");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("FH")) onStep.commandBlind(":FH#"); // reset focuser at home (half travel)
-    if (v.equals("Fh")) onStep.commandBlind(":Fh#"); // move focuser to home (half travel)
-  }
-
+  String value = www.arg("dr");
+  if (!value.equals(EmptyStr)) performFocuserAction("dr", value);
 }

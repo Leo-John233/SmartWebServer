@@ -6,6 +6,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 #if ENCODERS == ON
 
@@ -52,20 +53,8 @@ void syncTileAjax(String &data)
 // pass related data back to OnStep
 extern void syncTileGet()
 {
-  String v;
-
-  v = www.arg("enc");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("o2e")) encoders.syncFromOnStep();
-    if (v.equals("e2o")) encoders.syncToOnStep();
-    #ifdef ENC_ABSOLUTE
-      if (v.equals("zro")) encoders.originFromOnStep();
-    #endif
-    if (v.equals("on")) encoders.settings.autoSync = true;
-    if (v.equals("off")) encoders.settings.autoSync = false;
-    nv().kv().put("ENCODER_SETTINGS", encoders.settings);
-  }
+  String value = www.arg("enc");
+  if (!value.equals(EmptyStr)) performEncoderAction(value);
 }
 
 #endif

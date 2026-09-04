@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void focuserSlewingTile(String &data)
@@ -69,35 +70,8 @@ void focuserSlewingTileAjax(String &data)
 // pass related data back to OnStep
 extern void focuserSlewingTileGet()
 {
-  String v;
-
-  v = www.arg("foc");
-  if (!v.equals(EmptyStr))
-  {
-    if (v.equals("stop")) onStep.commandBlind(":FQ#");     // stop
-    if (v.equals("inf"))  onStep.commandBlind(":F4#:F-#"); // rate fast, move in
-    if (v.equals("in"))   onStep.commandBlind(":F2#:F-#"); // rate slow, move in
-    if (v.equals("out"))  onStep.commandBlind(":F2#:F+#"); // rate slow, move out
-    if (v.equals("outf")) onStep.commandBlind(":F4#:F+#"); // rate fast, move out
-
-    if (v.equals("vs"))   onStep.commandBlind(":F5#");     // goto rate very slow
-    if (v.equals("s"))    onStep.commandBlind(":F6#");     // goto rate slow
-    if (v.equals("n"))    onStep.commandBlind(":F7#");     // goto rate normal
-    if (v.equals("f"))    onStep.commandBlind(":F8#");     // goto rate fast
-    if (v.equals("vf"))   onStep.commandBlind(":F9#");     // goto rate very fast
-  }
-
-  // set position
-  v = www.arg("fs");
-  if (!v.equals(EmptyStr))
-  {
-    int p = v.toInt();
-    if (p >= -500000 || p <= 500000)
-    {
-      char temp[80];
-      snprintf(temp, sizeof(temp), ":FS%d#", p);
-      onStep.commandBool(temp);
-    }
-  }
-
+  String value = www.arg("foc");
+  if (!value.equals(EmptyStr)) performFocuserAction("foc", value);
+  value = www.arg("fs");
+  if (!value.equals(EmptyStr)) performFocuserAction("fs", value);
 }
