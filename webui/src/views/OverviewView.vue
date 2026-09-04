@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import type { Capabilities, ControllerState } from '../domain/device'
+import { computed } from 'vue'
+import type { Capabilities, DeviceSnapshot } from '../domain/device'
 
-defineProps<{ state: ControllerState | null; capabilities: Capabilities }>()
+const props = defineProps<{ snapshot: DeviceSnapshot | null; capabilities: Capabilities }>()
+const state = computed(() => props.snapshot?.controller ?? null)
+const monitorValues = computed(() => Object.entries(props.snapshot?.values ?? {}).filter(([key]) =>
+  /^(?:dvr_stat|servo|stall|tphd_|signal|last_err)/.test(key)))
 </script>
 
 <template>
@@ -9,9 +13,9 @@ defineProps<{ state: ControllerState | null; capabilities: Capabilities }>()
     <div class="section-heading">
       <div>
         <p class="eyebrow">Controller</p>
-        <h2>System overview</h2>
+        <h2>Controller overview</h2>
       </div>
-      <span class="live-dot">Live protocol preview</span>
+      <span class="live-dot">Live · {{ state?.activity ?? 'connecting' }}</span>
     </div>
     <div class="metric-grid">
       <article class="metric-card">
@@ -21,12 +25,12 @@ defineProps<{ state: ControllerState | null; capabilities: Capabilities }>()
       </article>
       <article class="metric-card">
         <span>Workload</span>
-        <strong>{{ state?.workload || '—' }}</strong>
+        <strong>{{ state?.workload || snapshot?.values.work_load || '—' }}</strong>
         <small>ESP web workload</small>
       </article>
       <article class="metric-card">
         <span>Weather</span>
-        <strong>{{ state?.weather || '—' }}</strong>
+        <strong>{{ state?.weather || snapshot?.values.tphd_t || '—' }}</strong>
         <small>Ambient telemetry</small>
       </article>
       <article class="metric-card">
@@ -35,6 +39,15 @@ defineProps<{ state: ControllerState | null; capabilities: Capabilities }>()
         <small>{{ state?.axisSummary || 'No axis data' }}</small>
       </article>
     </div>
+    <article v-if="monitorValues.length" class="panel monitor-panel">
+      <div>
+        <p class="eyebrow">Telemetry</p>
+        <h3>Active monitors</h3>
+      </div>
+      <dl class="compact-list">
+        <div v-for="([key, value]) in monitorValues" :key="key"><dt>{{ key.replaceAll('_', ' ') }}</dt><dd>{{ value || '—' }}</dd></div>
+      </dl>
+    </article>
     <article class="panel capability-panel">
       <div>
         <p class="eyebrow">Server capability contract</p>

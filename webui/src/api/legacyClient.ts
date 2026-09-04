@@ -1,6 +1,7 @@
 import type { DeviceSnapshot, MountActivity, UiConfig } from '../domain/device'
 import { safeUiConfig } from '../domain/device'
 import { mergeLegacyDocuments, parseLegacyText, type LegacyDocument } from '../protocol/legacyText'
+import { toLegacyRequest, type DeviceAction } from './deviceActions'
 
 export interface LegacyClientOptions {
   fetcher?: typeof fetch
@@ -45,6 +46,13 @@ export class LegacyClient {
     } catch {
       return safeUiConfig
     }
+  }
+
+  async performAction(action: DeviceAction): Promise<void> {
+    const request = toLegacyRequest(action)
+    const query = new URLSearchParams(request.params)
+    const response = await this.request(`${request.path}?${query}`)
+    if (!response.ok) throw new Error('Device rejected the action')
   }
 
   async getSnapshot(config: UiConfig): Promise<DeviceSnapshot> {

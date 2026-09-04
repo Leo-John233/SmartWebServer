@@ -22,7 +22,7 @@ function changeScenario(event: Event): void {
     <header class="topbar">
       <RouterLink class="brand" to="/">
         <span class="brand-mark">S</span>
-        <span><strong>Smart Web Server</strong><small>Observatory control</small></span>
+        <span><strong>Smart Web Server</strong><small>Observatory console</small></span>
       </RouterLink>
       <div class="topbar-status">
         <label v-if="mockMode" class="scenario-select">
@@ -43,10 +43,10 @@ function changeScenario(event: Event): void {
         <nav>
           <RouterLink to="/">Controller</RouterLink>
           <RouterLink v-if="session.config.value.capabilities.mount" to="/mount">Mount</RouterLink>
-          <span v-if="session.config.value.capabilities.rotator">Rotator</span>
-          <span v-if="session.config.value.capabilities.focuserCount">Focuser</span>
-          <span v-if="session.config.value.capabilities.auxiliary">Auxiliary</span>
-          <span v-if="session.config.value.capabilities.encoders">Encoders</span>
+          <span v-if="session.config.value.capabilities.rotator">Rotator · soon</span>
+          <span v-if="session.config.value.capabilities.focuserCount">Focuser · soon</span>
+          <span v-if="session.config.value.capabilities.auxiliary">Auxiliary · soon</span>
+          <span v-if="session.config.value.capabilities.encoders">Encoders · soon</span>
         </nav>
         <div class="controller-meta">
           <span>{{ session.config.value.controller.protocolFamily }}</span>
@@ -56,13 +56,17 @@ function changeScenario(event: Event): void {
 
       <main>
         <div v-if="session.error.value" class="error-banner" role="alert">{{ session.error.value }}</div>
+        <div v-else-if="!session.stateFresh.value" class="warning-banner" role="status">State is stale · motion controls are locked</div>
         <div v-if="session.loading.value" class="loading-card">Connecting to controller…</div>
         <RouterView v-else v-slot="{ Component }">
           <component
             :is="Component"
-            :state="$route.name === 'mount' ? session.snapshot.value?.mount ?? null : session.snapshot.value?.controller ?? null"
+            :snapshot="session.snapshot.value"
             :capabilities="session.config.value.capabilities"
             :actions-allowed="session.actionsAllowed.value"
+            :action-pending="session.actionPending.value"
+            @action="session.performAction"
+            @safety-action="session.performSafetyAction"
           />
         </RouterView>
       </main>
