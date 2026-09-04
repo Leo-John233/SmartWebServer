@@ -41,7 +41,10 @@ function sendMotion(action: DeviceAction): Promise<void> {
   return Promise.resolve()
 }
 
-const hold = useHoldMotion(sendMotion, toRef(props, 'actionsAllowed'))
+const hold = useHoldMotion<GuideDirection>(sendMotion, toRef(props, 'actionsAllowed'), {
+  start: (direction) => ({ type: 'mount.guide.start', direction }),
+  stop: (direction) => ({ type: 'mount.guide.stop', direction }),
+})
 
 function setSlewRate(rate: SlewRate): void {
   send({ type: 'mount.goto.rate', rate })

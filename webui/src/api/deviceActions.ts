@@ -32,6 +32,23 @@ export type DeviceAction =
   | { type: 'mount.site.time'; date: Date }
   | { type: 'mount.site.location'; longitude: string; latitude: string; utcOffset: string }
   | { type: 'mount.limits'; horizon: number; overhead: number; east: number; west: number; axis1Backlash: number; axis2Backlash: number }
+  | { type: 'rotator.move'; direction: 'counterclockwise' | 'clockwise'; fast: boolean }
+  | { type: 'rotator.stop' }
+  | { type: 'rotator.home'; mode: 'find' | 'reset' }
+  | { type: 'rotator.position'; degrees: number }
+  | { type: 'rotator.rate'; rate: SlewRate }
+  | { type: 'rotator.derotate'; command: 'on' | 'off' | 'reverse' | 'parallactic' }
+  | { type: 'rotator.backlash'; steps: number }
+  | { type: 'focuser.select'; index: number }
+  | { type: 'focuser.move'; direction: 'in' | 'out'; fast: boolean }
+  | { type: 'focuser.stop' }
+  | { type: 'focuser.home'; mode: 'find' | 'reset' }
+  | { type: 'focuser.position'; steps: number }
+  | { type: 'focuser.rate'; rate: SlewRate }
+  | { type: 'focuser.settings'; backlash: number; compensationEnabled: boolean; deadband: number; coefficient: number }
+  | { type: 'auxiliary.value'; feature: number; value: 1 | 2 | 3 | 4; setting: number }
+  | { type: 'encoders.sync'; direction: 'controllerToEncoder' | 'encoderToController' | 'origin' }
+  | { type: 'encoders.autoSync'; enabled: boolean }
 
 interface LegacyRequest {
   path: string
@@ -101,5 +118,25 @@ export function toLegacyRequest(action: DeviceAction): LegacyRequest {
         b1: String(action.axis1Backlash), b2: String(action.axis2Backlash),
       },
     }
+    case 'rotator.move': return { path: '/rotator-ajax-get.txt', params: { rot: `${action.direction === 'counterclockwise' ? 'ccw' : 'cw'}${action.fast ? 'f' : ''}` } }
+    case 'rotator.stop': return { path: '/rotator-ajax-get.txt', params: { rot: 'stop' } }
+    case 'rotator.home': return { path: '/rotator-ajax-get.txt', params: { rot: action.mode === 'find' ? 'home' : 'reset' } }
+    case 'rotator.position': return { path: '/rotator-ajax-get.txt', params: { rs: String(action.degrees) } }
+    case 'rotator.rate': return { path: '/rotator-ajax-get.txt', params: { rot: slewRateValue[action.rate] } }
+    case 'rotator.derotate': return { path: '/rotator-ajax-get.txt', params: { rot: action.command === 'reverse' ? 'rev' : action.command === 'parallactic' ? 'par' : action.command } }
+    case 'rotator.backlash': return { path: '/rotator-ajax-get.txt', params: { b3: String(action.steps) } }
+    case 'focuser.select': return { path: '/focuser-ajax-get.txt', params: { dr: `F${action.index}` } }
+    case 'focuser.move': return { path: '/focuser-ajax-get.txt', params: { foc: `${action.direction === 'in' ? 'in' : 'out'}${action.fast ? 'f' : ''}` } }
+    case 'focuser.stop': return { path: '/focuser-ajax-get.txt', params: { foc: 'stop' } }
+    case 'focuser.home': return { path: '/focuser-ajax-get.txt', params: { dr: action.mode === 'find' ? 'Fh' : 'FH' } }
+    case 'focuser.position': return { path: '/focuser-ajax-get.txt', params: { fs: String(action.steps) } }
+    case 'focuser.rate': return { path: '/focuser-ajax-get.txt', params: { foc: slewRateValue[action.rate] } }
+    case 'focuser.settings': return {
+      path: '/focuser-ajax-get.txt',
+      params: { foc_bl: String(action.backlash), foc_tcf_en: action.compensationEnabled ? '1' : '0', foc_tcf_db: String(action.deadband), foc_tcf_coef: String(action.coefficient) },
+    }
+    case 'auxiliary.value': return { path: '/auxiliary-ajax-get.txt', params: { [`x${action.feature}v${action.value}`]: String(action.setting) } }
+    case 'encoders.sync': return { path: '/enc-ajax-get.txt', params: { enc: action.direction === 'controllerToEncoder' ? 'o2e' : action.direction === 'encoderToController' ? 'e2o' : 'zro' } }
+    case 'encoders.autoSync': return { path: '/enc-ajax-get.txt', params: { enc: action.enabled ? 'on' : 'off' } }
   }
 }

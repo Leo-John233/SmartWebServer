@@ -21,4 +21,8 @@ export const handlers = [
   }),
   http.get('/index-ajax-get.txt', ({ request }) => respond(request, scenarioFrom(request).controllerText)),
   http.get('/mount-ajax-get.txt', ({ request }) => respond(request, scenarioFrom(request).mountText)),
+  http.get('/rotator-ajax-get.txt', ({ request }) => respond(request, scenarioFrom(request).rotatorText)),
+  http.get('/focuser-ajax-get.txt', ({ request }) => respond(request, scenarioFrom(request).focuserText)),
+  http.get('/auxiliary-ajax-get.txt', ({ request }) => respond(request, scenarioFrom(request).auxiliaryText)),
+  http.get('/enc-ajax-get.txt', ({ request }) => respond(request, scenarioFrom(request).encoderText)),
 ]

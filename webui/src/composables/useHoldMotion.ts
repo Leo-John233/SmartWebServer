@@ -1,19 +1,24 @@
 import { onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
-import type { DeviceAction, GuideDirection } from '../api/deviceActions'
+import type { DeviceAction } from '../api/deviceActions'
 
-export function useHoldMotion(send: (action: DeviceAction) => Promise<void>, enabled: Ref<boolean>) {
-  const activeDirection = ref<GuideDirection | null>(null)
+interface HoldActions<T extends string> {
+  start: (direction: T) => DeviceAction
+  stop: (direction: T) => DeviceAction
+}
+
+export function useHoldMotion<T extends string>(send: (action: DeviceAction) => Promise<void>, enabled: Ref<boolean>, actions: HoldActions<T>) {
+  const activeDirection = ref<T | null>(null)
   let queue = Promise.resolve()
 
   function enqueue(action: DeviceAction): void {
     queue = queue.then(() => send(action)).catch(() => undefined)
   }
 
-  function stopDirection(direction: GuideDirection): void {
-    enqueue({ type: 'mount.guide.stop', direction })
-    window.setTimeout(() => enqueue({ type: 'mount.guide.stop', direction }), 150)
-    window.setTimeout(() => enqueue({ type: 'mount.guide.stop', direction }), 500)
+  function stopDirection(direction: T): void {
+    enqueue(actions.stop(direction))
+    window.setTimeout(() => enqueue(actions.stop(direction)), 150)
+    window.setTimeout(() => enqueue(actions.stop(direction)), 500)
   }
 
   function stop(): void {
@@ -22,11 +27,11 @@ export function useHoldMotion(send: (action: DeviceAction) => Promise<void>, ena
     if (direction) stopDirection(direction)
   }
 
-  function start(direction: GuideDirection): void {
+  function start(direction: T): void {
     if (!enabled.value || activeDirection.value === direction) return
     stop()
     activeDirection.value = direction
-    enqueue({ type: 'mount.guide.start', direction })
+    enqueue(actions.start(direction))
   }
 
   function onVisibilityChange(): void {

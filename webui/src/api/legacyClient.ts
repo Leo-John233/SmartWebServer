@@ -56,7 +56,13 @@ export class LegacyClient {
   }
 
   async getSnapshot(config: UiConfig): Promise<DeviceSnapshot> {
-    const requests = ['/index-ajax-get.txt', '/mount-ajax-get.txt'].map(async (path) => {
+    const paths = ['/index-ajax-get.txt']
+    if (config.capabilities.mount) paths.push('/mount-ajax-get.txt')
+    if (config.capabilities.rotator) paths.push('/rotator-ajax-get.txt')
+    if (config.capabilities.focuserCount) paths.push('/focuser-ajax-get.txt')
+    if (config.capabilities.auxiliary) paths.push('/auxiliary-ajax-get.txt')
+    if (config.capabilities.encoders) paths.push('/enc-ajax-get.txt')
+    const requests = paths.map(async (path) => {
       const response = await this.request(path)
       if (!response.ok) throw new Error(`Legacy endpoint failed: ${path}`)
       return parseLegacyText(await response.text())

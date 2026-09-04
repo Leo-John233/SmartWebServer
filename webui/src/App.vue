@@ -43,10 +43,11 @@ function changeScenario(event: Event): void {
         <nav>
           <RouterLink to="/">Controller</RouterLink>
           <RouterLink v-if="session.config.value.capabilities.mount" to="/mount">Mount</RouterLink>
-          <span v-if="session.config.value.capabilities.rotator">Rotator · soon</span>
-          <span v-if="session.config.value.capabilities.focuserCount">Focuser · soon</span>
-          <span v-if="session.config.value.capabilities.auxiliary">Auxiliary · soon</span>
-          <span v-if="session.config.value.capabilities.encoders">Encoders · soon</span>
+          <RouterLink v-if="session.config.value.capabilities.rotator" to="/rotator">Rotator</RouterLink>
+          <RouterLink v-if="session.config.value.capabilities.focuserCount" to="/focuser">Focuser</RouterLink>
+          <RouterLink v-if="session.config.value.capabilities.auxiliary" to="/auxiliary">Auxiliary</RouterLink>
+          <RouterLink v-if="session.config.value.capabilities.encoders" to="/encoders">Encoders</RouterLink>
+          <a href="/net.htm">Network ↗</a>
         </nav>
         <div class="controller-meta">
           <span>{{ session.config.value.controller.protocolFamily }}</span>

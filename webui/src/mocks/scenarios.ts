@@ -16,6 +16,10 @@ export interface MockScenario {
   config: UiConfig
   controllerText: string
   mountText: string
+  rotatorText: string
+  focuserText: string
+  auxiliaryText: string
+  encoderText: string
   activity: MountActivity
 }
 
@@ -69,9 +73,14 @@ function mountText(activity: MountActivity): string {
   ].join('\n')
 }
 
+const rotatorText = ['rot_sta|Inactive', 'rotatorpos|12.5°', 'rot_rate|Normal', 'rot_rate_n|selected', 'rot_on|unselected', 'rot_off|selected'].join('\n')
+const focuserText = ['foc_sel|Focuser 1 selected', 'foc1_sel|selected', 'foc_sta|Inactive', 'focuserpos|12450', 'foc_rate|Normal', 'f_temp|Temperature 11.8 °C', 'f_bl|24 step(s)', 'f_tcf_en|false'].join('\n')
+const auxiliaryText = ['sw1_on|selected', 'sw1_off|unselected', 'vout1|12.1', 'iout1|0.8', 'x2v1|42', 'x3v2|2.5', 'x3v3|1.0'].join('\n')
+const encoderText = ['diff_a1|+0.02°', 'enc_a1|120.42°', 'raw_a1|120.40°', 'diff_a2|-0.01°', 'enc_a2|42.11°', 'raw_a2|42.12°', 'enc_as_on|selected'].join('\n')
+
 function makeScenario(id: ScenarioId, label: string, activity: MountActivity, replayId = 'onstep-4.24-connected', overrides: Partial<Capabilities> = {}): MockScenario {
   const message = activity === 'fault' ? 'Controller reported a fault' : activity === 'limit' ? 'A configured travel limit is active' : ''
-  return { id, label, activity, config: configFromReplay(replayId, overrides), controllerText: controllerText(message), mountText: mountText(activity) }
+  return { id, label, activity, config: configFromReplay(replayId, overrides), controllerText: controllerText(message), mountText: mountText(activity), rotatorText, focuserText, auxiliaryText, encoderText }
 }
 
 export const mockScenarios: MockScenario[] = [

@@ -18,4 +18,12 @@ describe('LegacyClient', () => {
     expect(config.safeReadOnly).toBe(true)
     await expect(client.getSnapshot(config)).rejects.toThrow()
   })
+
+  it('loads only subsystems advertised by the server', async () => {
+    const client = new LegacyClient({ scenario: () => 'all-subsystems' })
+    const snapshot = await client.getSnapshot(await client.getConfig())
+    expect(snapshot.values.rotatorpos).toBe('12.5°')
+    expect(snapshot.values.focuserpos).toBe('12450')
+    expect(snapshot.values.enc_a1).toBe('120.42°')
+  })
 })

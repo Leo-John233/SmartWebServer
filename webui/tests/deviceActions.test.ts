@@ -17,4 +17,11 @@ describe('legacy action adapter', () => {
     })
     expect(request.params).toMatchObject({ g1: '+120', g2: '30', g3: '45', t1: '-30', t2: '15', t3: '20' })
   })
+
+  it('routes subsystem actions through their legacy adapters', () => {
+    expect(toLegacyRequest({ type: 'rotator.position', degrees: 45 }).path).toBe('/rotator-ajax-get.txt')
+    expect(toLegacyRequest({ type: 'focuser.select', index: 2 }).params).toEqual({ dr: 'F2' })
+    expect(toLegacyRequest({ type: 'auxiliary.value', feature: 3, value: 2, setting: 50 }).params).toEqual({ x3v2: '50' })
+    expect(toLegacyRequest({ type: 'encoders.autoSync', enabled: true }).params).toEqual({ enc: 'on' })
+  })
 })
