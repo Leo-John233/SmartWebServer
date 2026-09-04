@@ -23,7 +23,9 @@ async function refresh(): Promise<void> {
     const nextSnapshot = await getClient().getSnapshot(nextConfig)
     config.value = nextConfig
     snapshot.value = nextSnapshot
-    error.value = nextConfig.safeReadOnly ? 'Device configuration is unavailable, actions remain disabled' : ''
+    error.value = nextConfig.safeReadOnly || nextConfig.controller.protocolFamily === 'unknown'
+      ? 'Device configuration is unavailable, actions remain disabled'
+      : ''
   } catch {
     error.value = 'Device connection interrupted'
     if (snapshot.value) snapshot.value.controller.connection = 'disconnected'
@@ -60,7 +62,9 @@ export function useDeviceSession() {
     error: readonly(error),
     loading: readonly(loading),
     scenarios: mockScenarios,
-    actionsAllowed: computed(() => snapshot.value?.controller.connection === 'connected' && !config.value.safeReadOnly),
+    actionsAllowed: computed(() => snapshot.value?.controller.connection === 'connected'
+      && config.value.controller.protocolFamily !== 'unknown'
+      && !config.value.safeReadOnly),
     start,
     refresh,
     selectScenario,

@@ -309,6 +309,15 @@ Again:
 
   www.on("/net.htm", handleNetwork);
 
+  #if defined(ESP8266) && OPERATIONAL_MODE == WIFI && WEB_SERVER == ON
+    www.on("/ui", handleWebUi);
+    www.on(WEB_UI_INDEX_PATH, handleWebUi);
+    www.on("/ui/index.html", handleWebUi);
+    www.on(WEB_UI_STYLE_PATH, handleWebUiAsset);
+    www.on(WEB_UI_SCRIPT_PATH, handleWebUiAsset);
+    www.on("/ui-config.json", handleUiConfig);
+  #endif
+
   www.on("/", handleRoot);
   
   www.onNotFound(handleNotFound);

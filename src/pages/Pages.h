@@ -6,6 +6,10 @@
 #include "../../Config.h"
 #include "../../Extended.config.h"
 
+#if defined(ESP8266) && OPERATIONAL_MODE == WIFI && WEB_SERVER == ON
+  #include "../webui/WebUiServer.h"
+#endif
+
 void handleRoot();
 void indexAjaxGet();
 void indexAjax();
