@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import type { DeviceAction } from '../api/deviceActions'
 import type { DeviceSnapshot } from '../domain/device'
+import { useUiLocale } from '../i18n'
 
 const props = defineProps<{ snapshot: DeviceSnapshot | null; actionsAllowed: boolean; actionPending: boolean }>()
 const emit = defineEmits<{ action: [action: DeviceAction] }>()
@@ -9,6 +10,7 @@ const values = computed(() => props.snapshot?.values ?? {})
 const selected = computed(() => props.snapshot?.selected ?? {})
 const locked = computed(() => !props.actionsAllowed || props.actionPending)
 const settings = ref(Array.from({ length: 8 }, () => 0))
+const ui = useUiLocale()
 
 const activeFeatures = computed(() => Array.from({ length: 8 }, (_, index) => index + 1).filter((feature) =>
   Object.keys(values.value).some((key) => key.startsWith(`x${feature}v`) || key === `vout${feature}` || key === `iout${feature}`)
@@ -22,7 +24,7 @@ function setFeature(feature: number, setting: number): void {
 
 <template>
   <section>
-    <div class="section-heading"><div><p class="eyebrow">Auxiliary</p><h2>Power &amp; accessories</h2></div><span class="live-dot">{{ activeFeatures.length }} active channels</span></div>
+    <div class="section-heading"><div><p class="eyebrow">{{ ui.t('Auxiliary') }}</p><h2>{{ ui.t('Power & accessories') }}</h2></div><span class="live-dot">{{ activeFeatures.length }} active channels</span></div>
     <div v-if="activeFeatures.length" class="feature-grid">
       <article v-for="feature in activeFeatures" :key="feature" class="panel feature-card">
         <div class="panel-title"><div><p class="eyebrow">Channel {{ feature }}</p><h3>Feature {{ feature }}</h3></div><span class="status-text">{{ values[`vout${feature}`] ? `${values[`vout${feature}`]} V` : '' }} {{ values[`iout${feature}`] ? `· ${values[`iout${feature}`]} A` : '' }}</span></div>

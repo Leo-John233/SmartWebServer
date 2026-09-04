@@ -3,6 +3,7 @@ import { computed, ref, toRef } from 'vue'
 import type { DeviceAction, SlewRate } from '../api/deviceActions'
 import { useHoldMotion } from '../composables/useHoldMotion'
 import type { Capabilities, DeviceSnapshot } from '../domain/device'
+import { useUiLocale } from '../i18n'
 
 type Direction = 'in' | 'out'
 const props = defineProps<{ snapshot: DeviceSnapshot | null; capabilities: Capabilities; actionsAllowed: boolean; actionPending: boolean }>()
@@ -11,6 +12,7 @@ const values = computed(() => props.snapshot?.values ?? {})
 const locked = computed(() => !props.actionsAllowed || props.actionPending)
 const position = ref(0)
 const settings = ref({ backlash: 0, compensationEnabled: false, deadband: 1, coefficient: 0 })
+const ui = useUiLocale()
 
 function sendMotion(action: DeviceAction): Promise<void> {
   if (action.type === 'focuser.stop') emit('safetyAction', action)
@@ -26,7 +28,7 @@ const hold = useHoldMotion<Direction>(sendMotion, toRef(props, 'actionsAllowed')
 
 <template>
   <section>
-    <div class="section-heading"><div><p class="eyebrow">Focuser</p><h2>Focus control</h2></div><button class="danger-button" :disabled="!actionsAllowed" @click="emit('safetyAction', { type: 'focuser.stop' })">Stop</button></div>
+    <div class="section-heading"><div><p class="eyebrow">{{ ui.t('Focuser') }}</p><h2>{{ ui.t('Focus control') }}</h2></div><button class="danger-button" :disabled="!actionsAllowed" @click="emit('safetyAction', { type: 'focuser.stop' })">{{ ui.t('Stop') }}</button></div>
     <div class="subsystem-hero">
       <article class="panel hero-value"><span>Position</span><strong>{{ values.focuserpos || '—' }}</strong><small>{{ values.foc_sta || values.foc_sel || 'Unavailable' }}</small></article>
       <article class="panel control-body always-visible"><div class="dual-hold"><button :disabled="locked" @pointerdown.prevent="hold.start('in')" @pointerup="hold.stop" @pointercancel="hold.stop" @pointerleave="hold.stop">Move in</button><button :disabled="locked" @pointerdown.prevent="hold.start('out')" @pointerup="hold.stop" @pointercancel="hold.stop" @pointerleave="hold.stop">Move out</button></div><label class="field"><span>Go to position</span><div class="inline-field"><input v-model.number="position" type="number" min="-500000" max="500000"><button :disabled="locked" @click="emit('action', { type: 'focuser.position', steps: position })">Go</button></div></label></article>

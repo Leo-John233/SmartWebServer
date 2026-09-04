@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Capabilities, DeviceSnapshot } from '../domain/device'
+import { useUiLocale } from '../i18n'
 
 const props = defineProps<{ snapshot: DeviceSnapshot | null; capabilities: Capabilities }>()
 const state = computed(() => props.snapshot?.controller ?? null)
 const monitorValues = computed(() => Object.entries(props.snapshot?.values ?? {}).filter(([key]) =>
   /^(?:dvr_stat|servo|stall|tphd_|signal|last_err)/.test(key)))
+const ui = useUiLocale()
 </script>
 
 <template>
@@ -13,7 +15,7 @@ const monitorValues = computed(() => Object.entries(props.snapshot?.values ?? {}
     <div class="section-heading">
       <div>
         <p class="eyebrow">Controller</p>
-        <h2>Controller overview</h2>
+        <h2>{{ ui.t('Controller overview') }}</h2>
       </div>
       <span class="live-dot">Live · {{ state?.activity ?? 'connecting' }}</span>
     </div>

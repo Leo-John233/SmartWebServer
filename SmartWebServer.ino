@@ -323,7 +323,11 @@ Again:
     www.on("/api/v1/network", HTTP_POST, handleApiV1NetworkPost);
   #endif
 
-  www.on("/", handleRoot);
+  #if defined(ESP8266) && OPERATIONAL_MODE == WIFI && WEB_SERVER == ON
+    www.on("/", handleWebUi);
+  #else
+    www.on("/", handleRoot);
+  #endif
   
   www.onNotFound(handleNotFound);
 

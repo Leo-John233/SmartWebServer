@@ -3,6 +3,7 @@ import { computed, ref, toRef } from 'vue'
 import type { DeviceAction, GuideDirection, SlewRate, TrackingMode } from '../api/deviceActions'
 import { useHoldMotion } from '../composables/useHoldMotion'
 import type { Capabilities, DeviceSnapshot } from '../domain/device'
+import { useUiLocale } from '../i18n'
 
 const props = defineProps<{
   snapshot: DeviceSnapshot | null
@@ -26,6 +27,7 @@ const longitude = ref('')
 const latitude = ref('')
 const utcOffset = ref('+00:00')
 const limits = ref({ horizon: 0, overhead: 90, east: 0, west: 0, axis1Backlash: 0, axis2Backlash: 0 })
+const ui = useUiLocale()
 
 function send(action: DeviceAction): void {
   emit('action', action)
@@ -66,8 +68,8 @@ function saveLimits(): void {
 <template>
   <section>
     <div class="section-heading">
-      <div><p class="eyebrow">Mount</p><h2>Observation control</h2></div>
-      <button class="danger-button emergency" :disabled="!actionsAllowed" @click="emit('safetyAction', { type: 'mount.goto.stop' })">Stop all motion</button>
+      <div><p class="eyebrow">{{ ui.t('Mount') }}</p><h2>{{ ui.t('Observation control') }}</h2></div>
+      <button class="danger-button emergency" :disabled="!actionsAllowed" @click="emit('safetyAction', { type: 'mount.goto.stop' })">{{ ui.t('Stop all motion') }}</button>
     </div>
 
     <div class="mount-dashboard">
@@ -77,7 +79,7 @@ function saveLimits(): void {
           <div><span>Right ascension</span><strong>{{ state?.targetRa || '—' }}</strong></div>
           <div><span>Declination</span><strong>{{ state?.targetDec || '—' }}</strong></div>
         </div>
-        <div class="button-row"><button class="primary-button" :disabled="locked" @click="send({ type: 'mount.goto.start' })">Start goto</button><button :disabled="locked" @click="send({ type: 'mount.sync' })">Sync here</button></div>
+        <div class="button-row"><button class="primary-button" :disabled="locked" @click="send({ type: 'mount.goto.start' })">{{ ui.t('Start goto') }}</button><button :disabled="locked" @click="send({ type: 'mount.sync' })">{{ ui.t('Sync here') }}</button></div>
       </article>
 
       <article class="panel guide-panel">
@@ -99,7 +101,7 @@ function saveLimits(): void {
       <details class="panel control-card" open>
         <summary><span><small>Position</small>Home &amp; park</span><strong>{{ state?.homePark || '—' }}</strong></summary>
         <div class="control-body">
-          <div class="button-row"><button :disabled="locked" @click="send({ type: 'mount.home', mode: 'find' })">Find home</button><button :disabled="locked" @click="send({ type: 'mount.park' })">Park</button><button :disabled="locked" @click="send({ type: 'mount.unpark' })">Unpark</button></div>
+          <div class="button-row"><button :disabled="locked" @click="send({ type: 'mount.home', mode: 'find' })">{{ ui.t('Find home') }}</button><button :disabled="locked" @click="send({ type: 'mount.park' })">{{ ui.t('Park') }}</button><button :disabled="locked" @click="send({ type: 'mount.unpark' })">{{ ui.t('Unpark') }}</button></div>
           <button class="quiet-button" :disabled="locked" @click="confirmSend('Set the current position as park?', { type: 'mount.setPark' })">Set park position</button>
           <div v-if="capabilities.autoHome" class="segmented"><span>Automatic home</span><button :class="{ selected: selected.auto_on }" :disabled="locked" @click="send({ type: 'mount.autoHome', enabled: true })">On</button><button :class="{ selected: selected.auto_off }" :disabled="locked" @click="send({ type: 'mount.autoHome', enabled: false })">Off</button></div>
         </div>

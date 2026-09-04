@@ -153,6 +153,8 @@ h3 { font-size: 21px; }
 .network-actions p { margin: 0; }
 .login-panel { max-width: 520px; display: grid; gap: 18px; }
 .legacy-link { color: var(--accent-blue); font-size: 13px; }
+.locale-button { min-height: 34px; padding: 6px 9px; color: var(--muted); font-size: 12px; }
+.legacy-sidebar-link { margin-top: 12px; display: inline-block; color: var(--accent-blue); font-size: 11px; }
 
 @media (max-width: 900px) {
   .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

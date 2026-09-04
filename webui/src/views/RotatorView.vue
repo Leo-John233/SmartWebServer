@@ -3,6 +3,7 @@ import { computed, ref, toRef } from 'vue'
 import type { DeviceAction, SlewRate } from '../api/deviceActions'
 import { useHoldMotion } from '../composables/useHoldMotion'
 import type { DeviceSnapshot } from '../domain/device'
+import { useUiLocale } from '../i18n'
 
 type Direction = 'counterclockwise' | 'clockwise'
 const props = defineProps<{ snapshot: DeviceSnapshot | null; actionsAllowed: boolean; actionPending: boolean }>()
@@ -11,6 +12,7 @@ const values = computed(() => props.snapshot?.values ?? {})
 const locked = computed(() => !props.actionsAllowed || props.actionPending)
 const position = ref(0)
 const backlash = ref(0)
+const ui = useUiLocale()
 
 function sendMotion(action: DeviceAction): Promise<void> {
   if (action.type === 'rotator.stop') emit('safetyAction', action)
@@ -30,7 +32,7 @@ function setRate(rate: SlewRate): void {
 
 <template>
   <section>
-    <div class="section-heading"><div><p class="eyebrow">Rotator</p><h2>Camera orientation</h2></div><button class="danger-button" :disabled="!actionsAllowed" @click="emit('safetyAction', { type: 'rotator.stop' })">Stop</button></div>
+    <div class="section-heading"><div><p class="eyebrow">{{ ui.t('Rotator') }}</p><h2>{{ ui.t('Camera orientation') }}</h2></div><button class="danger-button" :disabled="!actionsAllowed" @click="emit('safetyAction', { type: 'rotator.stop' })">{{ ui.t('Stop') }}</button></div>
     <div class="subsystem-hero">
       <article class="panel hero-value"><span>Position</span><strong>{{ values.rotatorpos || '—' }}</strong><small>{{ values.rot_sta || 'Unavailable' }}</small></article>
       <article class="panel control-body always-visible">
