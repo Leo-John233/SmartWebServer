@@ -16,12 +16,14 @@ function textValue(document: LegacyDocument, keys: string[], fallback = '—'): 
 }
 
 function inferActivity(document: LegacyDocument): MountActivity {
-  const status = `${document.values.gto_status ?? ''} ${document.values.hp_sta ?? ''} ${document.values.track ?? ''}`.toLowerCase()
+  const status =
+    `${document.values.gto_status ?? ''} ${document.values.hp_sta ?? ''} ${document.values.track ?? ''}`.toLowerCase()
   if (status.includes('fault') || status.includes('error')) return 'fault'
   if (status.includes('limit')) return 'limit'
   if (status.includes('slew') || document.enabled.gto_active) return 'goto'
   if (status.includes('parked')) return 'parked'
-  if (document.selected.trk_on || (status.includes('tracking') && !status.includes('tracking off'))) return 'tracking'
+  if (document.selected.trk_on || (status.includes('tracking') && !status.includes('tracking off')))
+    return 'tracking'
   return 'idle'
 }
 
@@ -29,6 +31,8 @@ export class LegacyClient {
   private readonly fetcher: typeof fetch
   private readonly scenario: () => string
   private apiAvailable = false
+  // 星表和提示只下发一次，需要在后续轮询中保留
+  private catalogState: Record<string, string> = {}
 
   constructor(options: LegacyClientOptions = {}) {
     this.fetcher = options.fetcher ?? ((input, init) => globalThis.fetch(input, init))
@@ -38,7 +42,11 @@ export class LegacyClient {
   private async request(path: string, init: RequestInit = {}): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('X-WebUI-Scenario', this.scenario())
-    return this.fetcher(path, { ...init, headers })
+    return this.fetcher(path, {
+      ...init,
+      headers,
+      signal: init.signal ?? AbortSignal.timeout(5000),
+    })
   }
 
   async getConfig(): Promise<UiConfig> {
@@ -46,7 +54,7 @@ export class LegacyClient {
       const apiResponse = await this.request('/api/v1/capabilities')
       if (apiResponse.ok) {
         this.apiAvailable = true
-        return await apiResponse.json() as UiConfig
+        return (await apiResponse.json()) as UiConfig
       }
     } catch {
       this.apiAvailable = false
@@ -54,7 +62,7 @@ export class LegacyClient {
     try {
       const response = await this.request('/ui-config.json')
       if (!response.ok) return safeUiConfig
-      return await response.json() as UiConfig
+      return (await response.json()) as UiConfig
     } catch {
       return safeUiConfig
     }
@@ -64,7 +72,8 @@ export class LegacyClient {
     if (this.apiAvailable) {
       const body = new URLSearchParams({ action: action.type })
       for (const [key, value] of Object.entries(action)) {
-        if (key !== 'type') body.set(key, value instanceof Date ? value.toISOString() : String(value))
+        if (key !== 'type')
+          body.set(key, value instanceof Date ? value.toISOString() : String(value))
       }
       const apiResponse = await this.request('/api/v1/actions', {
         method: 'POST',
@@ -72,7 +81,8 @@ export class LegacyClient {
         body,
       })
       if (apiResponse.ok) return
-      if (apiResponse.status !== 404 && apiResponse.status !== 501) throw new Error('Device rejected the action')
+      if (apiResponse.status !== 404 && apiResponse.status !== 501)
+        throw new Error('Device rejected the action')
     }
     const request = toLegacyRequest(action)
     const query = new URLSearchParams(request.params)
@@ -81,39 +91,19 @@ export class LegacyClient {
   }
 
   async getSnapshot(config: UiConfig): Promise<DeviceSnapshot> {
-    const scopePaths = ['controller']
-    if (config.capabilities.mount) scopePaths.push('mount')
-    if (config.capabilities.rotator) scopePaths.push('rotator')
-    if (config.capabilities.focuserCount) scopePaths.push('focuser')
-    if (config.capabilities.auxiliary) scopePaths.push('auxiliary')
-    if (config.capabilities.encoders) scopePaths.push('encoders')
-
-    if (this.apiAvailable) {
-      try {
-        const documents = await Promise.all(scopePaths.map(async (scope) => {
-          const response = await this.request(`/api/v1/state?scope=${scope}`)
-          if (!response.ok) throw new Error(`API state failed: ${scope}`)
-          const payload = await response.json() as Pick<LegacyDocument, 'values' | 'selected' | 'enabled'>
-          return { entries: [], values: payload.values, selected: payload.selected, enabled: payload.enabled }
-        }))
-        return this.snapshotFromDocument(config, mergeLegacyDocuments(...documents))
-      } catch {
-        this.apiAvailable = false
-      }
-    }
-
-    const paths = ['/index-ajax-get.txt']
-    if (config.capabilities.mount) paths.push('/mount-ajax-get.txt')
-    if (config.capabilities.rotator) paths.push('/rotator-ajax-get.txt')
-    if (config.capabilities.focuserCount) paths.push('/focuser-ajax-get.txt')
-    if (config.capabilities.auxiliary) paths.push('/auxiliary-ajax-get.txt')
-    if (config.capabilities.encoders) paths.push('/enc-ajax-get.txt')
+    // 状态查询使用轮询地址，命令地址可能返回空响应
+    const paths = ['/index.txt']
+    if (config.capabilities.mount) paths.push('/mount-ajax.txt')
+    if (config.capabilities.rotator) paths.push('/rotator-ajax.txt')
+    if (config.capabilities.focuserCount) paths.push('/focuser-ajax.txt')
+    if (config.capabilities.auxiliary) paths.push('/auxiliary-ajax.txt')
+    if (config.capabilities.encoders) paths.push('/enc-ajax.txt')
     const requests = paths.map(async (path) => {
       const response = await this.request(path)
       if (!response.ok) throw new Error(`Legacy endpoint failed: ${path}`)
       return parseLegacyText(await response.text())
     })
-    const document = mergeLegacyDocuments(...await Promise.all(requests))
+    const document = mergeLegacyDocuments(...(await Promise.all(requests)))
     if (document.entries.length === 0) throw new Error('Legacy endpoints returned no state')
     return this.snapshotFromDocument(config, document)
   }
@@ -121,7 +111,7 @@ export class LegacyClient {
   async getNetwork(): Promise<NetworkConfig> {
     const response = await this.request('/api/v1/network')
     if (!response.ok) throw new Error('Network settings are unavailable')
-    return await response.json() as NetworkConfig
+    return (await response.json()) as NetworkConfig
   }
 
   async updateNetwork(values: Record<string, string | number | boolean>): Promise<void> {
@@ -136,6 +126,10 @@ export class LegacyClient {
   }
 
   private snapshotFromDocument(config: UiConfig, document: LegacyDocument): DeviceSnapshot {
+    for (const key of ['cat_data', 'lib_message']) {
+      if (key in document.values) this.catalogState[key] = document.values[key]
+      else if (key in this.catalogState) document.values[key] = this.catalogState[key]
+    }
     const now = Date.now()
 
     return {
@@ -145,8 +139,8 @@ export class LegacyClient {
         product: textValue(document, ['fw_name', 'controller']),
         firmwareVersion: config.firmwareVersion || textValue(document, ['fw_ver']),
         controllerVersion: config.controller.version || textValue(document, ['version']),
-        workload: textValue(document, ['workload', 'work']),
-        weather: textValue(document, ['weather', 'temp']),
+        workload: textValue(document, ['workload', 'work_load', 'work']),
+        weather: textValue(document, ['weather', 'tphd_t', 'temp']),
         axisSummary: textValue(document, ['axis_summary', 'axis']),
         message: textValue(document, ['message'], ''),
         updatedAt: now,

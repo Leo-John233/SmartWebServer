@@ -52,10 +52,13 @@ export function parseLegacyText(text: string): LegacyDocument {
 }
 
 export function mergeLegacyDocuments(...documents: LegacyDocument[]): LegacyDocument {
-  return documents.reduce<LegacyDocument>((merged, document) => ({
-    entries: [...merged.entries, ...document.entries],
-    values: { ...merged.values, ...document.values },
-    selected: { ...merged.selected, ...document.selected },
-    enabled: { ...merged.enabled, ...document.enabled },
-  }), { entries: [], values: {}, selected: {}, enabled: {} })
+  return documents.reduce<LegacyDocument>(
+    (merged, document) => ({
+      entries: [...merged.entries, ...document.entries],
+      values: { ...merged.values, ...document.values },
+      selected: { ...merged.selected, ...document.selected },
+      enabled: { ...merged.enabled, ...document.enabled },
+    }),
+    { entries: [], values: {}, selected: {}, enabled: {} },
+  )
 }

@@ -2,6 +2,11 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 const devicePaths = [
+  '/index.htm',
+  '/mount.htm',
+  '/net.htm',
+  '/auxiliary.htm',
+  '/libraryHelp.htm',
   '/ui-config.json',
   '/api',
   '/index-ajax-get.txt',
@@ -21,9 +26,10 @@ const devicePaths = [
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const target = env.VITE_DEVICE_URL || 'http://192.168.0.1'
-  const proxy = mode === 'device'
-    ? Object.fromEntries(devicePaths.map((path) => [path, { target, changeOrigin: true }]))
-    : undefined
+  const proxy =
+    mode === 'device'
+      ? Object.fromEntries(devicePaths.map((path) => [path, { target, changeOrigin: true }]))
+      : undefined
 
   return {
     base: mode === 'embed' ? '/ui/' : '/',

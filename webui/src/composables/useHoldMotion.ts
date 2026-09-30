@@ -7,7 +7,11 @@ interface HoldActions<T extends string> {
   stop: (direction: T) => DeviceAction
 }
 
-export function useHoldMotion<T extends string>(send: (action: DeviceAction) => Promise<void>, enabled: Ref<boolean>, actions: HoldActions<T>) {
+export function useHoldMotion<T extends string>(
+  send: (action: DeviceAction) => Promise<void>,
+  enabled: Ref<boolean>,
+  actions: HoldActions<T>,
+) {
   const activeDirection = ref<T | null>(null)
   let queue = Promise.resolve()
 

@@ -27,9 +27,10 @@ async function refresh(): Promise<void> {
     const nextSnapshot = await getClient().getSnapshot(nextConfig)
     config.value = nextConfig
     snapshot.value = nextSnapshot
-    error.value = nextConfig.safeReadOnly || nextConfig.controller.protocolFamily === 'unknown'
-      ? 'Device configuration is unavailable, actions remain disabled'
-      : ''
+    error.value =
+      nextConfig.safeReadOnly || nextConfig.controller.protocolFamily === 'unknown'
+        ? 'Device configuration is unavailable, actions remain disabled'
+        : ''
   } catch {
     error.value = 'Device connection interrupted'
     if (snapshot.value) snapshot.value.controller.connection = 'disconnected'
@@ -72,14 +73,20 @@ async function selectScenario(id: ScenarioId): Promise<void> {
 
 const stateFresh = computed(() => {
   const updatedAt = snapshot.value?.controller.updatedAt
-  return updatedAt !== null && updatedAt !== undefined
-    && clock.value - updatedAt <= Math.max(config.value.pollIntervalMs * 4, 2500)
+  return (
+    updatedAt !== null &&
+    updatedAt !== undefined &&
+    clock.value - updatedAt <= Math.max(config.value.pollIntervalMs * 4, 2500)
+  )
 })
 
-const actionsAllowed = computed(() => snapshot.value?.controller.connection === 'connected'
-  && config.value.controller.protocolFamily !== 'unknown'
-  && !config.value.safeReadOnly
-  && stateFresh.value)
+const actionsAllowed = computed(
+  () =>
+    snapshot.value?.controller.connection === 'connected' &&
+    config.value.controller.protocolFamily !== 'unknown' &&
+    !config.value.safeReadOnly &&
+    stateFresh.value,
+)
 
 export function useDeviceSession() {
   onBeforeUnmount(() => window.clearTimeout(timer))
@@ -96,6 +103,11 @@ export function useDeviceSession() {
     start,
     refresh,
     selectScenario,
+    performMotion: async (action: DeviceAction) => {
+      const stopping = ['mount.guide.stop', 'focuser.stop', 'rotator.stop'].includes(action.type)
+      if (!stopping && !actionsAllowed.value) return
+      await getClient().performAction(action)
+    },
     performAction: (action: DeviceAction) => sendAction(action),
     performSafetyAction: (action: DeviceAction) => sendAction(action, true),
   }

@@ -28,20 +28,26 @@ describe('LegacyClient', () => {
   })
 
   it('uses form encoded versioned actions when available', async () => {
-    const fetcher = vi.fn((input: RequestInfo | URL, init?: RequestInit) => globalThis.fetch(input, init))
+    const fetcher = vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+      globalThis.fetch(input, init),
+    )
     const client = new LegacyClient({ fetcher, scenario: () => 'normal' })
     await client.getConfig()
     await client.performAction({ type: 'mount.park' })
-    expect(fetcher).toHaveBeenLastCalledWith('/api/v1/actions', expect.objectContaining({ method: 'POST' }))
+    expect(fetcher).toHaveBeenLastCalledWith(
+      '/api/v1/actions',
+      expect.objectContaining({ method: 'POST' }),
+    )
   })
 
   it('keeps core state equivalent to the legacy fallback', async () => {
     const apiClient = new LegacyClient({ scenario: () => 'normal' })
     const legacyClient = new LegacyClient({
       scenario: () => 'normal',
-      fetcher: (input, init) => String(input).startsWith('/api/')
-        ? Promise.resolve(new Response('', { status: 404 }))
-        : globalThis.fetch(input, init),
+      fetcher: (input, init) =>
+        String(input).startsWith('/api/')
+          ? Promise.resolve(new Response('', { status: 404 }))
+          : globalThis.fetch(input, init),
     })
     const apiSnapshot = await apiClient.getSnapshot(await apiClient.getConfig())
     const legacySnapshot = await legacyClient.getSnapshot(await legacyClient.getConfig())
