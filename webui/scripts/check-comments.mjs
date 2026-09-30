@@ -36,7 +36,6 @@ function createState() {
 
 function commentFragments(line, state) {
   const fragments = []
-  let fragment = ''
   let i = 0
 
   while (i < line.length) {
@@ -103,11 +102,6 @@ function commentFragments(line, state) {
     i += 1
   }
 
-  if (/^\s*\*(?!\/)/.test(line) && fragments.length === 0) {
-    fragment = line.replace(/^\s*\*\s?/, '')
-    fragments.push(fragment)
-  }
-
   if (state.quote !== '`') state.quote = null
   return fragments
 }
@@ -123,8 +117,14 @@ function inspectLine(path, lineNumber, line, state, report) {
   const fragments = commentFragments(line, state)
   if (!report) return
   for (const fragment of fragments) {
+    // 工具指令保留原语法，说明性注释必须包含中文
+    const text = fragment.trim()
+    const toolDirective = /^(?:\/?\s*<reference\b|@|eslint-|prettier-|SPDX-)/.test(text)
+    if (text && !toolDirective && !/\p{Script=Han}/u.test(text)) {
+      violations.push({ path, lineNumber, reason: '说明性注释请使用中文', text: line.trim() })
+    }
     if (hasForbiddenEnding(fragment)) {
-      violations.push({ path, lineNumber, text: line.trim() })
+      violations.push({ path, lineNumber, reason: '注释末尾不能带句号', text: line.trim() })
     }
   }
 }
@@ -181,7 +181,7 @@ if (workingTree) {
 
 if (violations.length > 0) {
   for (const violation of violations) {
-    console.error(`${violation.path}:${violation.lineNumber}: comment ends with a period: ${violation.text}`)
+    console.error(`${violation.path}:${violation.lineNumber}: ${violation.reason}: ${violation.text}`)
   }
   process.exit(1)
 }
