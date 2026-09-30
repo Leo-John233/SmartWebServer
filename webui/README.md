@@ -69,3 +69,24 @@ The interface supports English and Chinese from the language switch in the heade
 - 每完成一个可独立说明的功能模块，执行相关检查并提交一次本地 Git
 - 提交标题写明模块及改动，提交正文列出具体内容与验证结果，不将无关改动混入同一提交
 - 页面源码修改完成后运行 `npm run build:embed`，同步固件内嵌资源
+
+## 固件语义核对（2026-09-30）
+
+- `tphd_m` 来自 `:GX9F#`，表示 OnStep 控制器内部 MCU 温度，不是环境温度
+- `tphd_t / tphd_p / tphd_h / tphd_d` 分别来自 `:GX9A# / :GX9B# / :GX9C# / :GX9E#`，对应环境温度、气压、相对湿度和露点
+- `:T+# / :T-#` 微调恒星时基准时钟，每次 0.02 Hz；`:TR#` 恢复计算得到的恒星时基准，不是电机转速重置
+- 参数术语按 `src/locales/Strings_en.h` 的 26 种轴参数维护，`(i)` 表示立即生效，其他参数通常需要重启
+- 当前项目 `AxisTile.cpp` 仅为 OnStepX 10.26 及以上生成动态轴参数表单；OnStep 4 场景不能展示不存在的可编辑表单
+- 所有轴按固件返回的字段、范围和提交方式保存；原版第九轴保存扫描边界已由 `< 9` 修正为 `<= 9`
+- 模拟环境根据附件能力生成轴 1～9 的示例步进驱动参数，支持各轴独立保存与恢复默认；这不代表真实设备一定提供相同参数
+- StallGuard 按原版使用 0～1023 量程并显示触发阈值，伺服位置误差采用以零为中心的量程
+- Vue 页面不再提供旧版界面入口，内部仍读取原固件表单和兼容接口
+
+核对来源：
+
+- [OnStep 4 指令实现](https://github.com/hjd1964/OnStep/blob/release-4.24/Command.ino)
+- [OnStepX 跟踪指令实现](https://github.com/hjd1964/OnStepX/blob/main/src/telescope/mount/Mount.command.cpp)
+- [SWS 轴配置实现](https://github.com/hjd1964/SmartWebServer/blob/main/src/pages/index/AxisTile.cpp)
+- 本地 `src/libApp/status/StateController.cpp`、`src/pages/index/AmbientTile.cpp`、`src/pages/index/StallGuardTile.h`
+
+本轮验证覆盖网页类型检查、模拟浏览器和表单解析；当前环境没有 Arduino CLI / PlatformIO，未进行固件编译或实机烧录

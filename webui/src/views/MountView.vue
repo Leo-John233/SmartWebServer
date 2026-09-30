@@ -475,22 +475,29 @@ function saveLimits(): void {
           ><strong>{{ ui.t(state?.tracking || '—') }}</strong>
         </summary>
         <div class="control-body">
+          <p class="setting-help">
+            {{
+              ui.t(
+                'Adjust the tracking reference clock by 0.02 Hz per press to correct long-term drift. Hz means cycles per second, not motor speed. Restore resets the calculated sidereal reference.',
+              )
+            }}
+          </p>
           <div class="button-row">
             <button
               :disabled="locked"
               @click="send({ type: 'mount.tracking.adjust', adjustment: 'slower' })"
             >
-              − 0.02 Hz</button
+              {{ ui.t('Slower (−0.02 Hz)') }}</button
             ><button
               :disabled="locked"
               @click="send({ type: 'mount.tracking.adjust', adjustment: 'reset' })"
             >
-              {{ ui.t('Reset') }}</button
+              {{ ui.t('Restore sidereal clock') }}</button
             ><button
               :disabled="locked"
               @click="send({ type: 'mount.tracking.adjust', adjustment: 'faster' })"
             >
-              + 0.02 Hz
+              {{ ui.t('Faster (+0.02 Hz)') }}
             </button>
           </div>
         </div>

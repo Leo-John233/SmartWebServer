@@ -1,24 +1,6 @@
 // 保留旧版固件字段和控件描述，供无硬件预览解析
 export const formsByPath: Record<string, string> = {
-  '/index.htm': `
-<div class="b1">
-<div>Axis 1</div>
-<form action="/index.htm">
-<label>Steps per degree<input name="a1p1value" type="number" min="1" max="100000" value="12800">
-</label>
-<label>Reverse<select name="a1p2value">
-<option value="0">Off</option>
-<option value="1">On</option>
-</select>
-</label>
-<button type="submit">Save</button>
-<button type="submit" name="revert" value="1">Reset</button>
-</form>
-</div>
-<form action="/index.htm">
-<button name="advanced" value="enable" type="submit">Enable axis configuration</button>
-</form>
-`,
+  '/index.htm': '',
   '/mount.htm': `
 <div class="b1">
 <div>Home offsets</div>

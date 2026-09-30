@@ -41,7 +41,7 @@ function changeScenario(event: Event): void {
         class="brand"
         to="/"
       >
-        <span class="brand-mark"><UiIcon name="telescope" /></span>
+        <span class="brand-mark"><UiIcon name="orbit" /></span>
         <span
           ><strong>{{ identity.name || ui.t('Controller') }}</strong
           ><small>{{ identity.version || ui.t('Waiting for identification') }}</small></span
@@ -143,11 +143,6 @@ function changeScenario(event: Event): void {
         <div class="controller-meta">
           <span>{{ identity.name || ui.t('Controller') }}</span>
           <strong>{{ identity.version || ui.t('Waiting for identification') }}</strong>
-          <a
-            class="legacy-sidebar-link"
-            href="/index.htm"
-            >{{ ui.t('Legacy UI') }} ↗</a
-          >
         </div>
       </aside>
 
@@ -186,6 +181,7 @@ function changeScenario(event: Event): void {
           <component
             :is="Component"
             :snapshot="session.snapshot.value"
+            :scenario="session.activeScenario.value"
             :capabilities="session.config.value.capabilities"
             :actions-allowed="session.actionsAllowed.value"
             :action-pending="session.actionPending.value"

@@ -1,3 +1,4 @@
+import { controllerSettingsPage } from './controllerSettings'
 import { delay, http, HttpResponse } from 'msw'
 import { toLegacyRequest, type DeviceAction } from '../api/deviceActions'
 import {
@@ -26,25 +27,57 @@ const network = {
   station: { enabled: true, ssid: 'Observatory', dhcp: true, ip: '192.168.1.44' },
   accessPoint: { enabled: true, ssid: 'SmartWebServer', channel: 6, ip: '192.168.0.1' },
 }
+const controllerPages = new Map<string, string>()
+
 export const handlers = [
   http.get('/auxiliary.htm', ({ request }) => response(request, auxiliaryPage)),
   ...Object.keys(formsByPath).map((path) =>
     http.all(path, async ({ request }) => {
-      if (request.method === 'POST') {
-        const params = new URLSearchParams(await request.text())
-        const doc = new DOMParser().parseFromString(formsByPath[path], 'text/html')
-        for (const input of doc.querySelectorAll<HTMLInputElement>('input[name]')) {
-          if (input.type !== 'password' && params.has(input.name))
-            input.setAttribute('value', params.get(input.name)!)
-          if (input.type === 'checkbox') input.toggleAttribute('checked', params.has(input.name))
+      const scenario = getScenario(request)
+      const pageKey = scenario.id + path
+      let html =
+        path === '/index.htm'
+          ? (controllerPages.get(pageKey) ?? controllerSettingsPage(scenario.config))
+          : formsByPath[path]
+      const params =
+        request.method === 'POST'
+          ? new URLSearchParams(await request.text())
+          : new URL(request.url).searchParams
+      if (params.size) {
+        const doc = new DOMParser().parseFromString(html, 'text/html')
+        for (const input of doc.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+          'input[name], select[name]',
+        )) {
+          if (!params.has(input.name)) continue
+          if (input instanceof HTMLSelectElement) {
+            for (const option of input.options)
+              option.toggleAttribute('selected', option.value === params.get(input.name))
+          } else if (input.type !== 'password') input.setAttribute('value', params.get(input.name)!)
         }
-        formsByPath[path] = doc.body.innerHTML
+        const revertedAxis = Number(params.get('revert'))
+        if (path === '/index.htm' && revertedAxis >= 1 && revertedAxis <= 9) {
+          const defaults = new DOMParser().parseFromString(
+            controllerSettingsPage(scenario.config),
+            'text/html',
+          )
+          const selector = 'input[name="a' + revertedAxis + 'p1value"]'
+          const original = doc.querySelector(selector)?.closest('form')
+          const replacement = defaults.querySelector(selector)?.closest('form')
+          replacement
+            ?.querySelectorAll('input, select, button')
+            .forEach((node) => node.setAttribute('disabled', ''))
+          if (original && replacement) original.replaceWith(replacement)
+        }
+        html = doc.body.innerHTML
+        if (path === '/index.htm') controllerPages.set(pageKey, html)
+        else formsByPath[path] = html
       }
-      return response(request, formsByPath[path])
+      return response(request, html)
     }),
   ),
   http.post('/__mock/reset', () => {
     resetMockDevice()
+    controllerPages.clear()
     return HttpResponse.json({ ok: true })
   }),
   ...['/api/v1/capabilities', '/ui-config.json'].map((path) =>
@@ -59,7 +92,17 @@ export const handlers = [
               (scope === 'controller' ? 'index' : scope === 'encoders' ? 'enc' : scope) +
               (mode === 'poll' ? '-ajax.txt' : '-ajax-get.txt'),
         ({ request }) => {
-          applyLegacyAction(request, scope, Object.fromEntries(new URL(request.url).searchParams))
+          const params = new URL(request.url).searchParams
+          if (scope === 'controller' && params.get('boot') === 'reset') {
+            const key = getScenario(request).id + '/index.htm'
+            const html = controllerPages.get(key)
+            if (html) {
+              const doc = new DOMParser().parseFromString(html, 'text/html')
+              doc.querySelectorAll('[disabled]').forEach((node) => node.removeAttribute('disabled'))
+              controllerPages.set(key, doc.body.innerHTML)
+            }
+          }
+          applyLegacyAction(request, scope, Object.fromEntries(params))
           return response(request, serializeLegacyState(getScenarioState(request)[scope]))
         },
       ),

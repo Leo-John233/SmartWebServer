@@ -1,12 +1,33 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   parseFirmwareForms,
   firmwareFormValues,
   type FirmwareForm,
 } from '../protocol/firmwareForms'
 import { useUiLocale } from '../i18n'
-const props = defineProps<{ actionsAllowed: boolean }>()
+import type { Capabilities } from '../domain/device'
+const props = defineProps<{
+  actionsAllowed: boolean
+  capabilities: Capabilities
+  scenario?: string
+}>()
+const selectedAxis = ref(0)
+const axes = computed(() => [
+  ...(props.capabilities.mount ? [1, 2] : []),
+  ...(props.capabilities.rotator ? [3] : []),
+  ...Array.from({ length: props.capabilities.focuserCount }, (_, index) => index + 4),
+])
+const visibleForms = computed(() =>
+  path.value === '/index.htm'
+    ? forms.value.filter((form) => (form.axis ?? 0) === selectedAxis.value)
+    : forms.value,
+)
+function requestHeaders(): HeadersInit {
+  return import.meta.env.MODE === 'mock' && props.scenario
+    ? { 'X-WebUI-Scenario': props.scenario }
+    : {}
+}
 const ui = useUiLocale()
 const path = ref('/index.htm')
 const forms = ref<FirmwareForm[]>([])
@@ -15,7 +36,7 @@ const message = ref('')
 async function load(): Promise<void> {
   busy.value = true
   try {
-    const response = await fetch(path.value)
+    const response = await fetch(path.value, { headers: requestHeaders() })
     if (!response.ok) throw new Error()
     forms.value = parseFirmwareForms(await response.text(), path.value)
     message.value = forms.value.length ? '' : 'No editable settings reported'
@@ -30,9 +51,12 @@ async function save(form: FirmwareForm, button: FirmwareForm['buttons'][number])
   if (!window.confirm(ui.t('Apply these device settings?'))) return
   busy.value = true
   try {
-    const response = await fetch(form.path, {
-      method: 'POST',
-      body: firmwareFormValues(form, button),
+    const values = firmwareFormValues(form, button)
+    const method = form.method ?? 'GET'
+    const response = await fetch(method === 'GET' ? form.path + '?' + values : form.path, {
+      method,
+      headers: requestHeaders(),
+      ...(method === 'POST' ? { body: values } : {}),
     })
     if (!response.ok) throw new Error()
     if (form.command) await load()
@@ -44,6 +68,7 @@ async function save(form: FirmwareForm, button: FirmwareForm['buttons'][number])
     busy.value = false
   }
 }
+watch(() => props.scenario, load)
 onMounted(load)
 </script>
 <template>
@@ -51,7 +76,7 @@ onMounted(load)
     <div class="section-heading">
       <div>
         <p class="eyebrow">{{ ui.t('Device settings') }}</p>
-        <h2>{{ ui.t('Full settings') }}</h2>
+        <h2>{{ ui.t('Device settings') }}</h2>
       </div>
     </div>
     <p class="muted-text">
@@ -79,9 +104,49 @@ onMounted(load)
     >
       {{ ui.t(message) }}
     </p>
-    <div class="control-grid">
+    <nav
+      v-if="path === '/index.htm'"
+      class="axis-tabs"
+      :aria-label="ui.t('Controller and axes')"
+    >
+      <button
+        :aria-pressed="selectedAxis === 0"
+        @click="selectedAxis = 0"
+      >
+        {{ ui.t('Controller') }}
+      </button>
+      <button
+        v-for="axis in axes"
+        :key="axis"
+        :aria-pressed="selectedAxis === axis"
+        @click="selectedAxis = axis"
+      >
+        {{ ui.t('Axis ' + axis) }}
+      </button>
+    </nav>
+    <p
+      v-if="path === '/index.htm' && !visibleForms.length && !busy"
+      class="read-only-note"
+    >
+      {{
+        ui.t(
+          'The firmware did not provide editable parameters. Axis configuration may be disabled or awaiting a reboot. Dynamic axis parameters in this project require OnStepX 10.26 or later.',
+        )
+      }}
+    </p>
+    <p
+      v-if="selectedAxis && path === '/index.htm'"
+      class="setting-help"
+    >
+      {{
+        ui.t(
+          'Apply settings separately for each axis. Most changes take effect after restarting the controller, except parameters marked as immediate.',
+        )
+      }}
+    </p>
+    <div class="control-grid settings-grid">
       <form
-        v-for="(form, index) in forms"
+        v-for="(form, index) in visibleForms"
         :key="path + index"
         class="panel control-body always-visible"
         @submit.prevent="save(form, form.buttons[0])"
@@ -112,7 +177,13 @@ onMounted(load)
                 :key="option.value"
                 :value="option.value"
               >
-                {{ ui.t(option.label) }}
+                {{
+                  ui.t(
+                    /Decay mode/.test(field.label) && ['Fast', 'Slow'].includes(option.label)
+                      ? option.label + ' decay'
+                      : option.label,
+                  )
+                }}
               </option>
             </select>
             <input
@@ -132,7 +203,11 @@ onMounted(load)
             v-for="button in form.buttons"
             :key="button.name + button.value"
             type="button"
-            :disabled="busy || !actionsAllowed"
+            :disabled="
+              busy ||
+              !actionsAllowed ||
+              (!!form.fields.length && form.fields.every((field) => field.disabled))
+            "
             @click="
               ($event.currentTarget as HTMLButtonElement).form?.reportValidity() &&
               save(form, button)

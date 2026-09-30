@@ -18,7 +18,7 @@ async function load(): Promise<void> {
     network.value = await client.getNetwork()
     error.value = ''
   } catch {
-    error.value = 'Network settings are unavailable · use Legacy UI for this firmware'
+    error.value = 'Network settings are unavailable'
   }
 }
 
@@ -70,11 +70,6 @@ onMounted(() => void load())
         <p class="eyebrow">{{ ui.t('Network') }}</p>
         <h2>{{ ui.t('Connectivity') }}</h2>
       </div>
-      <a
-        class="legacy-link"
-        href="/net.htm"
-        >{{ ui.t('Legacy UI') }} ↗</a
-      >
     </div>
     <div
       v-if="error"

@@ -4,6 +4,18 @@ import { parseAuxiliaryControls } from '../src/protocol/auxiliaryControls'
 import { LegacyClient } from '../src/api/legacyClient'
 
 describe('firmware compatibility', () => {
+  it('keeps all axes, selects labels without options, and preserves GET submission', () => {
+    const html = Array.from({ length: 9 }, (_, index) => {
+      const axis = index + 1
+      return `<div class="b1"><div>Axis${axis}:</div><form method="get" action="/index.htm"><input name="a${axis}p1value" value="12800">&nbsp;Steps/degree<br><label>Reverse<select name="a${axis}p2value"><option value="0">Off</option><option value="1">On</option></select></label><button type="submit">Upload</button></form></div>`
+    }).join('')
+    const forms = parseFirmwareForms(html, '/index.htm')
+    expect(forms).toHaveLength(9)
+    expect(forms[8]).toMatchObject({ axis: 9, method: 'GET', title: 'Axis9' })
+    expect(forms[8].fields[0].label).toBe('Steps/degree')
+    expect(forms[8].fields[1].label).toBe('Reverse')
+    expect(firmwareFormValues(forms[8], forms[8].buttons[0]).get('a9p1value')).toBe('12800')
+  })
   it('preserves checkboxes, axis parameter names and password blanks', () => {
     const [form] = parseFirmwareForms(
       `<div class='b1'><div>Axis 1:</div><form action='/index.htm'>

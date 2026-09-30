@@ -249,7 +249,7 @@ void axisTileGet()
 
     // determine what axis is being set
     int axisNumber = 0;
-    for (int i = 1; i < 9; i++) {
+    for (int i = 1; i <= 9; i++) {
       snprintf(argStr, sizeof(argStr), "a%dp%dvalue", i, 1);
       if (!www.arg(argStr).equals(EmptyStr)) {
         axisNumber = i;

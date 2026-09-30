@@ -1,3 +1,4 @@
+import { translateFirmwareText } from './firmwareTranslations'
 import { computed, ref } from 'vue'
 
 export type UiLocale = 'en' | 'zh'
@@ -6,6 +7,37 @@ export type UiLocale = 'en' | 'zh'
 const translations: Record<string, string> = {
   'Inactive || Best': '空闲 · 自动侧向',
   'Slewing || East': '正在转向 · 东侧',
+  'Controller temperature': '主控芯片温度',
+  'Internal MCU sensor': '控制器内部温度传感器',
+  'Controller workload': '控制器任务负载',
+  'Observing conditions': '观测环境',
+  'Ambient temperature': '环境温度',
+  'Relative humidity': '相对湿度',
+  'Air pressure': '气压',
+  'Dew point': '露点温度',
+  'Network settings are unavailable': '暂时无法读取网络设置，请检查设备连接后重试',
+  'Slower (−0.02 Hz)': '调慢 −0.02 Hz',
+  'Faster (+0.02 Hz)': '调快 +0.02 Hz',
+  'Restore sidereal clock': '恢复恒星时基准',
+  'The firmware did not provide editable parameters. Axis configuration may be disabled or awaiting a reboot. Dynamic axis parameters in this project require OnStepX 10.26 or later.':
+    '当前固件未提供此项可编辑参数，可能尚未启用驱动配置，或恢复默认参数后需要重启；本项目的动态轴参数页面要求 OnStepX 10.26 及以上版本',
+  'Apply settings separately for each axis. Most changes take effect after restarting the controller, except parameters marked as immediate.':
+    '按轴分别应用参数，多数参数在控制器重启后生效；标注“立即生效”的参数除外',
+  'Adjust the tracking reference clock by 0.02 Hz per press to correct long-term drift. Hz means cycles per second, not motor speed. Restore resets the calculated sidereal reference.':
+    '用于校正长期跟踪偏快或偏慢：每次调整基准时钟频率 0.02 赫兹（Hz，每秒周期数），不是电机转速。恢复按钮重置为计算得到的恒星时基准。',
+  'Measured value': '实测值',
+  'Trigger threshold': '触发阈值',
+  'Servo output (%)': '伺服输出（%）',
+  'Measurement unit': '测量单位',
+  'StallGuard value': '堵转检测值',
+  'StallGuard state': '堵转保护状态',
+  'StallGuard axis': '堵转监测轴',
+  'Fault duration (ms)': '异常持续时间（ms）',
+  Armed: '保护已启用',
+  asec: '角秒',
+  stps: '步',
+  'Fast decay': '快速衰减',
+  'Slow decay': '慢速衰减',
   Now: '现在',
   'Recent samples': '最近采样',
   'Waiting for telemetry': '等待遥测数据',
@@ -23,7 +55,6 @@ const translations: Record<string, string> = {
   Auxiliary: '辅助设备',
   Encoders: '编码器',
   Network: '网络',
-  'Legacy UI': '旧版界面',
   'Controller overview': '控制器概览',
   'Observation control': '观测控制',
   'Camera orientation': '相机方向',
@@ -172,7 +203,7 @@ const translations: Record<string, string> = {
   Home: '归零',
   'Goto rate': 'GoTo 速度',
   'Field derotation': '视场消旋',
-  Reverse: '反向',
+  Reverse: '电机方向反转',
   Parallactic: '视差角',
   Steps: '步数',
   Channel: '信道',
@@ -251,7 +282,6 @@ const translations: Record<string, string> = {
   Inactive: '空闲',
   Unavailable: '不可用',
   'Device settings': '设备设置',
-  'Full settings': '完整设置',
   'Settings category': '设置分类',
   'Controller and axes': '控制器与驱动轴',
   'Mount calibration and limits': '赤道仪校准与限位',
@@ -321,7 +351,8 @@ export function useUiLocale() {
 
   return {
     locale: computed(() => locale.value),
-    t: (text: string) => (locale.value === 'zh' ? (translations[text] ?? text) : text),
+    t: (text: string) =>
+      locale.value === 'zh' ? (translations[text] ?? translateFirmwareText(text) ?? text) : text,
     setLocale,
     toggleLocale: () => setLocale(locale.value === 'zh' ? 'en' : 'zh'),
   }

@@ -1877,3 +1877,69 @@ textarea::placeholder {
 .observation-home {
   grid-template-columns: 1fr;
 }
+/* 设置按控制器和各轴分组，环境读数单独展示 */
+.axis-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.axis-tabs button {
+  min-width: 70px;
+}
+.axis-tabs button[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--surface);
+}
+.settings-grid {
+  grid-template-columns: 1fr;
+}
+.settings-grid form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+}
+.settings-grid h3,
+.settings-grid .button-row {
+  grid-column: 1 / -1;
+}
+.settings-grid .button-row {
+  margin-top: 12px;
+  max-width: 540px;
+}
+.setting-help {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0;
+}
+.axis-tabs + .setting-help,
+.read-only-note + .setting-help {
+  margin-top: 16px;
+}
+.environment-panel {
+  margin-top: 18px;
+}
+.environment-values {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 0;
+}
+.environment-values dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.environment-values dd {
+  margin: 8px 0 0;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 680px) {
+  .settings-grid form {
+    grid-template-columns: 1fr;
+  }
+  .environment-values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
