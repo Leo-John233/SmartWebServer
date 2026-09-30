@@ -4,6 +4,11 @@ export type UiLocale = 'en' | 'zh'
 
 // 界面文案集中维护，设备返回的原始文本找不到翻译时保持原样
 const translations: Record<string, string> = {
+  'Inactive || Best': '空闲 · 自动侧向',
+  'Slewing || East': '正在转向 · 东侧',
+  Now: '现在',
+  'Recent samples': '最近采样',
+  'Waiting for telemetry': '等待遥测数据',
   'Waiting for identification': '等待识别固件',
   Observe: '观测',
   'Targets & alignment': '目标与校准',

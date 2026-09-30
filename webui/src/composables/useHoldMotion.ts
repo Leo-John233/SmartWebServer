@@ -14,6 +14,7 @@ export function useHoldMotion<T extends string>(
 ) {
   const activeDirection = ref<T | null>(null)
   let queue = Promise.resolve()
+  let motionSequence = 0
 
   function enqueue(action: DeviceAction): void {
     queue = queue.then(() => send(action)).catch(() => undefined)
@@ -21,8 +22,13 @@ export function useHoldMotion<T extends string>(
 
   function stopDirection(direction: T): void {
     enqueue(actions.stop(direction))
-    window.setTimeout(() => enqueue(actions.stop(direction)), 150)
-    window.setTimeout(() => enqueue(actions.stop(direction)), 500)
+    // 新的移动开始后，旧操作的延迟停止不能打断它
+    const sequence = motionSequence
+    for (const delay of [150, 500]) {
+      window.setTimeout(() => {
+        if (sequence === motionSequence) enqueue(actions.stop(direction))
+      }, delay)
+    }
   }
 
   function stop(): void {
@@ -34,6 +40,7 @@ export function useHoldMotion<T extends string>(
   function start(direction: T): void {
     if (!enabled.value || activeDirection.value === direction) return
     stop()
+    motionSequence += 1
     activeDirection.value = direction
     enqueue(actions.start(direction))
   }
@@ -47,12 +54,16 @@ export function useHoldMotion<T extends string>(
   })
   onMounted(() => {
     window.addEventListener('blur', stop)
+    window.addEventListener('pointerup', stop)
+    window.addEventListener('pointercancel', stop)
     document.addEventListener('visibilitychange', onVisibilityChange)
   })
   onBeforeRouteLeave(() => stop())
   onBeforeUnmount(() => {
     stop()
     window.removeEventListener('blur', stop)
+    window.removeEventListener('pointerup', stop)
+    window.removeEventListener('pointercancel', stop)
     document.removeEventListener('visibilitychange', onVisibilityChange)
   })
 

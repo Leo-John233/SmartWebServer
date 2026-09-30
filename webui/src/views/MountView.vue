@@ -21,6 +21,12 @@ const locked = computed(() => !props.actionsAllowed || props.actionPending)
 const state = computed(() => props.snapshot?.mount ?? null)
 const values = computed(() => props.snapshot?.values ?? {})
 const selected = computed(() => props.snapshot?.selected ?? {})
+const activeSection = ref('observe')
+const sections = [
+  { id: 'observe', label: 'Observe' },
+  { id: 'targets', label: 'Targets & alignment' },
+  { id: 'settings', label: 'Motion settings' },
+]
 const guideRate = ref(2)
 const trackingMode = ref<TrackingMode>('sidereal')
 const alignStars = ref(1)
@@ -110,6 +116,11 @@ const hold = useHoldMotion<GuideDirection>(sendMotion, toRef(props, 'actionsAllo
   stop: (direction) => ({ type: 'mount.guide.stop', direction }),
 })
 
+function changeSection(id: string): void {
+  hold.stop()
+  activeSection.value = id
+}
+
 function setSlewRate(rate: SlewRate): void {
   send({ type: 'mount.goto.rate', rate })
 }
@@ -165,7 +176,23 @@ function saveLimits(): void {
         >{{ ui.t('Tracking') }} <strong>{{ ui.t(state?.tracking || '—') }}</strong></span
       >
     </div>
-    <div class="mount-dashboard">
+    <nav
+      class="section-tabs"
+      :aria-label="ui.t('Observation control')"
+    >
+      <button
+        v-for="section in sections"
+        :key="section.id"
+        :aria-pressed="activeSection === section.id"
+        @click="changeSection(section.id)"
+      >
+        {{ ui.t(section.label) }}
+      </button>
+    </nav>
+    <div
+      v-show="activeSection === 'observe'"
+      class="mount-dashboard"
+    >
       <article class="panel tracking-panel">
         <div class="panel-title">
           <h3>{{ ui.t('Device tracking') }}</h3>
@@ -244,6 +271,12 @@ function saveLimits(): void {
             :class="{ active: hold.activeDirection.value === 'north' }"
             :disabled="locked"
             @pointerdown.prevent="hold.start('north')"
+            @keydown.space.prevent="hold.start('north')"
+            @keydown.enter.prevent="hold.start('north')"
+            @keyup.space.prevent="hold.stop"
+            @keyup.enter.prevent="hold.stop"
+            @blur="hold.stop"
+            @contextmenu.prevent
             @pointerup="hold.stop"
             @pointercancel="hold.stop"
           >
@@ -255,6 +288,12 @@ function saveLimits(): void {
             :class="{ active: hold.activeDirection.value === 'west' }"
             :disabled="locked"
             @pointerdown.prevent="hold.start('west')"
+            @keydown.space.prevent="hold.start('west')"
+            @keydown.enter.prevent="hold.start('west')"
+            @keyup.space.prevent="hold.stop"
+            @keyup.enter.prevent="hold.stop"
+            @blur="hold.stop"
+            @contextmenu.prevent
             @pointerup="hold.stop"
             @pointercancel="hold.stop"
           >
@@ -274,6 +313,12 @@ function saveLimits(): void {
             :class="{ active: hold.activeDirection.value === 'east' }"
             :disabled="locked"
             @pointerdown.prevent="hold.start('east')"
+            @keydown.space.prevent="hold.start('east')"
+            @keydown.enter.prevent="hold.start('east')"
+            @keyup.space.prevent="hold.stop"
+            @keyup.enter.prevent="hold.stop"
+            @blur="hold.stop"
+            @contextmenu.prevent
             @pointerup="hold.stop"
             @pointercancel="hold.stop"
           >
@@ -285,6 +330,12 @@ function saveLimits(): void {
             :class="{ active: hold.activeDirection.value === 'south' }"
             :disabled="locked"
             @pointerdown.prevent="hold.start('south')"
+            @keydown.space.prevent="hold.start('south')"
+            @keydown.enter.prevent="hold.start('south')"
+            @keyup.space.prevent="hold.stop"
+            @keyup.enter.prevent="hold.stop"
+            @blur="hold.stop"
+            @contextmenu.prevent
             @pointerup="hold.stop"
             @pointercancel="hold.stop"
           >
@@ -302,7 +353,10 @@ function saveLimits(): void {
       {{ ui.t('Actions are locked until fresh state is available from a recognized controller') }}
     </p>
 
-    <article class="panel target-panel">
+    <article
+      v-show="activeSection !== 'settings'"
+      class="panel target-panel"
+    >
       <div class="panel-title">
         <div>
           <p class="eyebrow">{{ ui.t('Current target') }}</p>
@@ -341,8 +395,12 @@ function saveLimits(): void {
       </div>
     </article>
 
-    <div class="control-grid">
+    <div
+      class="control-grid"
+      :class="{ 'observation-home': activeSection === 'observe' }"
+    >
       <details
+        v-show="activeSection === 'observe'"
         class="panel control-card"
         open
       >
@@ -406,54 +464,17 @@ function saveLimits(): void {
       </details>
 
       <details
+        v-show="activeSection === 'settings'"
         class="panel control-card"
         open
       >
         <summary>
           <span
             ><small>{{ ui.t('Motion') }}</small
-            >{{ ui.t('Tracking') }}</span
+            >{{ ui.t('Tracking fine tuning') }}</span
           ><strong>{{ ui.t(state?.tracking || '—') }}</strong>
         </summary>
         <div class="control-body">
-          <div class="segmented compact">
-            <button
-              :class="{ selected: selected.trk_on }"
-              :disabled="locked"
-              @click="send({ type: 'mount.tracking', enabled: true })"
-            >
-              {{ ui.t('On') }}</button
-            ><button
-              :class="{ selected: selected.trk_off }"
-              :disabled="locked"
-              @click="send({ type: 'mount.tracking', enabled: false })"
-            >
-              {{ ui.t('Off') }}
-            </button>
-          </div>
-          <div class="button-row wrap">
-            <button
-              :disabled="locked"
-              @click="setTrackingMode('sidereal')"
-            >
-              {{ ui.t('Sidereal') }}</button
-            ><button
-              :disabled="locked"
-              @click="setTrackingMode('lunar')"
-            >
-              {{ ui.t('Lunar') }}</button
-            ><button
-              :disabled="locked"
-              @click="setTrackingMode('solar')"
-            >
-              {{ ui.t('Solar') }}</button
-            ><button
-              :disabled="locked"
-              @click="setTrackingMode('king')"
-            >
-              {{ ui.t('King') }}
-            </button>
-          </div>
           <div class="button-row">
             <button
               :disabled="locked"
@@ -475,7 +496,10 @@ function saveLimits(): void {
         </div>
       </details>
 
-      <details class="panel control-card">
+      <details
+        v-show="activeSection === 'settings'"
+        class="panel control-card"
+      >
         <summary>
           <span
             ><small>{{ ui.t('Motion') }}</small
@@ -538,7 +562,10 @@ function saveLimits(): void {
         </div>
       </details>
 
-      <details class="panel control-card">
+      <details
+        v-show="activeSection === 'targets'"
+        class="panel control-card"
+      >
         <summary>
           <span
             ><small>{{ ui.t('Model') }}</small
@@ -591,7 +618,10 @@ function saveLimits(): void {
         </div>
       </details>
 
-      <details class="panel control-card">
+      <details
+        v-show="activeSection === 'settings'"
+        class="panel control-card"
+      >
         <summary>
           <span
             ><small>{{ ui.t('Site') }}</small
@@ -646,7 +676,10 @@ function saveLimits(): void {
         </div>
       </details>
 
-      <details class="panel control-card">
+      <details
+        v-show="activeSection === 'targets'"
+        class="panel control-card"
+      >
         <summary>
           <span
             ><small>{{ ui.t('Catalog') }}</small
@@ -737,7 +770,10 @@ function saveLimits(): void {
         </div>
       </details>
 
-      <details class="panel control-card">
+      <details
+        v-show="activeSection === 'settings'"
+        class="panel control-card"
+      >
         <summary>
           <span
             ><small>{{ ui.t('Correction') }}</small
@@ -776,7 +812,10 @@ function saveLimits(): void {
         </div>
       </details>
 
-      <details class="panel control-card">
+      <details
+        v-show="activeSection === 'settings'"
+        class="panel control-card"
+      >
         <summary>
           <span
             ><small>{{ ui.t('Safety') }}</small
@@ -849,7 +888,10 @@ function saveLimits(): void {
           </div>
         </div>
       </details>
-      <details class="panel control-card">
+      <details
+        v-show="activeSection === 'settings'"
+        class="panel control-card"
+      >
         <summary>
           <span>{{ ui.t('Advanced motion settings') }}</span>
         </summary>
