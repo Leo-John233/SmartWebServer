@@ -8,8 +8,8 @@ This directory contains the Vue 3 development environment for the ESP8266 interf
 - `npm run dev:device` proxies legacy requests to the configured ESP device
 - `npm run test` runs protocol and component tests
 - `npm run test:e2e` builds and verifies the production preview with Chromium
-- `npm run build` creates the production bundle in `dist/`
-- `npm run build:embed` creates the `/ui/` bundle and regenerates `src/webui/WebAssets.generated.h`
+- `npm run build` creates the production bundle in `dist/production/`
+- `npm run build:embed` creates the `/ui/` bundle and regenerates `webui/firmware/webui/WebAssets.generated.h`
 - `npm run preview` serves the latest production build at `http://127.0.0.1:4173`
 
 ## Device proxy
@@ -20,9 +20,9 @@ The browser talks to Vite on the same origin, so the device does not require COR
 
 ## Firmware build
 
-Run `npm ci` and `npm run build:embed` before compiling the ESP8266 sketch. The generated header contains the minified gzip assets and is committed with the firmware source
+Run `npm ci` and `npm run firmware:prepare` to assemble the Vue firmware at `build/vue/SmartWebServer`. Edit hardware settings in `webui/firmware/Config.h` and `webui/firmware/Extended.config.h`. The original firmware is independent at `legacy/SmartWebServer`
 
-On ESP8266 WiFi builds, `/` and `/ui/` open the Vue interface. `/index.htm` remains the legacy fallback. Other targets keep their existing default page
+In the Vue firmware build, `/` and `/ui/` open the Vue interface. The separate original firmware build serves its original page at `/` and contains no Vue assets
 
 The Network page never reads passwords. Leaving a password field blank preserves the stored password
 
@@ -90,3 +90,14 @@ The interface supports English and Chinese from the language switch in the heade
 - 本地 `src/libApp/status/StateController.cpp`、`src/pages/index/AmbientTile.cpp`、`src/pages/index/StallGuardTile.h`
 
 本轮验证覆盖网页类型检查、模拟浏览器和表单解析；当前环境没有 Arduino CLI / PlatformIO，未进行固件编译或实机烧录
+
+
+## 独立构建目录
+
+- 普通网页：`npm run build` → `dist/production`
+- 无硬件模拟：`npm run build:mock` → `dist/mock`，`npm run preview:mock` 预览
+- 固件网页：`npm run build:embed` → `dist/embed` 与 `firmware/webui/WebAssets.generated.h`
+- Vue 固件装配：`npm run firmware:prepare` → 仓库根目录 `build/vue/SmartWebServer`
+- Vue 固件编译：`npm run firmware:build -- --fqbn <开发板标识>`
+
+构建不会启动浏览器或常驻预览服务，原版配置与输出也不会被 Vue 构建覆盖

@@ -3,3 +3,6 @@
 esp32.svd
 debug.cfg
 debug.svd
+
+# 两版固件的独立生成目录
+/build/

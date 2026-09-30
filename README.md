@@ -1,3 +1,23 @@
+# 原版与 Vue 版目录隔离
+
+| 内容 | 源码位置 | 独立构建输出 |
+| --- | --- | --- |
+| 原版 SWS 固件及网页 | [legacy/SmartWebServer](legacy/SmartWebServer) | build/legacy/SmartWebServer |
+| Vue 前端 | [webui](webui) | webui/dist/production、mock、embed |
+| Vue 固件适配与独立配置 | [webui/firmware](webui/firmware) | build/vue/SmartWebServer |
+
+原版：在仓库根目录运行 `node scripts/build-firmware.mjs legacy`，或直接用 Arduino IDE 打开 `legacy/SmartWebServer/SmartWebServer.ino`
+
+Vue 版：在 `webui` 目录运行 `npm ci` 和 `npm run firmware:prepare`，再用 Arduino IDE 打开 `build/vue/SmartWebServer/SmartWebServer.ino`
+
+命令行编译：原版使用 `node scripts/build-firmware.mjs legacy --compile --fqbn <开发板标识>`，Vue 使用 `npm run firmware:build -- --fqbn <开发板标识>`（在 webui 目录执行）
+
+两版分别维护自己的 Config.h / Extended.config.h，生成目录不可作为源码编辑；运行 `node --test scripts/build-firmware.test.mjs` 检查隔离性
+
+隔离保留已有协议修复，不代表还原历史上游快照；Vue 兼容接口仍复用原版控制逻辑，当前内嵌适配仍限 ESP8266 WiFi
+
+---
+
 # OnStep Smart Web Server
 This is the WiFi and Ethernet web server for OnStep, it is also sometimes referred to as the "SWS".
 The SWS enables OnStep to be controlled from a website and/or by passing commands over IP.

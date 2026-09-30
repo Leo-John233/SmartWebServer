@@ -17,7 +17,10 @@
     "build:mock": "npm run typecheck && vite build --mode mock",
     "test:e2e:mock": "npm run build:mock && playwright test --config playwright.mock.config.ts",
     "format": "prettier --write \"src/**/*.{ts,vue,css}\" \"tests/**/*.ts\" \"e2e*/**/*.ts\" \"*.{ts,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,vue,css}\" \"tests/**/*.ts\" \"e2e*/**/*.ts\" \"*.{ts,json}\""
+    "format:check": "prettier --check \"src/**/*.{ts,vue,css}\" \"tests/**/*.ts\" \"e2e*/**/*.ts\" \"*.{ts,json}\"",
+    "firmware:prepare": "npm run build:embed && node ../scripts/build-firmware.mjs vue",
+    "firmware:build": "npm run build:embed && node ../scripts/build-firmware.mjs vue --compile",
+    "preview:mock": "vite preview --mode mock"
   },
   "dependencies": {
     "@lucide/vue": "1.49.0",

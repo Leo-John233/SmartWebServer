@@ -37,6 +37,7 @@ export default defineConfig(({ mode }) => {
     server: { host: '127.0.0.1', port: 5173, proxy },
     preview: { host: '127.0.0.1', port: 4173 },
     build: {
+      outDir: mode === 'embed' ? 'dist/embed' : mode === 'mock' ? 'dist/mock' : 'dist/production',
       target: 'es2020',
       sourcemap: false,
       cssCodeSplit: true,
