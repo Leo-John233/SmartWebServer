@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import UiIcon from './components/UiIcon.vue'
 import StatusPill from './components/StatusPill.vue'
@@ -7,13 +7,22 @@ import { useDeviceSession } from './composables/useDeviceSession'
 import type { ScenarioId } from './mocks/scenarios'
 import { useUiLocale } from './i18n'
 
+import { controllerIdentity } from './domain/controllerIdentity'
+
 const session = useDeviceSession()
+const identity = computed(() => controllerIdentity(session.config.value.controller))
 const mockMode = import.meta.env.MODE === 'mock'
 const ui = useUiLocale()
 const nightMode = ref(localStorage.getItem('smart-webui-night') === 'true')
 watchEffect(() => {
   document.documentElement.dataset.theme = nightMode.value ? 'night' : 'dark'
   localStorage.setItem('smart-webui-night', String(nightMode.value))
+})
+
+watchEffect(() => {
+  document.title = [identity.value.name || ui.t('Controller'), identity.value.version]
+    .filter(Boolean)
+    .join(' · ')
 })
 
 onMounted(() => {
@@ -32,9 +41,10 @@ function changeScenario(event: Event): void {
         class="brand"
         to="/"
       >
-        <span class="brand-mark"><UiIcon name="planet" /></span>
+        <span class="brand-mark"><UiIcon name="telescope" /></span>
         <span
-          ><strong>Smart Web Server</strong><small>{{ ui.t('Observatory console') }}</small></span
+          ><strong>{{ identity.name || ui.t('Controller') }}</strong
+          ><small>{{ identity.version || ui.t('Waiting for identification') }}</small></span
         >
       </RouterLink>
       <div class="topbar-status">
@@ -131,8 +141,8 @@ function changeScenario(event: Event): void {
           >
         </nav>
         <div class="controller-meta">
-          <span>{{ session.config.value.controller.protocolFamily }}</span>
-          <strong>{{ session.config.value.controller.version || 'Unknown controller' }}</strong>
+          <span>{{ identity.name || ui.t('Controller') }}</span>
+          <strong>{{ identity.version || ui.t('Waiting for identification') }}</strong>
           <a
             class="legacy-sidebar-link"
             href="/index.htm"

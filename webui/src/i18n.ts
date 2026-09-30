@@ -4,6 +4,11 @@ export type UiLocale = 'en' | 'zh'
 
 // 界面文案集中维护，设备返回的原始文本找不到翻译时保持原样
 const translations: Record<string, string> = {
+  'Waiting for identification': '等待识别固件',
+  Observe: '观测',
+  'Targets & alignment': '目标与校准',
+  'Motion settings': '运动设置',
+  'Tracking fine tuning': '跟踪微调',
   'Observatory console': '天文台控制台',
   Scenario: '场景',
   Controller: '控制器',

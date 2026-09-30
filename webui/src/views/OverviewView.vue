@@ -26,7 +26,7 @@ const ui = useUiLocale()
     <div class="metric-grid">
       <article class="metric-card">
         <span>{{ ui.t('Firmware') }}</span>
-        <strong>{{ state?.firmwareVersion || '—' }}</strong>
+        <strong>{{ state?.controllerVersion || '—' }}</strong>
         <small>{{ state?.product || 'Waiting for device' }}</small>
       </article>
       <article class="metric-card">

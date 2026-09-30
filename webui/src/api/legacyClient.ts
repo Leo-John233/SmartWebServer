@@ -1,3 +1,4 @@
+import { controllerIdentity } from '../domain/controllerIdentity'
 import type { DeviceSnapshot, MountActivity, NetworkConfig, UiConfig } from '../domain/device'
 import { safeUiConfig } from '../domain/device'
 import { mergeLegacyDocuments, parseLegacyText, type LegacyDocument } from '../protocol/legacyText'
@@ -136,7 +137,7 @@ export class LegacyClient {
       controller: {
         connection: 'connected',
         activity: inferActivity(document),
-        product: textValue(document, ['fw_name', 'controller']),
+        product: controllerIdentity(config.controller).name,
         firmwareVersion: config.firmwareVersion || textValue(document, ['fw_ver']),
         controllerVersion: config.controller.version || textValue(document, ['version']),
         workload: textValue(document, ['workload', 'work_load', 'work']),
