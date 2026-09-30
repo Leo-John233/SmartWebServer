@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import TelemetryTrace from '../components/TelemetryTrace.vue'
 import type { Capabilities, DeviceSnapshot } from '../domain/device'
 import { useUiLocale } from '../i18n'
 
 const props = defineProps<{ snapshot: DeviceSnapshot | null; capabilities: Capabilities }>()
 const state = computed(() => props.snapshot?.controller ?? null)
-const monitorValues = computed(() => Object.entries(props.snapshot?.values ?? {}).filter(([key]) =>
-  /^(?:dvr_stat|servo|stall|tphd_|signal|last_err)/.test(key)))
+const monitorValues = computed(() =>
+  Object.entries(props.snapshot?.values ?? {}).filter(([key]) =>
+    /^(?:dvr_stat|svo|sg|units|servo|stall|tphd_|signal|last_err)/.test(key),
+  ),
+)
 const ui = useUiLocale()
 </script>
 
@@ -14,54 +18,85 @@ const ui = useUiLocale()
   <section>
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Controller</p>
+        <p class="eyebrow">{{ ui.t('Controller') }}</p>
         <h2>{{ ui.t('Controller overview') }}</h2>
       </div>
-      <span class="live-dot">Live · {{ state?.activity ?? 'connecting' }}</span>
+      <span class="live-dot">{{ ui.t('Live ·') }} {{ state?.activity ?? 'connecting' }}</span>
     </div>
     <div class="metric-grid">
       <article class="metric-card">
-        <span>Firmware</span>
+        <span>{{ ui.t('Firmware') }}</span>
         <strong>{{ state?.firmwareVersion || '—' }}</strong>
         <small>{{ state?.product || 'Waiting for device' }}</small>
       </article>
       <article class="metric-card">
-        <span>Workload</span>
+        <span>{{ ui.t('Workload') }}</span>
         <strong>{{ state?.workload || snapshot?.values.work_load || '—' }}</strong>
-        <small>ESP web workload</small>
+        <small>{{ ui.t('ESP web workload') }}</small>
       </article>
       <article class="metric-card">
-        <span>Weather</span>
+        <span>{{ ui.t('Weather') }}</span>
         <strong>{{ state?.weather || snapshot?.values.tphd_t || '—' }}</strong>
-        <small>Ambient telemetry</small>
+        <small>{{ ui.t('Ambient telemetry') }}</small>
       </article>
       <article class="metric-card">
-        <span>Axes</span>
+        <span>{{ ui.t('Axes') }}</span>
         <strong>{{ capabilities.axisCount || '—' }}</strong>
         <small>{{ state?.axisSummary || 'No axis data' }}</small>
       </article>
     </div>
-    <article v-if="monitorValues.length" class="panel monitor-panel">
+    <div
+      class="control-grid"
+      v-if="snapshot?.values.svoD !== undefined || snapshot?.values.sgV !== undefined"
+    >
+      <TelemetryTrace
+        v-if="snapshot?.values.svoD !== undefined"
+        :label="ui.t('Servo error')"
+        :value="snapshot.values.svoD"
+        :unit="snapshot.values.units"
+        :updated-at="snapshot.controller.updatedAt"
+      />
+      <TelemetryTrace
+        v-if="snapshot?.values.sgV !== undefined"
+        :label="ui.t('StallGuard')"
+        :value="snapshot.values.sgV"
+        :updated-at="snapshot.controller.updatedAt"
+      />
+    </div>
+    <article
+      v-if="monitorValues.length"
+      class="panel monitor-panel"
+    >
       <div>
-        <p class="eyebrow">Telemetry</p>
-        <h3>Active monitors</h3>
+        <p class="eyebrow">{{ ui.t('Telemetry') }}</p>
+        <h3>{{ ui.t('Active monitors') }}</h3>
       </div>
       <dl class="compact-list">
-        <div v-for="([key, value]) in monitorValues" :key="key"><dt>{{ key.replaceAll('_', ' ') }}</dt><dd>{{ value || '—' }}</dd></div>
+        <div
+          v-for="[key, value] in monitorValues"
+          :key="key"
+        >
+          <dt>{{ key.replaceAll('_', ' ') }}</dt>
+          <dd>{{ value || '—' }}</dd>
+        </div>
       </dl>
     </article>
     <article class="panel capability-panel">
       <div>
-        <p class="eyebrow">Server capability contract</p>
-        <h3>Detected subsystems</h3>
+        <p class="eyebrow">{{ ui.t('Server capability contract') }}</p>
+        <h3>{{ ui.t('Detected subsystems') }}</h3>
       </div>
       <div class="chip-row">
-        <span v-if="capabilities.mount">Mount</span>
-        <span v-if="capabilities.rotator">Rotator</span>
-        <span v-if="capabilities.focuserCount">Focusers × {{ capabilities.focuserCount }}</span>
-        <span v-if="capabilities.auxiliary">Auxiliary</span>
-        <span v-if="capabilities.encoders">Encoders</span>
-        <span v-if="!capabilities.mount && !capabilities.rotator && !capabilities.focuserCount">Read-only</span>
+        <span v-if="capabilities.mount">{{ ui.t('Mount') }}</span>
+        <span v-if="capabilities.rotator">{{ ui.t('Rotator') }}</span>
+        <span v-if="capabilities.focuserCount"
+          >{{ ui.t('Focusers ×') }} {{ capabilities.focuserCount }}</span
+        >
+        <span v-if="capabilities.auxiliary">{{ ui.t('Auxiliary') }}</span>
+        <span v-if="capabilities.encoders">{{ ui.t('Encoders') }}</span>
+        <span v-if="!capabilities.mount && !capabilities.rotator && !capabilities.focuserCount">{{
+          ui.t('Read-only')
+        }}</span>
       </div>
     </article>
   </section>

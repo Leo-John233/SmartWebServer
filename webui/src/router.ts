@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import SettingsView from './views/SettingsView.vue'
 import OverviewView from './views/OverviewView.vue'
 import MountView from './views/MountView.vue'
 import RotatorView from './views/RotatorView.vue'
@@ -10,7 +11,9 @@ import NetworkView from './views/NetworkView.vue'
 export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
-    { path: '/', name: 'overview', component: OverviewView },
+    { path: '/settings', name: 'settings', component: SettingsView },
+    { path: '/', redirect: '/mount' },
+    { path: '/overview', name: 'overview', component: OverviewView },
     { path: '/mount', name: 'mount', component: MountView },
     { path: '/rotator', name: 'rotator', component: RotatorView },
     { path: '/focuser', name: 'focuser', component: FocuserView },

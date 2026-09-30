@@ -57,7 +57,7 @@ async function save(): Promise<void> {
 }
 
 function reboot(): void {
-  if (window.confirm('Restart the web server now?')) void submit({ action: 'reboot' })
+  if (window.confirm(ui.t('Restart the web server now?'))) void submit({ action: 'reboot' })
 }
 
 onMounted(() => void load())
@@ -65,13 +65,146 @@ onMounted(() => void load())
 
 <template>
   <section>
-    <div class="section-heading"><div><p class="eyebrow">{{ ui.t('Network') }}</p><h2>{{ ui.t('Connectivity') }}</h2></div><a class="legacy-link" href="/net.htm">{{ ui.t('Legacy UI') }} ↗</a></div>
-    <div v-if="error" class="error-banner" role="alert">{{ error }}</div>
-    <article v-if="network && !network.authenticated" class="panel login-panel"><div><p class="eyebrow">Protected settings</p><h3>Administrator login</h3></div><label class="field"><span>Password</span><input v-model="password" type="password" autocomplete="current-password"></label><button :disabled="saving || !password" @click="login">Log in</button></article>
-    <div v-else-if="network" class="network-grid">
-      <article class="panel control-body always-visible"><div class="panel-title"><div><p class="eyebrow">Station</p><h3>Join a network</h3></div><span class="status-text">{{ network.station.ip }}</span></div><label class="check-field"><input v-model="network.station.enabled" type="checkbox"> Enabled</label><label class="field"><span>SSID</span><input v-model="network.station.ssid" autocomplete="off"></label><label class="field"><span>New password</span><input v-model="stationPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep"></label><label class="check-field"><input v-model="network.station.dhcp" type="checkbox"> Use DHCP</label></article>
-      <article class="panel control-body always-visible"><div class="panel-title"><div><p class="eyebrow">Access point</p><h3>Device hotspot</h3></div><span class="status-text">{{ network.accessPoint.ip }}</span></div><label class="check-field"><input v-model="network.accessPoint.enabled" type="checkbox"> Enabled</label><label class="field"><span>SSID</span><input v-model="network.accessPoint.ssid" autocomplete="off"></label><label class="field"><span>New password</span><input v-model="accessPointPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep"></label><label class="field"><span>Channel</span><input v-model.number="network.accessPoint.channel" type="number" min="1" max="14"></label></article>
-      <div class="network-actions"><p v-if="network.restartRequired" class="read-only-note">A restart is required to apply changes</p><div class="button-row"><button class="primary-button" :disabled="saving" @click="save">{{ ui.t('Save settings') }}</button><button class="danger-button" :disabled="saving" @click="reboot">Restart</button><button :disabled="saving" @click="submit({ action: 'logout' })">Log out</button></div></div>
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">{{ ui.t('Network') }}</p>
+        <h2>{{ ui.t('Connectivity') }}</h2>
+      </div>
+      <a
+        class="legacy-link"
+        href="/net.htm"
+        >{{ ui.t('Legacy UI') }} ↗</a
+      >
+    </div>
+    <div
+      v-if="error"
+      class="error-banner"
+      role="alert"
+    >
+      {{ error }}
+    </div>
+    <article
+      v-if="network && !network.authenticated"
+      class="panel login-panel"
+    >
+      <div>
+        <p class="eyebrow">{{ ui.t('Protected settings') }}</p>
+        <h3>{{ ui.t('Administrator login') }}</h3>
+      </div>
+      <label class="field"
+        ><span>{{ ui.t('Password') }}</span
+        ><input
+          v-model="password"
+          type="password"
+          autocomplete="current-password" /></label
+      ><button
+        :disabled="saving || !password"
+        @click="login"
+      >
+        {{ ui.t('Log in') }}
+      </button>
+    </article>
+    <div
+      v-else-if="network"
+      class="network-grid"
+    >
+      <article class="panel control-body always-visible">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow">{{ ui.t('Station') }}</p>
+            <h3>{{ ui.t('Join a network') }}</h3>
+          </div>
+          <span class="status-text">{{ network.station.ip }}</span>
+        </div>
+        <label class="check-field"
+          ><input
+            v-model="network.station.enabled"
+            type="checkbox"
+          />
+          {{ ui.t('Enabled') }}</label
+        ><label class="field"
+          ><span>SSID</span
+          ><input
+            v-model="network.station.ssid"
+            autocomplete="off" /></label
+        ><label class="field"
+          ><span>{{ ui.t('New password') }}</span
+          ><input
+            v-model="stationPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Leave blank to keep" /></label
+        ><label class="check-field"
+          ><input
+            v-model="network.station.dhcp"
+            type="checkbox"
+          />
+          {{ ui.t('Use DHCP') }}</label
+        >
+      </article>
+      <article class="panel control-body always-visible">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow">{{ ui.t('Access point') }}</p>
+            <h3>{{ ui.t('Device hotspot') }}</h3>
+          </div>
+          <span class="status-text">{{ network.accessPoint.ip }}</span>
+        </div>
+        <label class="check-field"
+          ><input
+            v-model="network.accessPoint.enabled"
+            type="checkbox"
+          />
+          {{ ui.t('Enabled') }}</label
+        ><label class="field"
+          ><span>SSID</span
+          ><input
+            v-model="network.accessPoint.ssid"
+            autocomplete="off" /></label
+        ><label class="field"
+          ><span>{{ ui.t('New password') }}</span
+          ><input
+            v-model="accessPointPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Leave blank to keep" /></label
+        ><label class="field"
+          ><span>{{ ui.t('Channel') }}</span
+          ><input
+            v-model.number="network.accessPoint.channel"
+            type="number"
+            min="1"
+            max="14"
+        /></label>
+      </article>
+      <div class="network-actions">
+        <p
+          v-if="network.restartRequired"
+          class="read-only-note"
+        >
+          {{ ui.t('A restart is required to apply changes') }}
+        </p>
+        <div class="button-row">
+          <button
+            class="primary-button"
+            :disabled="saving"
+            @click="save"
+          >
+            {{ ui.t('Save settings') }}</button
+          ><button
+            class="danger-button"
+            :disabled="saving"
+            @click="reboot"
+          >
+            {{ ui.t('Restart') }}</button
+          ><button
+            :disabled="saving"
+            @click="submit({ action: 'logout' })"
+          >
+            {{ ui.t('Log out') }}
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 </template>

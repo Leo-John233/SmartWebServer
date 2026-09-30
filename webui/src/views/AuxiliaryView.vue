@@ -1,38 +1,103 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { DeviceAction } from '../api/deviceActions'
 import type { DeviceSnapshot } from '../domain/device'
+import { parseAuxiliaryControls, type AuxiliaryFeature } from '../protocol/auxiliaryControls'
 import { useUiLocale } from '../i18n'
-
-const props = defineProps<{ snapshot: DeviceSnapshot | null; actionsAllowed: boolean; actionPending: boolean }>()
+const props = defineProps<{
+  snapshot: DeviceSnapshot | null
+  actionsAllowed: boolean
+  actionPending: boolean
+}>()
 const emit = defineEmits<{ action: [action: DeviceAction] }>()
-const values = computed(() => props.snapshot?.values ?? {})
-const selected = computed(() => props.snapshot?.selected ?? {})
-const locked = computed(() => !props.actionsAllowed || props.actionPending)
-const settings = ref(Array.from({ length: 8 }, () => 0))
 const ui = useUiLocale()
-
-const activeFeatures = computed(() => Array.from({ length: 8 }, (_, index) => index + 1).filter((feature) =>
-  Object.keys(values.value).some((key) => key.startsWith(`x${feature}v`) || key === `vout${feature}` || key === `iout${feature}`)
-  || Object.keys(selected.value).some((key) => key.startsWith(`sw${feature}_`))))
-
-function setFeature(feature: number, setting: number): void {
-  settings.value[feature - 1] = setting
-  emit('action', { type: 'auxiliary.value', feature, value: 1, setting })
+const features = ref<AuxiliaryFeature[]>([])
+const error = ref('')
+const locked = computed(() => !props.actionsAllowed || props.actionPending)
+async function load(): Promise<void> {
+  try {
+    const response = await fetch('/auxiliary.htm')
+    if (!response.ok) throw new Error()
+    features.value = parseAuxiliaryControls(await response.text())
+    error.value = ''
+  } catch {
+    error.value = 'Unable to load device settings'
+  }
 }
+function setValue(feature: number, value: 1 | 2 | 3 | 4, setting: number): void {
+  emit('action', { type: 'auxiliary.value', feature, value, setting })
+}
+onMounted(load)
 </script>
-
 <template>
   <section>
-    <div class="section-heading"><div><p class="eyebrow">{{ ui.t('Auxiliary') }}</p><h2>{{ ui.t('Power & accessories') }}</h2></div><span class="live-dot">{{ activeFeatures.length }} active channels</span></div>
-    <div v-if="activeFeatures.length" class="feature-grid">
-      <article v-for="feature in activeFeatures" :key="feature" class="panel feature-card">
-        <div class="panel-title"><div><p class="eyebrow">Channel {{ feature }}</p><h3>Feature {{ feature }}</h3></div><span class="status-text">{{ values[`vout${feature}`] ? `${values[`vout${feature}`]} V` : '' }} {{ values[`iout${feature}`] ? `· ${values[`iout${feature}`]} A` : '' }}</span></div>
-        <div class="segmented compact"><button :class="{ selected: selected[`sw${feature}_on`] }" :disabled="locked" @click="setFeature(feature, 255)">On</button><button :class="{ selected: selected[`sw${feature}_off`] }" :disabled="locked" @click="setFeature(feature, 0)">Off</button></div>
-        <label class="range-field"><span>Output {{ values[`x${feature}v1`] || settings[feature - 1] }}</span><input v-model.number="settings[feature - 1]" :disabled="locked" type="range" min="0" max="255" @change="setFeature(feature, settings[feature - 1])"></label>
-        <dl class="compact-list"><div v-for="value in [2, 3, 4]" :key="value"><dt>Value {{ value }}</dt><dd>{{ values[`x${feature}v${value}`] || '—' }}</dd></div></dl>
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">{{ ui.t('Auxiliary') }}</p>
+        <h2>{{ ui.t('Power & accessories') }}</h2>
+      </div>
+      <button @click="load">{{ ui.t('Refresh') }}</button>
+    </div>
+    <p
+      v-if="error"
+      role="alert"
+    >
+      {{ ui.t(error) }}
+    </p>
+    <div class="feature-grid">
+      <article
+        v-for="feature in features"
+        :key="feature.id"
+        class="panel feature-card"
+      >
+        <div>
+          <p class="eyebrow">{{ ui.t('Channel') }} {{ feature.id }}</p>
+          <h3>{{ ui.t(feature.name.replace(/:$/, '')) }}</h3>
+        </div>
+        <div class="button-row">
+          <button
+            v-for="button in feature.switches"
+            :key="button.value"
+            :disabled="locked"
+            :class="{
+              selected: snapshot?.selected['sw' + feature.id + (button.value ? '_on' : '_off')],
+            }"
+            @click="setValue(feature.id, 1, button.value)"
+          >
+            {{ ui.t(button.label) }}
+          </button>
+        </div>
+        <label
+          v-for="control in feature.controls"
+          :key="control.key"
+          class="range-field"
+          ><span
+            >{{ ui.t(control.label) }} · {{ snapshot?.values[control.key] ?? control.value }}</span
+          ><input
+            v-model.number="control.value"
+            type="range"
+            :min="control.min"
+            :max="control.max"
+            :disabled="locked"
+            @change="
+              setValue(feature.id, Number(control.key.slice(-1)) as 1 | 2 | 3 | 4, control.value)
+            "
+        /></label>
+        <dl class="compact-list">
+          <div
+            v-for="key in ['vout' + feature.id, 'iout' + feature.id, 'x' + feature.id + 'v4']"
+            :key="key"
+          >
+            <template v-if="snapshot?.values[key]"
+              ><dt>
+                {{ key.startsWith('vout') ? 'V' : key.startsWith('iout') ? 'A' : ui.t('Feedback') }}
+              </dt>
+              <dd>{{ snapshot.values[key] }}</dd></template
+            >
+          </div>
+        </dl>
       </article>
     </div>
-    <article v-else class="panel empty-state"><h3>No active auxiliary features</h3><p>The controller did not report any configured channels</p></article>
+    <p v-if="!features.length && !error">{{ ui.t('No active auxiliary features') }}</p>
   </section>
 </template>
