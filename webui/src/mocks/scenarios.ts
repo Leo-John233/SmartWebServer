@@ -58,7 +58,11 @@ function controllerText(message = ''): string {
     'fw_name|Smart Web Server',
     'fw_ver&2.10h',
     'workload|18%',
-    'weather|12.4 °C / 42%',
+    'tphd_m|38.0 °C',
+    'tphd_t|12.4 °C',
+    'tphd_h|42%',
+    'tphd_p|1013 hPa',
+    'tphd_d|0.0 °C',
     'axis_summary|Axis 1 ready · Axis 2 ready',
     `message|${message}`,
   ].join('\n')

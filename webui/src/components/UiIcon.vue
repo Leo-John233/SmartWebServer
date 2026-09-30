@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import {
-  Telescope,
+  Cpu,
+  Orbit,
   Settings,
   SlidersHorizontal,
   RotateCw,
@@ -13,7 +14,8 @@ import {
 const props = defineProps<{ name: string }>()
 // 统一使用同一套图标，按需引入以控制固件资源体积
 const icons = {
-  telescope: Telescope,
+  telescope: Cpu,
+  orbit: Orbit,
   settings: Settings,
   control: SlidersHorizontal,
   rotate: RotateCw,
@@ -22,7 +24,7 @@ const icons = {
   encoder: Crosshair,
   network: Wifi,
 }
-const icon = computed(() => icons[props.name as keyof typeof icons] ?? Telescope)
+const icon = computed(() => icons[props.name as keyof typeof icons] ?? Cpu)
 </script>
 <template>
   <component

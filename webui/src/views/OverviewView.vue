@@ -8,10 +8,20 @@ const props = defineProps<{ snapshot: DeviceSnapshot | null; capabilities: Capab
 const state = computed(() => props.snapshot?.controller ?? null)
 const monitorValues = computed(() =>
   Object.entries(props.snapshot?.values ?? {}).filter(([key]) =>
-    /^(?:dvr_stat|svo|sg|units|servo|stall|tphd_|signal|last_err)/.test(key),
+    /^(?:dvr_stat|svo|sg|units|servo|stall|signal|last_err)/.test(key),
   ),
 )
 const ui = useUiLocale()
+const monitorLabels: Record<string, string> = {
+  svoD: 'Servo error',
+  svoP: 'Servo output (%)',
+  units: 'Measurement unit',
+  sgV: 'StallGuard value',
+  sgT: 'Trigger threshold',
+  sgS: 'StallGuard state',
+  sgA: 'StallGuard axis',
+  sgB: 'Fault duration (ms)',
+}
 </script>
 
 <template>
@@ -21,7 +31,7 @@ const ui = useUiLocale()
         <p class="eyebrow">{{ ui.t('Controller') }}</p>
         <h2>{{ ui.t('Controller overview') }}</h2>
       </div>
-      <span class="live-dot">{{ ui.t('Live ·') }} {{ state?.activity ?? 'connecting' }}</span>
+      <span class="live-dot">{{ ui.t('Live ·') }} {{ ui.t(state?.activity ?? 'connecting') }}</span>
     </div>
     <div class="metric-grid">
       <article class="metric-card">
@@ -32,12 +42,12 @@ const ui = useUiLocale()
       <article class="metric-card">
         <span>{{ ui.t('Workload') }}</span>
         <strong>{{ state?.workload || snapshot?.values.work_load || '—' }}</strong>
-        <small>{{ ui.t('ESP web workload') }}</small>
+        <small>{{ ui.t('Controller workload') }}</small>
       </article>
       <article class="metric-card">
-        <span>{{ ui.t('Weather') }}</span>
-        <strong>{{ state?.weather || snapshot?.values.tphd_t || '—' }}</strong>
-        <small>{{ ui.t('Ambient telemetry') }}</small>
+        <span>{{ ui.t('Controller temperature') }}</span>
+        <strong>{{ snapshot?.values.tphd_m || '—' }}</strong>
+        <small>{{ ui.t('Internal MCU sensor') }}</small>
       </article>
       <article class="metric-card">
         <span>{{ ui.t('Axes') }}</span>
@@ -45,6 +55,30 @@ const ui = useUiLocale()
         <small>{{ state?.axisSummary || 'No axis data' }}</small>
       </article>
     </div>
+    <article
+      v-if="
+        ['tphd_t', 'tphd_h', 'tphd_p', 'tphd_d'].some(
+          (key) => snapshot?.values[key] && snapshot.values[key] !== '?',
+        )
+      "
+      class="panel environment-panel"
+    >
+      <h3>{{ ui.t('Observing conditions') }}</h3>
+      <dl class="environment-values">
+        <div
+          v-for="[key, label] in [
+            ['tphd_t', 'Ambient temperature'],
+            ['tphd_h', 'Relative humidity'],
+            ['tphd_p', 'Air pressure'],
+            ['tphd_d', 'Dew point'],
+          ]"
+          :key="key"
+        >
+          <dt>{{ ui.t(label) }}</dt>
+          <dd>{{ snapshot?.values[key] || '—' }}</dd>
+        </div>
+      </dl>
+    </article>
     <div
       class="control-grid"
       v-if="snapshot?.values.svoD !== undefined || snapshot?.values.sgV !== undefined"
@@ -53,13 +87,15 @@ const ui = useUiLocale()
         v-if="snapshot?.values.svoD !== undefined"
         :label="ui.t('Servo error')"
         :value="snapshot.values.svoD"
-        :unit="snapshot.values.units"
+        :unit="ui.t(snapshot.values.units || '')"
         :updated-at="snapshot.controller.updatedAt"
       />
       <TelemetryTrace
         v-if="snapshot?.values.sgV !== undefined"
         :label="ui.t('StallGuard')"
         :value="snapshot.values.sgV"
+        range="stallguard"
+        :threshold="snapshot.values.sgT"
         :updated-at="snapshot.controller.updatedAt"
       />
     </div>
@@ -76,8 +112,8 @@ const ui = useUiLocale()
           v-for="[key, value] in monitorValues"
           :key="key"
         >
-          <dt>{{ key.replaceAll('_', ' ') }}</dt>
-          <dd>{{ value || '—' }}</dd>
+          <dt>{{ ui.t(monitorLabels[key] || key.replaceAll('_', ' ')) }}</dt>
+          <dd>{{ ui.t(value || '—') }}</dd>
         </div>
       </dl>
     </article>
