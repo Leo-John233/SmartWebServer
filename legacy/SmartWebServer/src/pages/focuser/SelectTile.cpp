@@ -4,14 +4,13 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void focuserSelectTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", "Select");
+  sprintf_P(temp, html_tile_beg, "22em", "13em", "Select");
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 
@@ -24,7 +23,7 @@ void focuserSelectTile(String &data)
     data.concat(L_FOCUSER " " L_INACTIVE);
   } else
   {
-    snprintf(temp, sizeof(temp), L_FOCUSER "%d " L_SELECTED, state.focuserSelected);
+    sprintf(temp, L_FOCUSER "%d " L_SELECTED, state.focuserSelected);
     data.concat(temp);
   }
   data.concat(F("</span></big><br /><br />"));
@@ -54,7 +53,7 @@ void focuserSelectTileAjax(String &data)
     data.concat(keyValueString("foc_sel", L_INACTIVE));
   else
   {
-    snprintf(temp, sizeof(temp), L_FOCUSER "%d " L_SELECTED, state.focuserSelected);
+    sprintf(temp, L_FOCUSER "%d " L_SELECTED, state.focuserSelected);
     data.concat(keyValueString("foc_sel", temp));
   }
   data.concat(keyValueBoolSelected("foc1_sel", state.focuserSelected == 1));
@@ -69,6 +68,16 @@ void focuserSelectTileAjax(String &data)
 // pass related data back to OnStep
 extern void focuserSelectTileGet()
 {
-  String value = www.arg("dr");
-  if (!value.equals(EmptyStr)) performFocuserAction("dr", value);
+  String v;
+
+  v = www.arg("dr");
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("F1")) { onStep.commandBool(":FA1#"); state.focuserSelected = 1; }
+    if (v.equals("F2")) { onStep.commandBool(":FA2#"); state.focuserSelected = 2; }
+    if (v.equals("F3")) { onStep.commandBool(":FA3#"); state.focuserSelected = 3; }
+    if (v.equals("F4")) { onStep.commandBool(":FA4#"); state.focuserSelected = 4; }
+    if (v.equals("F5")) { onStep.commandBool(":FA5#"); state.focuserSelected = 5; }
+    if (v.equals("F6")) { onStep.commandBool(":FA6#"); state.focuserSelected = 6; }
+  }
 }

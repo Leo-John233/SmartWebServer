@@ -4,14 +4,13 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void deRotatorTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_DEROTATOR);
+  sprintf_P(temp, html_tile_beg, "22em", "13em", L_DEROTATOR);
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 
@@ -37,6 +36,14 @@ void deRotatorTileAjax(String &data)
 // pass related data back to OnStep
 extern void deRotatorTileGet()
 {
-  String value = www.arg("rot");
-  if (!value.equals(EmptyStr)) performRotatorAction("rot", value);
+  String v;
+  v = www.arg("rot");
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("off")) onStep.commandBlind(":r-#"); // disable derotator
+    if (v.equals("on"))  onStep.commandBlind(":r+#"); // enable derotator
+    if (v.equals("rev")) onStep.commandBlind(":rR#"); // reverse rotator
+    if (v.equals("par")) onStep.commandBlind(":rP#"); // move rotator to parallactic angle
+  }
+
 }

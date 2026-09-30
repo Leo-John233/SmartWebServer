@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Locale Spanish, ISO ISO639-1 language code "es"
+// Locale English (default,) ISO ISO639-1 language code "en"
 #pragma once
 
 // General
@@ -26,13 +26,10 @@
 #define L_OK "Ok"
 #define L_ON "On"
 #define L_OFF "Off"
-#define L_VISIT "Visitar"
-#define L_PAUSE "Pausa"
 #define L_START "Iniciar"
 #define L_DELTA "Delta"
-#define L_DP_MSG  "Rel."
-#define L_DP_ZERO "Máx. pot. bajo"
-#define L_DP_SPAN "Apaga sobre"
+#define L_ZERO "Zero"
+#define L_SPAN "Span"
 #define L_POWER "Pwr"
 #define L_GUIDE "Guiar"
 #define L_CENTER "Centrar"
@@ -121,7 +118,6 @@
 #define L_DRIVER_FAULT "Falla"
 
 // misc. errors/workload
-#define L_HARDWARE "Hardware"
 #define L_INTERNAL_TEMP "Temperatura interna del controlador"
 #define L_LAST_GENERAL_ERROR "Último error"
 #define L_WORKLOAD "Carga de trabajo"
@@ -178,7 +174,7 @@
 #define L_HINT_CLOCK "Establecer fecha/hora"
 #define L_HINT_CONTINUE_GOTO "Continuar GoTo (cuando está en pausa en posición de Inicio)"
 #define L_HOME_PARK_TITLE "Localización y Posición de Inicio"
-#define L_RETURN_HOME "Buscar Posición de Inicio"
+#define L_FIND_HOME "Buscar Posición de Inicio"
 #define L_RESET_HOME "Posición de Inicio (Resetear)"
 #define L_UNPARK "Desestacionar"
 #define L_PARK "Estacionar"
@@ -280,7 +276,6 @@
 #define L_PEC_RECORDING "Grabando"
 #define L_PEC_UNK "Desconocido"
 #define L_PEC_EEWRITING "escribir en EEPROM"
-#define L_PEC_STEPS_PER_WORM_ROTATION "Pasos por rotación"
 
 // --------------------------- Settings --------------------------
 
@@ -293,9 +288,6 @@
 #define L_PARK "Estacionar"
 #define L_SET_PARK "Colocar en Posición de Estacionamiento"
 #define L_SET_PARK_CURRENT_COORDS "Establecer la posición de estacionamiento en las coordenadas actuales"
-#define L_COORD_ORIGIN_TITLE "Origen de Coordenadas"
-#define L_COORD_ORIGIN "Establecer Origen de Coordenadas"
-#define L_COORD_ORIGIN_MSG "En la posicion de inicio y con el seguimiento apagado, establece el origen fisico/de coordenadas usado por los limites de sincronizacion."
 
 #define L_TRK_FASTER "más rápido"
 #define L_TRK_SLOWER "más lento"
@@ -311,7 +303,6 @@
 #define L_MERIDIAN_FLIP_AUTO "Volteo de meridiano automático en el límite"
 #define L_MERIDIAN_FLIP_NOW "Ahora"
 #define L_MERIDIAN_FLIP_PAUSE "Volteo de Meridiano, Pausa en Posicion de Inicio"
-#define L_MERIDIAN_FLIP_HOMING "Volteo de meridiano, posicion de inicio"
 #define L_MERIDIAN_FLIP_PPS "Volteo de Meridiano, lado del muelle preferido"
 
 #define L_ORIENTATION_AUTO "Cambio de orientación"
@@ -361,47 +352,32 @@
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Opuesto del valor de zona horaria, esto es para la hora estándar (no para la hora de verano)."
 
 // advanced configuration
-#define L_AXPN_STEPS_PER_DEG "Pasos/grado"
-#define L_AXPN_LIMIT_DEGS_MIN "Límite mín, grados"
-#define L_AXPN_LIMIT_DEGS_MAX "Límite máx, grados"
-#define L_AXPN_STEPS_PER_UM "Pasos/µm"
-#define L_AXPN_LIMIT_UM_MIN "Límite mín, µm"
-#define L_AXPN_LIMIT_UM_MAX "Límite máx, µm"
-#define L_AXPN_REVERSE "Reversa"
-#define L_AXPN_MICROSTEPS "Microsteps"
-#define L_AXPN_MICROSTEPS_GOTO "Microsteps girando"
-#define L_AXPN_DECAY_MODE "Modo"
-#define L_AXPN_DECAY_MODE_GOTO "Modo girando"
-#define L_AXPN_CURRENT_HOLD "mA Mantener"
-#define L_AXPN_CURRENT_RUN "mA Correr"
-#define L_AXPN_CURRENT_GOTO "mA girando"
-#define L_AXPN_INTERPOLATE "256x Interpolación"
-#define L_AXPN_PID_P "P rastreo"
-#define L_AXPN_PID_I "I rastreo"
-#define L_AXPN_PID_D "D rastreo"
-#define L_AXPN_PID_SLEWING_P "P girando"
-#define L_AXPN_PID_SLEWING_I "I girando"
-#define L_AXPN_PID_SLEWING_D "D girando"
-#define L_AXPN_RADS_PER_COUNT "Radianes/conteo"
-#define L_AXPN_STEPS_TO_COUNTS "Pasos/contar"
-#define L_AXPN_MAX_ACCEL "Max acelerar, %/s/s"
-#define L_AXPN_MIN_PWR "Min fuerza, %"
-#define L_AXPN_MAX_PWR "Max fuerza, %"
-
-#define L_ADV_DECAY_SLOW "Lento"
-#define L_ADV_DECAY_FAST "Rápido"
-#define L_ADV_DECAY_MIXED "Mixto"
-#define L_ADV_DECAY_SPREADCYCLE "SpreadCycle"
-#define L_ADV_DECAY_STEALTHCHOP "StealthChop"
-
-#define L_ADV_MOTOR "Motor"
 #define L_REVERT "Volver a los valores predeterminados"
 #define L_ADV_SET_TITLE "Avanzado"
 #define L_ADV_SET_HEADER_MSG "los cambios a continuación surten efecto después de reiniciar OnStep:"
 #define L_ADV_MOUNT_TYPE "Seleccione 1 GEM, 2 EQ o 3 para Alt/Azm"
 #define L_ADV_BOOL "0 falso O 1 verdadero"
 
+#define L_ADV_SET_SPWR "Pasos por rotación del engranaje"
+#define L_ADV_SET_SPD "Pasos por grado"
+#define L_ADV_SET_SPM "Pasos por micrón"
 #define L_ADV_SET_REV "Invertir dirección"
+#define L_ADV_SET_MIN "Posición Mínima"
+#define L_ADV_SET_MAX "Posición Máxima"
+
+#define L_ADV_SET_SPECIAL "Step/Dir Driver:<br /><br />Un valor de -1 es equivalente a Config.h OFF. <i>¡Ten cuidado con estos!</i>"
+#define L_ADV_SET_IMMEDIATE "Servo Driver:<br /><br />Los ajustes surten efecto inmediatamente, no es necesario reiniciar. <i>¡Ten cuidado con estos!</i>"
+#define L_ADV_SET_TRAK_us "Micropasos"
+#define L_ADV_SET_GOTO_us "Micropasos en GoTo"
+#define L_ADV_SET_HOLD_ma "Corriente en Retención en mA"
+#define L_ADV_SET_TRAK_ma "Corriente en Seguimiento en mA"
+#define L_ADV_SET_SLEW_ma "Corriente en Giro en mA"
+#define L_ADV_SET_P "Proporcional de Seguimiento"
+#define L_ADV_SET_I "Integral de Seguimiento"
+#define L_ADV_SET_D "Derivativo de Seguimiento"
+#define L_ADV_SET_P_GOTO "Proporcional de GoTo"
+#define L_ADV_SET_I_GOTO "Integral de GoTo"
+#define L_ADV_SET_D_GOTO "Derivativo de GoTo"
 
 #define L_ADV_ENABLE "Activar Configuración Avanzada"
 #define L_ADV_DISABLE "Desactivar Configuración Avanzada (Valores por defecto al reiniciar)"
@@ -410,6 +386,7 @@
 #define L_ADV_SET_FOOTER_MSG0 "La mayoría de los cambios en la configuración de los ejes requieren un reinicio para que surtan efecto."
 #define L_ADV_SET_FOOTER_MSG1 "Después de presionar [Cargar], tome nota de los cambios anteriores, ya que la carga puede haber sido rechazada debido a un parámetro no válido."
 #define L_ADV_SET_FOOTER_MSG2 "Cuando elige [Revertir], ese grupo deja de estar disponible para editar hasta que reinicia OnStep."
+#define L_ADV_SET_FOOTER_MSG3 "Si IRUN se establece en un valor diferente al predeterminado de Config.h, IHOLD se establece en(HALF.)"
 #define L_ADV_SET_FOOTER_MSG4 "Cambiar la relación de Pasos de Axis1 por rotación de engranajes y Pasos por grado puede dañar el área de memoria de Library NV, primero haga una copia de seguridad de los catálogos si es necesario."
 
 // reset control
@@ -429,7 +406,7 @@
 #define L_NETWORK_PWD "Contraseña"
 #define L_NETWORK_PWD_MSG "8 caracteres mínimo."
 #define L_NETWORK_EN_DHCP "Habilitar DHCP"
-#define L_NETWORK_EN_DHCP_MSG "Si DHCP esta activo, se ignoran IPs"
+#define L_NETWORK_EN_DHCP_MSG "Nota: las direcciones anteriores se ignoran si DHCP está habilitado"
 #define L_NETWORK_EN_STA "Habilitar modo de estación"
 #define L_IP_ADDRESS "Dirección IP"
 #define L_GATEWAY "Puerta de enlace"
@@ -437,13 +414,9 @@
 #define L_NETWORK_CHA "Canal"
 #define L_NETWORK_EN_AP_MODE "Habilitar modo de punto de acceso"
 
-#define L_NETWORK_OTA_TITLE "Actualización de firmware OTA SWS"
-#define L_NETWORK_EN_OTA "Activar modo OTA"
-#define L_REBOOT_OTA "Reiniciar en modo OTA"
-
 #define L_NETWORK_CONFIG_SECURITY "Configuración de Seguridad de red"
 
-#define L_NETWORK_AP "Modo de punto de acceso (auto si el modo Estación no conecta)"
+#define L_NETWORK_AP "Modo de punto de acceso"
 
 #define L_NETWORK_RESTART_MSG "Debes <u>manualmente</u> reiniciar para que los cambios surtan efecto."
 

@@ -9,8 +9,10 @@
 #include <TimeLib.h> // https://github.com/PaulStoffregen/Time/archive/master.zip
 
 #if OPERATIONAL_MODE == WIFI
+  #include <WiFiUdp.h>
   WiFiUDP Udp;
 #else
+  #include <EthernetUdp.h>
   EthernetUDP Udp;
 #endif
 
@@ -81,14 +83,14 @@ void TlsNTP::poll() {
   Udp.begin(localPort);
 
   // discard any previously received packets
-  unsigned long tOut = millis() + 3000U;
+  unsigned long tOut = millis() + 3000L;
   while ((Udp.parsePacket() > 0) && ((long)(millis() - tOut) < 0)) Y;
 
   VLF("MSG: TLS, transmit NTP Request");
   sendNTPpacket(timeServer);
 
-  unsigned long beginWait = millis();
-  while (millis() - beginWait < 1500U) {
+  uint32_t beginWait = millis();
+  while (millis() - beginWait < 1500) {
     int size = Udp.parsePacket();
     if (size >= NTP_PACKET_SIZE) {
       VLF("MSG: TLS, receive NTP Response");

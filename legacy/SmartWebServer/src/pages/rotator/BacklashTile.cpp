@@ -4,7 +4,6 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void rotatorBacklashTile(String &data)
@@ -15,22 +14,22 @@ void rotatorBacklashTile(String &data)
   if (!onStep.command(":rb#", temp1)) strcpy(temp1, "0");
   int backlash = atoi(temp1);
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "13em", "Backlash");
+  sprintf_P(temp, html_tile_text_beg, "22em", "13em", "Backlash");
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 
-  snprintf_P(temp, sizeof(temp), html_backlashValue, backlash);
+  sprintf_P(temp, html_backlashValue, backlash);
   data.concat(temp);
 
   data.concat(F("<hr>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
+  sprintf_P(temp, html_collapsable_beg, L_SETTINGS "...");
   data.concat(temp);
 
-  snprintf_P(temp, sizeof(temp), html_form_begin, "rotator.htm");
+  sprintf_P(temp, html_form_begin, "rotator.htm");
   data.concat(temp);
 
-  snprintf_P(temp, sizeof(temp), html_configBlAxis3, backlash);
+  sprintf_P(temp, html_configBlAxis3, backlash);
   data.concat(temp);
   data.concat(F("<button type='submit'>" L_UPLOAD "</button>\n"));
 
@@ -52,6 +51,15 @@ void rotatorBacklashTileAjax(String &data)
 // pass related data back to OnStep
 extern void rotatorBacklashTileGet()
 {
-  String value = www.arg("b3");
-  if (!value.equals(EmptyStr)) performRotatorAction("b3", value);
+  String v;
+  char temp[32] = "";
+
+  v = www.arg("b3");
+  if (!v.equals(EmptyStr)) {
+    if (v.toInt() >= 0 && v.toInt() <= 32767) { 
+      sprintf(temp, ":rb%d#", (int16_t)v.toInt());
+      onStep.commandBool(temp);
+    }
+  }
+
 }

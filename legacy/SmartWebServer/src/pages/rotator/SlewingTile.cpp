@@ -4,17 +4,16 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void rotatorSlewingTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_SLEWING);
+  sprintf_P(temp, html_tile_beg, "22em", "13em", L_SLEWING);
   data.concat(temp);
   data.concat(F("<div style='float: right; text-align: right;' id='rot_sta' class='c'>"));
-  if (state.rotatorSlewing) data.concat(L_ACTIVE); else data.concat(L_INACTIVE);
+  if (state.focuserSlewing) data.concat(L_ACTIVE); else data.concat(L_INACTIVE);
   data.concat(F("</div><br /><hr>"));
 
   data.concat(L_CURRENT ": <span id='rotatorpos' class='c'>");
@@ -23,22 +22,17 @@ void rotatorSlewingTile(String &data)
 
   data.concat(FPSTR(html_rotPosition));
   data.concat(FPSTR(html_rotStop));
-  www.sendContentAndClear(data);
 
-  data.concat(FPSTR(html_script_motion_controls_1));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_script_motion_controls_2));
-  www.sendContentAndClear(data);
   data.concat(FPSTR(html_rotateCcw));
   data.concat(FPSTR(html_rotateCw));
 
   data.concat(F("<hr>"));
 
   if (status.getVersionMajor() >= 10) {
-    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
+    sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
     data.concat(temp);
 
-    snprintf_P(temp, sizeof(temp), html_rotateSlewSpeed, state.rotateSlewSpeedStr);
+    sprintf_P(temp, html_rotateSlewSpeed, state.rotateSlewSpeedStr);
     data.concat(temp);
     data.concat(FPSTR(html_rotateGotoSelect));
 
@@ -69,8 +63,37 @@ void rotatorSlewingTileAjax(String &data)
 // pass related data back to OnStep
 extern void rotatorSlewingTileGet()
 {
-  String value = www.arg("rot");
-  if (!value.equals(EmptyStr)) performRotatorAction("rot", value);
-  value = www.arg("rs");
-  if (!value.equals(EmptyStr)) performRotatorAction("rs", value);
+  String v;
+
+  // stop movement
+  v = www.arg("rot");
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("stop")) onStep.commandBlind(":rQ#");         // stop
+    if (v.equals("ccwf")) onStep.commandBlind(":r3#:rc#:r<#"); // rate 3, move ccw
+    if (v.equals("ccw"))  onStep.commandBlind(":r1#:rc#:r<#"); // rate 1, move ccw
+    if (v.equals("cw"))   onStep.commandBlind(":r1#:rc#:r>#"); // rate 1, move cw
+    if (v.equals("cwf"))  onStep.commandBlind(":r3#:rc#:r>#"); // rate 3, move cw
+
+    if (v.equals("vs"))   onStep.commandBlind(":r5#");         // goto rate very slow
+    if (v.equals("s"))    onStep.commandBlind(":r6#");         // goto rate slow
+    if (v.equals("n"))    onStep.commandBlind(":r7#");         // goto rate normal
+    if (v.equals("f"))    onStep.commandBlind(":r8#");         // goto rate fast
+    if (v.equals("vf"))   onStep.commandBlind(":r9#");         // goto rate very fast
+  }
+
+  // set position
+  v = www.arg("rs");
+  if (!v.equals(EmptyStr))
+  {
+    double f = v.toFloat();
+    if (f >= -360.0 || f <= 360.0)
+    {
+      char temp[80], temp1[40];
+      convert.doubleToDms(temp1, f, true, true, PM_HIGH);
+      sprintf(temp, ":rS%s#", temp1);
+      onStep.commandBool(temp);
+    }
+  }
+
 }

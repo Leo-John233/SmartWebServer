@@ -4,14 +4,13 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void alignTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_ALIGN);
+  sprintf_P(temp, html_tile_beg, "22em", "15em", L_ALIGN);
   data.concat(temp);
 
   data.concat(F("<div style='float: right; text-align: right;' id='align_progress' class='c'>"));
@@ -21,7 +20,7 @@ void alignTile(String &data)
   char poleName[8] = L_ZENITH;
   if (status.mountType != MT_ALTAZM) { if (state.latitude < 0) strcpy(poleName, L_SCP); else strcpy(poleName, L_NCP); }
 
-  snprintf_P(temp, sizeof(temp), html_alignCorrection, state.alignLrStr, state.alignUdStr, poleName);
+  sprintf_P(temp, html_alignCorrection, state.alignLrStr, state.alignUdStr, poleName);
   data.concat(temp);
   www.sendContentAndClear(data);
 
@@ -73,7 +72,7 @@ void alignTile(String &data)
 
   if (status.mountType != MT_ALTAZM)
   {
-    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
+    sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
     data.concat(temp);
 
     data.concat(L_REFINE_POLAR_ALIGN ":<br /><br />");
@@ -102,8 +101,26 @@ void alignTileAjax(String &data)
 // pass related data back to OnStep
 extern void alignTileGet()
 {
-  String value = www.arg("al");
-  if (!value.equals(EmptyStr)) performMountAlignAction("al", value);
-  value = www.arg("rp");
-  if (!value.equals(EmptyStr)) performMountAlignAction("rp", value);
+  String v;
+  v = www.arg("al");
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("1")) onStep.commandBool(":A1#");
+    if (v.equals("2")) onStep.commandBool(":A2#");
+    if (v.equals("3")) onStep.commandBool(":A3#");
+    if (v.equals("4")) onStep.commandBool(":A4#");
+    if (v.equals("5")) onStep.commandBool(":A5#");
+    if (v.equals("6")) onStep.commandBool(":A6#");
+    if (v.equals("7")) onStep.commandBool(":A7#");
+    if (v.equals("8")) onStep.commandBool(":A8#");
+    if (v.equals("9")) onStep.commandBool(":A9#");
+    if (v.equals("n")) onStep.commandBool(":A+#");
+    if (v.equals("q")) onStep.commandBlind(":Q#");
+  }
+  // refine polar align
+  v = www.arg("rp");
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("a")) onStep.commandBool(":MP#");
+  }
 }

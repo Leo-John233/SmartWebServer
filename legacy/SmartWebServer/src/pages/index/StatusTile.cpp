@@ -4,44 +4,34 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../lib/tasks/OnTask.h"
 
 // create the related webpage tile
 void statusTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "11em", L_STATE);
+  sprintf_P(temp, html_tile_text_beg, "22em", "11em", L_STATE);
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 
   // General status
 
-  // get hardware name
-  if (status.getVersionMajor() > 10 || (status.getVersionMajor() == 10 && status.getVersionMinor() >= 26)) {
-    if (onStep.command(":GVH#", temp)) {
-      data.concat(F(L_HARDWARE ": <span class='c'>"));
-      data.concat(temp);
-      data.concat(F("</span><br />"));
-    }
-  }
-
-  snprintf_P(temp, sizeof(temp), html_indexGeneralError, state.lastErrorStr);
+  sprintf_P(temp, html_indexGeneralError, state.lastErrorStr);
   data.concat(temp);
 
   if (status.getVersionMajor() < 10)
   {
-    snprintf_P(temp, sizeof(temp), html_indexWorkload, state.workLoadStr);
+    sprintf_P(temp, html_indexWorkload, state.workLoadStr);
     data.concat(temp);
   }
 
   #if DISPLAY_INTERNAL_TEMPERATURE == ON
-    snprintf_P(temp, sizeof(temp), html_indexTemp, L_INTERNAL_TEMP ":", 'm', state.controllerTemperatureStr);
+    sprintf_P(temp, html_indexTemp, L_INTERNAL_TEMP ":", 'm', state.controllerTemperatureStr);
     data.concat(temp);
   #endif
 
-  #if OPERATIONAL_MODE == WIFI
-    snprintf_P(temp, sizeof(temp), html_indexSignalStrength, state.signalStrengthStr);
+  #if OPERATIONAL_MODE == WIFI && DISPLAY_WIFI_SIGNAL_STRENGTH == ON
+    sprintf_P(temp, html_indexSignalStrength, state.signalStrengthStr);
     data.concat(temp);
   #endif
 
@@ -60,7 +50,7 @@ void statusTile(String &data)
 
   if (displayCollapsable)
   {
-    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
+    sprintf_P(temp, html_collapsable_beg, L_SETTINGS "...");
     data.concat(temp);
     www.sendContentAndClear(data);
   }
@@ -68,9 +58,9 @@ void statusTile(String &data)
   #if DRIVE_CONFIGURATION == ON
     if (mountType >= 1 && mountType <= 3)
     {
-      snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
+      sprintf_P(temp, html_form_begin, "index.htm");
       data.concat(temp);
-      snprintf_P(temp, sizeof(temp), html_indexMountType, mountType);
+      sprintf_P(temp, html_indexMountType, mountType);
       data.concat(temp);
       data.concat(F("<button type='submit'>" L_UPLOAD "</button> "));
       data.concat(F("<button name='revert' value='0' type='submit'>" L_REVERT "</button>\n"));
@@ -81,7 +71,7 @@ void statusTile(String &data)
 
   #if DISPLAY_RESET_CONTROLS != OFF
     if (mountType != 0) data.concat(F("<br /><hr>"));
-    snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
+    sprintf_P(temp, html_form_begin, "index.htm");
     data.concat(temp);
     data.concat(L_RESET_TITLE "<br/><br/>");
     data.concat(F("<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('boot','reset')\" type='button'>" L_RESET "!</button><br />"));
@@ -125,7 +115,7 @@ void statusTileAjax(String &data)
     data.concat("\n");
   }
 
-  #if OPERATIONAL_MODE == WIFI
+  #if OPERATIONAL_MODE == WIFI && DISPLAY_WIFI_SIGNAL_STRENGTH == ON
     data.concat(F("signal|"));
     data.concat(state.signalStrengthStr);
     data.concat("\n");
@@ -153,10 +143,7 @@ void statusTileGet()
         pinMode(RESET_PIN, INPUT);
       #endif
 
-      // and also attempt to reset the SWS
-      tasks.yield(1000);
-      HAL_RESET();
-
+      delay(250);
       return;
     }
     if (ssa.equals("wipe"))
@@ -204,7 +191,7 @@ void statusTileGet()
   String ssm = www.arg("mountt");
   if (!ssm.equals(EmptyStr))
   {
-    snprintf(temp, sizeof(temp), ":SXEM,%s#", ssm.c_str());
+    sprintf(temp, ":SXEM,%s#", ssm.c_str());
     onStep.commandBool(temp);
   }
 }

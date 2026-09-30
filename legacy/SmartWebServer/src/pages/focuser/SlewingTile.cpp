@@ -4,14 +4,13 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void focuserSlewingTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_SLEWING);
+  sprintf_P(temp, html_tile_beg, "22em", "13em", L_SLEWING);
   data.concat(temp);
   data.concat(F("<div style='float: right; text-align: right;' id='foc_sta' class='c'>"));
   if (state.focuserSlewing) data.concat(L_ACTIVE); else data.concat(L_INACTIVE);
@@ -24,22 +23,17 @@ void focuserSlewingTile(String &data)
   data.concat(FPSTR(html_focPosition));
   if (status.getVersionMajor() >= 10) data.concat(FPSTR(html_focStop));
   data.concat(F("<br />"));
-  www.sendContentAndClear(data);
 
-  data.concat(FPSTR(html_script_motion_controls_1));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_script_motion_controls_2));
-  www.sendContentAndClear(data);
   data.concat(FPSTR(html_focuserIn));
   data.concat(FPSTR(html_focuserOut));
 
   data.concat(F("<hr>"));
 
   if (status.getVersionMajor() >= 10) {
-    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
+    sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
     data.concat(temp);
 
-    snprintf_P(temp, sizeof(temp), html_focuserSlewSpeed, state.focuserSlewSpeedStr);
+    sprintf_P(temp, html_focuserSlewSpeed, state.focuserSlewSpeedStr);
     data.concat(temp);
     data.concat(FPSTR(html_focuserGotoSelect));
 
@@ -70,8 +64,35 @@ void focuserSlewingTileAjax(String &data)
 // pass related data back to OnStep
 extern void focuserSlewingTileGet()
 {
-  String value = www.arg("foc");
-  if (!value.equals(EmptyStr)) performFocuserAction("foc", value);
-  value = www.arg("fs");
-  if (!value.equals(EmptyStr)) performFocuserAction("fs", value);
+  String v;
+
+  v = www.arg("foc");
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("stop")) onStep.commandBlind(":FQ#");     // stop
+    if (v.equals("inf"))  onStep.commandBlind(":F4#:F-#"); // rate fast, move in
+    if (v.equals("in"))   onStep.commandBlind(":F2#:F-#"); // rate slow, move in
+    if (v.equals("out"))  onStep.commandBlind(":F2#:F+#"); // rate slow, move out
+    if (v.equals("outf")) onStep.commandBlind(":F4#:F+#"); // rate fast, move out
+
+    if (v.equals("vs"))   onStep.commandBlind(":F5#");     // goto rate very slow
+    if (v.equals("s"))    onStep.commandBlind(":F6#");     // goto rate slow
+    if (v.equals("n"))    onStep.commandBlind(":F7#");     // goto rate normal
+    if (v.equals("f"))    onStep.commandBlind(":F8#");     // goto rate fast
+    if (v.equals("vf"))   onStep.commandBlind(":F9#");     // goto rate very fast
+  }
+
+  // set position
+  v = www.arg("fs");
+  if (!v.equals(EmptyStr))
+  {
+    int p = v.toInt();
+    if (p >= -500000 || p <= 500000)
+    {
+      char temp[80];
+      sprintf(temp, ":FS%d#", p);
+      onStep.commandBool(temp);
+    }
+  }
+
 }

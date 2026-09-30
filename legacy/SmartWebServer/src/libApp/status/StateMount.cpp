@@ -16,100 +16,108 @@ void State::updateMount(bool now)
 
   // UTC Time and Date
   if (!onStep.command(":GX80#", temp)) strcpy(temp, "?");
-  sstrcpyex(timeStr, temp, 10);
+  strncpyex(timeStr, temp, 10);
   if (strcmp(timeStr, "00:00:00") ||
      (strlen(dateStr) == 0 && !strcmp(timeStr, "23:59:59"))) {
     if (!onStep.command(":GX81#", temp)) strcpy(temp, "?");
     if (temp[0] == '0') strcpy(&temp[0], &temp[1]);
-    sstrcpyex(dateStr, temp, 10);
+    strncpyex(dateStr, temp, 10);
   }
   Y;
 
   // LST
   if (!onStep.command(":GS#", temp)) strcpy(temp, "?");
-  sstrcpyex(lastStr, temp, 10); Y;
+  strncpyex(lastStr, temp, 10); Y;
 
   if (DISPLAY_HIGH_PRECISION_COORDS == ON && status.getVersionMajor() >= 10)
   {
     // Azm,Alt current
     if (!onStep.command(":GZH#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexAzmStr, temp, 14);
+    strncpyex(indexAzmStr, temp, 14);
     formatDegreesStr(indexAzmStr); Y;
     if (!onStep.command(":GAH#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexAltStr, temp, 14);
+    strncpyex(indexAltStr, temp, 14);
     formatDegreesStr(indexAltStr); Y;
   } else {
     // Azm,Alt current
     if (!onStep.command(":GZ#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexAzmStr, temp, 14);
+    strncpyex(indexAzmStr, temp, 14);
     formatDegreesStr(indexAzmStr); Y;
     if (!onStep.command(":GA#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexAltStr, temp, 14);
+    strncpyex(indexAltStr, temp, 14);
     formatDegreesStr(indexAltStr); Y;
   }
 
   #if DISPLAY_HIGH_PRECISION_COORDS == ON
     // RA,Dec current
     if (!onStep.command(":GRa#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexRaStr, temp, 14);
+    strncpyex(indexRaStr, temp, 14);
     formatHoursStr(indexRaStr); Y;
     if (!onStep.command(":GDe#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexDecStr, temp, 14);
+    strncpyex(indexDecStr, temp, 14);
     formatDegreesStr(indexDecStr); Y;
 
     // RA,Dec target
     if (!onStep.command(":Gra#", temp)) strcpy(temp, "?");
-    sstrcpyex(targetRaStr, temp, 14);
+    strncpyex(targetRaStr, temp, 14);
     formatHoursStr(targetRaStr); Y;
     if (!onStep.command(":Gde#", temp)) strcpy(temp, "?");
-    sstrcpyex(targetDecStr, temp, 14);
+    strncpyex(targetDecStr, temp, 14);
     formatDegreesStr(targetDecStr); Y;
   #else
     // RA,Dec Current
     if (!onStep.command(":GR#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexRaStr, temp, 14);
+    strncpyex(indexRaStr, temp, 14);
     formatHoursStr(indexRaStr); Y;
     if (!onStep.command(":GD#", temp)) strcpy(temp, "?");
-    sstrcpyex(indexDecStr, temp, 14);
+    strncpyex(indexDecStr, temp, 14);
     formatDegreesStr(indexDecStr); Y;
 
     // RA,Dec Target
     if (!onStep.command(":Gr#", temp)) strcpy(temp, "?");
-    sstrcpyex(targetRaStr, temp, 14);
+    strncpyex(targetRaStr, temp, 14);
     formatHoursStr(targetRaStr); Y;
     if (!onStep.command(":Gd#", temp)) strcpy(temp, "?");
-    sstrcpyex(targetDecStr, temp, 14);
+    strncpyex(targetDecStr, temp, 14);
     formatDegreesStr(targetDecStr); Y;
   #endif
 
   // Latitude
-  if (!onStep.command(status.getVersionMajor() > 3 ? ":GtH#" : ":Gt#", temp)) strcpy(temp, "?");
-  sstrcpyex(latitudeStr, temp, 10);
+  if (status.getVersionMajor() > 3) {
+    if (!onStep.command(":GtH#", temp)) strcpy(temp, "?");
+  } else {
+    if (!onStep.command(":Gt#", temp)) strcpy(temp, "?");
+  }
+  strncpyex(latitudeStr, temp, 10);
   convert.dmsToDouble(&latitude, latitudeStr, true);
   formatDegreesStr(latitudeStr);
   Y;
 
   // Longitude
-  if (!onStep.command(status.getVersionMajor() > 3 ? ":GgH#" : ":Gg#", temp)) strcpy(temp, "?");
-  sstrcpyex(longitudeStr, temp, 11);
+  if (status.getVersionMajor() > 3) {
+    if (!onStep.command(":GgH#", temp)) strcpy(temp, "?");
+  } else {
+    if (!onStep.command(":Gg#", temp)) strcpy(temp, "?");
+  }
+  strncpyex(longitudeStr, temp, 11);
   formatDegreesStr(longitudeStr);
   Y;
 
   // Pier side
   if ((status.pierSide == PierSideFlipWE1) || (status.pierSide == PierSideFlipWE2) || (status.pierSide == PierSideFlipWE3)) strcpy(temp, L_MERIDIAN_FLIP_W_TO_E); else
   if ((status.pierSide == PierSideFlipEW1) || (status.pierSide == PierSideFlipEW2) || (status.pierSide == PierSideFlipEW3)) strcpy(temp, L_MERIDIAN_FLIP_E_TO_W); else
-  if (status.pierSide == PierSideWest) sstrcpy(temp, L_WEST); else
-  if (status.pierSide == PierSideEast) sstrcpy(temp, L_EAST); else
-  if (status.pierSide == PierSideNone) sstrcpy(temp, L_NONE); else sstrcpy(temp, L_UNKNOWN);
+  if (status.pierSide == PierSideWest) strcpy(temp, L_WEST); else
+  if (status.pierSide == PierSideEast) strcpy(temp, L_EAST); else
+  if (status.pierSide == PierSideNone) strcpy(temp, L_NONE); else strcpy(temp, L_UNKNOWN);
   if (!status.onStepFound) strcpy(temp, "?");
-  sstrcpyex(pierSideStr, temp, 10);
+  strncpyex(pierSideStr, temp, 10);
 
   // Preferred pier side
   if (status.mountType != MT_ALTAZM || (status.getVersionMajor() >= 10 && status.meridianFlips)) {
     preferredPierSideChar = '?';
     char temp[80];
     if (onStep.command(":GX96#", temp)) {
-      if (temp[0] == 'E' || temp[0] == 'W' || temp[0] == 'B' || temp[0] == 'A') preferredPierSideChar = temp[0];
+      if (temp[0] == 'E' || temp[0] == 'W' || temp[0] == 'B') preferredPierSideChar = temp[0];
     }
   }
 
@@ -119,7 +127,7 @@ void State::updateMount(bool now)
     if (status.autoMeridianFlips) strcat(temp, ", " L_AUTO);
   } else strcpy(temp, "Off");
   if (!status.onStepFound) strcpy(temp, "?");
-  sstrcpyex(meridianFlipStr, temp, 10);
+  strncpyex(meridianFlipStr, temp, 10);
 
   // Polar align
   strcpy(alignLrStr, "?");
@@ -139,21 +147,21 @@ void State::updateMount(bool now)
       char ud_s[12];
       if (ud >= 0) strcpy(ud_s, upTri); else strcpy(ud_s, downTri);
 
-      snprintf_P(temp, sizeof(temp), "%s %ld%c", lr_s, labs(lr), units);
-      sstrcpyex(alignLrStr, temp, 16);
+      sprintf_P(temp, "%s %ld%c", lr_s, labs(lr), units);
+      strncpyex(alignLrStr, temp, 16);
 
-      snprintf_P(temp, sizeof(temp), "%s %ld%c", ud_s, labs(ud), units);
-      sstrcpyex(alignUdStr, temp, 16); Y;
+      sprintf_P(temp, "%s %ld%c", ud_s, labs(ud), units);
+      strncpyex(alignUdStr, temp, 16); Y;
     }
   }
 
   // Align progress
   if (status.aligning && status.alignThisStar >= 0 && status.alignLastStar >= 0) {
-    snprintf(temp, sizeof(temp), L_POINT " %d of %d", status.alignThisStar, status.alignLastStar);
+    sprintf(temp, L_POINT " %d of %d", status.alignThisStar, status.alignLastStar);
   } else {
     if (status.alignThisStar > status.alignLastStar) strcpy(temp, L_COMPLETE); else strcpy(temp, L_INACTIVE);
   }
-  sstrcpyex(alignProgress, temp, 32);
+  strncpyex(alignProgress, temp, 32);
 
   // Park
   if (status.parked) strcpy(temp, L_PARKED); else strcpy(temp, L_NOT_PARKED);
@@ -161,7 +169,7 @@ void State::updateMount(bool now)
   if (status.parkFail) strcpy(temp, L_PARK_FAILED);
   if (status.atHome) strcat(temp, " (" L_AT_HOME ")");
   if (!status.onStepFound) strcpy(temp, "?");
-  sstrcpyex(parkStr, temp, 40); Y;
+  strncpyex(parkStr, temp, 40); Y;
 
   // Tracking
   double r = 0;
@@ -185,7 +193,7 @@ void State::updateMount(bool now)
   if (status.rateCompensation == RC_FULL_RA) strcat(temp, " FC"); else
   if (status.rateCompensation == RC_FULL_BOTH) strcat(temp, " FCD");
 
-  sstrcpyex(trackStr, temp, 40);
+  strncpyex(trackStr, temp, 40);
 
   // Slew speed
   if (isnan(slewSpeedNominal))
@@ -194,5 +202,5 @@ void State::updateMount(bool now)
   }
   if (!onStep.command(":GX92#", temp)) strcpy(temp, "?"); else { slewSpeedCurrent = atof(temp); } Y;
   if (!onStep.command(":GX97#", temp)) strcpy(temp, "?"); else { strcat(temp, "&deg;/s"); } Y;
-  sstrcpyex(slewSpeedStr, temp, 16);
+  strncpyex(slewSpeedStr, temp, 16);
 }

@@ -16,11 +16,8 @@
       WiFiServer *cmdSvr;
       WiFiClient cmdSvrClient;
 
-      char cmdBuffer[40];
-      int cmdBufferPos;
-
       unsigned long clientTimeoutMs;
-      unsigned long clientEndTimeMs;
+      unsigned long clientEndTimeMs = 0;
       bool persist;
       long port;
   };

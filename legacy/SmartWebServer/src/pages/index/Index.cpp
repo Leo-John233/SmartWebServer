@@ -54,7 +54,7 @@ void handleRoot()
   www.sendContentAndClear(data);
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "index-ajax-get.txt");
+  sprintf_P(temp, html_script_ajax_get, "index-ajax-get.txt");
   data.concat(temp);
   www.sendContentAndClear(data);
 
@@ -76,22 +76,21 @@ void handleRoot()
   data.concat(F("<br class=\"clear\" />\n"));
 
   #if DISPLAY_SERVO_MONITOR == ON
-    data.concat(F("<hr>"));
     servoTile(data);
-    data.concat(F("<br class=\"clear\" />\n"));
   #endif
 
-  #if DISPLAY_STALLGUARD_MONITOR == ON
-    data.concat(F("<hr>"));
-    stallGuardTile(data);
+  #if DISPLAY_SERVO_CALIBRATION == ON
+    servoCalibrateTile(data);
+  #endif
+
+  #if DISPLAY_SERVO_MONITOR == ON || DISPLAY_SERVO_CALIBRATION == ON
     data.concat(F("<br class=\"clear\" />\n"));
   #endif
 
   #if DRIVE_CONFIGURATION == ON
-    data.concat(F("<hr>"));
     if (numShown == 0) data.concat(F("<br />" L_ADV_SET_NO_EDIT "<br />"));
 
-    snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
+    sprintf_P(temp, html_form_begin, "index.htm");
     data.concat(temp);
 
     data.concat(F("<br /><button name='advanced' type='submit' "));
@@ -104,7 +103,7 @@ void handleRoot()
       data.concat(FPSTR(html_configAxesNotes));
       if (status.getVersionMajor() < 10) data.concat(FPSTR(html_configAxesNotesOnStep));
     } else
-      data.concat(F("<br /><hr>"));
+      data.concat(F("<br />"));
     www.sendContentAndClear(data);
   #endif
 
@@ -146,8 +145,8 @@ void indexAjax() {
     #if DISPLAY_SERVO_MONITOR == ON
       servoTileAjax(data);
     #endif
-    #if DISPLAY_STALLGUARD_MONITOR == ON
-      stallGuardTileAjax(data);
+    #if DISPLAY_SERVO_CALIBRATION == ON
+      servoCalibrateTileAjax(data);
     #endif
   }
 
@@ -177,8 +176,8 @@ void processIndexGet()
   #if DISPLAY_SERVO_MONITOR == ON
     servoTileGet();
   #endif
-  #if DISPLAY_STALLGUARD_MONITOR == ON
-    stallGuardTileGet();
+  #if DISPLAY_SERVO_CALIBRATION == ON
+    servoCalibrateTileGet();
   #endif
 
   state.lastControllerPageLoadTime = millis();

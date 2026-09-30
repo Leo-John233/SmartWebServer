@@ -2,11 +2,8 @@
 // Encoder Sync tile
 #include "SyncTile.h"
 
-#include "../../lib/nv/Nv.h"
-
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 #if ENCODERS == ON
 
@@ -15,11 +12,11 @@ void syncTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", "Sync Control");
+  sprintf_P(temp, html_tile_beg, "22em", "15em", "Sync Control");
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 
-  snprintf_P(temp, sizeof(temp), html_form_begin, "enc.htm");
+  sprintf_P(temp, html_form_begin, "enc.htm");
   data.concat(temp);
 
   data.concat(FPSTR(html_syncOnStepNow));
@@ -53,8 +50,20 @@ void syncTileAjax(String &data)
 // pass related data back to OnStep
 extern void syncTileGet()
 {
-  String value = www.arg("enc");
-  if (!value.equals(EmptyStr)) performEncoderAction(value);
+  String v;
+
+  v = www.arg("enc");
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("o2e")) encoders.syncFromOnStep();
+    if (v.equals("e2o")) encoders.syncToOnStep();
+    #ifdef ENC_ABSOLUTE
+      if (v.equals("zro")) encoders.originFromOnStep();
+    #endif
+    if (v.equals("on")) encoders.settings.autoSync = true;
+    if (v.equals("off")) encoders.settings.autoSync = false;
+    nv.updateBytes(NV_ENCODER_SETTINGS_BASE, &encoders.settings, sizeof(EncoderSettings));
+  }
 }
 
 #endif

@@ -4,14 +4,13 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 // create the related webpage tile
 void trackingTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_TRACKING);
+  sprintf_P(temp, html_tile_beg, "22em", "15em", L_TRACKING);
   data.concat(temp);
   data.concat(F("<div style='float: right; text-align: right;' id='track' class='c'>"));
   data.concat(state.trackStr);
@@ -22,10 +21,10 @@ void trackingTile(String &data)
   www.sendContentAndClear(data);
   data.concat(F("<hr>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
+  sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
-  snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
+  sprintf_P(temp, html_form_begin, "mount.htm");
   data.concat(temp);
   if (status.mountType != MT_ALTAZM || status.getVersionMajor() >= 10)
   {
@@ -75,9 +74,34 @@ void trackingTileAjax(String &data)
 // pass related data back to OnStep
 void trackingTileGet()
 {
-  const char* keys[] = {"tk", "rr", "dr"};
-  for (unsigned int index = 0; index < sizeof(keys) / sizeof(keys[0]); index++) {
-    String value = www.arg(keys[index]);
-    if (!value.equals(EmptyStr)) performMountTrackingAction(keys[index], value);
+  String v;
+
+  v = www.arg("tk"); // controller base rate
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("f")) onStep.commandBlind(":T+#"); // 0.02hz faster
+    if (v.equals("-")) onStep.commandBlind(":T-#"); // 0.02hz slower
+    if (v.equals("r")) onStep.commandBlind(":TR#"); // reset
+  }
+
+  v = www.arg("rr"); // tracking compensated
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("off"))  onStep.commandBool(":Tn#"); // compensated off
+    if (v.equals("on"))   onStep.commandBool(":Tr#"); // compensated on
+    if (v.equals("doff")) onStep.commandBool(":T1#"); // compensated 1 axis
+    if (v.equals("don"))  onStep.commandBool(":T2#"); // compensated 2 axis
+    if (v.equals("otk"))  onStep.commandBool(":To#"); // compensated pointing model
+  }
+
+  v = www.arg("dr"); // tracking
+  if (!v.equals(EmptyStr))
+  {
+    if (v.equals("T1")) onStep.commandBool(":Te#");  // enable tracking
+    if (v.equals("T0")) onStep.commandBool(":Td#");  // disable tracking
+    if (v.equals("Ts")) onStep.commandBlind(":TQ#"); // sidereal
+    if (v.equals("Tl")) onStep.commandBlind(":TL#"); // lunar
+    if (v.equals("Th")) onStep.commandBlind(":TS#"); // solar
+    if (v.equals("Tk")) onStep.commandBlind(":TK#"); // king rate
   }
 }

@@ -6,8 +6,6 @@
 #include "../../Config.h"
 #include "../../Extended.config.h"
 
-
-
 void handleRoot();
 void indexAjaxGet();
 void indexAjax();

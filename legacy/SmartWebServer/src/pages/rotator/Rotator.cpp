@@ -6,15 +6,13 @@
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 
-extern void handleNotFound();
 void processRotatorGet();
 
 void handleRotator() {
   char temp[240] = "";
 
   state.updateRotator(true);
-  if (status.rotatorFound != SD_TRUE) { handleNotFound(); return; }
-  
+
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
 
@@ -53,7 +51,7 @@ void handleRotator() {
   }
 
   // scripts
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "rotator-ajax-get.txt");
+  sprintf_P(temp, html_script_ajax_get, "rotator-ajax-get.txt");
   data.concat(temp);
   data.concat(FPSTR(html_script_ajax_shortcuts));
   data.concat(F("<script>var ajaxPage='rotator-ajax.txt';</script>\n"));

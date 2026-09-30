@@ -4,7 +4,6 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
-#include "../../api/SemanticActions.h"
 
 #define KV_GTO_STATUS 0
 #define KV_GTO_I1 1
@@ -40,18 +39,18 @@ void gotoTile(String &data)
 {
   char temp[400] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", "Goto");
+  sprintf_P(temp, html_tile_beg, "22em", "15em", "Goto");
   data.concat(temp);
 
   data.concat(F("<div style='float: right; text-align: right;' id='gto_status' class='c'>"));
-  snprintf(temp, sizeof(temp), "%s || %c", status.inGoto ? L_SLEWING : L_INACTIVE, state.pierSideStr[0]);
+  sprintf(temp, "%s || %c", status.inGoto ? L_SLEWING : L_INACTIVE, state.pierSideStr[0]);
   data.concat(temp);
   data.concat(F("</div><br /><hr>"));
 
   data.concat(FPSTR(html_mountPositionLabels));
-  snprintf_P(temp, sizeof(temp), html_mountPositionAxis1, state.indexAzmStr, state.indexRaStr, state.targetRaStr);
+  sprintf_P(temp, html_mountPositionAxis1, state.indexAzmStr, state.indexRaStr, state.targetRaStr);
   data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_mountPositionAxis2, state.indexAltStr, state.indexDecStr, state.targetDecStr);
+  sprintf_P(temp, html_mountPositionAxis2, state.indexAltStr, state.indexDecStr, state.targetDecStr);
   data.concat(temp);
 
   www.sendContentAndClear(data);
@@ -64,11 +63,11 @@ void gotoTile(String &data)
   data.concat(F("<hr>"));
   www.sendContentAndClear(data);
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
+  sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
   // Slew speed
-  snprintf_P(temp, sizeof(temp), html_slewSpeed, state.slewSpeedStr);
+  sprintf_P(temp, html_slewSpeed, state.slewSpeedStr);
   data.concat(temp);
   data.concat(FPSTR(html_slewSpeedSelect));
 
@@ -81,16 +80,12 @@ void gotoTile(String &data)
   {
     if (status.mountType == MT_ALTAZM) {
       data.concat(FPSTR(html_gotoMfNow));
-      snprintf_P(temp, sizeof(temp), html_gotoMfPause, L_ORIENTATION_CHANGE_PAUSE);
+      sprintf_P(temp, html_gotoMfPause, L_ORIENTATION_CHANGE_PAUSE);
       data.concat(temp);
     } else {
       data.concat(FPSTR(html_gotoMfAuto));
-      if (status.hasMeridianFlipHomeModes() && (status.mountType == MT_GEM || status.mountType == MT_FORK)) {
-        data.concat(FPSTR(html_gotoMfHome));
-      } else {
-        snprintf_P(temp, sizeof(temp), html_gotoMfPause, L_MERIDIAN_FLIP_PAUSE);
-        data.concat(temp);
-      }
+      sprintf_P(temp, html_gotoMfPause, L_MERIDIAN_FLIP_PAUSE);
+      data.concat(temp);
     }
 
     www.sendContentAndClear(data);
@@ -102,15 +97,12 @@ void gotoTile(String &data)
     data.concat(F("<br />"));
 
     if (status.mountType == MT_ALTAZM) {
-      snprintf_P(temp, sizeof(temp), html_gotoPreferredPierSide1, L_ORIENTATION_CHANGE_PPS, L_NORMAL, L_ALTERNATE);
+      sprintf_P(temp, html_gotoPreferredPierSide, L_ORIENTATION_CHANGE_PPS, L_NORMAL, L_ALTERNATE);
       data.concat(temp);
     } else {
-      snprintf_P(temp, sizeof(temp), html_gotoPreferredPierSide1, L_MERIDIAN_FLIP_PPS, L_EAST, L_WEST);
+      sprintf_P(temp, html_gotoPreferredPierSide, L_MERIDIAN_FLIP_PPS, L_EAST, L_WEST);
       data.concat(temp);
     }
-    www.sendContentAndClear(data);
-
-    data.concat(FPSTR(html_gotoPreferredPierSide2));
   }
 
   data.concat(FPSTR(html_collapsable_end));
@@ -143,13 +135,7 @@ void gotoTileAjax(String &data)
     data.concat(keyValueBoolEnabled("gto_mfa_on", true));
     data.concat(keyValueBoolEnabled("gto_mfa_off", true));
     data.concat(keyValueToggleBoolSelected("gto_mfa_on", "gto_mfa_off", status.autoMeridianFlips));
-    if (status.hasMeridianFlipHomeModes() && (status.mountType == MT_GEM || status.mountType == MT_FORK)) {
-      data.concat(keyValueBoolSelected("gto_mfh_off", status.meridianFlipHomeMode == MFHM_OFF));
-      data.concat(keyValueBoolSelected("gto_mfh_visit", status.meridianFlipHomeMode == MFHM_VISIT));
-      data.concat(keyValueBoolSelected("gto_mfh_pause", status.meridianFlipHomeMode == MFHM_PAUSE));
-    } else {
-      data.concat(keyValueToggleBoolSelected("gto_mfp_on", "gto_mfp_off", status.meridianFlipHomeMode == MFHM_PAUSE));
-    }
+    data.concat(keyValueToggleBoolSelected("gto_mfp_on", "gto_mfp_off", status.pauseAtHome));
   } else {
     data.concat(keyValueBoolEnabled("gto_mfa_on", false));
     data.concat(keyValueBoolEnabled("gto_mfa_off", false));
@@ -160,7 +146,6 @@ void gotoTileAjax(String &data)
     data.concat(keyValueBoolSelected("gto_pps_east", state.preferredPierSideChar == 'E'));
     data.concat(keyValueBoolSelected("gto_pps_west", state.preferredPierSideChar == 'W'));
     data.concat(keyValueBoolSelected("gto_pps_best", state.preferredPierSideChar == 'B'));
-    data.concat(keyValueBoolSelected("gto_pps_auto", state.preferredPierSideChar == 'A'));
   }
 
   data.concat(keyValueString("gto_rate", state.slewSpeedStr));
@@ -173,8 +158,8 @@ void gotoTileAjax(String &data)
 
     if (rateRatio > 1.75F) { rate_en[0] = true; }
     else if (rateRatio > 1.25F) { rate_en[1] = true; }
-    else if (rateRatio > 0.75F) { rate_en[2] = true; }
-    else if (rateRatio > 0.583F) { rate_en[3] = true; }
+    else if (rateRatio > 0.875F) { rate_en[2] = true; }
+    else if (rateRatio > 0.625F) { rate_en[3] = true; }
     else rate_en[4] = true;
     for (int i = 0; i < 5; i++) {
       String s = keyValueBoolSelected(rate_key[i], rate_en[i]);
@@ -188,6 +173,33 @@ void gotoTileAjax(String &data)
 // pass related data back to OnStep
 extern void gotoTileGet()
 {
-  String value = www.arg("goto");
-  if (!value.equals(EmptyStr)) performMountGotoAction(value);
+  String v;
+  char temp[80];
+
+  v = www.arg("goto");
+  if (!v.equals(EmptyStr)) {
+    if (v.equals("vs")) onStep.commandBool(":SX93,5#");      // very slow, 0.5 x
+    if (v.equals("s"))  onStep.commandBool(":SX93,4#");      // slow,      0.75x
+    if (v.equals("n"))  onStep.commandBool(":SX93,3#");      // normal,    1.0 x
+    if (v.equals("f"))  onStep.commandBool(":SX93,2#");      // fast,      1.5 x
+    if (v.equals("vf")) onStep.commandBool(":SX93,1#");      // very fast, 2.0 x
+
+    if (v.equals("bzr_on"))  onStep.commandBool(":SX97,1#"); // alert buzzer on
+    if (v.equals("bzr_off")) onStep.commandBool(":SX97,0#"); // alert buzzer off
+
+    if (v.equals("af_now")) onStep.commandBool(":MN#");      // auto-flip, now
+    if (v.equals("af_on")) onStep.commandBool(":SX95,1#");   // auto-flip, on
+    if (v.equals("af_off")) onStep.commandBool(":SX95,0#");  // auto-flip, off
+
+    if (v.equals("mp_on")) onStep.commandBool(":SX98,1#");   // meridian-flip, pause at home on
+    if (v.equals("mp_off")) onStep.commandBool(":SX98,0#");  // meridian-flip, pause at home off
+    if (v.equals("mp_cnt")) onStep.commandBool(":SX99,1#");  // meridian flip, pause->continue
+
+    if (v.equals("pps_e")) onStep.commandBool(":SX96,E#");   // meridian-flip, preferred pier side East
+    if (v.equals("pps_w")) onStep.commandBool(":SX96,W#");   // meridian-flip, preferred pier side West
+    if (v.equals("pps_b")) onStep.commandBool(":SX96,B#");   // meridian flip, preferred pier side Best
+
+    if (v.equals("go")) onStep.command(":MS#", temp);        // goto start
+    if (v.equals("stop")) onStep.commandBlind(":Q#");        // goto/slew stop
+  }
 }

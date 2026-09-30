@@ -44,7 +44,7 @@ bool Buffer::add(char c) {
       for (int cksCount0 = 1; cksCount0 < len - 3; cksCount0++) {  cks += cb[cksCount0]; }
 
       char chkSum[12];
-      snprintf(chkSum, sizeof(chkSum), "%02X", cks);
+      sprintf(chkSum, "%02X", cks);
 
       seq = cb[len - 1];
       if (!((chkSum[0] == cb[len - 3]) && (chkSum[1] == cb[len - 2]))) { 
