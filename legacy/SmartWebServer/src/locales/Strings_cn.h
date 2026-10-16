@@ -181,7 +181,7 @@
 #define L_COORD_SYNC "同步"
 
 #define L_HINT_CLOCK "设置日期/时间"
-#define L_HINT_CONTINUE_GOTO "继续 Goto (当在零位暂停时)"
+#define L_HINT_CONTINUE_GOTO "继续 GOTO (当在零位暂停时)"
 #define L_HOME_PARK_TITLE "回零与停放"
 #define L_RETURN_HOME "返回零位"
 #define L_RESET_HOME "重设零位"
@@ -312,7 +312,7 @@
 #define L_TRK_DUAL "双轴"
 #define L_TRK_SINGLE "单轴"
 
-#define L_BUZZER "Goto 到位蜂鸣器提示"
+#define L_BUZZER "GOTO 到位蜂鸣器提示"
 
 #define L_MERIDIAN_FLIP_AUTO "到达限位时自动中天翻转"
 #define L_MERIDIAN_FLIP_NOW "立即执行"
@@ -331,7 +331,7 @@
 
 #define L_MAX_SLEW_SPEED "最大回转速度"
 
-// goto Rate
+// GOTO Rate
 #define L_VSLOW "极慢"
 #define L_SLOW "慢"
 #define L_NORMAL "正常"
@@ -377,12 +377,12 @@
 #define L_AXPN_LIMIT_UM_MAX "最大限位，微米"     // "$6"
 #define L_AXPN_REVERSE "反向"                    // "$7" (first motor parameter)
 #define L_AXPN_MICROSTEPS "跟踪细分 (Microsteps)" // "$8"
-#define L_AXPN_MICROSTEPS_GOTO "Goto 细分"       // "$9"
-#define L_AXPN_DECAY_MODE "衰减模式"             // "$10"
-#define L_AXPN_DECAY_MODE_GOTO "Goto 衰减模式"   // "$11"
+#define L_AXPN_MICROSTEPS_GOTO "GOTO 细分"       // "$9"
+#define L_AXPN_DECAY_MODE "跟踪 衰减模式"             // "$10"
+#define L_AXPN_DECAY_MODE_GOTO "GOTO 衰减模式"   // "$11"
 #define L_AXPN_CURRENT_HOLD "保持电流 (mA)"      // "$12"
 #define L_AXPN_CURRENT_RUN "运行电流 (mA)"       // "$13"
-#define L_AXPN_CURRENT_GOTO "Goto 电流 (mA)"     // "$14"
+#define L_AXPN_CURRENT_GOTO "GOTO 电流 (mA)"     // "$14"
 #define L_AXPN_INTERPOLATE "256倍插值细分"       // "$15"
 #define L_AXPN_PID_P "<big><code>P</code></big> 跟踪" // "$16"
 #define L_AXPN_PID_I "<big><code>I</code></big> 跟踪" // "$17"
@@ -502,7 +502,7 @@
 #define L_GE_MERIDIAN "超出中天限位"
 #define L_GE_SYNC "超出同步安全限位"
 #define L_GE_PARK "停放失败"
-#define L_GE_GOTO_SYNC "Goto 同步失败"
+#define L_GE_GOTO_SYNC "GOTO 同步失败"
 #define L_GE_UNSPECIFIED "未知错误"
 #define L_GE_ALT_MAX "高于天顶限位"
 #define L_GE_WEATHER_INIT "气象传感器初始化失败"
@@ -524,14 +524,14 @@
 #define L_CE_PARK_FAILED "停放失败"
 #define L_CE_NOT_PARKED "未处于停放状态"
 #define L_CE_NO_PARK_POSITION_SET "未设置停放位置"
-#define L_CE_GOTO_FAIL "Goto 失败"
+#define L_CE_GOTO_FAIL "GOTO 失败"
 #define L_CE_LIBRARY_FULL "星表库已满"
-#define L_CE_GOTO_ERR_BELOW_HORIZON "Goto 目标低于地平线"
-#define L_CE_GOTO_ERR_ABOVE_OVERHEAD "Goto 目标高于天顶限位"
+#define L_CE_GOTO_ERR_BELOW_HORIZON "GOTO 目标低于地平线"
+#define L_CE_GOTO_ERR_ABOVE_OVERHEAD "GOTO 目标高于天顶限位"
 #define L_CE_SLEW_ERR_IN_STANDBY "待机状态下无法回转"
 #define L_CE_SLEW_ERR_IN_PARK "停放状态下无法回转"
-#define L_CE_GOTO_ERR_GOTO "已在执行 Goto 中"
-#define L_CE_GOTO_ERR_OUTSIDE_LIMITS "Goto 目标超出限位"
+#define L_CE_GOTO_ERR_GOTO "已在执行 GOTO 中"
+#define L_CE_GOTO_ERR_OUTSIDE_LIMITS "GOTO 目标超出限位"
 #define L_CE_SLEW_ERR_HARDWARE_FAULT "硬件故障"
 #define L_CE_MOUNT_IN_MOTION "赤道仪正在移动中"
 #define L_CE_GOTO_ERR_UNSPECIFIED "其他错误"
