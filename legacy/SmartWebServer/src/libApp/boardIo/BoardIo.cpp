@@ -21,7 +21,7 @@ void BoardIo::begin() {
   if (!activityAvailable() && !brakeAvailable()) return;
   uint8_t settings = 3; // 默认开启活动指示和自动保护，不持久保存“已就绪”。
   if (!nv().kv().getOrInit("BOARD_IO_SETTINGS", settings) || settings > 3) settings = 3;
-  policy_.configure(settings & 1, settings & 2, millis());
+  policy_.configure(settings & 1, brakeAvailable() && (settings & 2), millis());
   #if SWS_ACTIVITY_LED_PIN != OFF
     digitalWrite(SWS_ACTIVITY_LED_PIN, HIGH);
     pinMode(SWS_ACTIVITY_LED_PIN, OUTPUT);
@@ -45,7 +45,7 @@ void BoardIo::tick() {
     if (level != ledLevel_) { digitalWrite(SWS_ACTIVITY_LED_PIN, level); ledLevel_ = level; }
   #endif
   #if SWS_RA_BRAKE_PIN != OFF
-    const int brake = policy_.releaseBrake(connected, now) ? HIGH : LOW;
+    const int brake = brakeAvailable() && policy_.releaseBrake(connected, now) ? HIGH : LOW;
     if (brake != brakeLevel_) { digitalWrite(SWS_RA_BRAKE_PIN, brake); brakeLevel_ = brake; }
   #endif
 }
@@ -81,6 +81,7 @@ void BoardIo::driverFeedback(bool received, const char *reply) {
 
 bool BoardIo::save(bool activity, bool protection) {
   if (!started_) return false;
+  protection = brakeAvailable() && protection;
   const uint8_t settings = (activity ? 1 : 0) | (protection ? 2 : 0);
   if (nv().kv().put("BOARD_IO_SETTINGS", settings) != KvPartition::Status::Ok) return false;
   policy_.configure(activity, protection, millis());

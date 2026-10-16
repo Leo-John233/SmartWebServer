@@ -69,7 +69,8 @@ BrakeState BoardIoPolicy::brakeState(bool connected, uint32_t now) const {
 
 bool BoardIoPolicy::releaseBrake(bool connected, uint32_t now) const {
   const BrakeState state = brakeState(connected, now);
-  return state == BrakeState::Disabled || state == BrakeState::Released;
+  // 关闭开关也保持抱闸，只有开启后的持续正常反馈才允许松闸。
+  return state == BrakeState::Released;
 }
 
 bool BoardIoPolicy::feedbackDue(uint32_t now) const {

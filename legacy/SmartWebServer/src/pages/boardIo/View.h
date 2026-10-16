@@ -6,7 +6,7 @@ const char html_board_io_styles[] PROGMEM = R"IO(
 <style>
 .sws-overview-grid .content { padding:12px 0 0; background:transparent; }
 .sws-overview-grid .content > br { display:none; }
-.sws-controller-settings { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 0 18px; }
+.sws-controller-settings { display:grid; grid-template-columns:repeat(var(--settings-columns,3),minmax(0,1fr)); gap:14px; margin:0 0 18px; }
 .sws-io-controls { display:contents; }
 .sws-io-control, .sws-mount-type { min-width:0; margin:0; padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--field); }
 .sws-io-control { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 16px; align-content:start; align-items:center; }
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 )IO";
 
 const char html_board_io_begin[] PROGMEM =
-  "<section class='sws-io-controls' data-confirm=\"" L_IO_RELEASE_CONFIRM "\" data-error=\"" L_IO_SAVE_FAILED "\">";
+  "<section class='sws-io-controls' data-confirm=\"" L_IO_BRAKE_OFF_CONFIRM "\" data-error=\"" L_IO_SAVE_FAILED "\">";
 const char html_board_io_activity[] PROGMEM =
   "<div class='sws-io-control'><h3>" L_IO_ACTIVITY_TITLE "</h3>"
   "<button type='button' id='sws-io-activity' class='sws-switch' role='switch' aria-label=\"" L_IO_ACTIVITY_TITLE "\" aria-checked='%s' data-selected='%s' data-setting='activity'></button>"

@@ -72,7 +72,11 @@ void statusTile(String &data)
     www.sendContentAndClear(data);
   }
 
-  data.concat(F("<div class='sws-controller-settings'>"));
+  const int settingColumns = int(boardIo.activityAvailable()) + int(boardIo.brakeAvailable()) + int(mountType >= 1 && mountType <= 3);
+  if (settingColumns) {
+    snprintf_P(temp, sizeof(temp), html_indexSettingsBegin, settingColumns);
+    data.concat(temp);
+  }
   boardIoTile(data);
 
   #if DRIVE_CONFIGURATION == ON
@@ -86,7 +90,7 @@ void statusTile(String &data)
     }
   #endif
 
-  data.concat(F("</div>"));
+  if (settingColumns) data.concat(F("</div>"));
 
   #if DISPLAY_RESET_CONTROLS != OFF
     if (mountType != 0) data.concat(F("<br /><hr>"));

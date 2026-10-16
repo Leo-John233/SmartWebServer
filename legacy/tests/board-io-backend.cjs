@@ -5,7 +5,9 @@ const root = path.join(__dirname,'../SmartWebServer');
 const clean = (file) => fs.readFileSync(path.join(root,'src',file),'utf8').replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
 
 // 编译实际策略、GPIO 适配器和设置接口；只替换串口、引脚、时钟和存储。
-module.exports = function({preview=false,language=process.env.SWS_TEST_LANGUAGE||'cn'}={}) {
+module.exports = function({preview=false,language=process.env.SWS_TEST_LANGUAGE||'cn',
+  brakeEnabled=/^#define\s+RA_BRAKE_PROTECTION\s+ON\b/m.test(fs.readFileSync(path.join(root,'Config.h'),'utf8')),
+  activityAvailable=true}={}) {
   const work=fs.mkdtempSync(path.join(output,'board-io-'));
   const templates=require('./page-templates.cjs')(root,language);
   let code=`
@@ -18,8 +20,13 @@ module.exports = function({preview=false,language=process.env.SWS_TEST_LANGUAGE|
 #include <iostream>
 #include <functional>
 #include <stdint.h>
-#define SWS_ACTIVITY_LED_PIN 2
+#define SWS_ACTIVITY_LED_PIN ${activityAvailable ? '2' : 'OFF'}
 #define SWS_RA_BRAKE_PIN 5
+#define RA_BRAKE_PROTECTION ${brakeEnabled ? 'ON' : 'OFF'}
+#define AXIS1_ENCODER OFF
+#define AXIS2_ENCODER OFF
+#define DISPLAY_RESET_CONTROLS OFF
+#define FWU -204
 #define LOW 0
 #define HIGH 1
 #define OUTPUT 1
@@ -65,12 +72,29 @@ struct Web{
   void on(const char*,std::function<void()>fn){handler=fn;}
 }www;
 `;
-  code+=clean('libApp/boardIo/Policy.h')+'\n'+clean('libApp/boardIo/BoardIo.h')+'\n';
+  code+=clean('libApp/boardIo/Config.h')+'\n'+clean('libApp/boardIo/Policy.h')+'\n'+clean('libApp/boardIo/BoardIo.h')+'\n';
   code+=clean('libApp/boardIo/Policy.cpp')+'\n'+clean('libApp/boardIo/BoardIo.cpp')+'\n';
   code+=require('./locale-source.cjs')(language)+'\n';
   for(const [name,value]of Object.entries(templates['boardIo/View.h']))code+='const char '+name+'[]='+JSON.stringify(value)+';\n';
   code+=clean('pages/boardIo/BoardIo.cpp')+'\n'+clean('pages/Request.cpp')+'\n';
-  code+=preview?`int main(){boardIo.initPins();boardIo.begin();status.onStepFound=true;status.mountFound=SD_TRUE;now=10;boardIo.driverFeedback(true,"ST,,,,,,,");now=600;boardIo.driverFeedback(true,"ST,,,,,,,");String data;boardIoTile(data);std::cout<<data;}`:`
+  code+=preview?`int main(){boardIo.initPins();boardIo.begin();status.onStepFound=true;status.mountFound=SD_TRUE;now=10;boardIo.driverFeedback(true,"ST,,,,,,,");now=600;boardIo.driverFeedback(true,"ST,,,,,,,");String data;boardIoTile(data);std::cout<<data;}`:!brakeEnabled?`
+int main(){
+  boardIo.initPins();assert(pins[5]==LOW&&pinEvents[0]==50);
+  boardIo.begin();assert(!boardIo.brakeAvailable()&&boardIo.ownsPin(5));
+  assert(tasks.added==${activityAvailable ? '1' : '0'}); // 关闭自动保护后没有抱闸采样任务。
+  status.onStepFound=true;status.mountFound=SD_TRUE;
+  for(now=100;now<=2100;now+=250){boardIo.driverFeedback(true,"ST,,,,,,,");boardIo.pollDriver();boardIo.tick();assert(pins[5]==LOW);}
+  assert(onStep.calls==0); // 旧 NV 中保存的开启状态和正常反馈均不能使 IO5 拉高。
+  assert(boardIo.save(true,true)==${activityAvailable ? 'true' : 'false'});assert(pins[5]==LOW);
+  status.onStepFound=false;boardIo.tick();assert(pins[5]==LOW);
+  String data;boardIoTile(data);assert(data.find("sws-io-protection")==std::string::npos);
+  assert((data.find("sws-io-activity")!=std::string::npos)==${activityAvailable ? 'true' : 'false'});
+  data.clear();boardIoTileAjax(data);assert(data.find("sws-io-brake-state|")==std::string::npos);
+  www.methodValue=HTTP_POST;www.args={{"setting","protection"},{"enabled","1"}};handleBoardIo();assert(www.code==409&&pins[5]==LOW);
+  www.args["enabled"]="0";handleBoardIo();assert(www.code==409&&pins[5]==LOW);
+  for(int event:pinEvents)assert(event!=51); // 从初始化到整个测试结束从未输出 HIGH。
+  std::cout<<"PASS: config OFF hides brake controls and status, refuses API changes, skips driver queries and holds IO5 LOW with legacy NV and healthy feedback\\n";
+}`:`
 void advance(uint32_t time){now=time;boardIo.tick();}
 int main(){
   boardIo.initPins();assert(pins[5]==LOW&&pinEvents[0]==50);
@@ -95,9 +119,18 @@ int main(){
   advance(now+1001);assert(pins[5]==LOW&&boardIo.brakeState()==BrakeState::Stale);
   boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW); // 过期后重新等待稳定反馈。
   status.onStepFound=false;boardIo.tick();assert(pins[5]==LOW);
-  assert(boardIo.save(true,false));assert(pins[5]==HIGH&&boardIo.brakeState()==BrakeState::Disabled);
-  assert(nv().store.stored==1); // 用户明确关闭保护时保持释放，设置写入 NV。
+  status.onStepFound=true;now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");now+=500;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
+  assert(boardIo.save(true,false));assert(pins[5]==LOW&&boardIo.brakeState()==BrakeState::Disabled);
+  assert(nv().store.stored==1); // 关闭保护立即抱闸，设置写入 NV。
+  const int disabledCalls=onStep.calls;
+  now+=1500;boardIo.pollDriver();boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW&&onStep.calls==disabledCalls);
+  BoardIo disabledReboot;disabledReboot.initPins();disabledReboot.begin();assert(!disabledReboot.policy().protectionEnabled()&&pins[5]==LOW);
+  disabledReboot.driverFeedback(true,"ST,,,,,,,");now+=500;disabledReboot.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW);
   assert(boardIo.save(false,true));assert(pins[5]==LOW&&nv().store.stored==2);
+  now+=500;boardIo.tick();assert(pins[5]==LOW); // 重新开启不能沿用关闭前的就绪结果。
+  boardIo.driverFeedback(true,"ST,,,,,,,");now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
+  boardIo.driverFeedback(false,"");assert(pins[5]==LOW);
   nv().store.fail=true;assert(!boardIo.save(true,false));assert(pins[5]==LOW&&boardIo.policy().protectionEnabled());nv().store.fail=false;
   BoardIo rebooted;rebooted.initPins();rebooted.begin();assert(!rebooted.policy().activityEnabled()&&rebooted.policy().protectionEnabled()&&pins[5]==LOW);
   // 网络活动既覆盖网页入口，也覆盖资源发送；空闲时没有持续脉冲。
@@ -108,10 +141,10 @@ int main(){
   assert(boardIo.save(false,true));advance(2400);assert(pins[2]==HIGH);
   status.onStepFound=false;advance(2400);assert(pins[2]==LOW);advance(2800);assert(pins[2]==HIGH); // 关闭活动功能仍保留掉线闪烁。
   // 接口使用明确的 0/1，只在持久化成功后更新状态。
-  www.methodValue=HTTP_POST;www.args={{"setting","protection"},{"enabled","0"}};handleBoardIo();assert(www.code==200&&pins[5]==HIGH);
+  www.methodValue=HTTP_POST;www.args={{"setting","protection"},{"enabled","0"}};handleBoardIo();assert(www.code==200&&pins[5]==LOW);
   assert(www.output.find("\\"protection\\":false")!=std::string::npos);
-  www.args["enabled"]="bad";handleBoardIo();assert(www.code==400&&pins[5]==HIGH);
-  www.args["enabled"]="1";nv().store.fail=true;handleBoardIo();assert(www.code==500&&pins[5]==HIGH);nv().store.fail=false;
+  www.args["enabled"]="bad";handleBoardIo();assert(www.code==400&&pins[5]==LOW);
+  www.args["enabled"]="1";nv().store.fail=true;handleBoardIo();assert(www.code==500&&pins[5]==LOW);nv().store.fail=false;
   handleBoardIo();assert(www.code==200&&pins[5]==LOW);
   www.methodValue=HTTP_GET;handleBoardIo();assert(www.code==200);
   www.methodValue=2;handleBoardIo();assert(www.code==405);
@@ -122,7 +155,7 @@ int main(){
   String data;boardIoTile(data);assert(data.find("sws-io-activity")!=std::string::npos&&data.find("sws-io-protection")!=std::string::npos);
   data.clear();boardIoTileAjax(data);assert(data.find("sws-io-brake-state|")!=std::string::npos);
   tasks.fail=true;BoardIo failed;failed.initPins();failed.begin();assert(pins[5]==LOW&&failed.brakeState()==BrakeState::Starting);assert(!failed.save(true,false));
-  std::cout<<"PASS: actual IO2/IO5 output polarity, startup lock, valid/invalid feedback, stable recovery, stale lock, no-browser polling, manual override, NV reload/failure, HTTP settings, activity pulses, original disconnect blink and clock rollover\\n";
+  std::cout<<"PASS: actual IO2/IO5 polarity, startup lock, feedback fault/recovery, stale lock, disabled lock, re-enable readiness, NV reload/failure, HTTP settings, activity pulses and clock rollover\\n";
 }`;
   const file=path.join(work,'test.cpp'),exe=path.join(work,'test.exe');fs.writeFileSync(file,code);
   cp.execFileSync(process.env.CXX||'g++',['-std=c++11','-Wall','-Wextra',file,'-o',exe],{stdio:['pipe','pipe','pipe']});
@@ -134,7 +167,8 @@ int main(){
     '#include "'+path.join(root,'src/libApp/boardIo/Config.h').replaceAll('\\','/')+'"\n'+
     'static_assert(RA_BRAKE_PIN==5 && SWS_RA_BRAKE_PIN==5,"IO5 brake mapping");\n'+
     'static_assert(AXIS2_ENCODER_A_PIN==OFF && VGPIO_PIN_2==OFF,"IO5 not reused by encoder or virtual GPIO");\n'+
-    'static_assert(SWS_ACTIVITY_LED_PIN==2,"IO2 activity LED mapping");\n';
+    'static_assert(SWS_ACTIVITY_LED_PIN==2,"IO2 activity LED mapping");\n'+
+    'static_assert(RA_BRAKE_PROTECTION==OFF,"missing feature config defaults to OFF");\n';
   const pinFile=path.join(work,'pins.cpp');fs.writeFileSync(pinFile,pinSource);
   cp.execFileSync(process.env.CXX||'g++',['-std=c++11','-fsyntax-only',pinFile]);
   fs.writeFileSync(pinFile,pinSource.replace('#define AXIS2_ENCODER OFF','#define AXIS2_ENCODER ON'));
@@ -142,4 +176,4 @@ int main(){
   assert.notEqual(conflict.status,0);assert(conflict.stderr.includes('Axis 2 encoder A is disabled'));
   console.log(html.trim());
 };
-if(require.main===module)module.exports();
+if(require.main===module){module.exports();module.exports({brakeEnabled:false});module.exports({brakeEnabled:false,activityAvailable:false});}

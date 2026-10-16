@@ -22,6 +22,9 @@ const char html_indexWorkload[] PROGMEM = "<div class='sws-metric'><span>" L_WOR
   const char html_indexSignalStrength[] PROGMEM = "<div class='sws-metric'><span>" L_WIRELESS_SIGNAL_STRENGTH "</span><strong id='signal' class='c'>%s</strong></div>";
 #endif
 
+const char html_indexSettingsBegin[] PROGMEM =
+  "<div class='sws-controller-settings' style='--settings-columns:%d'>";
+
 const char html_indexMountType[] PROGMEM =
   "<form class='sws-mount-type' method='get' action='/index.htm'><label for='sws-mount-type'>" L_MOUNT_TYPE "</label>"
   "<select id='sws-mount-type' name='mountt'><option value='1'%s>" L_MOUNT_GEM "</option>"

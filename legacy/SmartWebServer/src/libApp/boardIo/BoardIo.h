@@ -15,7 +15,7 @@ public:
   bool save(bool activity, bool protection);
   bool ownsPin(int pin) const;
   bool activityAvailable() const { return SWS_ACTIVITY_LED_PIN != OFF; }
-  bool brakeAvailable() const { return SWS_RA_BRAKE_PIN != OFF; }
+  bool brakeAvailable() const { return RA_BRAKE_PROTECTION == ON && SWS_RA_BRAKE_PIN != OFF; }
   const BoardIoPolicy &policy() const { return policy_; }
   BrakeState brakeState() const;
 

@@ -183,7 +183,9 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 | 引脚 | 映射及输出 | 行为 |
 | --- | --- | --- |
 | IO2 | 原 `LED_STATUS_PIN`；低电平亮灯 | 开启活动指示时显示网页及 TCP 控制连接的业务数据收发，连续活动仍保留闪烁间隙；关闭后恢复原连接指示。未连接主控时保留闪烁。 |
-| IO5 | 新增 `RA_BRAKE_PIN`；低电平锁定，高电平释放 | 启动第一步即输出低电平。开启保护时按 RA 驱动反馈自动控制；关闭保护时按用户设定保持释放，并在页面中确认、明确显示保护已关闭。 |
+| IO5 | 新增 `RA_BRAKE_PIN`；低电平锁定，高电平释放 | 启动第一步即输出低电平。开启保护时按 RA 驱动反馈自动控制；关闭保护时保持低电平抱闸，并在页面中确认、显示已抱闸。 |
+
+在 `SmartWebServer/Config.h` 中设置 `RA_BRAKE_PROTECTION`：`ON` 启用自动保护并显示网页开关，`OFF` 隐藏此项并保持 IO5 低电平抱闸，不再单独采样抱闸反馈。未提供此配置时同样按 `OFF` 处理。关闭编译配置后，原先保存的开启状态不会使抱闸释放，`/board-io` 也会拒绝修改保护设置；重新改为 `ON` 需要重新编译和烧录。网页开关关闭时也不会松闸，重新开启后必须重新等待持续正常反馈。
 
 `Pins.Esp8266.h` 的 `AXIS2_ENCODER_A_PIN` 已改为 `OFF`，IO5 不再兼任第二轴编码器 A。虚拟 GPIO 也会避开本模块占用的引脚。ESP8266 原有串口配置不变；其他板型默认不启用这两个板载功能。
 
@@ -197,5 +199,5 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - `src/libApp/boardIo/BoardIo.*`、`Config.h`：GPIO、后台采样、NV 与占用检查。
 - `src/pages/boardIo/`：卡片、开关交互、状态文字及设置接口。
 - `src/pages/Request.*`：网页活动报告；TCP 控制服务器仅增加收发活动报告，保留原传输及运动命令处理。
-- `node legacy/tests/board-io-backend.cjs`：模拟引脚执行真实硬件适配器、策略及接口，覆盖上电、异常与过期反馈、故障恢复、手动释放、存储失败和重启、时钟回绕及掉线闪烁。
+- `node legacy/tests/board-io-backend.cjs`：模拟引脚执行真实硬件适配器、策略及接口，覆盖上电、异常与过期反馈、故障恢复、关闭后抱闸、编译开关隐藏、存储失败和重启、时钟回绕及掉线闪烁。
 - `node legacy/tests/board-io-ui.cjs`：执行真实卡片与开关脚本，检查提交、确认取消、保存失败恢复和桌面、手机布局。所有测试产物仍保存在仓库内。

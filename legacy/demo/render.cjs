@@ -36,4 +36,4 @@ const state={sta:{enabled:true,ssid:'Redmi_Hotel',open:false,dhcp:true,ip:'192.1
 function doc(url,embedded){if(!embedded)return head+'</head><body>'+shared+title+'<p id="sws-load" role="status"></p><iframe id="sws-frame" title="标签内容"></iframe>'+shellScript;const body=url==='/net.htm'?(loggedIn?netBody:'<form method="post" action="/net.htm"><label>管理密码 <input name="login" type="password"></label><button>登录</button></form>'):url==='/mount.htm'?mount:optional[url]||controller;return head+(url==='/net.htm'?templates['network/NetworkWifi.h'].html_network_css:'')+'</head><body>'+shared+title+'<div class="b">'+(url==='/mount.htm'?constant(scripts,'html_script_ajax_date_time_return')+'<script>'+templates['htmlScripts.h'].html_script_ajax.match(/function pad[\s\S]*?(?=var autoTimer)/)[0]+'</script>':url==='/focuser.htm'||url==='/rotator.htm'?motion:'')+body+'</div>'+constant(scripts,'html_script_collapsible')+'</body></html>';}
 
 // 演示复用固件样式和控件，所有交互由本地模拟服务接管
-module.exports={doc,state,head,shared,templates,auxiliary,resources};
+module.exports={doc,state,head,shared,templates,auxiliary,resources,brakeAvailable:controller.includes("id='sws-io-protection'")};

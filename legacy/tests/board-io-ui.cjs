@@ -4,26 +4,28 @@ const {chromium}=require('../../webui/node_modules/playwright');
 const root=path.join(__dirname,'../SmartWebServer');
 const templates=require('./page-templates.cjs')(root);
 const card=require('./board-io-backend.cjs')({preview:true});
+const hiddenCard=require('./board-io-backend.cjs')({preview:true,brakeEnabled:false});
 const mountForm=templates['index/StatusTile.h'].html_indexMountType.replace('%s',' selected').replace('%s','').replace('%s','');
-const html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body>'+templates['Appearance.h'].html_shared_appearance+'<main class="sws-controller"><div class="sws-overview-grid"><div class="b1"><div>工作状态</div><hr><div class="sws-controller-settings">'+card+mountForm+'</div></div></div></main></body></html>';
+const render=(controls,columns)=>'<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body>'+templates['Appearance.h'].html_shared_appearance+'<main class="sws-controller"><div class="sws-overview-grid"><div class="b1"><div>工作状态</div><hr>'+templates['index/StatusTile.h'].html_indexSettingsBegin.replace('%d',columns)+controls+mountForm+'</div></div></div></main></body></html>';
+const html=render(card,3),hiddenHtml=render(hiddenCard,2);
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],posts=[];
   let state={activity:true,protection:true,message:'驱动正常，已松闸'},fail=false,confirmation=true,dialogs=0;
   page.on('pageerror',e=>errors.push(e.message));
-  page.on('dialog',async dialog=>{dialogs++;if(confirmation)await dialog.accept();else await dialog.dismiss();});
+  page.on('dialog',async dialog=>{dialogs++;assert(dialog.message().includes('保持抱闸'));if(confirmation)await dialog.accept();else await dialog.dismiss();});
   await page.route('http://board.test/**',async route=>{
    const request=route.request(),url=new URL(request.url());
    if(url.pathname==='/board-io'){
     if(request.method()==='POST'){
      const values=Object.fromEntries(new URLSearchParams(request.postData()));posts.push(values);
      if(fail)return route.fulfill({status:500,body:'{}',contentType:'application/json'});
-     state[values.setting]=values.enabled==='1';state.message=state.protection?'等待驱动，已抱闸':'保护关闭，已松闸';
+     state[values.setting]=values.enabled==='1';state.message=state.protection?'等待驱动，已抱闸':'保护关闭，已抱闸';
     }
     return route.fulfill({body:JSON.stringify(state),contentType:'application/json'});
    }
-   return route.fulfill({body:html,contentType:'text/html; charset=utf-8'});
+   return route.fulfill({body:url.pathname==='/disabled'?hiddenHtml:html,contentType:'text/html; charset=utf-8'});
   });
   await page.goto('http://board.test/');
   const led=page.locator('#sws-io-activity'),brake=page.locator('#sws-io-protection');
@@ -46,9 +48,9 @@ const html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewpor
   assert.equal(await page.locator('[name=revert]').getAttribute('value'),'0','保留原恢复按钮');
   await led.click();await page.waitForFunction(()=>document.getElementById('sws-io-activity').getAttribute('aria-checked')==='false');
   assert.deepEqual(posts[0],{setting:'activity',enabled:'0'});
-  confirmation=false;await brake.click();assert.equal(posts.length,1,'取消手动释放时不发送请求');
+  confirmation=false;await brake.click();assert.equal(posts.length,1,'取消关闭保护时不发送请求');
   confirmation=true;await brake.click();await page.waitForFunction(()=>document.getElementById('sws-io-protection').getAttribute('aria-checked')==='false');
-  assert.equal(await page.locator('#sws-io-brake-state').innerText(),'保护关闭，已松闸');assert.equal(dialogs,2);
+  assert.equal(await page.locator('#sws-io-brake-state').innerText(),'保护关闭，已抱闸');assert.equal(dialogs,2);
   await brake.click();await page.waitForFunction(()=>document.getElementById('sws-io-protection').getAttribute('aria-checked')==='true');
   assert.equal(await page.locator('#sws-io-brake-state').innerText(),'等待驱动，已抱闸');
   fail=true;await led.click();await page.locator('[role=alert]').filter({hasText:'保存'}).waitFor();
@@ -67,7 +69,16 @@ const html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewpor
    if(width<600){const boxes=await cards.evaluateAll(items=>items.map(e=>e.getBoundingClientRect().y));assert(boxes[0]<boxes[1]&&boxes[1]<boxes[2],'窄屏三个设置自然纵向排列');}
    await page.screenshot({path:path.join(output,'board-io-'+width+'.png'),fullPage:true});
   }
+  await page.goto('http://board.test/disabled');
+  assert.equal(await page.locator('#sws-io-protection,#sws-io-brake-state').count(),0,'编译关闭后没有抱闸开关和状态');
+  assert.equal(await page.locator('#sws-io-activity').count(),1,'活动指示灯不受影响');
+  for(const width of [1440,390,320]){
+   await page.setViewportSize({width,height:1000});
+   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'关闭抱闸功能后布局不溢出');
+   if(width===1440){const boxes=await page.locator('.sws-io-control,.sws-mount-type').evaluateAll(items=>items.map(e=>{const r=e.getBoundingClientRect();return{y:r.y,width:r.width};}));assert.equal(boxes.length,2);assert.equal(boxes[0].y,boxes[1].y);assert(Math.abs(boxes[0].width-boxes[1].width)<2,'隐藏后剩余两项等宽，无空白占位');}
+   await page.screenshot({path:path.join(output,'board-io-disabled-'+width+'.png'),fullPage:true});
+  }
   assert.deepEqual(errors,[]);
-  console.log('PASS: three aligned settings, theme switches, original mount type interface, distinct IO settings, release confirmation, save failure recovery and 1440/390/320 layouts');
+  console.log('PASS: theme switches, original mount type interface, disable-to-lock confirmation, save failure recovery, config OFF hides brake controls, responsive two/three-card layouts');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
