@@ -36,6 +36,9 @@ void handleNetwork() {
   
   processNetworkGet();
 
+  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
+  if (servePageShell(PAGE_NETWORK)) return;
+
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
@@ -69,7 +72,7 @@ void handleNetwork() {
   }
 
   // page contents
-  data.concat(F("<div>"));
+  data.concat(F("<div class=\"sws-network-layout\">"));
 
   if (restartRequired) {
     restartRequired = false;
@@ -129,9 +132,10 @@ void handleNetwork() {
     data.concat(FPSTR(html_tile_end));
     www.sendContentAndClear(data);
 
-    data.concat(F("<br class='clear' /><hr>"));
+    // 账号设置独占一行，通信与固件更新按屏幕宽度排列
+    data.concat(F("<section class='sws-account'>"));
     data.concat(FPSTR(html_logout));
-    data.concat(F("<hr>"));
+    data.concat(F("</section>"));
   }
 
   sstrcpy(temp, "</div></div></body></html>");

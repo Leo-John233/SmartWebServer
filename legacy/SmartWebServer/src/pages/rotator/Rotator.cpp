@@ -20,6 +20,9 @@ void handleRotator() {
 
   processRotatorGet();
 
+  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
+  if (servePageShell(PAGE_ROTATOR)) return;
+
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
@@ -61,13 +64,16 @@ void handleRotator() {
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // page contents
-  rotatorHomeTile(data);
+  // 旋转控制优先展示，归位和补偿各自分组
+  data.concat(F("<div class='sws-device-layout'><div class='sws-device-controls'><section class='sws-device-primary'>"));
   rotatorSlewingTile(data);
+  data.concat(F("</section><section>"));
+  rotatorHomeTile(data);
+  data.concat(F("</section></div><details class='sws-more' open><summary>" L_DEROTATOR " / " L_BACKLASH "</summary><div class='sws-settings-grid'>"));
   if (status.derotatorFound) deRotatorTile(data);
   rotatorBacklashTile(data);
+  data.concat(F("</div></details></div>"));
 
-  data.concat(F("<br class='clear' />"));
   data.concat(FPSTR(html_page_and_body_end));
 
   data.concat(FPSTR(html_script_collapsible));

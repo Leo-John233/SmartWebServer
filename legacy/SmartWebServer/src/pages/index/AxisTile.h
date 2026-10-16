@@ -19,18 +19,19 @@ const char html_configMountType[] PROGMEM =
 " <input style='width: 7em;' value='%d' type='number' name='mountt' min='1' max='3' step='1'>&nbsp; " L_ADV_MOUNT_TYPE "<br /><br />\n";
 
 #if DRIVE_CONFIGURATION == ON
+  // 参数名称与输入框同排展示，标签沿用语言文件中的原文
   const char html_configAxisFloat[] PROGMEM =
-  " <input style='width: 10em;' value='%s' type='number' name='a%dp%dvalue' min='%ld' max='%ld' step='any'>&nbsp;%s<br />\n";
+  "<label class='sws-parameter'><input style='width: 10em;' value='%s' type='number' name='a%dp%dvalue' min='%ld' max='%ld' step='any'><span>%s</span></label>\n";
   const char html_configAxisInt[] PROGMEM =
-  " <input style='width: 10em;' value='%ld' type='number' name='a%dp%dvalue' min='%ld' max='%ld' step='1'>&nbsp;%s<br />\n";
+  "<label class='sws-parameter'><input style='width: 10em;' value='%ld' type='number' name='a%dp%dvalue' min='%ld' max='%ld' step='1'><span>%s</span></label>\n";
   const char html_configAxisSelectStart[] PROGMEM =
-  " <select size='1' style='width: 10.6em; margin: 3px; text-align-last: center;' name='a%dp%dvalue' >";
+  "<label class='sws-parameter'><select size='1' style='width: 10.6em; margin: 3px; text-align-last: center;' name='a%dp%dvalue' >";
   const char html_configAxisSelectOption[] PROGMEM =
   "<option value='%d'>%s</option>";
   const char html_configAxisSelectOptionSelected[] PROGMEM =
   "<option value='%d' selected>%s</option>";
   const char html_configAxisSelectEnd[] PROGMEM =
-  "</select>&nbsp;%s<br />\n";
+  "</select><span>%s</span></label>\n";
 
   const char html_configAxisRevert[] PROGMEM =
   "<button name='revert' value='%d' type='submit'>" L_REVERT "</button>";

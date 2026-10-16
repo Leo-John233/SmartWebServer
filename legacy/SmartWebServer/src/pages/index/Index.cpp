@@ -18,6 +18,9 @@ void handleRoot()
 
   processIndexGet();
 
+  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
+  if (servePageShell(PAGE_CONTROLLER)) return;
+
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
@@ -58,12 +61,14 @@ void handleRoot()
   data.concat(temp);
   www.sendContentAndClear(data);
 
-  // page contents
+  // 概况与驱动分区展示，详细参数在卡片内展开
+  data.concat(F("<div class='sws-controller'><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_CONTROLLER " " L_STATUS "</h2><p></p></div><div class='sws-overview-grid'>"));
   #if DISPLAY_WEATHER == ON
     ambientTile(data);
   #endif
 
   statusTile(data);
+  data.concat(F("</div></section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_DRIVER "</h2><p></p></div><div class='sws-axis-grid'>"));
 
   int numShown = 0;
   int numAxes = 5;
@@ -73,7 +78,7 @@ void handleRoot()
     if (axisTile(axis, data)) numShown++;
   }
 
-  data.concat(F("<br class=\"clear\" />\n"));
+  data.concat(F("</div></section>"));
 
   #if DISPLAY_SERVO_MONITOR == ON
     data.concat(F("<hr>"));
@@ -88,7 +93,7 @@ void handleRoot()
   #endif
 
   #if DRIVE_CONFIGURATION == ON
-    data.concat(F("<hr>"));
+    data.concat(F("<details class='sws-more' open><summary>" L_ADV_SET_TITLE "</summary>"));
     if (numShown == 0) data.concat(F("<br />" L_ADV_SET_NO_EDIT "<br />"));
 
     snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
@@ -108,6 +113,10 @@ void handleRoot()
     www.sendContentAndClear(data);
   #endif
 
+  #if DRIVE_CONFIGURATION == ON
+    data.concat(F("</details>"));
+  #endif
+  data.concat(F("</div>"));
   data.concat(FPSTR(html_script_collapsible));
 
   data.concat(FPSTR(html_page_and_body_end));

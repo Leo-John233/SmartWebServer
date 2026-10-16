@@ -22,6 +22,9 @@ void handleAux() {
 
   processAuxGet();
 
+  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
+  if (servePageShell(PAGE_AUXILIARY)) return;
+
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
@@ -62,6 +65,9 @@ void handleAux() {
   www.sendContentAndClear(data);
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
+
+  // 输出通道按功能独立分组，窄屏自动单列
+  data.concat(F("<div class='sws-device-layout'><div class='sws-section-head'><h2 class='sws-section-title'>" L_AUX_FEATURES "</h2><p></p></div><div class='sws-aux-grid'>"));
 
   // Auxiliary Features --------------------------------------
   int j = 0;
@@ -234,6 +240,7 @@ void handleAux() {
 
   data.concat(FPSTR(html_auxEnd));
   
+  data.concat(F("</div></div>"));
   data.concat(FPSTR(html_page_and_body_end));
   www.sendContentAndClear(data);
 

@@ -25,9 +25,9 @@ bool axisTile(int axis, String &data)
   switch (axis) {
     case 0: snprintf(temp1, sizeof(temp1), "Axis%d RA/Azm", 1); break;
     case 1: snprintf(temp1, sizeof(temp1), "Axis%d Dec/Alt", 2); break;
-    case 2: snprintf(temp1, sizeof(temp1), "Axis%d Rotator", 3); break;
+    case 2: snprintf(temp1, sizeof(temp1), "Axis%d " L_ROTATOR, 3); break;
     case 3: case 4: case 5: case 6: case 7: case 8:
-      snprintf(temp1, sizeof(temp1), "Axis%d Focuser%d", axis + 1, axis - 2);
+      snprintf(temp1, sizeof(temp1), "Axis%d " L_FOCUSER "%d", axis + 1, axis - 2);
     break;
   }
   snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "11em", temp1);
@@ -249,7 +249,8 @@ void axisTileGet()
 
     // determine what axis is being set
     int axisNumber = 0;
-    for (int i = 1; i < 9; i++) {
+    // 包含第九轴，确保最后一个调焦器的参数也能提交
+    for (int i = 1; i <= 9; i++) {
       snprintf(argStr, sizeof(argStr), "a%dp%dvalue", i, 1);
       if (!www.arg(argStr).equals(EmptyStr)) {
         axisNumber = i;

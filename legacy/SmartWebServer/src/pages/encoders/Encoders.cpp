@@ -20,6 +20,9 @@ void handleEncoders()
 
   processEncodersGet();
 
+  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
+  if (servePageShell(PAGE_ENCODERS)) return;
+
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
@@ -63,12 +66,14 @@ void handleEncoders()
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // page contents
+  // 同步状态与两轴参数分区排列，避免窄屏并排挤压
+  data.concat(F("<div class='sws-device-layout'><section class='sws-device-selector'>"));
   syncTile(data);
+  data.concat(F("</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_ENC_CONF "</h2><p></p></div><div class='sws-settings-grid'>"));
   encAxisTile(0, data);
   encAxisTile(1, data);
+  data.concat(F("</div></section></div>"));
 
-  data.concat(F("<br class=\"clear\" />\n"));
   data.concat(FPSTR(html_page_and_body_end));
 
   data.concat(FPSTR(html_script_collapsible));

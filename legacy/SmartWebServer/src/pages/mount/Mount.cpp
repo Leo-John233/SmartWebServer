@@ -19,6 +19,9 @@ void handleMount()
 
   processMountGet();
 
+  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
+  if (servePageShell(PAGE_MOUNT)) return;
+
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
@@ -63,21 +66,26 @@ void handleMount()
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // page contents
+  // 常用移动与定位放在首屏，校准和限位放入独立设置区
+  data.concat(F("<div class='sws-mount'><div class='sws-control-grid'><section class='sws-guide'>"));
+  guideTile(data);
+  data.concat(F("</section><section class='sws-target'>"));
+  gotoTile(data);
+  data.concat(F("</section><section class='sws-tracking'>"));
+  trackingTile(data);
+  data.concat(F("</section></div><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_LOCATION_TITLE " / " L_PAGE_LIBRARY "</h2><p></p></div><div class='sws-settings-grid'>"));
   siteTile(data);
+  libraryTile(data);
+  data.concat(F("</div></section><details class='sws-more' open><summary>" L_HOME_PARK_TITLE " / " L_ALIGN " / " L_LIMITS_TITLE "</summary><div class='sws-settings-grid'>"));
   homeParkTile(data);
   alignTile(data);
-  gotoTile(data);
-  libraryTile(data);
-  guideTile(data);
-  trackingTile(data);
+  limitsTile(data);
   if (status.pecEnabled) pecTile(data);
   #if DISPLAY_COORDINATE_ORIGIN == ON
     coordinateTile(data);
   #endif
-  limitsTile(data);
+  data.concat(F("</div></details></div>"));
 
-  data.concat(F("<br class='clear' />"));
   data.concat(FPSTR(html_page_and_body_end));
 
   data.concat(FPSTR(html_script_collapsible));
