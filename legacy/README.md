@@ -60,3 +60,9 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - 新增加的高级设置分区默认展开，原有控件内的设置折叠保持可操作
 - `node legacy/tests/axis-page.cjs <HTML输出路径>` 编译实际轴页面代码，检查 26 项参数及上传、恢复默认值，并验证第九轴参数提交
 - 页面功能清单覆盖原有显示、状态刷新和命令处理入口，实际可用功能仍由设备和编译配置决定
+
+## 导航图标
+
+- 导航采用内嵌实心 SVG，桌面侧栏和手机导航共用，设备离线时无需加载字体或图片
+- 赤道仪按参考图重绘为倾斜镜筒、镜口和底座，其他入口分别使用芯片、Wi-Fi、对焦镜头、旋转箭头、开关和编码盘
+- 造型参考 [MDI 望远镜](https://pictogrammers.com/library/mdi/icon/telescope/)、[芯片](https://pictogrammers.com/library/mdi/icon/chip/)、[镜头](https://pictogrammers.com/library/mdi/icon/camera-iris/)与[调节器](https://pictogrammers.com/library/mdi/icon/tune/)，路径在项目内重绘
