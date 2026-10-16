@@ -170,3 +170,7 @@
 #ifndef L_TRK_AXES
 #define L_TRK_AXES "Compensation axes"
 #endif
+
+#ifndef L_DEVICE_TRACKING
+#define L_DEVICE_TRACKING "Device tracking"
+#endif

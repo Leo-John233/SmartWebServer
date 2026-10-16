@@ -88,6 +88,10 @@ html.sws-embedded body{background:#101012}html.sws-embedded .b{background:transp
 .sws-goto-overview{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:stretch;margin:12px 0}.sws-goto-overview .sws-position-grid{margin:0;min-width:0}.sws-goto-overview .sws-position-grid strong{text-align:center;margin:auto 0}.sws-target .sws-goto-overview .sws-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(44px,1fr));gap:8px;margin:0;align-items:stretch}.sws-target .sws-goto-overview .sws-actions button{width:100%!important;height:100%!important;min-width:0;margin:0;padding:10px 8px;white-space:normal;line-height:1.5}.sws-target .sws-goto-overview .sws-actions button:nth-of-type(n+3){background:#30262c;border-color:#50353e}@media(max-width:1000px){.sws-goto-overview{grid-template-columns:1fr}.sws-target .sws-goto-overview .sws-actions{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:1fr}}@media(max-width:700px){.sws-goto-overview{gap:12px}.sws-target .sws-goto-overview .sws-actions{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(44px,1fr))}}
 /* 方位控制标题与其他卡片一致靠左，方向盘继续居中 */
 .sws-mount .sws-guide>.b1>div:first-child{text-align:left;align-self:stretch}
+/* 跟踪卡片从开关开始显示，移除重复标题及标题占位 */
+.sws-tracking>.b1>div:first-child,.sws-tracking>.b1>br:first-of-type,.sws-tracking>.b1>hr:first-of-type{display:none}
+/* 设备跟踪开关行与方位控制标题采用统一层级 */
+.sws-track-switch{min-height:28px;margin:0 0 16px;clear:both}.sws-track-switch>span,.sws-mount .sws-guide>.b1>div:first-child{font-size:16px;font-weight:600;line-height:28px}
 </style>
 <script>
 // 坐标由单次请求提交，保留错误反馈且不在连接中断时自动重发运动指令
@@ -105,6 +109,9 @@ html.sws-embedded body{background:#101012}html.sws-embedded .b{background:transp
 // 下拉框代理原有按钮，后台状态更新仍通过原来的标识同步
  document.addEventListener('DOMContentLoaded',()=>{
  const tracking=document.querySelector('.sws-tracking .b1');
+ // 方位控制标题去掉冒号，保留倍率与状态节点
+ const guideTitle=document.querySelector('.sws-guide>.b1>div:first-child');
+ if(guideTitle)guideTitle.childNodes.forEach(node=>{if(node.nodeType===Node.TEXT_NODE)node.textContent=node.textContent.replace(/[:：]\s*$/,'');});
  document.querySelectorAll('.sws-choice-source').forEach(source=>{
   const buttons=[...source.querySelectorAll('button')];if(!buttons.length)return;
   const label=document.createElement('label');label.className='sws-choice';const text=document.createElement('span');text.textContent=source.dataset.label;const select=document.createElement('select');
@@ -114,7 +121,7 @@ html.sws-embedded body{background:#101012}html.sws-embedded .b{background:transp
   if(tracking&&source.classList.contains('sws-guide-choice')){let collapse=tracking.querySelector('.collapsible');while(collapse&&collapse.parentElement!==tracking)collapse=collapse.parentElement;tracking.insertBefore(label,collapse||null);}
  });
  const on=document.getElementById('trk_on'),off=document.getElementById('trk_off');
- if(on&&off){const wrap=document.createElement('div');wrap.className='sws-track-switch';const name=document.createElement('span');name.textContent=tracking.querySelector('div').textContent.replace(/:$/,'');const toggle=document.createElement('button');toggle.className='sws-switch';toggle.type='button';toggle.setAttribute('role','switch');toggle.setAttribute('aria-label',name.textContent);toggle.setAttribute('aria-checked','false');on.before(wrap);wrap.append(name,toggle);on.hidden=true;off.hidden=true;toggle.onclick=()=>{const checked=toggle.getAttribute('aria-checked')==='true';(checked?off:on).dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));};const sync=()=>{toggle.setAttribute('aria-checked',String(on.style.background==='rgb(153, 75, 87)'));toggle.disabled=on.disabled&&off.disabled;};const observer=new MutationObserver(sync);[on,off].forEach(b=>observer.observe(b,{attributes:true,attributeFilter:['style','disabled']}));sync();}
+ if(on&&off){const wrap=document.createElement('div');wrap.className='sws-track-switch';const name=document.createElement('span');name.textContent=on.dataset.label||tracking.querySelector('div').textContent.replace(/:$/,'');const toggle=document.createElement('button');toggle.className='sws-switch';toggle.type='button';toggle.setAttribute('role','switch');toggle.setAttribute('aria-label',name.textContent);toggle.setAttribute('aria-checked','false');on.before(wrap);wrap.append(name,toggle);on.hidden=true;off.hidden=true;toggle.onclick=()=>{const checked=toggle.getAttribute('aria-checked')==='true';(checked?off:on).dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));};const sync=()=>{toggle.setAttribute('aria-checked',String(on.style.background==='rgb(153, 75, 87)'));toggle.disabled=on.disabled&&off.disabled;};const observer=new MutationObserver(sync);[on,off].forEach(b=>observer.observe(b,{attributes:true,attributeFilter:['style','disabled']}));sync();}
  });
 
 // 内容页使用独立文档，离开时由浏览器清理轮询与事件，导航和页头保持不动

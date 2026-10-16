@@ -11,7 +11,7 @@ extern void trackingTileAjax(String &data);
 extern void trackingTileGet();
 
 const char html_trackingEnable[] PROGMEM = 
-"<button id='trk_on' class='btns_right' onpointerdown=\"s('dr','T1')\" type='button'>" L_ON "</button>"
+"<button id='trk_on' data-label='" L_DEVICE_TRACKING "' class='btns_right' onpointerdown=\"s('dr','T1')\" type='button'>" L_ON "</button>"
 "<button id='trk_off' class='btns_left' onpointerdown=\"s('dr','T0')\" type='button'>" L_OFF "</button>";
 
 const char html_trackingPreset[] PROGMEM =

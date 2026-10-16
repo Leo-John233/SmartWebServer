@@ -61,6 +61,7 @@
 #define L_DEW_POINT "露点温度"
 
 // operation
+#define L_DEVICE_TRACKING "设备跟踪"
 #define L_TRACKING "跟踪"
 #define L_SITE "观测地点"
 #define L_COORDINATES "坐标"
