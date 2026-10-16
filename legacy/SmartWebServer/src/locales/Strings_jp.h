@@ -720,9 +720,6 @@
 #define L_IO_BRAKE_STOP_FAILED "停止指令未送信、解除を維持"
 
 #define L_SITE_TIME "時刻"
-#define L_SITE_LOCATE "現在地"
-#define L_SITE_LOCATE_FAILED "位置を取得できません 権限を許可するか手動で編集してください"
-#define L_SITE_LOCATE_HTTPS "位置取得には信頼された HTTPS 接続が必要です 経緯度を手動で入力してください"
 #define L_TRACK_REJECTED "追尾が拒否されました パーク・原点・ドライバーの状態を確認してください"
 #define L_TRACK_TIMEOUT "応答がタイムアウトしました 接続を確認してください"
 #define L_TRACK_INVALID "応答が不正です 再試行してください"

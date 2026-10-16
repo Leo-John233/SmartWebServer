@@ -721,9 +721,6 @@
 #define L_IO_BRAKE_STOP_FAILED "STOP non inviato, rilasciato"
 
 #define L_SITE_TIME "Ora"
-#define L_SITE_LOCATE "Localizza"
-#define L_SITE_LOCATE_FAILED "Posizione non disponibile, consentire accesso o modificare manualmente"
-#define L_SITE_LOCATE_HTTPS "La posizione richiede HTTPS attendibile; inserire le coordinate manualmente"
 #define L_TRACK_REJECTED "Inseguimento rifiutato; verificare parcheggio, origine e driver"
 #define L_TRACK_TIMEOUT "Risposta scaduta; verificare la connessione"
 #define L_TRACK_INVALID "Risposta non valida; riprovare"

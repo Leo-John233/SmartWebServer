@@ -33,14 +33,12 @@ const char html_editor_styles[] PROGMEM = R"UI(
 .sws-site .sws-unit-inputs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
 .sws-site .sws-unit-inputs > select { width:100%; height:44px; }
 .sws-site .sws-site-fields { gap:26px; }
-.sws-zone-row { display:grid; grid-template-columns:minmax(0,3fr) minmax(90px,1fr); gap:10px; }
-.sws-site .sws-locate, .sws-site .sws-clock-action button { background:var(--accent); width:100%; height:44px; margin:0; }
+.sws-site .sws-clock-action button { background:var(--accent); width:100%; height:44px; margin:0; }
 .sws-site .sws-clock-controls { display:grid; grid-template-columns:minmax(0,3fr) minmax(90px,1fr); align-items:end; border:0; padding-top:0; margin-top:26px; gap:10px; }
 .sws-site #sws-local-time { width:100%; margin:0; font-size:16px; text-align:left; padding:8px 12px; }
 .sws-site.sws-editor .sws-clock-action small { display:block; width:100%; }
 .sws-site.sws-editor .sws-clock-action button { width:100%; white-space:normal; overflow-wrap:anywhere; padding:6px; }
-.sws-zone-row > *, .sws-site .sws-clock-controls > form { min-width:0; }
-.sws-site .sws-locate { min-width:0; padding:6px; overflow-wrap:anywhere; }
+.sws-site .sws-clock-controls > form { min-width:0; }
 .sws-editor .sws-help { margin:10px 0 0; font-size:12px; line-height:1.7; color:var(--muted); }
 .sws-editor .sws-limits-form { display:grid; gap:22px; }
 .sws-editor .sws-number-field { display:block; margin:0; }
@@ -145,39 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     group.querySelector('.sws-unit-inputs').hidden = true;
     group.querySelector('.sws-help').hidden = true;
-    const row = document.createElement('div'), locate = document.createElement('button'), notice = document.createElement('p');
-    row.className = 'sws-zone-row'; locate.className = 'sws-locate'; locate.type = 'button';
-    locate.textContent = )UI" SWS_JS_TEXT(L_SITE_LOCATE) R"UI(;
-    notice.className = 'sws-help'; notice.setAttribute('role','status'); notice.hidden = true;
-    row.append(select,locate); group.append(row,notice);
+    group.append(select);
     select.onchange = () => {
       const west = Number(select.value);
       hours.value = (west < 0 ? '-' : '') + Math.floor(Math.abs(west)/60);
       minutes.value = Math.abs(west)%60;
-    };
-    locate.onclick = () => {
-      if(site.closest('.sws-editor').dataset.editing!=='true')return;
-      notice.hidden = true;
-      const revision=site.closest('.sws-editor').dataset.editRevision;
-      const current=()=>site.closest('.sws-editor').dataset.editing==='true'&&site.closest('.sws-editor').dataset.editRevision===revision;
-      const failed = (message) => { if(!current())return; locate.disabled=false; notice.textContent=typeof message==='string'?message:)UI" SWS_JS_TEXT(L_SITE_LOCATE_FAILED) R"UI(; notice.hidden=false; };
-      if (window.isSecureContext === false) { failed()UI" SWS_JS_TEXT(L_SITE_LOCATE_HTTPS) R"UI(); return; }
-      if (!navigator.geolocation) { failed(); return; }
-      locate.disabled = true;
-      navigator.geolocation.getCurrentPosition(position => {
-        if(!current())return;
-        locate.disabled = false;
-        for (const [prefix,coordinate,negative] of [['g',position.coords.longitude,position.coords.longitude>=0],['t',position.coords.latitude,position.coords.latitude<0]]) {
-          const total=Math.round(Math.abs(coordinate)*3600), source=site.elements[prefix+'1'];
-          const value=source.parentElement.querySelector('input:not([hidden])'), direction=source.closest('fieldset').querySelector('.sws-unit-inputs > select');
-          value.value=Math.floor(total/3600); direction.value=negative?'-':'+';
-          value.dispatchEvent(new Event('input')); direction.dispatchEvent(new Event('change'));
-          site.elements[prefix+'2'].value=Math.floor(total%3600/60);
-          if(site.elements[prefix+'3']) site.elements[prefix+'3'].value=total%60;
-        }
-        const year=new Date().getFullYear(), west=Math.max(new Date(year,0,1).getTimezoneOffset(),new Date(year,6,1).getTimezoneOffset());
-        if([...select.options].some(o=>Number(o.value)===west)){select.value=west;select.onchange();}
-      },failed,{timeout:10000,maximumAge:60000});
     };
     const updateLocalTime = () => {
       const date=document.getElementById('date_ut').textContent.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/), time=document.getElementById('time_ut').textContent.match(/^(\d{2}):(\d{2}):(\d{2})$/);
@@ -203,8 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', remember);
     const setEditing = (editing) => {
       card.dataset.editing = String(editing);
-      card.dataset.editRevision=String(Number(card.dataset.editRevision||0)+1);
-      const locate=form.querySelector('.sws-locate');if(locate)locate.disabled=!editing;
       fields.forEach(field => { if (field.tagName === 'SELECT') field.disabled = !editing; else field.readOnly = !editing; });
       edit.disabled = editing; edit.setAttribute('aria-expanded', String(editing));
     };

@@ -719,9 +719,6 @@
 #define L_IO_BRAKE_STOP_FAILED "STOP no enviat, alliberat"
 
 #define L_SITE_TIME "Hora"
-#define L_SITE_LOCATE "Localitza"
-#define L_SITE_LOCATE_FAILED "Ubicació no disponible, permeteu l’accés o editeu-la"
-#define L_SITE_LOCATE_HTTPS "La ubicació requereix una connexió HTTPS de confiança; introduïu les coordenades manualment"
 #define L_TRACK_REJECTED "Seguiment rebutjat; comproveu aparcament, origen i controlador"
 #define L_TRACK_TIMEOUT "Temps d’espera esgotat; comproveu la connexió"
 #define L_TRACK_INVALID "Resposta no vàlida; torneu-ho a provar"
