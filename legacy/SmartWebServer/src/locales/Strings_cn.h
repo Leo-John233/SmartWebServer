@@ -176,7 +176,7 @@
 #define BUTTON_W "西"
 #define BUTTON_SYNC "@"
 // 方向盘中心停止文字与坐标同步文字分别定义
-#define BUTTON_STOP "stop"
+#define BUTTON_STOP "STOP"
 // 定位区使用文字标识同步操作，避免与方向盘停止键混淆
 #define L_COORD_SYNC "同步"
 
