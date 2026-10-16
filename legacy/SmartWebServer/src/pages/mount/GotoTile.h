@@ -14,25 +14,16 @@ extern void gotoTileGet();
 #define Axis1 "&alpha;"
 #define Axis2 "&delta;"
 
-const char html_mountPositionLabels[] PROGMEM =
-  "<div style='display: table; text-align: left;'><div style='display: table-cell;'>"
-  L_CURRENT ":<br /><br />"
-  L_TARGET ":<br />"
-  "</div>";
-
+// 当前坐标和目标坐标采用两列指标，保留原来的状态更新标识
+const char html_mountPositionLabels[] PROGMEM = "<div class='sws-position-grid'>";
 const char html_mountPositionAxis1[] PROGMEM =
-  "<div style='display: table-cell;'>"
-  "&nbsp;&nbsp;&nbsp;Z <span id='gto_az1' class='c'>%s</span><br />"
-  "&nbsp;&nbsp;&nbsp;" Axis1 " <span id='gto_i1' class='c'>%s</span><br />"
-  "&nbsp;&nbsp;&nbsp;" Axis1 " <span id='gto_t1' class='c'>%s</span><br />"
-  "</div>";
-
+"<div><span>" L_COORD_AZ "</span><strong id='gto_az1'>%s</strong></div>"
+"<div><span>" L_CURRENT " RA</span><strong id='gto_i1'>%s</strong></div>"
+"<div><span>" L_TARGET " RA</span><strong id='gto_t1'>%s</strong></div>";
 const char html_mountPositionAxis2[] PROGMEM =
-  "<div style='display: table-cell;'>"
-  "&nbsp;&nbsp;&nbsp;A <span id='gto_az2' class='c'>%s</span><br />"
-  "&nbsp;&nbsp;&nbsp;" Axis2 " <span id='gto_i2' class='c'>%s</span><br />"
-  "&nbsp;&nbsp;&nbsp;" Axis2 " <span id='gto_t2' class='c'>%s</span><br />"
-  "</div></div>";
+"<div><span>" L_COORD_ALT "</span><strong id='gto_az2'>%s</strong></div>"
+"<div><span>" L_CURRENT " DEC</span><strong id='gto_i2'>%s</strong></div>"
+"<div><span>" L_TARGET " DEC</span><strong id='gto_t2'>%s</strong></div></div>";
 
 const char html_mountHorizon[] PROGMEM =
   "Z <span id='gto_az1' class='c'>%s</span>, A <span id='gto_az2' class='c'>%s</span><br />";
@@ -44,16 +35,16 @@ const char html_mountTarget[] PROGMEM =
   L_TARGET ": &nbsp;" Axis1 " <span id='gto_t1' class='c'>%s</span>, " Axis2 " <span id='gto_t2' class='c'>%s</span><br />";
 
 const char html_gotoGo[] PROGMEM =
-  "<br /><button onpointerdown=\"s('goto','go')\" type='button' class='bb'>" L_SET_LABEL "</button>";
+  "<br /><button onpointerdown=\"s('goto','go')\" type='button' class='bb'>" L_GOTO_TARGET "</button>";
 
 const char html_gotoStop[] PROGMEM =
   "<button onpointerdown=\"s('goto','stop')\" type='button' class='bb' style='height: 3em; width: 5em; color: White;' title='" L_HINT_EMERGENCY_STOP "'>" L_STOP "!</button>";
 
 // 同步操作移至定位动作区，继续使用原有同步命令
-const char html_gotoSync[] PROGMEM = "<button class='sws-sync' onpointerdown=\"g('sy')\" type='button'>" L_COORD_SYNC "</button>";
+const char html_gotoSync[] PROGMEM = "<button class='sws-sync' onpointerdown=\"g('sy')\" type='button'>" L_SYNC_TARGET "</button>";
 
 const char html_gotoContinue[] PROGMEM =
-  "<button id='gto_active' onpointerdown=\"s('goto','mp_cnt')\" type='button' disabled class='bb' title='" L_HINT_CONTINUE_GOTO "'>" ARROW_R2 HOME_CH ARROW_R2 "</button>";
+  "<button id='gto_active' onpointerdown=\"s('goto','mp_cnt')\" type='button' disabled class='bb' title='" L_HINT_CONTINUE_GOTO "'>" L_CONTINUE "</button>";
 
 const char html_slewSpeed[] PROGMEM =
   L_MAX_SLEW_SPEED " <span id='gto_rate' class='c'>%s</span>:<br />";
@@ -118,3 +109,9 @@ const char html_gotoPreferredPierSide2[] PROGMEM =
   "<button id='gto_pps_auto' class='btns_left' onpointerdown=\"s('goto','pps_a')\" type='button'>" L_AUTO "</button>"
   "<br />\n"
   "</div>";
+
+// 坐标表单使用语言资源，按钮只在有效输入后提交完整坐标
+const char html_coordinateInput[] PROGMEM =
+"<form id='sws-coordinate-form' class='sws-coordinate-form' data-send='" L_COORD_SEND "' data-ok='" L_COORD_OK "' data-invalid='" L_COORD_INVALID "' data-reject='" L_COORD_REJECT "' data-network='" L_COORD_NETWORK "'>\n<h3>" L_COORD_GOTO "</h3><div class='sws-coordinate-grid'><label class='sws-coordinate-system'><span>" L_COORD_SYSTEM "</span><input value='" L_COORD_JNOW "' readonly></label><div class='sws-coordinate-actions'><button type='submit' name='coord_action' value='go'>" L_GOTO_ACTION "</button><button class='sws-secondary' type='submit' name='coord_action' value='sync'>" L_COORD_SYNC "</button></div><fieldset><legend>" L_COORD_RA "</legend><div class='sws-coordinate-units'><label class='sws-coordinate-unit'><input name='ra_h' type='number' min='0' max='23' step='1' inputmode='numeric' required aria-label='" L_COORD_H "'><span>" L_COORD_H "</span></label><label class='sws-coordinate-unit'><input name='ra_m' type='number' min='0' max='59' step='1' inputmode='numeric' required aria-label='" L_COORD_M "'><span>" L_COORD_M "</span></label><label class='sws-coordinate-unit'><input name='ra_s' type='number' min='0' max='59' step='1' inputmode='numeric' required aria-label='" L_COORD_S "'><span>" L_COORD_S "</span></label></div></fieldset><fieldset><legend>" L_COORD_DEC "</legend><div class='sws-coordinate-units'><select name='dec_sign' aria-label='" L_COORD_SIGN "'><option value='+'>+</option><option value='-'>−</option></select><label class='sws-coordinate-unit'><input name='dec_d' type='number' min='0' max='90' step='1' inputmode='numeric' required aria-label='" L_COORD_D "'><span>" L_COORD_D "</span></label><label class='sws-coordinate-unit'><input name='dec_m' type='number' min='0' max='59' step='1' inputmode='numeric' required aria-label='" L_COORD_M "'><span>" L_COORD_M "</span></label><label class='sws-coordinate-unit'><input name='dec_s' type='number' min='0' max='59' step='1' inputmode='numeric' required aria-label='" L_COORD_S "'><span>" L_COORD_S "</span></label></div></fieldset></div><p role='status' class='sws-coordinate-message'></p></form>";
+
+extern void gotoCoordinatesGet();

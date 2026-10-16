@@ -102,7 +102,8 @@ void State::updateMount(bool now)
   if (status.pierSide == PierSideEast) sstrcpy(temp, L_EAST); else
   if (status.pierSide == PierSideNone) sstrcpy(temp, L_NONE); else sstrcpy(temp, L_UNKNOWN);
   if (!status.onStepFound) strcpy(temp, "?");
-  sstrcpyex(pierSideStr, temp, 10);
+  // 按目标数组容量复制，避免截断中文描述
+  sstrcpyex(pierSideStr, temp, sizeof(pierSideStr));
 
   // Preferred pier side
   if (status.mountType != MT_ALTAZM || (status.getVersionMajor() >= 10 && status.meridianFlips)) {

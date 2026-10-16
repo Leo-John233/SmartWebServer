@@ -84,3 +84,85 @@
   #define celsiusToNativeRelative(t) (t)
   #define TEMPERATURE_UNITS_ABV "C"
 #endif
+
+// 其他语言未提供新标签时使用默认文字
+#ifndef L_HOME_ACTIONS
+#define L_HOME_ACTIONS "Home"
+#endif
+#ifndef L_PARK_ACTIONS
+#define L_PARK_ACTIONS "Parking"
+#endif
+#ifndef L_COORD_GOTO
+#define L_COORD_GOTO "Coordinate GOTO"
+#endif
+#ifndef L_COORD_SYSTEM
+#define L_COORD_SYSTEM "Coordinate system"
+#endif
+#ifndef L_COORD_JNOW
+#define L_COORD_JNOW "RA / Dec (JNOW)"
+#endif
+#ifndef L_COORD_RA
+#define L_COORD_RA "RA"
+#endif
+#ifndef L_COORD_DEC
+#define L_COORD_DEC "DEC"
+#endif
+#ifndef L_COORD_SIGN
+#define L_COORD_SIGN "Sign"
+#endif
+#ifndef L_COORD_H
+#define L_COORD_H "h"
+#endif
+#ifndef L_COORD_D
+#define L_COORD_D "deg"
+#endif
+#ifndef L_COORD_M
+#define L_COORD_M "min"
+#endif
+#ifndef L_COORD_S
+#define L_COORD_S "sec"
+#endif
+#ifndef L_COORD_SEND
+#define L_COORD_SEND "Sending coordinates"
+#endif
+#ifndef L_COORD_OK
+#define L_COORD_OK "Command accepted"
+#endif
+#ifndef L_COORD_REJECT
+#define L_COORD_REJECT "Command rejected, check device status"
+#endif
+#ifndef L_COORD_INVALID
+#define L_COORD_INVALID "Enter valid coordinates; minutes and seconds must be zero at 90 degrees"
+#endif
+#ifndef L_COORD_NETWORK
+#define L_COORD_NETWORK "Connection lost, check device before retrying"
+#endif
+#ifndef L_CAT_PREV
+#define L_CAT_PREV "Previous"
+#endif
+#ifndef L_CAT_NEXT
+#define L_CAT_NEXT "Next"
+#endif
+#ifndef L_CAT_TARGET
+#define L_CAT_TARGET "Set target"
+#endif
+#ifndef L_CAT_HELP
+#define L_CAT_HELP "Catalog help"
+#endif
+
+#ifndef L_COORD_AZ
+#define L_COORD_AZ "Azimuth"
+#endif
+#ifndef L_COORD_ALT
+#define L_COORD_ALT "Altitude"
+#endif
+#ifndef L_GOTO_ACTION
+#define L_GOTO_ACTION "GOTO"
+#endif
+
+#ifndef L_GOTO_TARGET
+#define L_GOTO_TARGET "Go to current target"
+#endif
+#ifndef L_SYNC_TARGET
+#define L_SYNC_TARGET "Sync current target"
+#endif

@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Goto tile
 #include "GotoTile.h"
+#include "CoordinateInput.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -39,13 +40,15 @@ void gotoTile(String &data)
 {
   char temp[640] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", "Goto");
+  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_GOTO_ACTION);
   data.concat(temp);
 
   data.concat(F("<div style='float: right; text-align: right;' id='gto_status' class='c'>"));
-  snprintf(temp, sizeof(temp), "%s || %c", status.inGoto ? L_SLEWING : L_INACTIVE, state.pierSideStr[0]);
+  snprintf(temp, sizeof(temp), "%s", status.inGoto ? L_SLEWING : L_INACTIVE);
   data.concat(temp);
-  data.concat(F("</div><br /><hr>"));
+  data.concat(F("</div><div class='sws-pier-status'>" L_PIER_SIDE " <span id='gto_pier'>"));
+  data.concat(state.pierSideStr);
+  data.concat(F("</span></div><hr>"));
 
   data.concat(FPSTR(html_mountPositionLabels));
   snprintf_P(temp, sizeof(temp), html_mountPositionAxis1, state.indexAzmStr, state.indexRaStr, state.targetRaStr);
@@ -58,12 +61,12 @@ void gotoTile(String &data)
   // 定位动作与位置数据显示分开，避免按钮和速率文字挤在同一行
   data.concat(F("<div class='sws-actions'>"));
   data.concat(FPSTR(html_gotoGo));
-  data.concat(F("&nbsp;&nbsp;&nbsp;"));
   data.concat(FPSTR(html_gotoStop));
   data.concat(F("&nbsp;&nbsp;&nbsp;"));
   data.concat(FPSTR(html_gotoContinue));
   data.concat(FPSTR(html_gotoSync));
   data.concat(F("</div>"));
+  data.concat(FPSTR(html_coordinateInput));
   data.concat(F("<hr>"));
   www.sendContentAndClear(data);
 
@@ -129,10 +132,9 @@ void gotoTile(String &data)
 void gotoTileAjax(String &data)
 {
 
-  char pss[2] = "N";
-  pss[0] = state.pierSideStr[0];
-
-  data.concat(keyValueString("gto_status", status.inGoto ? L_SLEWING : L_INACTIVE, " || ", pss));
+  // 状态与镜筒侧分别更新，完整保留中文字符串
+  data.concat(keyValueString("gto_status", status.inGoto ? L_SLEWING : L_INACTIVE));
+  data.concat(keyValueString("gto_pier", state.pierSideStr));
 
   data.concat(keyValueString("gto_t1", state.targetRaStr));
   data.concat(keyValueString("gto_t2", state.targetDecStr));
@@ -231,4 +233,23 @@ extern void gotoTileGet()
     if (v.equals("go")) onStep.command(":MS#", temp);        // goto start
     if (v.equals("stop")) onStep.commandBlind(":Q#");        // goto/slew stop
   }
+}
+
+// 一次请求内校验并设置完整坐标，任一步失败均不继续启动移动或同步
+void gotoCoordinatesGet() {
+  const char *names[7] = {"ra_h", "ra_m", "ra_s", "dec_sign", "dec_d", "dec_m", "dec_s"};
+  String parts[7]; const char *values[7];
+  for (int i = 0; i < 7; ++i) { parts[i] = www.arg(names[i]); values[i] = parts[i].c_str(); }
+  char ra[24], dec[24], reply[80] = "";
+  String action = www.arg("coord_action");
+  if ((!action.equals("go") && !action.equals("sync")) || !coordinateCommands(values, ra, dec)) {
+    www.sendContent("invalid"); return;
+  }
+  if (!status.onStepFound || !onStep.commandBool(ra) || !onStep.commandBool(dec)) {
+    www.sendContent("rejected"); return;
+  }
+  bool accepted;
+  if (action.equals("sync")) accepted = onStep.commandBool(":CS#");
+  else accepted = onStep.command(":MS#", reply) && reply[0] == '0';
+  www.sendContent(accepted ? "ok" : "rejected");
 }

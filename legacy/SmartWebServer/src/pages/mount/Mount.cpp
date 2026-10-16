@@ -101,7 +101,9 @@ void mountAjaxGet()
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
 
-  processMountGet();
+  // 坐标操作返回本次结果，避免与其他控制参数混合执行
+  if (!www.arg("coord_action").equals(EmptyStr)) gotoCoordinatesGet();
+  else processMountGet();
 
   www.sendContent("");
 }

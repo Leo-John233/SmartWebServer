@@ -22,22 +22,21 @@ void homeParkTile(String &data)
   data.concat(F("</div><br /><hr>"));
 
   // 归位与停车各占一组，常用操作在同一行排列
-  data.concat(F("<div class='sws-home-actions'><div>"));
+  data.concat(F("<div class='sws-home-actions'><div><h3>" L_HOME_ACTIONS "</h3><div class='sws-action-pair'>"));
   data.concat(FPSTR(html_homeReturn));
   data.concat(FPSTR(html_homeReset));
-  data.concat(F("</div><div>"));
-  data.concat(FPSTR(html_unpark));
+  data.concat(F("</div></div><div><h3>" L_PARK_ACTIONS "</h3><div class='sws-action-pair'>"));
   data.concat(FPSTR(html_park));
-  data.concat(F("</div></div>"));
+  data.concat(FPSTR(html_setpark));
+  data.concat(F("</div><div class='sws-unpark-row'>"));
+  data.concat(FPSTR(html_unpark));
+  data.concat(F("</div></div></div>"));
   data.concat(F("<hr>"));
 
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
-  data.concat(F("<div class='sws-option-grid'><div class='sws-option-row'>" L_SET_PARK_CURRENT_COORDS ":<br />"));
-
-  data.concat(FPSTR(html_setpark));
-  data.concat(F("</div>"));
+  data.concat(F("<div class='sws-option-grid'>"));
   www.sendContentAndClear(data);
 
   // home options when home sense is available

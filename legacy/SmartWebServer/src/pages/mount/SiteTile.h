@@ -25,7 +25,7 @@ const char html_site[] PROGMEM =
 const char html_setDateTime[] PROGMEM =
   "<form style='display: inline' method='get' action='/mount.htm'>\n"
   "<div class='sws-clock-action'>"
-  "<small><button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' type='submit'>" CLOCK_CH " " L_HINT_CLOCK "</button></small>"
+  "<small><button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' type='submit'>" L_HINT_CLOCK "</button></small>"
   "</div>\n"
   "<input id='dm' type='hidden' name='dm'><input id='dd' type='hidden' name='dd'><input id='dy' type='hidden' name='dy'>"
   "<input id='th' type='hidden' name='th'><input id='tm' type='hidden' name='tm'><input id='ts' type='hidden' name='ts'>\n"

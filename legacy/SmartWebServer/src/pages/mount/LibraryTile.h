@@ -35,13 +35,13 @@ const char html_libShowMessage[] PROGMEM =
 "<div id='lib_message' style='margin: 0 auto; width: 14em; margin-top: 0.5em; margin-bottom: 1em; background-color: " COLOR_LIGHT_BACKGROUND "; color: " COLOR_LIGHT_FOREGROUND "; border: 1px solid " COLOR_BORDER "; padding: 2px;'>" L_CAT_NO_CAT "</div>\n";
 
 const char html_catPrevRec[] PROGMEM =
-"&nbsp;<button id='cat_prev' type='button' onclick=\"s('lib','cat_prev');\" disabled>" "Prev" "</button>\n";
+"&nbsp;<button id='cat_prev' type='button' onclick=\"s('lib','cat_prev');\" disabled>" L_CAT_PREV "</button>\n";
 
 const char html_catNextRec[] PROGMEM =
-"&nbsp;<button id='cat_next' type='button' onclick=\"s('lib','cat_next');\" disabled>" "Next" "</button>\n";
+"&nbsp;<button id='cat_next' type='button' onclick=\"s('lib','cat_next');\" disabled>" L_CAT_NEXT "</button>\n";
 
 const char html_catSetTarget[] PROGMEM =
-"&nbsp;<button id='cat_select' type='button' onclick=\"s('lib','cat_select');\" disabled>" "Set Target" "</button>\n";
+"&nbsp;<button id='cat_select' type='button' onclick=\"s('lib','cat_select');\" disabled>" L_CAT_TARGET "</button>\n";
 
 const char html_catShowMessage[] PROGMEM =
 "<div id='cat_message' style='margin: 0 auto; width: 14em; margin-top: 0.5em; margin-bottom: 1em; background-color: " COLOR_LIGHT_BACKGROUND "; color: " COLOR_LIGHT_FOREGROUND "; border: 1px solid " COLOR_BORDER "; padding: 2px;'>" L_CAT_NO_OBJECT "</div>\n";
@@ -61,7 +61,7 @@ const char html_libEditCatalog[] PROGMEM =
 "rows='10' cols='40' oninput=\"document.getElementById('cat_upload').disabled=false;\"></textarea><br /><br />\n";
 
 const char html_libCatalogHelp[] PROGMEM =
-"<br /><a href='libraryHelp.htm'>Library Help</a><br />";
+"<br /><a href='libraryHelp.htm'>" L_CAT_HELP "</a><br />";
 
 // Javascript for library status
 const char html_script_ajax_library[] PROGMEM =

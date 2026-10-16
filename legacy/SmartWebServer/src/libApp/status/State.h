@@ -81,7 +81,8 @@ class State {
     char diffAngleAxis1Str[24] = "?";
     char diffAngleAxis2Str[24] = "?";
 
-    char pierSideStr[10] = "?";
+    // 完整保存中文镜筒侧和中天翻转描述
+    char pierSideStr[80] = "?";
     char preferredPierSideChar = '?';
     char meridianFlipStr[10] = "?";
 
