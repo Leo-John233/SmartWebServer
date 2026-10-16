@@ -106,7 +106,7 @@ void State::axisStatusUpdate() {
   for (int axis = 0; axis < maxAxes; axis++) {
     if (driverStatusFailedAttempts[axis] < 3) {
       char cmd[40];
-      char reply[40];
+      char reply[80]; // 命令通道最多写入 79 字节及结束符，异常长反馈也不能越界
       snprintf(cmd, sizeof(cmd), ":GXU%d#", axis + 1);
       const bool received = onStep.command(cmd, reply);
       if (axis == 0) boardIo.driverFeedback(received, reply);

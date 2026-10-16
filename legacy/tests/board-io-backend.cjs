@@ -86,23 +86,29 @@ struct Web{
   code+=clean('pages/boardIo/BoardIo.cpp')+'\n'+clean('pages/Request.cpp')+'\n';
   code+=preview?`int main(){boardIo.initPins();boardIo.begin();status.onStepFound=true;status.mountFound=SD_TRUE;now=10;boardIo.driverFeedback(true,"ST,,,,,,,");now=600;boardIo.driverFeedback(true,"ST,,,,,,,");String data;boardIoTile(data);std::cout<<data;}`:!brakeEnabled?`
 int main(){
-  boardIo.initPins();assert(pins[5]==LOW&&pinEvents[0]==50);
+  boardIo.initPins();assert(pins[5]==HIGH&&pinEvents[0]==51);
   boardIo.begin();assert(!boardIo.brakeAvailable()&&boardIo.ownsPin(5));
   assert(tasks.added==${activityAvailable ? '1' : '0'}); // 关闭自动保护后没有抱闸采样任务。
   status.onStepFound=true;status.mountFound=SD_TRUE;
-  for(now=100;now<=2100;now+=250){boardIo.driverFeedback(true,"ST,,,,,,,");boardIo.pollDriver();boardIo.tick();assert(pins[5]==LOW);}
-  assert(onStep.calls==0); // 旧 NV 中保存的开启状态和正常反馈均不能使 IO5 拉高。
+  for(now=100;now<=2100;now+=250){boardIo.driverFeedback(true,"ST,,,,,,,");boardIo.pollDriver();boardIo.tick();assert(pins[5]==HIGH);}
+  assert(onStep.calls==0); // 旧 NV 中保存的开启状态和正常反馈均不能使 IO5 拉低。
   for(const char*fault:{"ST,OA,,,,,,","ST,,OB,,,,,","ST,,,GA,,,,","ST,,,,GB,,,","ST,,,,,OT,,","ST,,,,,,PW,","ST,,,,,,,GF"})boardIo.driverFeedback(true,fault);
   assert(onStep.stops==0); // 编译关闭后停止和抱闸自动保护一起停用。
-  assert(boardIo.save(true,true)==${activityAvailable ? 'true' : 'false'});assert(pins[5]==LOW);
-  status.onStepFound=false;boardIo.tick();assert(pins[5]==LOW);
+  assert(boardIo.save(true,true)==${activityAvailable ? 'true' : 'false'});assert(pins[5]==HIGH);
+  status.onStepFound=false;boardIo.tick();assert(pins[5]==HIGH);
   String data;boardIoTile(data);assert(data.find("sws-io-protection")==std::string::npos);
   assert((data.find("sws-io-activity")!=std::string::npos)==${activityAvailable ? 'true' : 'false'});
   data.clear();boardIoTileAjax(data);assert(data.find("sws-io-brake-state|")==std::string::npos);
-  www.methodValue=HTTP_POST;www.args={{"setting","protection"},{"enabled","1"}};handleBoardIo();assert(www.code==409&&pins[5]==LOW);
-  www.args["enabled"]="0";handleBoardIo();assert(www.code==409&&pins[5]==LOW);
-  for(int event:pinEvents)assert(event!=51); // 从初始化到整个测试结束从未输出 HIGH。
-  std::cout<<"PASS: config OFF hides brake controls and status, refuses API changes, skips driver queries and holds IO5 LOW with legacy NV and healthy feedback\\n";
+  www.methodValue=HTTP_POST;www.args={{"setting","protection"},{"enabled","1"}};handleBoardIo();assert(www.code==409&&pins[5]==HIGH);
+  www.args["enabled"]="0";handleBoardIo();assert(www.code==409&&pins[5]==HIGH);
+  for(uint8_t stored: {0,1,2,3,255}){
+    nv().store.stored=stored;
+    BoardIo reboot;reboot.initPins();reboot.begin();reboot.tick();assert(pins[5]==HIGH);
+  }
+  nv().store.fail=true;BoardIo noStorage;noStorage.initPins();noStorage.begin();noStorage.tick();assert(pins[5]==HIGH);
+  tasks.fail=true;BoardIo failed;failed.initPins();failed.begin();failed.tick();assert(pins[5]==HIGH);
+  for(int event:pinEvents)assert(event!=50); // 从初始化到整个测试结束从未输出 LOW。
+  std::cout<<"PASS: config OFF hides brake controls and status, refuses API changes, skips driver queries and holds IO5 HIGH with legacy NV and healthy feedback\\n";
 }`:`
 void advance(uint32_t time){now=time;boardIo.tick();}
 void healthy(){now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");now+=500;boardIo.driverFeedback(true,"ST,,,,,,,");}
@@ -145,6 +151,16 @@ int main(){
     now+=250;boardIo.driverFeedback(true,stoppedReply.c_str());assert(pins[5]==LOW);
     healthy();assert(pins[5]==HIGH&&boardIo.brakeState()==BrakeState::Released);
   }
+  // 静止确认中途恢复运动必须重新计时，249ms 不能提前抱闸。
+  boardIo.driverFeedback(true,",,,,,,,GF");
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH);
+  now+=250;boardIo.driverFeedback(true,",,,,,,,GF");assert(pins[5]==HIGH);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH);
+  now+=249;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH);
+  now+=1;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==LOW);
+  boardIo.tick();now+=1000;boardIo.tick();assert(pins[5]==LOW);
+  now+=1;boardIo.tick();assert(pins[5]==HIGH);
+  healthy();
   // STOP 后始终没有 ST，就持续松闸；不能用固定延时替代静止反馈。
   boardIo.driverFeedback(true,",,,,,,,GF");const int movingStops=onStep.stops;
   for(int i=0;i<10;i++){now+=250;boardIo.driverFeedback(true,",,,,,,,GF");assert(pins[5]==HIGH);}

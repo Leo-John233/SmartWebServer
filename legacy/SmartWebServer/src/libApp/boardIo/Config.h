@@ -1,6 +1,6 @@
 #pragma once
 
-// 未配置自动保护时保持抱闸，Config.h 中的 ON/OFF 同时决定网页是否显示。
+// 未配置自动保护时保持松闸，Config.h 中的 ON/OFF 同时决定网页是否显示。
 #ifndef RA_BRAKE_PROTECTION
   #define RA_BRAKE_PROTECTION OFF
 #endif
@@ -8,7 +8,7 @@
   #error "RA_BRAKE_PROTECTION must be ON or OFF."
 #endif
 
-// 物理引脚独立于功能开关：关闭保护仍需把抱闸引脚保持为 LOW。
+// 物理引脚独立于功能开关：编译关闭保护仍需把抱闸引脚保持为 HIGH。
 #ifndef SWS_ACTIVITY_LED_PIN
   #if OPERATIONAL_MODE == WIFI && defined(ESP8266)
     #define SWS_ACTIVITY_LED_PIN LED_STATUS_PIN

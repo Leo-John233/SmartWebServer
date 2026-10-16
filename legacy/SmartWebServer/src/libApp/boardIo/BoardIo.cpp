@@ -10,10 +10,11 @@ static void pollBoardDriver() { boardIo.pollDriver(); }
 
 void BoardIo::initPins() {
   #if SWS_RA_BRAKE_PIN != OFF
-    // 先设置输出锁存值，再切换方向；启动及等待主控期间保持线圈断电。
-    digitalWrite(SWS_RA_BRAKE_PIN, LOW);
+    // 先设置输出锁存值再切换方向；编译关闭保护时从初始化开始松闸。
+    const int initialLevel = brakeAvailable() ? LOW : HIGH;
+    digitalWrite(SWS_RA_BRAKE_PIN, initialLevel);
     pinMode(SWS_RA_BRAKE_PIN, OUTPUT);
-    brakeLevel_ = LOW;
+    brakeLevel_ = initialLevel;
   #endif
 }
 
@@ -27,7 +28,7 @@ void BoardIo::begin() {
     pinMode(SWS_ACTIVITY_LED_PIN, OUTPUT);
     ledLevel_ = HIGH;
   #endif
-  // 无法建立输出监控任务时维持启动锁定，不允许网页声称已经释放。
+  // 无法建立输出监控任务时维持初始化电平；启用保护时仍保持启动抱闸。
   if (!tasks.add(20, 0, true, 1, pollBoardOutputs, "BoardIO")) return;
   started_ = true;
   // 与命令通道同优先级，允许在网页让出执行权时采样，避免长页面使反馈过期。
@@ -49,7 +50,7 @@ void BoardIo::tick() {
   #if SWS_RA_BRAKE_PIN != OFF
     // 发送 STOP 期间即使其他任务调用 tick，也不能抢先改变抱闸输出。
     if (!stopping_) {
-      const int brake = brakeAvailable() && released ? HIGH : LOW;
+      const int brake = !brakeAvailable() || released ? HIGH : LOW;
       if (brake != brakeLevel_) { digitalWrite(SWS_RA_BRAKE_PIN, brake); brakeLevel_ = brake; }
     }
   #endif
