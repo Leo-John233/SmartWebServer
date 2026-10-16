@@ -37,9 +37,10 @@ public:
 unsigned long clockMs=0;
 unsigned long millis(){return clockMs;}
 struct AccessPointSettings{char ssid[32]="ONSTEPX",pwd[32]="password";unsigned char channel=7;uint8_t ip[4]={192,168,0,1},gw[4]={192,168,0,1},sn[4]={255,255,255,0};};
-struct StationSettings{char host[32]{},ssid[32]="Home",pwd[32]="password";bool dhcpEnabled=true;uint8_t target[4]{},ip[4]={192,168,1,55},gw[4]={192,168,1,1},sn[4]={255,255,255,0};};
-struct WifiSettings{char masterPassword[32]="password";bool accessPointEnabled=true;AccessPointSettings ap;bool stationEnabled=false,stationApFallback=true;StationSettings station[3];};
-struct Manager {WifiSettings settings;int stationNumber=1,writes=0;StationSettings *sta=&settings.station[0];bool networkBusy=false,webManaged=false;void setStation(int n){sta=&settings.station[n-1];}void writeSettings(){writes++;}} wifiManager;
+struct StationSettings{char host[32]{},ssid[33]="Home";bool dhcpEnabled=true;uint8_t target[4]{},ip[4]={192,168,1,55},gw[4]={192,168,1,1},sn[4]={255,255,255,0};};
+struct StationPassword{char password[64]="password";};
+struct WifiSettings{char masterPassword[32]="password";bool accessPointEnabled=true;AccessPointSettings ap;bool stationEnabled=false,stationApFallback=true;};
+struct Manager {WifiSettings settings;StationSettings station[3];StationPassword stationPassword[3];int stationNumber=1,writes=0;StationSettings *sta=&station[0];StationPassword *staPwd=&stationPassword[0];bool networkBusy=false,webManaged=false;void setStation(int n){sta=&station[n-1];staPwd=&stationPassword[n-1];}void writeSettings(){writes++;}} wifiManager;
 struct WifiFake {
   int mode=2,connection=0,scan=-1,begins=0,disconnects=0;bool configOk=true;uint8_t local[4]={192,168,1,55},mask[4]={255,255,255,0};
   int getMode(){return mode;}int status(){return connection;}int RSSI(int i=0){return -45-i;}

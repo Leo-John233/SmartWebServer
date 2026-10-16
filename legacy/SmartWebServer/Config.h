@@ -67,3 +67,7 @@
 // 用户配置结束！
 // -------------------------------------------------------------------------------
 #include "Extended.config.h"
+// 补充新版原版固件新增的选项，已有设备参数继续使用本地配置
+#define HOST_NAME "OnStep-SWS"
+#define DISPLAY_COORDINATE_ORIGIN OFF
+#define DISPLAY_STALLGUARD_MONITOR OFF

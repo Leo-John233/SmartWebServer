@@ -3,6 +3,9 @@
 #pragma once
 
 // locate WeMos D1 R32 serial port pins to match WeMos D1 Mini main and swapped port pins
+#ifndef SERIAL_ONSTEP
+  #define SERIAL_ONSTEP Serial1
+#endif
 #ifndef SERIAL_RX
   #define SERIAL_RX          1
 #endif
@@ -35,4 +38,17 @@
   #define VGPIO_PIN_1        AXIS1_ENCODER_B_PIN
   #define VGPIO_PIN_2        AXIS2_ENCODER_A_PIN
   #define VGPIO_PIN_3        AXIS2_ENCODER_B_PIN
+#endif
+
+#ifndef VGPIO_PIN_4
+#define VGPIO_PIN_4          16
+#endif
+#ifndef VGPIO_PIN_5
+#define VGPIO_PIN_5          25
+#endif
+#ifndef VGPIO_PIN_6
+#define VGPIO_PIN_6          33
+#endif
+#ifndef VGPIO_PIN_7
+#define VGPIO_PIN_7          32
 #endif

@@ -10,7 +10,7 @@ void pecTile(String &data)
 {
   char temp[240] = "";
 
-  sprintf_P(temp, html_tile_beg, "22em", "15em", L_PAGE_PEC);
+  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_PAGE_PEC);
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 
@@ -19,7 +19,9 @@ void pecTile(String &data)
   }
 
   data.concat(F("<br /><hr>"));
-  sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
+
+  // display pec controls
+  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
   if (status.pecEnabled) {
@@ -30,12 +32,36 @@ void pecTile(String &data)
   } else {
     data.concat(L_DISABLED_MESSAGE);
   }
+
+  data.concat(FPSTR(html_collapsable_end));
+  www.sendContentAndClear(data);
+
+  // display steps per worm rotation
+  data.concat(F("<div style='margin-top: 0.5em';></div>"));
+  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
+  data.concat(temp);
+
+  char response[80];
+  if (status.pecEnabled && onStep.command(":GXE7#", response)) {
+    snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
+    data.concat(temp);
+
+    long value = strtol(response, NULL, 10);
+    snprintf_P(temp, sizeof(temp), html_configAxisSpwr, value, 0, 129600000L);
+    data.concat(temp);
+    data.concat(F("<br /><button type='submit'>" L_UPLOAD "</button><br />\n"));
+
+    data.concat(FPSTR(html_form_end));
+  } else {
+    data.concat(L_DISABLED_MESSAGE);
+  }
   www.sendContentAndClear(data);
 
   data.concat(FPSTR(html_collapsable_end));
-  data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
 
+  data.concat(FPSTR(html_tile_end));
+  www.sendContentAndClear(data);
 }
 
 // use Ajax key/value pairs to pass related data to the web client in the background
@@ -61,6 +87,7 @@ void pecTileAjax(String &data)
 extern void pecTileGet()
 {
   String v;
+  char temp[40];
 
   v = www.arg("pec");
   if (!v.equals(EmptyStr)) {
@@ -69,5 +96,11 @@ extern void pecTileGet()
     if (v.equals("clr")) onStep.commandBlind(":$QZZ#");  // clear
     if (v.equals("rec")) onStep.commandBlind(":$QZ/#");  // record
     if (v.equals("wrt")) onStep.commandBlind(":$QZ!#");  // write to eeprom
+  }
+
+  v = www.arg("spwr");
+  if (!v.equals(EmptyStr)) {
+    snprintf(temp, sizeof(temp), ":SXE7,%s#", v.c_str());
+    onStep.commandBool(temp);
   }
 }

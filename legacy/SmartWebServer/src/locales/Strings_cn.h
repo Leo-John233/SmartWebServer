@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Locale Chinese ISO ISO639-1 language code "cn"
+// Locale Chinese, ISO ISO639-1 language code "cn"
 #pragma once
 
 // General
@@ -26,10 +26,13 @@
 #define L_OK "确定" // Ok
 #define L_ON "开"
 #define L_OFF "关"
+#define L_VISIT "经过"
+#define L_PAUSE "暂停"
 #define L_START "开始"
 #define L_DELTA "差值" // Delta，数学/物理术语，原翻译“对冲值”错误
-#define L_ZERO "零"
-#define L_SPAN "跨度"
+#define L_DP_MSG  "相对"
+#define L_DP_ZERO "低于则全功率"
+#define L_DP_SPAN "高于则关闭"
 #define L_POWER "电源" // Pwr，原翻译“功率”易歧义，此处通常指电源开关或状态
 #define L_GUIDE "导星" // Guide，天文语境下通常指导星
 #define L_CENTER "居中"
@@ -76,10 +79,10 @@
 #define L_OPERATIONS "操作" // Operations，原翻译“运转”
 
 // parking
-#define L_PARKING "停车中" // Parking (ing)
+#define L_PARKING "停车中" // 重复定义
 #define L_PARKED "已停车"
 #define L_NOT_PARKED "未停车"
-#define L_PARKING "停车中" // 重复定义
+#define L_PARKING "停车"
 #define L_PARK_FAILED "停车失败"
 
 // home
@@ -98,7 +101,7 @@
 #define L_REFR_COMP_BOTH "RCD"
 #define L_FULL_COMP_RA "FC"
 #define L_FULL_COMP_BOTH "FCD"
-#define L_TRACKING "跟踪"
+#define L_TRACKING "追踪"
 #define L_CURRENT_MAXRATE "当前最大速率"
 #define L_DEFAULT_MAXRATE "默认最大速率" // Default
 #define L_CURRENT_MAXSLEW "最大GOTO速度" // Maximum slew speed
@@ -118,6 +121,7 @@
 #define L_DRIVER_FAULT "故障" // Fault，原翻译“过错”指人为错误，此处指设备故障
 
 // misc. errors/workload
+#define L_HARDWARE "硬件"
 #define L_INTERNAL_TEMP "控制器温度"
 #define L_LAST_GENERAL_ERROR "上一个错误" // Last Error
 #define L_WORKLOAD "负载" // Workload，指CPU/MCU负载
@@ -167,14 +171,14 @@
 
 #define BUTTON_N "北"
 #define BUTTON_S "南"
-#define BUTTON_W "西"
 #define BUTTON_E "东"
+#define BUTTON_W "西"
 #define BUTTON_SYNC "@"
 
 #define L_HINT_CLOCK "设置日期/时间"
 #define L_HINT_CONTINUE_GOTO "继续GOTO (当在零位暂停时)"
 #define L_HOME_PARK_TITLE "归位和停车"
-#define L_FIND_HOME "寻找零位" // Find Home
+#define L_RETURN_HOME "搜索起始位置"
 #define L_RESET_HOME "设置零位 (重置)" // Home (Reset)
 #define L_UNPARK "取消停车"
 #define L_PARK "停车"
@@ -277,6 +281,7 @@
 #define L_PEC_RECORDING "录制中"
 #define L_PEC_UNK "未知"
 #define L_PEC_EEWRITING "正在写入EEPROM"
+#define L_PEC_STEPS_PER_WORM_ROTATION "蠕虫旋转的步骤数（0禁用）"
 
 // --------------------------- Settings --------------------------
 
@@ -289,6 +294,9 @@
 #define L_PARK "停车"
 #define L_SET_PARK "设置停车位"
 #define L_SET_PARK_CURRENT_COORDS "将当前坐标设为停车位"
+#define L_COORD_ORIGIN_TITLE "坐标原点"
+#define L_COORD_ORIGIN "设置坐标原点"
+#define L_COORD_ORIGIN_MSG "在归位且关闭跟踪时，用于建立物理方向与坐标原点的关系，以用于同步限制。"
 
 #define L_TRK_FASTER "更快" // Faster，原翻译“跟进”错误
 #define L_TRK_SLOWER "更慢"
@@ -304,6 +312,7 @@
 #define L_MERIDIAN_FLIP_AUTO "限位处自动子午线翻转"
 #define L_MERIDIAN_FLIP_NOW "立即翻转"
 #define L_MERIDIAN_FLIP_PAUSE "翻转，在零位暂停"
+#define L_MERIDIAN_FLIP_HOMING "子午线翻转归位"
 #define L_MERIDIAN_FLIP_PPS "翻转，优先指向侧" // Preferred Pier Side
 
 #define L_ORIENTATION_AUTO "方向改变"
@@ -353,32 +362,47 @@
 #define L_LOCATION_MESSAGE_UTC_OFFSET "标准时间 (非夏令时!)"
 
 // advanced configuration
+#define L_AXPN_STEPS_PER_DEG "步/度"
+#define L_AXPN_LIMIT_DEGS_MIN "最小限制度数"
+#define L_AXPN_LIMIT_DEGS_MAX "最大限制度数"
+#define L_AXPN_STEPS_PER_UM "步/微米"
+#define L_AXPN_LIMIT_UM_MIN "最小限度微米"
+#define L_AXPN_LIMIT_UM_MAX "最大限度微米"
+#define L_AXPN_REVERSE "反向"
+#define L_AXPN_MICROSTEPS "微步"
+#define L_AXPN_MICROSTEPS_GOTO "微步跳至"
+#define L_AXPN_DECAY_MODE "衰减模式"
+#define L_AXPN_DECAY_MODE_GOTO "衰减模式跳至"
+#define L_AXPN_CURRENT_HOLD "mA 保持"
+#define L_AXPN_CURRENT_RUN "mA 运行"
+#define L_AXPN_CURRENT_GOTO "mA 跳至"
+#define L_AXPN_INTERPOLATE "256倍插值"
+#define L_AXPN_PID_P "P 跟踪"
+#define L_AXPN_PID_I "I 跟踪"
+#define L_AXPN_PID_D "D 跟踪"
+#define L_AXPN_PID_SLEWING_P "P 摆动"
+#define L_AXPN_PID_SLEWING_I "I 摆动"
+#define L_AXPN_PID_SLEWING_D "D 摆动"
+#define L_AXPN_RADS_PER_COUNT "弧度/计数"
+#define L_AXPN_STEPS_TO_COUNTS "步数/计数比"
+#define L_AXPN_MAX_ACCEL "最大加速度，%/秒/秒"
+#define L_AXPN_MIN_PWR "最小功率，%"
+#define L_AXPN_MAX_PWR "最大功率，%"
+
+#define L_ADV_DECAY_SLOW "慢速"
+#define L_ADV_DECAY_FAST "快速"
+#define L_ADV_DECAY_MIXED "混合"
+#define L_ADV_DECAY_SPREADCYCLE "SpreadCycle"
+#define L_ADV_DECAY_STEALTHCHOP "StealthChop"
+
+#define L_ADV_MOTOR "发动机"
 #define L_REVERT "恢复默认值"
 #define L_ADV_SET_TITLE "高级"
 #define L_ADV_SET_HEADER_MSG "除非另有说明，以下更改将在重启OnStep后生效:"
 #define L_ADV_MOUNT_TYPE " 选择 1 德式赤道仪(GEM), 2 叉式(Fork), 3 经纬仪(Alt/Azm)"
 #define L_ADV_BOOL "0 假 或 1 真"
 
-#define L_ADV_SET_SPWR "蜗杆旋转一周的步数"
-#define L_ADV_SET_SPD "每度步数"
-#define L_ADV_SET_SPM "每微米步数"
 #define L_ADV_SET_REV "反向，0假或1真"
-#define L_ADV_SET_MIN "最小位置"
-#define L_ADV_SET_MAX "最大位置"
-
-#define L_ADV_SET_SPECIAL "步进/方向驱动器：<br /><br />值为-1相当于Config.h OFF。 <i>请谨慎修改！</i>"
-#define L_ADV_SET_IMMEDIATE "伺服驱动器：<br /><br />设置立即生效，无需重启。 <i>请谨慎修改！</i>"
-#define L_ADV_SET_TRAK_us "跟踪细分(Microsteps)"
-#define L_ADV_SET_GOTO_us "GOTO细分"
-#define L_ADV_SET_HOLD_ma "mA 保持电流"
-#define L_ADV_SET_TRAK_ma "mA 跟踪电流"
-#define L_ADV_SET_SLEW_ma "mA GOTO电流"
-#define L_ADV_SET_P "跟踪 P (比例)"
-#define L_ADV_SET_I "跟踪 I (积分)"
-#define L_ADV_SET_D "跟踪 D (微分)"
-#define L_ADV_SET_P_GOTO "GOTO P (比例)"
-#define L_ADV_SET_I_GOTO "GOTO I (积分)"
-#define L_ADV_SET_D_GOTO "GOTO D (微分)"
 
 #define L_ADV_ENABLE "启用高级配置"
 #define L_ADV_DISABLE "禁用高级配置 (重启后恢复默认)"
@@ -387,7 +411,6 @@
 #define L_ADV_SET_FOOTER_MSG0 "大多数轴设置更改需要重启才能生效。"
 #define L_ADV_SET_FOOTER_MSG1 "按下 [上传] 后，请注意上方变化，因为无效参数可能导致上传被拒绝。"
 #define L_ADV_SET_FOOTER_MSG2 "选择 [恢复默认] 后，该组在重启OnStep前不可编辑。"
-#define L_ADV_SET_FOOTER_MSG3 "如果IRUN设置为非Config.h默认值，IHOLD将被设为50% (一半)。"
 #define L_ADV_SET_FOOTER_MSG4 "更改轴1的蜗杆步数和每度步数比率可能会损坏库NV存储区，如有需要请先备份星表。"
 
 // reset control
@@ -399,7 +422,6 @@
 
 // ----------------------------  WiFi ----------------------------
 
-// 网络设置使用简短提示，避免把登录密码误认为修改密码
 #define L_NETWORK_PERFORMANCE "通信设置"
 #define L_NETWORK_CMD_TO "命令等待时间"
 #define L_NETWORK_WWW_TO "网页等待时间"
@@ -415,6 +437,10 @@
 #define L_SUBNET "子网掩码"
 #define L_NETWORK_CHA "信道"
 #define L_NETWORK_EN_AP_MODE "启用热点模式 (AP)"
+
+#define L_NETWORK_OTA_TITLE "OTA SWS固件更新"
+#define L_NETWORK_EN_OTA    "启用OTA模式"
+#define L_REBOOT_OTA        "重启进入OTA模式"
 
 #define L_NETWORK_CONFIG_SECURITY "修改管理密码"
 
@@ -503,3 +529,47 @@
 #define L_CE_MOUNT_IN_MOTION "赤道仪运动中" // Mount in motion
 #define L_CE_GOTO_ERR_UNSPECIFIED "其他"
 #define L_CE_UNK "未知"
+
+#define L_ZERO "零"
+
+#define L_SPAN "跨度"
+
+#define L_FIND_HOME "寻找零位" // Find Home
+
+#define L_ADV_SET_SPWR "蜗杆旋转一周的步数"
+
+#define L_ADV_SET_SPD "每度步数"
+
+#define L_ADV_SET_SPM "每微米步数"
+
+#define L_ADV_SET_MIN "最小位置"
+
+#define L_ADV_SET_MAX "最大位置"
+
+#define L_ADV_SET_SPECIAL "步进/方向驱动器：<br /><br />值为-1相当于Config.h OFF。 <i>请谨慎修改！</i>"
+
+#define L_ADV_SET_IMMEDIATE "伺服驱动器：<br /><br />设置立即生效，无需重启。 <i>请谨慎修改！</i>"
+
+#define L_ADV_SET_TRAK_us "跟踪细分(Microsteps)"
+
+#define L_ADV_SET_GOTO_us "GOTO细分"
+
+#define L_ADV_SET_HOLD_ma "mA 保持电流"
+
+#define L_ADV_SET_TRAK_ma "mA 跟踪电流"
+
+#define L_ADV_SET_SLEW_ma "mA GOTO电流"
+
+#define L_ADV_SET_P "跟踪 P (比例)"
+
+#define L_ADV_SET_I "跟踪 I (积分)"
+
+#define L_ADV_SET_D "跟踪 D (微分)"
+
+#define L_ADV_SET_P_GOTO "GOTO P (比例)"
+
+#define L_ADV_SET_I_GOTO "GOTO I (积分)"
+
+#define L_ADV_SET_D_GOTO "GOTO D (微分)"
+
+#define L_ADV_SET_FOOTER_MSG3 "如果IRUN设置为非Config.h默认值，IHOLD将被设为50% (一半)。"

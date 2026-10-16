@@ -10,10 +10,10 @@ void rotatorSlewingTile(String &data)
 {
   char temp[240] = "";
 
-  sprintf_P(temp, html_tile_beg, "22em", "13em", L_SLEWING);
+  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_SLEWING);
   data.concat(temp);
   data.concat(F("<div style='float: right; text-align: right;' id='rot_sta' class='c'>"));
-  if (state.focuserSlewing) data.concat(L_ACTIVE); else data.concat(L_INACTIVE);
+  if (state.rotatorSlewing) data.concat(L_ACTIVE); else data.concat(L_INACTIVE);
   data.concat(F("</div><br /><hr>"));
 
   data.concat(L_CURRENT ": <span id='rotatorpos' class='c'>");
@@ -22,17 +22,22 @@ void rotatorSlewingTile(String &data)
 
   data.concat(FPSTR(html_rotPosition));
   data.concat(FPSTR(html_rotStop));
+  www.sendContentAndClear(data);
 
+  data.concat(FPSTR(html_script_motion_controls_1));
+  www.sendContentAndClear(data);
+  data.concat(FPSTR(html_script_motion_controls_2));
+  www.sendContentAndClear(data);
   data.concat(FPSTR(html_rotateCcw));
   data.concat(FPSTR(html_rotateCw));
 
   data.concat(F("<hr>"));
 
   if (status.getVersionMajor() >= 10) {
-    sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
+    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
     data.concat(temp);
 
-    sprintf_P(temp, html_rotateSlewSpeed, state.rotateSlewSpeedStr);
+    snprintf_P(temp, sizeof(temp), html_rotateSlewSpeed, state.rotateSlewSpeedStr);
     data.concat(temp);
     data.concat(FPSTR(html_rotateGotoSelect));
 
@@ -91,7 +96,7 @@ extern void rotatorSlewingTileGet()
     {
       char temp[80], temp1[40];
       convert.doubleToDms(temp1, f, true, true, PM_HIGH);
-      sprintf(temp, ":rS%s#", temp1);
+      snprintf(temp, sizeof(temp), ":rS%s#", temp1);
       onStep.commandBool(temp);
     }
   }

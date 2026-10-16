@@ -13,7 +13,7 @@ void homeParkTile(String &data)
   char temp[240] = "";
   char reply[120] = "";
 
-  sprintf_P(temp, html_tile_beg, "22em", "15em", L_HOME_PARK_TITLE);
+  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_HOME_PARK_TITLE);
   data.concat(temp);
   data.concat(F("<div style='float: right; text-align: right;' id='hp_sta' class='c'>"));
   data.concat(getHomeParkStateStr());
@@ -26,7 +26,7 @@ void homeParkTile(String &data)
   data.concat(FPSTR(html_park));
   data.concat(F("<hr>"));
 
-  sprintf_P(temp, html_collapsable_beg, L_CONTROLS "...");
+  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
   data.concat(F(L_SET_PARK_CURRENT_COORDS ":<br />"));
@@ -42,25 +42,36 @@ void homeParkTile(String &data)
 
     if (onStep.command(":h?#", reply)) {
       status.hasHomeSense = false;
-      long homeAutomatic = false;
+      int hasHomeSense = 0;
       long homeOffsetAxis1 = 0;
       long homeOffsetAxis2 = 0;
-      if (sscanf(reply, "%d,%ld,%ld", &status.hasHomeSense, &homeOffsetAxis1, &homeOffsetAxis2) == 3) {
-        sprintf_P(temp, html_form_begin, "mount.htm");
-        data.concat(temp);
+      if (sscanf(reply, "%d,%ld,%ld", &hasHomeSense, &homeOffsetAxis1, &homeOffsetAxis2) == 3) {
+        status.hasHomeSense = (bool)hasHomeSense;
 
         if (status.hasHomeSense) {
+
+          data.concat(FPSTR(html_collapsable_end));
+          data.concat(F("<div style='margin-top: 0.5em';></div>"));
+          www.sendContentAndClear(data);
+
+          snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
+          data.concat(temp);
+
           #ifdef HOME_SWITCH_DIRECTION_CONTROL
-            data.concat(F("<br />" L_HOME_REV "<br />"));
+            data.concat(F(L_HOME_REV "<br />"));
             data.concat(html_homeReverse);
           #endif
 
-          data.concat(F("<br />" L_HOME_OFFSET "<br />"));
-          sprintf_P(temp, html_homeOffsetAxis1, homeOffsetAxis1);
+          snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
           data.concat(temp);
-          sprintf_P(temp, html_homeOffsetAxis2, homeOffsetAxis2);
+
+          data.concat(F(L_HOME_OFFSET "<br />"));
+          snprintf_P(temp, sizeof(temp), html_homeOffsetAxis1, homeOffsetAxis1);
+          data.concat(temp);
+          snprintf_P(temp, sizeof(temp), html_homeOffsetAxis2, homeOffsetAxis2);
           data.concat(temp);
           data.concat(F("<button type='submit'>" L_UPLOAD "</button><br />\n"));
+
           data.concat(FPSTR(html_form_end));
           www.sendContentAndClear(data);
         }
@@ -69,9 +80,9 @@ void homeParkTile(String &data)
   }
 
   data.concat(FPSTR(html_collapsable_end));
+
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
-
 }
 
 // use Ajax key/value pairs to pass related data to the web client in the background
@@ -136,7 +147,7 @@ void homeParkTileGet()
     {
       if (v.toInt() >= -HOME_OFFSET_RANGE_AXIS1 && v.toInt() <= HOME_OFFSET_RANGE_AXIS1)
       {
-        sprintf(temp, ":hC1,%ld#", v.toInt());
+        snprintf(temp, sizeof(temp), ":hC1,%ld#", v.toInt());
         onStep.commandBlind(temp);
       }
     }
@@ -146,7 +157,7 @@ void homeParkTileGet()
     {
       if (v.toInt() >= -HOME_OFFSET_RANGE_AXIS2 && v.toInt() <= HOME_OFFSET_RANGE_AXIS2)
       {
-        sprintf(temp, ":hC2,%ld#", v.toInt());
+        snprintf(temp, sizeof(temp), ":hC2,%ld#", v.toInt());
         onStep.commandBlind(temp);
       }
     }
@@ -166,10 +177,10 @@ void homeParkTileGet()
 const char *getHomeParkStateStr()
 {
   static char hsta[32];
-  if (status.parking) strncpyex(hsta, L_PARKING, 32); else
-  if (status.homing) strncpyex(hsta, L_HOMING, 32); else
-  if (status.parkFail) strncpyex(hsta, L_PARK_FAILED, 32); else
-  if (status.parked) strncpyex(hsta, L_PARKED, 32); else
-  if (status.atHome) strncpyex(hsta, L_AT_HOME, 32); else strncpyex(hsta, L_INACTIVE, 32);
+  if (status.parking) sstrcpyex(hsta, L_PARKING, 32); else
+  if (status.homing) sstrcpyex(hsta, L_HOMING, 32); else
+  if (status.parkFail) sstrcpyex(hsta, L_PARK_FAILED, 32); else
+  if (status.parked) sstrcpyex(hsta, L_PARKED, 32); else
+  if (status.atHome) sstrcpyex(hsta, L_AT_HOME, 32); else sstrcpyex(hsta, L_INACTIVE, 32);
   return hsta;
 }

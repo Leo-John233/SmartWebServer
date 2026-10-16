@@ -9,7 +9,10 @@ namespace {
 bool scanning = false, scanAddedSta = false, connecting = false, failed = false;
 uint8_t pending = 0; // 1 表示连接路由器，2 表示设置热点，先返回网页响应再切换网络
 unsigned long scheduledAt = 0, connectStarted = 0, scanStarted = 0, lastRetry = 0;
+// 上游将路由器参数和密码独立保存，提交时一起暂存并在应用时更新
 WifiSettings proposed;
+StationSettings proposedStation;
+StationPassword proposedPassword;
 String notice;
 
 // 转义网络名称中的引号和控制字符，保证扫描结果始终是合法 JSON
@@ -82,7 +85,7 @@ bool configureStation() {
   bool configured = s.dhcpEnabled ? WiFi.config(zero, zero, zero) :
     WiFi.config(IPAddress(s.ip), IPAddress(s.gw), IPAddress(s.sn), IPAddress(s.gw));
   if (!configured) return false;
-  WiFi.begin(s.ssid, s.pwd);
+  WiFi.begin(s.ssid, wifiManager.staPwd->password);
   connectStarted = millis();
   connecting = true;
   wifiManager.networkBusy = true;
@@ -106,7 +109,7 @@ String configJson() {
   String json = "{\"sta\":{\"enabled\":";
   json += wifiManager.settings.stationEnabled ? "true" : "false";
   json += ",\"ssid\":" + quote(s.ssid) + ",\"dhcp\":" + (s.dhcpEnabled ? "true" : "false");
-  json += ",\"open\":"; json += s.pwd[0] == 0 ? "true" : "false";
+  json += ",\"open\":"; json += wifiManager.staPwd->password[0] == 0 ? "true" : "false";
   json += ",\"ip\":" + quote(ipText(s.ip)) + ",\"gw\":" + quote(ipText(s.gw)) + ",\"sn\":" + quote(ipText(s.sn)) + "},\"ap\":{\"enabled\":";
   json += wifiManager.settings.accessPointEnabled ? "true" : "false";
   json += ",\"ssid\":" + quote(a.ssid) + ",\"channel\":" + String(a.channel);
@@ -175,16 +178,19 @@ void handleWifiNetwork() {
   if (scanning) { error(409, "请等待扫描完成"); return; }
   if (action != "connect" && action != "ap") { error(400, "未知操作"); return; }
   proposed = wifiManager.settings;
+  proposedStation = *wifiManager.sta;
+  proposedPassword = *wifiManager.staPwd;
   bool enabled = www.arg("enabled") == "1";
   String ssid = www.arg("ssid"), password = www.arg("password");
   if (ssid.length() == 0 || ssid.length() > 31 || password.length() > 31) {
     error(400, "Wi-Fi 名称不能为空；名称和密码均不能超过 31 字节（中文会占多个字节）"); return;
   }
   if (action == "connect") {
-    StationSettings &s = proposed.station[wifiManager.stationNumber - 1];
+    StationSettings &s = proposedStation;
+    char *savedPassword = proposedPassword.password;
     bool open = www.arg("open") == "1";
     if (enabled && !open && ((password.length() && password.length() < 8) ||
-        (!password.length() && (ssid != s.ssid || strlen(s.pwd) < 8)))) {
+        (!password.length() && (ssid != s.ssid || strlen(savedPassword) < 8)))) {
       error(400, "请输入 Wi-Fi 密码，无密码的网络请勾选无需密码"); return;
     }
     proposed.stationEnabled = enabled;
@@ -197,9 +203,9 @@ void handleWifiNetwork() {
     // 关闭状态下更换网络名称时清除旧密码，防止下次误用其他网络的密码
     bool changedNetwork = ssid != s.ssid;
     strcpy(s.ssid, ssid.c_str());
-    if (open) s.pwd[0] = 0;
-    else if (password.length()) strcpy(s.pwd, password.c_str());
-    else if (changedNetwork) s.pwd[0] = 0;
+    if (open) savedPassword[0] = 0;
+    else if (password.length()) strcpy(savedPassword, password.c_str());
+    else if (changedNetwork) savedPassword[0] = 0;
     pending = 1;
   } else {
     AccessPointSettings &a = proposed.ap;
@@ -240,6 +246,10 @@ void pollWifiNetwork() {
     }
     wifiManager.settings = proposed;
     wifiManager.setStation(wifiManager.stationNumber);
+    if (operation == 1) {
+      *wifiManager.sta = proposedStation;
+      *wifiManager.staPwd = proposedPassword;
+    }
     WiFi.persistent(false);
     if (operation == 1) {
       wifiManager.webManaged = true;

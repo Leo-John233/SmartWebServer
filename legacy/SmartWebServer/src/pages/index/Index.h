@@ -12,8 +12,8 @@
 #if DISPLAY_SERVO_MONITOR == ON
   #include "ServoTile.h"
 #endif
-#if DISPLAY_SERVO_CALIBRATION == ON
-  #include "ServoCalibrateTile.h"
+#if DISPLAY_STALLGUARD_MONITOR == ON
+  #include "StallGuardTile.h"
 #endif
 
 #if DRIVE_CONFIGURATION == ON
@@ -24,9 +24,6 @@
   "<li>" L_ADV_SET_FOOTER_MSG2 "</li>";
 
   const char html_configAxesNotesOnStep[] PROGMEM =
-  #if DRIVE_MAIN_AXES_CURRENT == ON
-	"<li>" L_ADV_SET_FOOTER_MSG3 "</li>"
-  #endif
   "<li>" L_ADV_SET_FOOTER_MSG4 "</li>"
   "</ul>";
 #endif

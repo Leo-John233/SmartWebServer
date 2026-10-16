@@ -10,10 +10,12 @@
   #define ENCODERS OFF
 #endif
 
-#if AXIS1_ENCODER == AS37_H39B_B || AXIS1_ENCODER == JTW_24BIT
+#if AXIS1_ENCODER == AS37_H39B_B || AXIS1_ENCODER == JTW_24BIT || AXIS1_ENCODER == JTW_26BIT || \
+    AXIS1_ENCODER == LIKA_ASC85
   #define AXIS1_ENCODER_ABSOLUTE
 #endif
-#if AXIS2_ENCODER == AS37_H39B_B || AXIS2_ENCODER == JTW_24BIT
+#if AXIS2_ENCODER == AS37_H39B_B || AXIS2_ENCODER == JTW_24BIT || AXIS2_ENCODER == JTW_26BIT || \
+    AXIS2_ENCODER == LIKA_ASC85
   #define AXIS2_ENCODER_ABSOLUTE
 #endif
 #if defined(AXIS1_ENCODER_ABSOLUTE) || defined(AXIS2_ENCODER_ABSOLUTE)
@@ -25,13 +27,17 @@
   #define ENCODER_POLLING_RATE_MS 500
 #endif
 
+#ifndef ENCODER_ORIGIN_INVALID
+  #define ENCODER_ORIGIN_INVALID INT32_MAX
+#endif
+
 // ----------------------------------------------------------------------------------------------------------------
 // background process position/rate control for encoders 
 
 #define EncoderSettingsSize 72
 typedef struct EncoderAxis {
   uint32_t zero;
-  uint32_t offset;
+  uint32_t index;
   int32_t diffTo;
   double ticksPerDeg;
   int16_t reverse;
@@ -54,8 +60,8 @@ class Encoders {
       #else
         false,
       #endif
-      {0, 0, AXIS1_ENCODER_DIFF_LIMIT_TO, AXIS1_ENCODER_TICKS_DEG, AXIS1_ENCODER_REVERSE},
-      {0, 0, AXIS2_ENCODER_DIFF_LIMIT_TO, AXIS2_ENCODER_TICKS_DEG, AXIS2_ENCODER_REVERSE}
+      {(uint32_t)ENCODER_ORIGIN_INVALID, 0, AXIS1_ENCODER_DIFF_LIMIT_TO, AXIS1_ENCODER_TICKS_DEG, AXIS1_ENCODER_REVERSE},
+      {(uint32_t)ENCODER_ORIGIN_INVALID, 0, AXIS2_ENCODER_DIFF_LIMIT_TO, AXIS2_ENCODER_TICKS_DEG, AXIS2_ENCODER_REVERSE}
     };
 
     #if ENCODERS == ON
@@ -88,8 +94,17 @@ class Encoders {
       double osAxis2      = 0;
       double enAxis1      = 0;
       double enAxis2      = 0;
+      bool   enAxis1Available = false;
+      bool   enAxis2Available = false;
       bool   enAxis1Fault = false;
       bool   enAxis2Fault = false;
+
+      bool hasUsableAxisReadings();
+      bool axis1OriginValid();
+      bool axis2OriginValid();
+      bool axis1TrustedAbsoluteReading();
+      bool axis2TrustedAbsoluteReading();
+      bool hasTrustedAbsolutePair();
 
     #endif
 };

@@ -5,7 +5,7 @@
 #include "../../locales/Locale.h"
 
 int webTimeout = TIMEOUT_WEB;
-int cmdTimeout = TIMEOUT_CMD;
+int cmdTimeout = TIMEOUT_COMMAND;
 
 void OnStepCmd::serialBegin(long baudRate, int swap) {
   static bool firstRun = true;
@@ -105,6 +105,10 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
   if (cmd[0] == ':' || cmd[0] == ';') {
     if (cmd[1] == 'G') {
       if (strchr("RDE", cmd[2])) { if (timeOutMs < 300) timeOutMs = 300; }
+      if (cmd[2] == 'X') {
+        if ((cmd[3] == 'E' && cmd[4] == 'E') ||
+            (cmd[3] == '8' && cmd[4] == '9')) shortResponse = true;
+      }
     } else
     if (cmd[1] == 'M') {
       if (strchr("ewnsg", cmd[2])) noResponse = true;
@@ -137,7 +141,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       if (strchr("AEGCMS0123456789", cmd[2])) noResponse = true;
     } else
     if (cmd[1] == 'S') {
-      if (strchr("CLSGtgMNOPrdhoTBX", cmd[2])) shortResponse = true;
+      if (strchr("CLSGtgMNOPrdhoTBXza", cmd[2])) shortResponse = true;
     } else
     if (cmd[1] == 'L') {
       if (strchr("BNCDL!",cmd[2])) noResponse = true;
@@ -186,6 +190,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
   if (shortResponse) {
     while ((long)(timeout - millis()) > 0) {
       if (SERIAL_ONSTEP.available()) { response[SERIAL_ONSTEP.readBytes(response, 1)] = 0; break; }
+      delay(0);
     }
     if ((long)(timeout - millis()) <= 0) { DF("WRN: cmd "); D(cmd); DLF(" timed out"); }
     #ifdef ESP32
@@ -204,13 +209,14 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
         if (responsePos > 79) responsePos = 79;
         response[responsePos] = 0;
       }
+      delay(0);
     }
     if ((long)(timeout - millis()) <= 0) { DF("WRN: cmd \""); D(cmd); DLF("\" timed out"); }
     #ifdef ESP32
       xSemaphoreGive(xMutex);
     #endif
-    return response[strlen(response) - 1] == '#';
-//    return (response[0] != 0);
+    const size_t n = strlen(response);
+    return (n > 0) && (response[n - 1] == '#');
   }
 }
 
@@ -229,7 +235,7 @@ bool OnStepCmd::commandBlind(const char* command) {
 bool OnStepCmd::commandEcho(const char* command) {
   char response[80] = "";
   char c[40] = "";
-  sprintf(c, ":EC%s#", command);
+  snprintf(c, sizeof(c), ":EC%s#", command);
   return processCommand(c, response, webTimeout);
 }
 

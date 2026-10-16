@@ -1,5 +1,5 @@
 void request(const char *action){www.args["action"]=action;www.code=0;handleWifiNetwork();}
-void reset(){pending=0;connecting=false;scanning=false;failed=false;scanAddedSta=false;notice="";lastRetry=clockMs=0;wifiManager.settings=WifiSettings();wifiManager.setStation(1);wifiManager.writes=0;wifiManager.networkBusy=wifiManager.webManaged=false;WiFi=WifiFake();www=WebFake();loginRequired=false;}
+void reset(){pending=0;connecting=false;scanning=false;failed=false;scanAddedSta=false;notice="";lastRetry=clockMs=0;wifiManager.settings=WifiSettings();wifiManager.station[0]=StationSettings();wifiManager.stationPassword[0]=StationPassword();wifiManager.setStation(1);wifiManager.writes=0;wifiManager.networkBusy=wifiManager.webManaged=false;WiFi=WifiFake();www=WebFake();loginRequired=false;}
 void station(){www.args={{"ssid","New Home"},{"password","new-pass-123"},{"enabled","1"},{"dhcp","1"}};}
 void apRequest(){www.args={{"ssid","ONSTEPX"},{"password",""},{"enabled","1"},{"channel","7"},{"ip","192.168.0.1"},{"gw","192.168.0.1"},{"sn","255.255.255.0"}};}
 int main(){
@@ -11,9 +11,12 @@ reset();request("scan");clockMs=46000;pollWifiNetwork();assert(!scanning&&WiFi.m
 reset();station();www.args["password"]="short";request("connect");assert(www.code==400&&pending==0&&wifiManager.writes==0);
 reset();station();www.args["ssid"]=std::string(32,'a');request("connect");assert(www.code==400);
 reset();station();www.args["password"]="";request("connect");assert(www.code==400);www.args["ssid"]="Home";request("connect");assert(www.code==202);
-reset();station();www.args["password"]="";www.args["open"]="1";request("connect");assert(www.code==202&&proposed.station[0].pwd[0]==0);
+reset();station();www.args["password"]="";www.args["open"]="1";request("connect");assert(www.code==202&&proposedPassword.password[0]==0);
 reset();station();www.args["dhcp"]="0";www.args["ip"]="192.168.0.55";www.args["gw"]="192.168.0.1";www.args["sn"]="255.255.255.0";request("connect");assert(www.code==400);www.args["ip"]="192.168.1.55";www.args["gw"]="192.168.1.1";www.args["sn"]="255.0.255.0";request("connect");assert(www.code==400);
-reset();station();request("connect");assert(www.code==202&&WiFi.begins==0);clockMs=500;pollWifiNetwork();assert(WiFi.begins==0);clockMs=1001;pollWifiNetwork();assert(connecting&&WiFi.begins==1&&apActive()&&wifiManager.writes==1);WiFi.connection=3;pollWifiNetwork();assert(!connecting&&!failed&&!wifiManager.networkBusy);
+reset();station();request("connect");assert(www.code==202&&WiFi.begins==0);clockMs=500;pollWifiNetwork();assert(WiFi.begins==0);clockMs=1001;pollWifiNetwork();assert(connecting&&WiFi.begins==1&&apActive()&&wifiManager.writes==1);
+// 确认新版独立保存的路由器参数和密码都在延迟应用后更新
+assert(std::string(wifiManager.sta->ssid)=="New Home"&&std::string(wifiManager.staPwd->password)=="new-pass-123");
+WiFi.connection=3;pollWifiNetwork();assert(!connecting&&!failed&&!wifiManager.networkBusy);
 reset();station();request("connect");clockMs=1001;pollWifiNetwork();clockMs=27002;pollWifiNetwork();assert(!connecting&&failed&&apActive());clockMs=58003;pollWifiNetwork();assert(connecting&&WiFi.begins==2);
 reset();station();request("connect");clockMs=1001;pollWifiNetwork();WiFi.local[2]=0;WiFi.connection=3;pollWifiNetwork();assert(failed&&WiFi.connection==0&&apActive());
 reset();apRequest();www.args["enabled"]="0";request("ap");assert(www.code==400);WiFi.connection=3;wifiManager.settings.stationEnabled=true;request("ap");assert(www.code==202);clockMs=1001;pollWifiNetwork();assert(!apActive()&&wifiManager.writes==1);

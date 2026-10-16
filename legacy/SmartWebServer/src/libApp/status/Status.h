@@ -8,6 +8,8 @@ enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BO
 
 enum MountTypes {MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM};
 
+enum MeridianFlipHomeModes {MFHM_OFF, MFHM_VISIT, MFHM_PAUSE};
+
 enum Errors {
   ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, 
   ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED,
@@ -22,6 +24,8 @@ typedef struct Features {
     float value2;
     float value3;
     float value4;
+    float voltage;
+    float current;
 } features;
 
 #define PierSideNone     0
@@ -44,17 +48,19 @@ class Status {
     inline int  getVersionMajor() { return ver_maj; }
     inline int  getVersionMinor() { return ver_min; }
     inline char getVersionPatch() { return ver_patch; }
+    inline bool hasMeridianFlipHomeModes() { return ver_maj > 10 || (ver_maj == 10 && ver_min >= 28); }
 
-    bool getLastErrorMessage(char message[]);
+    bool getLastErrorMessage(char message[], size_t messageSize);
 
     char configName[40] = "";
 
+    bool ready = false;
     bool atHome = false;
     bool homing = false;
-    int hasHomeSense = false;
+    bool hasHomeSense = false;
     bool autoHome = false;
     bool waitingHome = false;
-    bool pauseAtHome = false;
+    MeridianFlipHomeModes meridianFlipHomeMode = MFHM_OFF;
 
     bool tracking = false;
     bool inGoto = false;

@@ -6,12 +6,14 @@
 #include "../Page.h"
 #include "../Pages.common.h"
 
+extern void handleNotFound();
 void processFocuserGet();
 
 void handleFocuser() {
   char temp[240] = "";
 
   state.updateFocuser(true);
+  if (status.focuserFound != SD_TRUE) { handleNotFound(); return; }
 
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
@@ -51,7 +53,7 @@ void handleFocuser() {
   }
 
   // scripts
-  sprintf_P(temp, html_script_ajax_get, "focuser-ajax-get.txt");
+  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "focuser-ajax-get.txt");
   data.concat(temp);
   data.concat(FPSTR(html_script_ajax_shortcuts));
   data.concat(F("<script>var ajaxPage='focuser-ajax.txt';</script>\n"));

@@ -9,11 +9,13 @@ void pollWifiNetwork();
 #endif
 
 // 网络页使用独立的响应式样式，不加载外部字体和脚本
+// 新版通信与固件更新卡片限制在屏幕宽度内，避免手机页面横向滚动
 const char html_network_css[] PROGMEM = R"NET(
 <style>
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;color:#d2cccc}
 .t,.b{box-sizing:border-box;min-width:0;max-width:1100px;margin-left:auto;margin-right:auto;border-width:1px;padding:20px}
 .t{border-radius:16px 16px 0 0;margin-top:20px}.b{border-radius:0 0 16px 16px}
+.b1{box-sizing:border-box;max-width:100%;margin:12px 0;padding:16px;border-radius:14px;float:none}
 .t table{width:100%}.t td{overflow-wrap:anywhere}.t a{border-radius:8px;margin:8px 4px 0 0}
 input,select{box-sizing:border-box;color:#eee;background:#241d20;border:1px solid #725055;border-radius:8px;padding:10px;font:inherit;max-width:100%;text-align:left}
 button{color:#f7eeee;background:#842d39;border:1px solid #a34855;border-radius:8px;padding:10px 16px;font:inherit;cursor:pointer;min-height:44px}

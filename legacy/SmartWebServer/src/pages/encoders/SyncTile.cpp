@@ -2,6 +2,8 @@
 // Encoder Sync tile
 #include "SyncTile.h"
 
+#include "../../lib/nv/Nv.h"
+
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 
@@ -12,11 +14,11 @@ void syncTile(String &data)
 {
   char temp[240] = "";
 
-  sprintf_P(temp, html_tile_beg, "22em", "15em", "Sync Control");
+  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", "Sync Control");
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 
-  sprintf_P(temp, html_form_begin, "enc.htm");
+  snprintf_P(temp, sizeof(temp), html_form_begin, "enc.htm");
   data.concat(temp);
 
   data.concat(FPSTR(html_syncOnStepNow));
@@ -62,7 +64,7 @@ extern void syncTileGet()
     #endif
     if (v.equals("on")) encoders.settings.autoSync = true;
     if (v.equals("off")) encoders.settings.autoSync = false;
-    nv.updateBytes(NV_ENCODER_SETTINGS_BASE, &encoders.settings, sizeof(EncoderSettings));
+    nv().kv().put("ENCODER_SETTINGS", encoders.settings);
   }
 }
 

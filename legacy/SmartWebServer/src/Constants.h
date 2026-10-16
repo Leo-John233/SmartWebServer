@@ -22,23 +22,18 @@
 #define ANALOG_OUTPUT                2
 #define DEW_HEATER                   3
 #define INTERVALOMETER               4
+#define COVER_SWITCH                 7
 
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
 #define TIMEOUT_WEB                  200
-#define TIMEOUT_CMD                  200
+#define TIMEOUT_COMMAND              200
 
 // task manager
-#define TASKS_MAX                    32      // up to 32 tasks
+#define TASKS_MAX                    40      // up to 40 tasks
 #define TASKS_SKIP_MISSED
 
-// EEPROM contents
-#define INIT_NV_KEY                  698623874UL
+// NV -------------------------------------------------------------------------------------------------------------------
 
-#define NV_TIMEOUT_CMD               5       // 2 bytes
-#define NV_TIMEOUT_WEB               7       // 2 bytes
-#define NV_ETHERNET_SETTINGS_BASE    100     // up to 150 bytes (128)
-#define NV_WIFI_SETTINGS_BASE        250     // up to 500 bytes (451)
-#define NV_ENCODER_SETTINGS_BASE     750     // up to 75 bytes (72)
-
-
+// unique volume signature for this volume/partition layout
+#define NV_VOLUME_SIGNATURE         0x0001u

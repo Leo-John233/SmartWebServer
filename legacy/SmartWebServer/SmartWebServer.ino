@@ -2,7 +2,7 @@
  * 标题       OnStep Smart Web Server (智能网页服务器)
  * 作者       Howard Dutton
  *
- * 版权所有 (C) 2016 至 2024 Howard Dutton
+ * Copyright (C) 2016 to 2026 Howard Dutton
  *
  * 本程序为自由软件：您可以根据自由软件基金会发布的 GNU 通用公共许可证（GNU GPL）
  * 的条款重新分发和/或修改它，无论是许可证的第 3 版，还是（由您选择）任何更高版本。
@@ -28,24 +28,37 @@
 
 #define Product "Smart Web Server"
 #define FirmwareVersionMajor  "2"
-#define FirmwareVersionMinor  "08"
-#define FirmwareVersionPatch  "l"
+#define FirmwareVersionMinor  "10"
+#define FirmwareVersionPatch  "h"
 
 // 请使用 Config.h 根据您的要求配置 SWS (智能网页服务器)
 
 #include "src/Common.h"
-NVS nv; // 非易失性存储 (EEPROM替代品)
-#include "src/lib/tasks/OnTask.h"
-#include "src/libApp/cmd/Cmd.h"
-#include "src/libApp/bleGamepad/BleGamepad.h"
-#include "src/libApp/encoders/Encoders.h"
-#include "src/pages/Pages.h"
-#include "src/libApp/status/Status.h"
 
+#ifdef OTA_PRESENT
+  #include <ArduinoOTA.h>
+
+  typedef struct OtaSettings {
+    char password[64];
+    bool enabled;
+  } OtaSettings;
+#endif
+
+bool otaEnabled = false;
+
+#include "src/lib/tasks/OnTask.h"
+#include "src/lib/nv/Nv.h"
 #include "src/lib/ethernet/cmdServer/CmdServer.h"
 #include "src/lib/ethernet/webServer/WebServer.h"
 #include "src/lib/wifi/cmdServer/CmdServer.h"
 #include "src/lib/wifi/webServer/WebServer.h"
+
+#include "src/libApp/cmd/Cmd.h"
+#include "src/libApp/bleGamepad/BleGamepad.h"
+#include "src/libApp/encoders/Encoders.h"
+#include "src/libApp/status/Status.h"
+
+#include "src/pages/Pages.h"
 
 #if DEBUG == PROFILER
   extern void profiler();
@@ -65,17 +78,16 @@ NVS nv; // 非易失性存储 (EEPROM替代品)
   CmdServer cmdSvr(9999, 1L*1000L);
 #endif
 
-void systemServices() {
-  nv.poll(); // 轮询存储服务
-}
-
 void pollWebSvr() {
   www.handleClient(); // 处理网页客户端请求
 }
 
 void pollCmdSvr() {
+  if (otaEnabled) return;
+
   #if COMMAND_SERVER == PERSISTENT || COMMAND_SERVER == BOTH
-    persistentCmdSvr1.handleClient(); Y; // Y 是 yield() 的宏，让出 CPU 时间
+    persistentCmdSvr1.handleClient(); Y;
+
     #if OPERATIONAL_MODE != ETHERNET_W5100
       persistentCmdSvr2.handleClient(); Y;
     #endif
@@ -94,7 +106,7 @@ void setup(void) {
     WiFi.softAPdisconnect(true); // 断开之前的 WiFi 连接，重置状态
   #endif
 
-  strcpy(firmwareVersion.str, FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch);
+  sstrcpy(firmwareVersion.str, FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch);
 
   // 启动调试串口 (如果开启了调试模式)
   if (DEBUG == ON || DEBUG == VERBOSE || DEBUG == PROFILER) SERIAL_DEBUG.begin(SERIAL_DEBUG_BAUD);
@@ -108,7 +120,7 @@ void setup(void) {
   VF("MSG: MCU = "); VF(MCU_STR); V(", ");
   VF("Pinmap = "); VLF(PINMAP_STR); // 打印引脚映射信息
 
-  delay(2000);
+  delay(1000);
 
   // 调用蓝牙手柄初始化
   #if (BLE_GAMEPAD == ON && ESP32)
@@ -119,7 +131,7 @@ void setup(void) {
   // 调用硬件特定初始化 (HAL)
   VLF("MSG: Init HAL");
   HAL_INIT();
-  HAL_NV_INIT();
+
   #if LED_STATUS != OFF
     pinMode(LED_STATUS_PIN, OUTPUT);
   #endif
@@ -181,31 +193,68 @@ Again:
     goto Again; // 重试
   }
   onStep.clearSerialChannel();
-  // 系统服务
-  // 添加系统服务任务，每 10ms 运行一次，因此写入 1KB NV 数据大约需要 10 秒
-  VF("MSG: Setup, starting system services");
-  VF(" task (rate 10ms priority 7)... ");
-  if (tasks.add(10, 0, true, 7, systemServices, "SysSvcs")) { VL("success"); } else { VL("FAILED!");
-  }
 
-  // 准备 NV (非易失性存储)
-  if (!nv.isKeyValid(INIT_NV_KEY)) {
-    VF("MSG: NV, invalid key wipe "); V(nv.size);
-    VLF(" bytes");
-    if (nv.verify()) { VLF("MSG: NV, ready for reset to defaults");
+  // ----------------------------------------------------------------------------------------
+  // start the NV/EEPROM subsystem for settings storage
+  bool initErrorNv = false;
+  bool success = nv().init(2);
+  if (!success) { DLF("ERR: Setup, NV (EEPROM/FRAM/Flash/etc.) device not found!"); }
+
+  #if defined(NV_WIPE) && NV_WIPE == ON
+    if (success) nv().wipe();
+  #endif
+
+  NvVolume &nvVolume = nv().volume();
+
+  success = success && (nvVolume.mount("SWS", NV_VOLUME_SIGNATURE) == NvVolume::Status::Ok);
+  VF("MSG: Nv, volume ");
+  if (success) { VLF("'SWS' mounted"); } else { VLF("invalid/unformatted"); }
+
+  if (!success) {
+
+    // automatic kv partition sizing
+    uint32_t vSize = nvVolume.byteCount() - 32;
+    uint32_t kvSize = vSize;
+    if (vSize > 1039) {
+
+      // start the volume format
+      success = nvVolume.formatBegin("SWS", NV_VOLUME_SIGNATURE) == NvVolume::Status::Ok;
+      if (success) { VF("MSG: Nv, volume 'SWS' format started ("); V(vSize); VLF(" bytes)"); }
+
+      // add the KV partition
+      success = success && nvVolume.formatAddPartition("KV", kvSize);
+      if (success) { VF("MSG: Nv, volume format added 'KV' partition ("); V(kvSize); VLF(" bytes)"); }
+
+      // finally commit the volume format
+      success = success && (nvVolume.formatCommit() == NvVolume::Status::Ok);
+      if (success) { VLF("MSG: Nv, volume format done"); }
+
+      // try to mount the volume again
+      success = success && (nvVolume.mount("SWS", NV_VOLUME_SIGNATURE) == NvVolume::Status::Ok);
+      if (success) { VLF("MSG: Nv, volume 'SWS' mounted"); } else { DLF("WRN: Nv, volume 'SWS' mount FAILED!"); }
+
+    } else {
+      DLF("WRN: Nv, volume compatible storage device NOT FOUND!");
+      success = false;
     }
-  } else { VLF("MSG: NV, correct key found");
   }
 
-  // 获取命令和网页超时设置
-  if (!nv.hasValidKey()) {
-    nv.write(NV_TIMEOUT_CMD, (int16_t)cmdTimeout);
-    nv.write(NV_TIMEOUT_WEB, (int16_t)webTimeout);
-  }
-  cmdTimeout = nv.readUI(NV_TIMEOUT_CMD);
-  webTimeout = nv.readUI(NV_TIMEOUT_WEB);
+  // Bind global KV instance to the KV partition index
+  success = success && (nv().kv().init(nvVolume, "KV") == KvPartition::Status::Ok);
+  if (success) { VLF("MSG: Nv, partition 'KV' mounted"); } else { DLF("WRN: Nv, partition 'KV' mount FAILED!"); }
 
-  // 启动网络服务器 (WiFi 或 以太网)
+  if (!success) {
+    VLF("WRN: Nv, init FAILED!");
+    initErrorNv = true;
+  }
+  nv().kv().resetInitErrorFlag();
+
+  // get the command and web timeouts
+  if (!nv().kv().getOrInit("NETWORK_TIMEOUT_CMD", cmdTimeout)) { DLF("WRN: Nv, init failed for NETWORK_TIMEOUT_CMD"); }
+  if (!nv().kv().getOrInit("NETWORK_TIMEOUT_WEB", webTimeout)) { DLF("WRN: Nv, init failed for NETWORK_TIMEOUT_WEB"); }
+
+  // ----------------------------------------------------------------------------------------
+  // bring network servers up
   #if OPERATIONAL_MODE == WIFI
     VLF("MSG: Init WiFi");
     wifiManager.init();
@@ -217,13 +266,23 @@ Again:
   // 准备编码器
   VLF("MSG: Initialize Encoders");
   encoders.init();
-  // 初始化完成，必要时写入 NV 密钥
-  if (!nv.hasValidKey()) {
-    nv.writeKey((uint32_t)INIT_NV_KEY);
-    nv.wait();
-    if (!nv.isKeyValid(INIT_NV_KEY)) { DLF("ERR: NV, failed to read back key!"); } else { VLF("MSG: NV, reset complete");
+
+  // ----------------------------------------------------------------------------------------
+  // init is done let the user see what's in the KV
+  #if DEBUG != OFF
+    KvPartition::Stats stats;
+    if (success && nv().kv().stats(stats) == KvPartition::Status::Ok) {
+      VF("MSG: Nv, partition 'KV' data blocks used = ");
+      V(stats.dataBlocksTotal - stats.dataBlocksFree); VF(" (of "); V(stats.dataBlocksTotal); VF(")");
+      VF(" key slots used = ");
+      V(stats.slotsTotal - stats.slotsFree); VF(" (of "); V(stats.slotsTotal); VLF(")");
     }
-  }
+  #endif
+
+  // and capture any errors
+  if (nv().kv().getInitErrorFlag()) initErrorNv = true;
+  UNUSED(initErrorNv);
+  // ----------------------------------------------------------------------------------------
 
   VLF("MSG: Set webpage handlers"); // 设置网页路由处理程序
   www.on("/index.htm", handleRoot);
@@ -261,20 +320,49 @@ Again:
   www.on("/", handleRoot);
   
   www.onNotFound(handleNotFound);
+
+  #ifdef OTA_PRESENT
+    OtaSettings otaSettings = {"", false};
+    nv().kv().getOrInit("OTA_SETTINGS", otaSettings);
+    if (strlen(otaSettings.password) == 0) otaSettings.enabled = false;
+
+    if (otaSettings.enabled) {
+      otaEnabled = true;
+      VLF("MSG: Setup, bringing up OTA service for " HOST_NAME "-OTA");
+      ArduinoOTA.setHostname(HOST_NAME "-OTA");
+      ArduinoOTA.setPassword(otaSettings.password);
+      ArduinoOTA.begin();
+    }
+
+    // since this disturbs operation (ESP8266) allow one-shot enable only
+    if (otaSettings.enabled) {
+      otaSettings.enabled = false;
+      nv().kv().put("OTA_SETTINGS", otaSettings);
+    }
+  #endif
+
   #if COMMAND_SERVER == PERSISTENT || COMMAND_SERVER == BOTH
-    #if OPERATIONAL_MODE != ETHERNET_W5100
+    if (!otaEnabled) {
       VLF("MSG: Starting port 9996 cmd server");
+      persistentCmdSvr1.begin();
+      #if OPERATIONAL_MODE != ETHERNET_W5100
+        VLF("MSG: Starting port 9997 cmd server");
+        persistentCmdSvr2.begin();
+      #endif
+      VLF("MSG: Starting port 9998 cmd server");
       persistentCmdSvr3.begin();
-      VLF("MSG: Starting port 9997 cmd server");
-      persistentCmdSvr2.begin();
-    #endif
-    VLF("MSG: Starting port 9998 cmd server");
-    persistentCmdSvr1.begin();
+    } else {
+      VLF("MSG: OTA mode active, command ports 9996..9998 disabled");
+    }
   #endif
 
   #if COMMAND_SERVER == STANDARD || COMMAND_SERVER == BOTH
-    VLF("MSG: Starting port 9999 cmd server");
-    cmdSvr.begin();
+    if (!otaEnabled) {
+      VLF("MSG: Starting port 9999 cmd server");
+      cmdSvr.begin();
+    } else {
+      VLF("MSG: OTA mode active, command port 9999 disabled");
+    }
   #endif
 
   VLF("MSG: Starting port 80 web server");
@@ -324,5 +412,9 @@ void loop(void) {
     bleConnTest(); Y;
   #endif
 
-  tasks.yield(); // 任务调度器让步
+  #ifdef OTA_PRESENT
+    if (otaEnabled) ArduinoOTA.handle();
+  #endif
+
+  tasks.yield();
 }

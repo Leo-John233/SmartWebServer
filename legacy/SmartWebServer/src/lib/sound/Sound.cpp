@@ -6,6 +6,7 @@
 #ifdef STATUS_BUZZER
 
 #include "../tasks/OnTask.h"
+#include "../gpioEx/GpioEx.h"
 
 void Sound::init() {
   #if STATUS_BUZZER == ON
@@ -32,6 +33,7 @@ void Sound::alert() {
       _buzzerHandle = tasks.add(1000, 0, false, 6, buzzerOff);
     #endif
     #if STATUS_BUZZER >= 0
+      noTone(STATUS_BUZZER_PIN);
       tone(STATUS_BUZZER_PIN, STATUS_BUZZER, 1000);
     #endif
   }
@@ -45,6 +47,7 @@ void Sound::beep() {
       _buzzerHandle = tasks.add(250, 0, false, 6, buzzerOff);
     #endif
     #if STATUS_BUZZER >= 0
+      noTone(STATUS_BUZZER_PIN);
       tone(STATUS_BUZZER_PIN, STATUS_BUZZER, 250);
     #endif
   }
@@ -58,6 +61,7 @@ void Sound::click() {
       _buzzerHandle = tasks.add(50, 0, false, 6, buzzerOff);
     #endif
     #if STATUS_BUZZER >= 0
+      noTone(STATUS_BUZZER_PIN);
       tone(STATUS_BUZZER_PIN, STATUS_BUZZER, 50);
     #endif
   }
