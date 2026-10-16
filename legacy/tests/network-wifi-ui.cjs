@@ -23,6 +23,8 @@ if(action==='scan'){scans++;if(scanFailure)return route.fulfill({status:503,cont
 if(action==='connect'){submissions++;submitted=p;if(rejectConnect)return route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'密码错误，请重试'})});response={message:'正在连接'};state.sta={...state.sta,enabled:p.get('enabled')==='1',ssid:p.get('ssid'),open:p.get('open')==='1',dhcp:p.get('dhcp')==='1'};state.connected=state.sta.enabled;state.ssid=p.get('ssid');state.ip='192.168.1.55';state.message=state.connected?'连接成功':'已断开路由器';}
 return route.fulfill({contentType:'application/json',body:JSON.stringify(response)});});
 await page.goto('http://sws.test/');await page.waitForFunction(()=>document.querySelectorAll('#nw-results button').length===3&&!document.querySelector('#nw-scan').disabled);
+// 无需打开详情就能看到实时访问地址
+assert.equal(await page.locator('#nw-access').isVisible(),true);assert.equal(await page.locator('#nw-access-ip').innerText(),'192.168.1.55');
 assert(scans>=2,'进入页面自动搜索并等待扫描完成');assert.equal(await page.locator('#nw-results img').count(),0,'SSID must be rendered as text');
 assert.equal(await page.locator('#nw-current .nw-selected').innerText(),'✓');assert.equal(await page.locator('#nw-current .nw-network-meta').innerText(),'-55 dBm');assert.equal(await page.locator('#nw-results .nw-selected').count(),0);
 // 刷新使用真实扫描流程，预览截图去除用于安全测试的特殊名称
@@ -45,7 +47,7 @@ for(const width of [390,320]){await page.setViewportSize({width,height:844});ass
 await page.locator('#nw-cancel').click();
 // 关闭需要确认，重新打开自动扫描，状态轮询不会把尚未连接的开关关掉
 page.once('dialog',d=>d.dismiss());await page.locator('#nw-enabled').click();assert.equal(await page.locator('#nw-enabled').isChecked(),true);
-page.once('dialog',d=>d.accept());await page.locator('#nw-enabled').uncheck();await page.waitForFunction(()=>!document.querySelector('#nw-enabled').disabled&&!document.querySelector('#nw-enabled').checked);assert.equal(submitted.get('enabled'),'0');
+page.once('dialog',d=>d.accept());await page.locator('#nw-enabled').uncheck();await page.waitForFunction(()=>!document.querySelector('#nw-enabled').disabled&&!document.querySelector('#nw-enabled').checked);assert.equal(submitted.get('enabled'),'0');assert.equal(await page.locator('#nw-access').isVisible(),false);
 const beforeEnable=scans;await page.locator('#nw-enabled').check();await page.waitForFunction(()=>!document.querySelector('#nw-scan').disabled);assert(scans>beforeEnable,'打开开关自动搜索');await page.waitForTimeout(2800);assert.equal(await page.locator('#nw-enabled').isChecked(),true);
 scanFailure=true;await page.locator('#nw-scan').click();await page.waitForFunction(()=>document.querySelector('#nw-scan-state').textContent.includes('搜索失败'));assert.equal(await page.locator('#nw-scan').isDisabled(),false);scanFailure=false;await page.locator('#nw-scan').click();await page.waitForFunction(()=>!document.querySelector('#nw-scan').disabled);
 // 使用已连接状态生成手机预览，弹窗单独截图

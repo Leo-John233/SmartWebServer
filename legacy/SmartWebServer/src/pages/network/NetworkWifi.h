@@ -31,6 +31,8 @@ button:disabled{color:#9b9393;background:#30282b;cursor:wait}button:focus-visibl
 .nw-state-top{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#ad98a2;font-size:12px}.nw-badge{padding:4px 9px;border-radius:6px;background:#352b30;color:#c6b7be;font-size:12px;white-space:nowrap}.nw-badge[data-connected=true]{background:#4c303c;color:#f1c4d0}
 .nw-state-name{display:block;font-size:18px;font-weight:600;color:#efe1e7;margin:14px 0 16px}.nw-state-values{display:flex;gap:28px;flex-wrap:wrap;margin:0}.nw-state-values div{min-width:0}.nw-state-values dt{color:#a28d98;font-size:12px;margin-bottom:5px}.nw-state-values dd{margin:0;color:#d9cbd2;font-size:14px;font-variant-numeric:tabular-nums}
 /* 网络列表将名称放在左侧，锁和信号放在右侧，勾选只表示已经连接 */
+/* 访问地址直接显示在已连接网络下方，断开后隐藏旧地址 */
+.nw-access{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 16px;margin:12px 0 0;padding:0 16px}.nw-access dt{color:#ab979f;font-size:13px}.nw-access dd{margin:0;color:#eee1e5;font-size:15px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .nw-networks{overflow:hidden;margin-top:12px;border:1px solid #463239;border-radius:14px;background:#211b1f}
 #nw-results{max-height:360px;overflow:auto}.nw-networks:empty{display:none}
 .nw-row{display:flex;align-items:center;gap:12px;width:100%;min-height:72px;text-align:left;background:transparent;border:0;border-bottom:1px solid #372b31;border-radius:0;margin:0;padding:14px 16px;font-weight:400}
@@ -59,7 +61,7 @@ const char html_network_wifi[] PROGMEM = R"NET(
 <section class="nw-card" id="nw-sta-card"><h2>Wi-Fi <small>STA</small></h2>
 <p class="nw-note">连接路由器后，可通过同一网络访问设备</p>
 <div class="nw-switch-line"><label for="nw-enabled">连接 Wi-Fi</label><input id="nw-enabled" class="nw-switch" type="checkbox" role="switch"></div>
-<div id="nw-sta-state" aria-live="polite"><span id="nw-sta-badge" class="nw-note">读取中</span><div id="nw-current" class="nw-networks"></div></div>
+<div id="nw-sta-state" aria-live="polite"><span id="nw-sta-badge" class="nw-note">读取中</span><div id="nw-current" class="nw-networks"></div><dl id="nw-access" class="nw-access" hidden><dt>访问地址</dt><dd id="nw-access-ip">—</dd></dl></div>
 <div id="nw-available"><div class="nw-list-heading"><strong>其他网络</strong><button type="button" id="nw-scan" class="nw-secondary">刷新</button></div>
 <p id="nw-scan-state" class="nw-note" role="status"></p><div id="nw-results" class="nw-networks"></div>
 <div class="nw-networks"><button type="button" id="nw-manual" class="nw-row"><span class="nw-network-copy">其他网络…<span class="nw-network-meta">手动添加或连接隐藏 Wi-Fi</span></span><span aria-hidden="true">＋</span></button></div></div>
@@ -141,6 +143,8 @@ $('nw-close').onclick=$('nw-cancel').onclick=()=>dialog.close();
 async function status(){if(statusBusy)return;statusBusy=true;try{const s=await api('status');current=s;if(!loaded){fields(ap,s.ap);loaded=true;}
 if(!submitting)$('nw-enabled').checked=s.sta.enabled||enableDraft;
 $('nw-sta-badge').textContent=s.connected?'已连接':s.connecting?'正在连接 '+s.sta.ssid:s.sta.enabled||enableDraft?'尚未连接':'Wi-Fi 已关闭';
+// 使用实时连接地址，避免把配置中的静态地址当作实际访问地址
+$('nw-access').hidden=!s.connected;$('nw-access-ip').textContent=s.connected?s.ip:'—';
 $('nw-sta-ip').textContent=s.connected?s.ip:'未分配';$('nw-sta-signal').textContent=s.connected?s.rssi+' dBm':'—';
 $('nw-ap-badge').textContent=s.apActive?'已开启':'未开启';$('nw-ap-badge').dataset.connected=String(s.apActive);$('nw-ap-name').textContent=s.apSsid;$('nw-ap-ip').textContent=s.apActive?s.apIp:'—';
 renderNetworks();if(s.message&&s.message!==lastNotice){lastNotice=s.message;message(s.message,s.failed);}lock(s.connecting||s.pending);
