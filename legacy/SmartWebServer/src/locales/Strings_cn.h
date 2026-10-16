@@ -356,8 +356,8 @@
 #define L_LIMITS_TITLE "地平线与天顶限位"
 #define L_LIMITS_RANGE_HORIZON "地平线限位（&pm;30&deg;）"
 #define L_LIMITS_RANGE_OVERHEAD "高度角上限（60 至 90&deg;）"
-#define L_LIMITS_RANGE_MERIDIAN_E "中天限位·东（&pm;270&deg;）"
-#define L_LIMITS_RANGE_MERIDIAN_W "中天限位·西（&pm;270&deg;）"
+#define L_LIMITS_RANGE_MERIDIAN_E "中天限位 东（&pm;270&deg;）"
+#define L_LIMITS_RANGE_MERIDIAN_W "中天限位 西（&pm;270&deg;）"
 
 // location
 #define L_LOCATION_TITLE "时间与地点"
