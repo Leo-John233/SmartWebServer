@@ -107,7 +107,14 @@ const html = '<!doctype html><meta charset="utf-8"><meta name="viewport" content
     assert.equal(submissions[2].th,'8','同步使用设备 UTC+8 而非浏览器纽约时区');
     assert.equal(submissions[2].dd,'17');
     assert(!('g1' in submissions[2]), '时间同步与位置设置各自提交');
-    await page.evaluate(()=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(ok){ok({coords:{longitude:-122.25,latitude:47.5}});}}});});
+    assert.equal(await page.evaluate(()=>window.isSecureContext),false);
+    await page.locator('[data-edit-form=sws-site-form]').click();
+    await page.locator('.sws-locate').click();
+    await page.getByRole('status').filter({hasText:'当前 HTTP 连接不支持浏览器定位'}).waitFor();
+    assert.equal(await degree('g1').inputValue(),'121','HTTP 定位失败不改写坐标');
+    await site.locator('button[type=reset]').click();await page.waitForFunction(()=>document.querySelector('.sws-site').dataset.editing==='false');
+    // 后续用安全上下文与定位模拟验证成功、拒绝和取消路径
+    await page.evaluate(()=>{Object.defineProperty(window,'isSecureContext',{configurable:true,value:true});Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(ok){ok({coords:{longitude:-122.25,latitude:47.5}});}}});});
     assert.equal(await page.locator('.sws-locate').isEnabled(),false);
     await page.locator('[data-edit-form=sws-site-form]').click();
     await page.locator('.sws-locate').click();

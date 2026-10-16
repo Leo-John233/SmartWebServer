@@ -726,6 +726,7 @@
 #define L_SITE_TIME "时间"
 #define L_SITE_LOCATE "定位"
 #define L_SITE_LOCATE_FAILED "无法获取位置，请允许定位权限或手动编辑"
+#define L_SITE_LOCATE_HTTPS "当前 HTTP 连接不支持浏览器定位，请手动填写经纬度或使用可信 HTTPS 连接"
 #define L_TRACK_REJECTED "主控拒绝跟踪操作，请检查停放、回零及驱动状态"
 #define L_TRACK_TIMEOUT "主控应答超时，请检查连接"
 #define L_TRACK_INVALID "主控应答异常，请重试"

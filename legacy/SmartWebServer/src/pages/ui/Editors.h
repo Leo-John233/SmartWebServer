@@ -160,7 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
       notice.hidden = true;
       const revision=site.closest('.sws-editor').dataset.editRevision;
       const current=()=>site.closest('.sws-editor').dataset.editing==='true'&&site.closest('.sws-editor').dataset.editRevision===revision;
-      const failed = () => { if(!current())return; locate.disabled=false; notice.textContent=)UI" SWS_JS_TEXT(L_SITE_LOCATE_FAILED) R"UI(; notice.hidden=false; };
+      const failed = (message) => { if(!current())return; locate.disabled=false; notice.textContent=typeof message==='string'?message:)UI" SWS_JS_TEXT(L_SITE_LOCATE_FAILED) R"UI(; notice.hidden=false; };
+      if (window.isSecureContext === false) { failed()UI" SWS_JS_TEXT(L_SITE_LOCATE_HTTPS) R"UI(); return; }
       if (!navigator.geolocation) { failed(); return; }
       locate.disabled = true;
       navigator.geolocation.getCurrentPosition(position => {

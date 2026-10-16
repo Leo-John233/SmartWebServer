@@ -723,6 +723,7 @@
 #define L_SITE_TIME "Time"
 #define L_SITE_LOCATE "Locate"
 #define L_SITE_LOCATE_FAILED "Location unavailable, allow access or edit manually"
+#define L_SITE_LOCATE_HTTPS "Browser location requires a trusted HTTPS connection; enter coordinates manually"
 #define L_TRACK_REJECTED "Controller rejected tracking; check park, home and driver status"
 #define L_TRACK_TIMEOUT "Controller response timed out; check connection"
 #define L_TRACK_INVALID "Invalid controller response; retry"

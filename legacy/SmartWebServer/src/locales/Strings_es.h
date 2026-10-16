@@ -721,6 +721,7 @@
 #define L_SITE_TIME "Hora"
 #define L_SITE_LOCATE "Ubicación"
 #define L_SITE_LOCATE_FAILED "Ubicación no disponible, permita acceso o edite manualmente"
+#define L_SITE_LOCATE_HTTPS "La ubicación requiere HTTPS de confianza; introduzca las coordenadas manualmente"
 #define L_TRACK_REJECTED "Seguimiento rechazado; revise aparcado, origen y controlador"
 #define L_TRACK_TIMEOUT "Respuesta agotada; revise la conexión"
 #define L_TRACK_INVALID "Respuesta no válida; reintente"

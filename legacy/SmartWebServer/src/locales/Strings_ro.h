@@ -723,6 +723,7 @@
 #define L_SITE_TIME "Ora"
 #define L_SITE_LOCATE "Localizare"
 #define L_SITE_LOCATE_FAILED "Locație indisponibilă, permiteți accesul sau editați manual"
+#define L_SITE_LOCATE_HTTPS "Localizarea necesită HTTPS de încredere; introduceți coordonatele manual"
 #define L_TRACK_REJECTED "Urmărire refuzată; verificați parcarea, originea și driverul"
 #define L_TRACK_TIMEOUT "Răspuns expirat; verificați conexiunea"
 #define L_TRACK_INVALID "Răspuns nevalid; reîncercați"

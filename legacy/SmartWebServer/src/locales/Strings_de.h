@@ -731,6 +731,7 @@
 #define L_SITE_TIME "Zeit"
 #define L_SITE_LOCATE "Standort"
 #define L_SITE_LOCATE_FAILED "Standort nicht verfügbar, Zugriff erlauben oder manuell bearbeiten"
+#define L_SITE_LOCATE_HTTPS "Standort benötigt eine vertrauenswürdige HTTPS-Verbindung; Koordinaten manuell eingeben"
 #define L_TRACK_REJECTED "Nachführung abgelehnt; Park-, Referenz- und Treiberstatus prüfen"
 #define L_TRACK_TIMEOUT "Antwortzeit überschritten; Verbindung prüfen"
 #define L_TRACK_INVALID "Ungültige Antwort; erneut versuchen"
