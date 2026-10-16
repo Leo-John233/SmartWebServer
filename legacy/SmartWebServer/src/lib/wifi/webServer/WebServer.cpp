@@ -8,7 +8,7 @@
   #if defined(ESP32)
     WebServer www(80);
   #elif defined(ESP8266)
-    ESP8266WebServer www(80);
+    SwsWebServer www(80);
   #endif
 
 #endif

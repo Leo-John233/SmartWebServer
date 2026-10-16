@@ -14,7 +14,20 @@ const char html_shell_script[] PROGMEM = R"UI(
     hint = document.getElementById('sws-load'),
     links = [...document.querySelectorAll('.t a')];
   let sequence = 0,
-    timer;
+    timer, waiting = false, timedOut = false;
+  function recover(ticket) {
+    if(ticket !== sequence)return;
+    clearTimeout(timer);
+    waiting=false;
+    hint.textContent = )UI" SWS_JS_TEXT(L_UI_SLOW_LOAD) R"UI(;
+    frame.style.pointerEvents = '';
+    try {
+      const child=frame.contentWindow;
+      if(child.document.body)child.document.body.inert=false;
+      if(child.swsResumePolling)child.swsResumePolling();
+    } catch(e) {}
+    resize();
+  }
   // 参考实心设备图标重绘剪影，望远镜保留倾斜镜筒、镜口与底座
   // 图形内嵌且继承导航颜色，离线可用并同步适配桌面和手机
   const icons = {
@@ -106,6 +119,7 @@ const char html_shell_script[] PROGMEM = R"UI(
     closeMore();
     more.dataset.active = String(!['/index.htm', '/mount.htm', '/net.htm'].includes(path));
     const ticket = ++sequence;
+    waiting=true; timedOut=false;
     clearTimeout(timer);
     hint.textContent = )UI" SWS_JS_TEXT(L_UI_OPENING) R"UI(;
     frame.style.pointerEvents = 'none';
@@ -115,8 +129,13 @@ const char html_shell_script[] PROGMEM = R"UI(
       if (child.swsPausePolling) child.swsPausePolling();
       if (child.document.body) child.document.body.inert = true;
       const stops = (child.swsMotionStops || []).map((stop) => stop()).filter(Boolean);
-      if (stops.length) await Promise.all(stops);
-    } catch (e) {}
+      if (stops.length) {
+        let deadline;
+        try {
+          await Promise.race([Promise.all(stops),new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('stop timeout')),5000);})]);
+        } finally { clearTimeout(deadline); }
+      }
+    } catch (e) { recover(ticket); return; }
     if (ticket !== sequence) return;
     if (push && normalize(location.pathname) !== path) history.pushState({}, '', path);
     links.forEach((a) => {
@@ -129,19 +148,34 @@ const char html_shell_script[] PROGMEM = R"UI(
     ).textContent;
     document.getElementById('sws-page-description').textContent = '';
     frame.title = document.getElementById('sws-page-title').textContent;
+    frame.style.visibility='hidden';
     frame.contentWindow.location.replace(path + '?view=1');
     resize();
     timer = setTimeout(() => {
-      hint.textContent = )UI" SWS_JS_TEXT(L_UI_SLOW_LOAD) R"UI(;
-      resize();
+      if(ticket!==sequence)return;
+      timedOut=true;
+      try { frame.contentWindow.stop(); } catch(e) {}
+      recover(ticket);
     }, 12000);
   };
   frame.addEventListener('load', () => {
+    if(timedOut)return;
+    // 公共资源失败时不把缺少样式和交互的旧布局当成已加载完成。
+    try {
+      const child=frame.contentWindow, doc=child.document;
+      if((doc.querySelector('link[href*="/sws-ui.css"]')&&!child.getComputedStyle(doc.documentElement).getPropertyValue('--bg').trim()) ||
+         (doc.querySelector('script[src*="/sws-ui.js"]')&&typeof child.swsWatchCommand!=='function')) {
+        recover(sequence); return;
+      }
+    } catch(e) { recover(sequence); return; }
     clearTimeout(timer);
+    waiting=false;
     hint.textContent = '';
     frame.style.pointerEvents = '';
+    frame.style.visibility = '';
     resize();
   });
+  addEventListener('online', () => { if(waiting || timedOut) recover(sequence); });
   addEventListener('resize', resize);
   new ResizeObserver(resize).observe(document.querySelector('.t'));
   links.forEach((a) =>

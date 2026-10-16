@@ -200,6 +200,21 @@ async function polling(page) {
   await page.clock.runFor(7000);
   assert((await page.evaluate(() => requests.length)) <= 3, '失败后逐步退避');
   await page.evaluate(() => swsPausePolling());
+  // 请求没有完成事件时也要释放旧连接，长时间停留后仍能恢复轮询。
+  await page.evaluate(() => { window.requests=[]; window.delay=60000; window.replyStatus=200; swsResumePolling(); });
+  await page.clock.runFor(5500);
+  assert(await page.evaluate(()=>requests[0].aborted),'独立截止时间终止无响应请求');
+  await page.evaluate(()=>window.delay=20);
+  await page.clock.runFor(700);
+  assert(await page.evaluate(()=>requests.length>=2&&!autoStopped),'超时后继续刷新');
+  // 即使一次更新处理异常也不能永久停止刷新。
+  await page.evaluate(()=>{window.savedPageReady=pageReady;pageReady=()=>()=>{throw Error('bad update');};swsResumePolling();});
+  await page.clock.runFor(20);
+  assert(await page.evaluate(()=>autoFailures>0));
+  await page.evaluate(()=>{pageReady=savedPageReady;window.beforeWake=requests.length;dispatchEvent(new Event('online'));});
+  await page.clock.runFor(20);
+  assert(await page.evaluate(()=>requests.length>beforeWake&&autoFailures===0),'连接恢复后立即刷新');
+  await page.evaluate(() => swsPausePolling());
   // 加快刷新仍采用原有配置，结束后回到普通间隔。
   await page.evaluate(() => { autoFastRun(); window.fastRate = autoRate(); });
   assert.equal(await page.evaluate(() => fastRate), 500);

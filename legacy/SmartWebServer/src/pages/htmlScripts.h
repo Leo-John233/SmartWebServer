@@ -108,7 +108,7 @@ const char html_script_ajax[] PROGMEM =
 "}\n"
 R"JS(
 // 按请求完成时间安排下一次刷新，慢连接只保留一个状态请求。
-var autoTimer=null, autoRequest=null, autoFastUntil=0, autoFailures=0, autoStopped=false;
+var autoTimer=null, autoRequest=null, autoDeadline=null, autoStarted=0, autoFastUntil=0, autoFailures=0, autoStopped=false;
 var autoHtmlValues=new WeakMap();
 function autoRate() {
   return Date.now()<autoFastUntil ? )JS" STR(AJAX_PAGE_UPDATE_RATE_FAST_MS) R"JS( : )JS" STR(AJAX_PAGE_UPDATE_RATE_MS) R"JS(;
@@ -123,6 +123,7 @@ function autoFastRun() {
 }
 function autoPause() {
   clearTimeout(autoTimer);
+  clearTimeout(autoDeadline);
   if (autoRequest) {
     var request=autoRequest;
     autoRequest=null;
@@ -130,24 +131,29 @@ function autoPause() {
   }
 }
 window.swsPausePolling=function() { autoStopped=true; autoPause(); };
+window.swsResumePolling=function() { autoStopped=false; autoFailures=0; autoPause(); autoRun(); };
 function autoRun() {
   if (autoStopped || document.hidden || autoRequest) return;
   // 命令正在发送时让出下一次刷新机会，不改变命令的参数或发送顺序。
   if (window.swsPendingCommands) { autoSchedule(autoRate()); return; }
   var request=new XMLHttpRequest();
   autoRequest=request;
+  autoStarted=Date.now();
   function finish() {
     if (autoRequest!==request) return;
+    clearTimeout(autoDeadline);
     autoRequest=null;
     if (request.status===200) {
-      autoFailures=0;
-      pageReady(ajaxPage).call(request);
+      try { pageReady(ajaxPage).call(request); autoFailures=0; }
+      catch (error) { autoFailures=Math.min(autoFailures+1,6); }
     } else autoFailures=Math.min(autoFailures+1,6);
     autoSchedule(autoFailures ? Math.min(30000,autoRate()*Math.pow(2,autoFailures)) : autoRate());
   }
   request.onreadystatechange=function() { if (request.readyState===4) finish(); };
   request.onerror=request.ontimeout=finish;
   request.timeout=5000;
+  // 独立截止时间防止浏览器漏发完成事件，终止旧请求后才安排下一次刷新。
+  autoDeadline=setTimeout(function() { if(autoRequest!==request)return; autoRequest=null; request.abort(); autoFailures=Math.min(autoFailures+1,6); autoSchedule(autoRate()); },5500);
   request.open('GET',ajaxPage.toLowerCase()+'?nocache='+Date.now(),true);
   request.send(null);
 }
@@ -187,4 +193,12 @@ document.addEventListener('visibilitychange',function() {
 });
 window.addEventListener('pagehide',window.swsPausePolling);
 window.addEventListener('pageshow',function() { autoStopped=false; autoRun(); });
+function autoWake() {
+  if(autoStopped || document.hidden)return;
+  autoFailures=0;
+  if(autoRequest && Date.now()-autoStarted>5000)autoPause();
+  if(!autoRequest)autoRun();
+}
+window.addEventListener('online',autoWake);
+window.addEventListener('focus',autoWake);
 )JS" "</script>\n";
