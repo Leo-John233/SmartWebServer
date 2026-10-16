@@ -23,6 +23,7 @@ module.exports=({templates:t,defs:d,tile,h,motion,axis})=>{
     optional['/'+kind+'.htm']=fill(t['htmlScripts.h'].html_script_ajax_get,kind+'-ajax-get.txt')+t['htmlScripts.h'].html_script_ajax_shortcuts+'<script>function autoFastRun(){}</script><div class="sws-device-layout sws-accessory-layout">'+(kind==='focuser'?'<section class="sws-device-selector">'+cards.Select+'</section>':'')+'<div class="sws-accessory-grid"><div class="sws-accessory-main"><section class="sws-device-primary sws-accessory-motion">'+cards.Slewing+'</section><section class="sws-accessory-home">'+cards.Home+'</section></div><section class="sws-accessory-settings">'+(kind==='focuser'?cards.BacklashTcf:cards.Backlash+cards.DeRotator)+'</section></div></div>';
   }
   optional['/enc.htm']='<div class="sws-device-layout"><section class="sws-device-selector">'+tile(d.L_ENCODER,controls('encoders/SyncTile.h'))+'</section>'+group(d.L_ENC_CONF,[1,2].map(n=>tile('Axis'+n,controls('encoders/AxisTile.h'))).join(''))+'</div>';
-  optional['/auxiliary.htm']='<div class="sws-device-layout">'+group(d.L_AUX_FEATURES,tile(d.L_AUX_FEATURES,controls('auxiliary/Auxiliary.h')))+'</div>';
-  return {controller,mount,optional};
+  const auxiliary=require('./auxiliary-page.cjs')();
+  optional['/auxiliary.htm']=auxiliary.body;
+  return {controller,mount,optional,auxiliary};
 };

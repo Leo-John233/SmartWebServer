@@ -21,7 +21,7 @@ const guide=constant(read('src/pages/mount/GuideTile.h'),'html_guidePad');
 // 编译实际轴渲染函数，其他控件直接展开真实模板与中文宏
 const templates=require('../tests/page-templates.cjs')(root),cp=require('node:child_process');
 const axisPath=path.join(out,'axis.html');cp.execFileSync(process.execPath,[path.join(__dirname,'../tests/axis-page.cjs'),axisPath],{stdio:'pipe'});
-const {controller,mount,optional}=require('../tests/full-page-preview.cjs')({templates,defs,tile,h,motion,axis:fs.readFileSync(axisPath,'utf8')});
+const {controller,mount,optional,auxiliary}=require('../tests/full-page-preview.cjs')({templates,defs,tile,h,motion,axis:fs.readFileSync(axisPath,'utf8')});
 const manifest=require('../tests/page-feature-manifest.cjs');for(const [file,names] of Object.entries(manifest)){const source=read('src/pages/'+file);for(const name of names)assert(source.includes(name+'('),file+' 缺少 '+name);}
 const networkTile=(title,body)=>tile(title,body).replace('<br><hr>','');
 const netBody='<div class="sws-network-layout">'+raw(wifi,'html_network_wifi')+networkTile(defs.L_NETWORK_OTA_TITLE,n('htmL_NETWORKSSID8').replace('%s',''))+networkTile(defs.L_NETWORK_PERFORMANCE,n('htmL_NETWORKSerial').replace('%d','200').replace('%d','200'))+'<section class="sws-account">'+n('html_logout')+'</section></div>';
@@ -30,4 +30,4 @@ const state={sta:{enabled:true,ssid:'Redmi_Hotel',open:false,dhcp:true,ip:'192.1
 function doc(url,embedded){if(!embedded)return head+'</head><body>'+shared+title+'<p id="sws-load" role="status"></p><iframe id="sws-frame" title="标签内容"></iframe>'+shellScript;const body=url==='/net.htm'?(loggedIn?netBody:'<form method="post" action="/net.htm"><label>管理密码 <input name="login" type="password"></label><button>登录</button></form>'):url==='/mount.htm'?mount:optional[url]||controller;return head+(url==='/net.htm'?raw(wifi,'html_network_css'):'')+'</head><body>'+shared+title+'<div class="b">'+(url==='/mount.htm'?constant(scripts,'html_script_ajax_date_time_return')+'<script>'+templates['htmlScripts.h'].html_script_ajax.match(/function pad[\s\S]*?(?=var auto1Tick)/)[0]+'</script>':url==='/focuser.htm'||url==='/rotator.htm'?motion:'')+body+'</div>'+constant(scripts,'html_script_collapsible')+'<script>setInterval(()=>fetch("/preview-poll?page='+url+'"),200)</script></body></html>';}
 
 // 演示复用固件样式和控件，所有交互由本地模拟服务接管
-module.exports={doc,state,head,shared,templates};
+module.exports={doc,state,head,shared,templates,auxiliary};

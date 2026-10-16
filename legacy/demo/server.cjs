@@ -1,6 +1,7 @@
 // 仅在本机提供模拟设备，不连接串口或真实硬件
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
-const {doc,state,head,shared,templates}=require('./render.cjs');
+const {doc,state,head,shared,templates,auxiliary}=require('./render.cjs');
+const auxiliaryDevice=require('./auxiliary.cjs')(auxiliary);
 const client=fs.readFileSync(path.join(__dirname,'simulation.js'),'utf8');
 const pages=['/index.htm','/mount.htm','/net.htm','/focuser.htm','/rotator.htm','/auxiliary.htm','/enc.htm'];
 const networks=[{ssid:'Redmi_Hotel',rssi:-48,open:false},{ssid:'Observatory',rssi:-62,open:false},{ssid:'Guest',rssi:-73,open:true},{ssid:'Home Wi-Fi',rssi:-55,open:false}];
@@ -28,6 +29,8 @@ const server=http.createServer(async(req,res)=>{
     const valid=fields.every((k,i)=>/^\d+$/.test(q.get(k)||'')&&Number(q.get(k))<=max[i])&&['+','-'].includes(q.get('dec_sign'))&&['go','sync'].includes(q.get('coord_action'))&&!(Number(q.get('dec_d'))===90&&(Number(q.get('dec_m'))||Number(q.get('dec_s'))));
     return send(valid?'ok':'invalid','text/plain');
   }
+  if(url.pathname==='/auxiliary-ajax-get.txt'){if(!auxiliaryDevice.command(url.searchParams))res.statusCode=400;return send('','text/plain');}
+  if(url.pathname==='/auxiliary-ajax.txt')return send(auxiliaryDevice.poll(),'text/plain');
   if(url.pathname.endsWith('.txt')||url.pathname==='/preview-poll')return send('','text/plain');
   if(url.pathname==='/libraryHelp.htm')return send(head+'</head><body>'+shared+'<main class="sws-document"><h1>天体库</h1>'+Object.values(templates['LibraryHelp.h']).join('')+'</main></body></html>');
   const page=url.pathname==='/'?'/index.htm':url.pathname;
