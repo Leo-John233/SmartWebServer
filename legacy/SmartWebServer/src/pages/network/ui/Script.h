@@ -71,7 +71,20 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       else e.value = data[k];
     });
   }
-  // 行内图标使用固定内容，网络名称只通过纯文本写入
+  // 三条弧按 RSSI 分档，弱信号仍保留圆点；无有效读数时全部变暗。
+  function signalIcon(rssi) {
+    const valid = Number.isFinite(rssi) && rssi < 0;
+    const level = !valid ? 0 : rssi >= -55 ? 3 : rssi >= -70 ? 2 : rssi >= -85 ? 1 : 0;
+    const arcs = [
+      'M11 20a7 7 0 0 1 10 0',
+      'M7 15a13 13 0 0 1 18 0',
+      'M3 10a19 19 0 0 1 26 0',
+    ];
+    return '<svg class="nw-wifi" viewBox="0 0 32 32" aria-hidden="true">' +
+      arcs.map((d, i) => '<path d="' + d + '" opacity="' + (i < level ? 1 : 0.18) + '"/>').join('') +
+      '<circle cx="16" cy="25" r="1.6" fill="currentColor" stroke="none" opacity="' + (valid ? 1 : 0.18) + '"/></svg>';
+  }
+  // 网络名称只通过纯文本写入，图标依据每个网络的真实信号读数生成。
   function row(n, connected) {
     const b = document.createElement('button');
     b.type = 'button';
@@ -88,7 +101,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       (n.open
         ? ''
         : '<svg class="nw-lock" viewBox="0 0 16 20" aria-hidden="true"><rect x="3" y="8" width="10" height="9" rx="2"/><path d="M5 8V5a3 3 0 0 1 6 0v3"/></svg>') +
-      '<svg class="nw-wifi" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 10a19 19 0 0 1 26 0M7 15a13 13 0 0 1 18 0M11 20a7 7 0 0 1 10 0"/><circle cx="16" cy="25" r="1.6" fill="currentColor" stroke="none"/></svg>' +
+      signalIcon(n.rssi) +
       (connected
         ? '<span class="nw-selected" aria-hidden="true">✓</span>'
         : '<span class="nw-info" aria-hidden="true">i</span>');

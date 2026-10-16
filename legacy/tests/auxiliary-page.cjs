@@ -1,5 +1,6 @@
+const testOutput = require('./test-output.cjs');
 // 执行完整辅助页面与状态输出，设备能力采用明确的模拟通道组合
-const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cp=require('node:child_process');
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 const defaults=[
  {name:'Aux1',purpose:1,values:[1,0,0,0],voltage:12.1,current:.1},
  {name:'Aux2',purpose:2,values:[128,0,0,0],voltage:12.1,current:.4},
@@ -68,7 +69,7 @@ void handleNotFound(){www.output="NOT_FOUND";}
  const auxiliaryHeader=sourceRef?cp.execFileSync('git',['show',sourceRef+':src/pages/auxiliary/Auxiliary.h'],{encoding:'utf8'}):read('pages/auxiliary/Auxiliary.h');
  code+=clean(auxiliaryHeader)+'\n'+clean(auxiliarySource)+'\n';
  code+='int main(){handleAux();std::cout<<www.output<<"\\nPREVIEW_AJAX\\n";www.output.clear();auxAjax();std::cout<<www.output<<"PREVIEW_TIMES\\n";for(int i=0;i<256;i++)std::cout<<byteToTime(i)<<"\\n";}';
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sws-auxiliary-')),input=path.join(dir,'render.cpp'),exe=path.join(dir,'auxiliary-render.exe');fs.writeFileSync(input,code);
+ const dir=fs.mkdtempSync(path.join(testOutput,'sws-auxiliary-')),input=path.join(dir,'render.cpp'),exe=path.join(dir,'auxiliary-render.exe');fs.writeFileSync(input,code);
  cp.execFileSync(process.env.CXX||'g++',['-std=c++11',input,'-o',exe],{stdio:'pipe'});
  const [html,other]=cp.execFileSync(exe,[],{encoding:'utf8'}).replace(/\r/g,'').split('\nPREVIEW_AJAX\n'),[ajax,times]=other.split('PREVIEW_TIMES\n');
  let body='';if(html!=='NOT_FOUND'){const start=html.indexOf("<div class='b'>")+"<div class='b'>".length,end=html.lastIndexOf('</div></body></html>');if(start<"<div class='b'>".length||end<start)throw Error('辅助页面结构异常');body=html.slice(start,end);}

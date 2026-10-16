@@ -132,12 +132,15 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 
 以下检查使用真实语言宏、页面生成函数及后台处理代码；模拟设备数据不能替代实机验证。
 
+测试源码、生成的程序、浏览器配置和默认截图都集中在仓库内的 `legacy/tests/output/`，该目录不提交到 Git。测试入口通过 `tests/test-output.cjs` 设置临时目录，避免在系统临时目录运行测试程序；显式指定截图或构建输出位置时，也应使用此目录下的子目录。
+
 - `node legacy/tests/page-interfaces.cjs`：与已合并上游 `193a818` 对照原始路由、请求处理入口、设备通信及键值编码。后续更新基准时须核对测试中的版本号与已审查的差异。
 - `node legacy/tests/pages-languages.cjs <输出目录>`：检查全部 10 种语言选择的控件、提交参数、事件脚本以及桌面和 320/390 像素布局。
 - `node legacy/tests/firmware-languages.cjs <compile_commands.json> <输出目录>`：使用真实 Arduino 工具链检查 10 种语言下的全部网页源文件；清单由 Arduino CLI 的 `compile --only-compilation-database` 生成。只修改隔离副本中的语言配置，不改写工程 Config.h。
 - `node legacy/tests/locales.cjs`：检查 9 个语言文件的宏、格式占位符、特殊符号分支和坐标表单。
 - `node legacy/tests/encoders-page.cjs`：执行真实编码器页面与参数处理，检查第二轴默认值不误用第一轴配置。
 - `node legacy/tests/accessory-commands.cjs` 与 `node legacy/tests/coordinate-input.cjs`：检查附件控制、输入边界、坐标命令顺序与设备拒绝。
+- `node legacy/tests/network-page.cjs`：执行真实网络页及资源分段发送，模拟空分块结束 HTTP 响应，检查 Wi-Fi 后的 OTA、通信超时及账号设置不被截断；覆盖登录和 OTA 功能条件。
 - 另运行上述配网、公共界面和辅助设备浏览器检查，并分别编译 ESP8266 与 ESP32 固件。
 
 本次将新增导航、配网和错误提示统一接入语言文件；扩充轴参数标签缓冲区，防止长文案截断输入控件。辅助页回归按真实请求完成时机等待，保留原固件的延迟提交行为。
@@ -154,3 +157,5 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - 限位读数采用两列卡片，回差与限位设置独立分组；精调极轴分为三步，校准卡片不随旁边长表单拉高。
 - 时间与地点使用更大的读数和统一输入框；桌面侧栏收窄，品牌名称和底部说明居中。
 - PEC 的初始占位和状态读取失败使用本语言的“未知”，不再显示问号；`node legacy/tests/pec-status.cjs` 验证真实状态映射与读取失败分支。
+- 模拟器的跟踪、方位控制及网络页面执行固件生成函数，避免手工拼接模板遗漏状态节点或掩盖传输截断。跟踪和方位状态、标题倍率节点仍供原始 AJAX 更新，简洁布局隐藏其重复显示。
+- Wi-Fi 图标按实际 RSSI 显示亮弧：不低于 -55 dBm 为三条，-70 dBm 为两条，-85 dBm 为一条，更弱时只亮圆点；无有效读数时全部变暗。已连接网络与扫描列表共用规则，状态轮询同步更新。

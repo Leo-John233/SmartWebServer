@@ -1,5 +1,6 @@
+const testOutput = require('./test-output.cjs');
 // 验证真实坐标处理代码，错误输入或设备拒绝时不得触发移动
-const fs=require('fs'),path=require('path'),os=require('os'),cp=require('child_process');
+const fs=require('fs'),path=require('path'),cp=require('child_process');
 const root=path.join(__dirname,'../SmartWebServer/src/pages/mount');
 const handler=fs.readFileSync(path.join(root,'GotoTile.cpp'),'utf8').split('void gotoCoordinatesGet()')[1];
 const stub=`#include <string>
@@ -26,7 +27,7 @@ for(int fail:{1,2}){reset();onStep.fail=fail;gotoCoordinatesGet();assert(int(onS
 reset();onStep.rejectGoto=true;gotoCoordinatesGet();assert(www.reply=="rejected");
 std::cout<<"PASS: coordinate ranges, signed zero, command order, device rejection and no movement on invalid input";}
 `;
-const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sws-coordinates-')),src=path.join(dir,'test.cpp'),exe=path.join(dir,'test.exe');
+const dir=fs.mkdtempSync(path.join(testOutput,'sws-coordinates-')),src=path.join(dir,'test.cpp'),exe=path.join(dir,'test.exe');
 fs.writeFileSync(src,fs.readFileSync(path.join(root,'CoordinateInput.h'),'utf8')+'\n'+stub+handler+'\n'+cases);
 // Windows 可能短暂占用刚生成的程序，仅对启动权限错误做有限等待
 (async()=>{for(const [cmd,args]of [[process.env.CXX||'g++',['-std=c++11',src,'-o',exe]],[exe,[]]]){let r;for(let attempt=0;attempt<6;attempt++){r=cp.spawnSync(cmd,args,{encoding:'utf8'});if(r.error?.code!=='EPERM')break;await new Promise(resolve=>setTimeout(resolve,1000));}if(r.status!==0)throw Error(r.stderr||String(r.error));if(r.stdout)console.log(r.stdout);}})().catch(error=>{console.error(error);process.exit(1)});

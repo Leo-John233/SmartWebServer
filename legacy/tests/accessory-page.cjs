@@ -1,5 +1,6 @@
+const testOutput = require('./test-output.cjs');
 // 运行真实设备卡片，避免模拟页面跳过状态读数和设备条件
-const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cp=require('node:child_process');
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 module.exports=({kind='focuser',version=10,count=2,derotator=true}={})=>{
   const root=path.join(__dirname,'../SmartWebServer/src'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
   const clean=s=>s.replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
@@ -34,7 +35,7 @@ struct Device{bool command(const char*,char*out){strcpy(out,"16");return true;}}
   code+='int main(){String data;';
   for(const tile of tiles){const func=tile==='DeRotator'?'deRotatorTile':kind+tile+'Tile';code+='std::cout<<"PREVIEW_'+tile+'\\n";www.output.clear();'+(tile==='DeRotator'?'if(status.derotatorFound)':'')+func+'(data);std::cout<<www.output<<data;data.clear();';}
   code+='}';
-  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sws-accessory-')),input=path.join(dir,'render.cpp'),exe=path.join(dir,'render.exe');fs.writeFileSync(input,code);
+  const dir=fs.mkdtempSync(path.join(testOutput,'sws-accessory-')),input=path.join(dir,'render.cpp'),exe=path.join(dir,'render.exe');fs.writeFileSync(input,code);
   const build=cp.spawnSync(process.env.CXX||'g++',['-std=c++11',input,'-o',exe],{encoding:'utf8'});if(build.status!==0)throw Error(build.stderr);
   const result=cp.spawnSync(exe,[],{encoding:'utf8'});if(result.status!==0)throw Error(result.stderr);
   return Object.fromEntries(result.stdout.split('PREVIEW_').slice(1).map(s=>{const i=s.indexOf('\n');return[s.slice(0,i).trim(),s.slice(i+1)];}));

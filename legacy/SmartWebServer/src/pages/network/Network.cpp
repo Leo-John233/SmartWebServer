@@ -113,7 +113,8 @@ void handleNetwork() {
       data.concat(FPSTR(htmL_NETWORK_ETH_END));
       data.concat(FPSTR(html_tile_end));
     #endif
-    www.sendContentAndClear(data);
+    // Wi-Fi 界面已分段发送并清空 data；空分块会提前结束 HTTP 响应。
+    if (data.length()) { www.sendContentAndClear(data); }
 
     #ifdef OTA_PRESENT
       OtaSettings otaSettings = {"", false};

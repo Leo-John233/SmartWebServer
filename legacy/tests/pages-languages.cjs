@@ -1,13 +1,13 @@
+const testOutput = require('./test-output.cjs');
 // 各语言执行实际页面生成函数，并检查控件、脚本和手机布局
 const fs = require('node:fs'),
   path = require('node:path'),
-  os = require('node:os'),
   cp = require('node:child_process'),
   assert = require('node:assert/strict');
 const { chromium } = require('../../webui/node_modules/playwright');
 const root = path.join(__dirname, '../SmartWebServer'),
   read = (p) => fs.readFileSync(path.join(root, p), 'utf8'),
-  out = process.argv[2] || os.tmpdir();
+  out = process.argv[2] || testOutput;
 fs.mkdirSync(out, { recursive: true });
 const statuses = {
   sta: { enabled: false, ssid: 'Test Wi-Fi', open: false, dhcp: true },
@@ -70,7 +70,6 @@ const statuses = {
         motion,
         axis: fs.readFileSync(axisPath, 'utf8'),
       });
-      const network = templates['network/Network.h'];
       const bodies = {
         index: pages.controller,
         mount: pages.mount,
@@ -78,9 +77,7 @@ const statuses = {
         rotator: pages.optional['/rotator.htm'],
         auxiliary: pages.optional['/auxiliary.htm'],
         enc: pages.optional['/enc.htm'],
-        net: templates['network/NetworkWifi.h'].html_network_wifi +
-          tile(defs.L_NETWORK_PERFORMANCE, network.htmL_NETWORKSerial.replaceAll('%d', '200')) +
-          tile(defs.L_NETWORK_TITLE, network.html_login + network.html_logout + network.html_reboot),
+        net: require('./network-page.cjs')({fragment:true}),
       };
       const appearance = templates['Appearance.h'].html_shared_appearance,
         counts = {};

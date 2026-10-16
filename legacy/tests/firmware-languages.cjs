@@ -1,3 +1,4 @@
+const testOutput = require('./test-output.cjs');
 // 使用 Arduino 生成的真实编译命令，在配置副本中检查所有网页的语言分支。
 // node legacy/tests/firmware-languages.cjs <compile_commands.json> <输出目录>
 const fs = require('node:fs');
@@ -5,8 +6,8 @@ const path = require('node:path');
 const cp = require('node:child_process');
 const assert = require('node:assert/strict');
 
-const [databasePath, outputPath] = process.argv.slice(2);
-assert(databasePath && outputPath, '需要 compile_commands.json 和输出目录');
+const [databasePath, outputPath = path.join(testOutput, 'firmware-languages')] = process.argv.slice(2);
+assert(databasePath, '需要 compile_commands.json');
 const root = path.resolve(__dirname, '../SmartWebServer');
 const database = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
 const entries = database.filter((entry) => /[/\\]src[/\\]pages[/\\].*\.cpp$/.test(entry.file));

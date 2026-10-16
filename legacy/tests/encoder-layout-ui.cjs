@@ -1,3 +1,4 @@
+const testOutput = require('./test-output.cjs');
 // 验证真实编码器页面的同步请求、选中反馈、读数尺寸和手机布局。
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -8,7 +9,7 @@ const templates = require('./page-templates.cjs')(root);
 const body = require('./encoders-page.cjs')({ absolute: true });
 const appearance = templates['Appearance.h'].html_shared_appearance;
 const collapse = templates['htmlScripts.h'].html_script_collapsible;
-const output = process.argv[2] || require('node:os').tmpdir();
+const output = process.argv[2] || testOutput;
 fs.mkdirSync(output, { recursive: true });
 
 (async () => {

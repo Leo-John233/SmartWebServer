@@ -1,3 +1,4 @@
+require('./test-output.cjs');
 // 检查中文基准的宏覆盖、条件分支、格式标记及实际坐标表单
 const fs = require('node:fs');
 const path = require('node:path');

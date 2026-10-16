@@ -1,7 +1,7 @@
+const testOutput = require('./test-output.cjs');
 // 运行真实 PEC 状态处理，验证正常状态与读取失败时的文字。
 const fs = require('node:fs');
 const path = require('node:path');
-const os = require('node:os');
 const cp = require('node:child_process');
 const source = fs.readFileSync(
   path.join(__dirname, '../SmartWebServer/src/pages/mount/PecTile.cpp'),
@@ -59,7 +59,7 @@ int main() {
   std::cout << "PASS: actual PEC states, unknown response, unavailable data and storage status";
 }
 `;
-const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'sws-pec-'));
+const directory = fs.mkdtempSync(path.join(testOutput, 'sws-pec-'));
 const input = path.join(directory, 'pec.cpp'),
   executable = path.join(directory, 'pec.exe');
 fs.writeFileSync(input, program);

@@ -1,15 +1,15 @@
+const testOutput = require('./test-output.cjs');
 // 运行方式 node legacy/tests/network-wifi-ui.cjs 输出目录
 // 使用仓库 webui 已安装的 Playwright 验证真实页面脚本与手机布局
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('../../webui/node_modules/playwright');
-const output = path.resolve(process.argv[2] || require('node:os').tmpdir());
+const output = path.resolve(process.argv[2] || testOutput);
 const templates = require('./page-templates.cjs')(path.join(__dirname, '../SmartWebServer'));
 const shared = templates['Appearance.h'].html_shared_appearance;
 const css = templates['network/NetworkWifi.h'].html_network_css;
-const ui = templates['network/NetworkWifi.h'].html_network_wifi;
-const html = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{background:#26262a}.t,.b{background:#111;border:1px solid #551111}.t a{display:inline-block;padding:8px;color:#bb9198;border:1px solid #844}h1{margin:0}</style>${css}${shared}<div class="t"><table><tr><td><h1>OnStepX</h1></td><td>Smart Web Server 2.10h</td></tr></table><nav><a>控制器</a><a>赤道仪</a><a>网络</a></nav></div><div class="b"><b>通信设置：</b><p>命令等待时间：<input style="width:4em" value="200"> ms</p><p>网页等待时间：<input style="width:4em" value="200"> ms</p><button>上传</button>${ui}<div class="b1" style="text-align:left;width:33em;min-height:10em">无线更新固件<br><button>重启并更新固件</button></div><div class="b1" style="text-align:left;width:33em;min-height:10em">通信设置<br><input style="width:4em" value="200"> ms</div><h3>修改管理密码</h3><label>密码：<input type="password"></label><button>上传</button><button>退出</button><p class="nw-note">外观预览 · Wi-Fi 数据为模拟值</p></div>`;
+const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${css}${shared}</head><body><div class="b">${require('./network-page.cjs')({fragment:true})}</div></body></html>`;
 const state = {sta:{enabled:true,ssid:'Home Wi-Fi',open:false,dhcp:true,ip:'192.168.1.55',gw:'192.168.1.1',sn:'255.255.255.0'},ap:{enabled:true,ssid:'ONSTEPX',channel:7,ip:'192.168.0.1',gw:'192.168.0.1',sn:'255.255.255.0'},connected:true,connecting:false,pending:false,failed:false,apActive:true,ssid:'Home Wi-Fi',ip:'192.168.1.55',rssi:-55,apIp:'192.168.0.1',apSsid:'ONSTEPX',message:''};
 const networks=[{ssid:'Home Wi-Fi',rssi:-43,open:false},{ssid:'Observatory',rssi:-58,open:false},{ssid:'Guest',rssi:-70,open:true},{ssid:'Home Wi-Fi',rssi:-80,open:false},{ssid:'<img src=x onerror=alert(1)>',rssi:-90,open:false}];
 const previewMock=`<script>const mockState=${JSON.stringify(state)};window.fetch=async(url,opts)=>{const p=new URLSearchParams(opts&&opts.body||'');const action=p.get('action')||new URL(url,location.href).searchParams.get('action');let data=mockState;if(action==='scan')data={running:false,networks:${JSON.stringify(networks.filter(n=>!n.ssid.startsWith('<')))}};if(action==='connect'||action==='ap')data={message:'这是外观预览，未连接真实硬件'};return {ok:true,json:async()=>data};};</script>`;
@@ -28,6 +28,20 @@ await page.goto('http://sws.test/');await page.waitForFunction(()=>document.quer
 assert.equal(await page.locator('#nw-access').isVisible(),true);assert.equal(await page.locator('#nw-access-ip').innerText(),'192.168.1.55');
 assert(scans>=2,'进入页面自动搜索并等待扫描完成');assert.equal(await page.locator('#nw-results img').count(),0,'SSID must be rendered as text');
 assert.equal(await page.locator('#nw-current .nw-selected').innerText(),'✓');assert.equal(await page.locator('#nw-current .nw-network-meta').innerText(),'-55 dBm');assert.equal(await page.locator('#nw-results .nw-selected').count(),0);
+// 检查信号档位及边界；图标跟随实时连接状态更新，未启用的弧保持暗色。
+const signalCases=[[-40,3],[-55,3],[-56,2],[-70,2],[-71,1],[-85,1],[-86,0],[-95,0],[null,0],[0,0]];
+const originalCount=networks.length;
+signalCases.forEach(([rssi],i)=>networks.push({ssid:'RSSI_'+i,rssi,open:false}));
+await page.locator('#nw-scan').click();await page.getByRole('button',{name:/RSSI_9/}).waitFor();
+for(const [i,[rssi,level]] of signalCases.entries()) {
+ const icon=page.getByRole('button',{name:new RegExp('^RSSI_'+i+' ')}).locator('.nw-wifi');
+ assert.equal(await icon.locator('path[opacity="1"]').count(),level,'RSSI '+rssi+' 的亮弧数量');
+ assert.equal(await icon.locator('path[opacity="0.18"]').count(),3-level);
+ assert.equal(await icon.locator('circle').getAttribute('opacity'),rssi<0&&rssi!==null?'1':'0.18');
+}
+state.rssi=-80;await page.waitForFunction(()=>document.querySelectorAll('#nw-current .nw-wifi path[opacity="1"]').length===1);
+state.rssi=-50;await page.waitForFunction(()=>document.querySelectorAll('#nw-current .nw-wifi path[opacity="1"]').length===3);
+state.rssi=-55;networks.splice(originalCount);
 // 刷新使用真实扫描流程，预览截图去除用于安全测试的特殊名称
 includeHostile=false;const scansBefore=scans;await page.locator('#nw-scan').click();await page.waitForFunction(()=>document.querySelectorAll('#nw-results button').length===2);assert(scans>scansBefore);
 await page.screenshot({path:path.join(output,'network-desktop.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list.png')});
@@ -55,7 +69,7 @@ scanFailure=true;await page.locator('#nw-scan').click();await page.waitForFuncti
 state.connected=true;state.sta.enabled=true;state.sta.ssid=state.ssid='Home Wi-Fi';state.sta.open=false;state.message='';await page.waitForFunction(()=>document.querySelector('#nw-current').textContent.includes('Home Wi-Fi'));
 await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(output,'network-mobile.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list-mobile.png')});
 await page.getByRole('button',{name:/Observatory/}).click();await page.locator('#nw-password').fill('example-password');await page.screenshot({path:path.join(output,'network-password-mobile.png')});
-assert.equal((await page.locator('body').innerText()).includes('。'),false,'页面文案不使用句号');assert.deepEqual(errors,[]);console.log('PASS: auto/manual scan, current-network checkmark, safe SSIDs, modal cancel/retry, password toggle, open/hidden networks, static IP, enable/disable, scan recovery, mobile layout.');
+assert.equal((await page.locator('body').innerText()).includes('。'),false,'页面文案不使用句号');assert.deepEqual(errors,[]);console.log('PASS: RSSI strength levels, live connected signal, actual network page, auto/manual scan, current-network checkmark, safe SSIDs, modal cancel/retry, password toggle, open/hidden networks, static IP, enable/disable, scan recovery, mobile layout.');
 
 }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

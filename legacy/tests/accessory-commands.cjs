@@ -1,5 +1,6 @@
+const testOutput = require('./test-output.cjs');
 // 编译真实请求处理函数，检查网页参数到设备命令的映射与目标边界
-const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cp=require('node:child_process');
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 const root=path.join(__dirname,'../SmartWebServer/src/pages');
 const files=['focuser/SlewingTile.cpp','focuser/HomeTile.cpp','focuser/SelectTile.cpp','focuser/BacklashTcfTile.cpp','rotator/SlewingTile.cpp','rotator/HomeTile.cpp','rotator/BacklashTile.cpp','rotator/DeRotatorTile.cpp'];
 const handlers=files.map(file=>fs.readFileSync(path.join(root,file),'utf8').split('// pass related data back to OnStep')[1]).join('\n');
@@ -39,6 +40,6 @@ int main(){
  for(const char*v:{"-360.1","360.1","NaN","Infinity","0x10","1,5","1garbage"," 12","12 ","1e999","","+","--1"}){reset("rs",v);rotatorSlewingTileGet();assert(onStep.sent.empty());}
  puts("PASS: actual accessory handlers, motion/stop, speed presets, reference, selector, settings and target validation");
 }`;
-const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sws-accessory-commands-')),input=path.join(dir,'commands.cpp'),exe=path.join(dir,'commands.exe');fs.writeFileSync(input,code);
+const dir=fs.mkdtempSync(path.join(testOutput,'sws-accessory-commands-')),input=path.join(dir,'commands.cpp'),exe=path.join(dir,'commands.exe');fs.writeFileSync(input,code);
 cp.execFileSync(process.env.CXX||'g++',['-std=c++11',input,'-o',exe],{stdio:'pipe'});
 process.stdout.write(cp.execFileSync(exe,[],{encoding:'utf8'}));

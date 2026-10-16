@@ -2465,7 +2465,10 @@ h2.sws-section-title {
 /* 跟踪卡片从开关开始显示，移除重复标题及标题占位 */
 .sws-tracking > .b1 > div:first-child,
 .sws-tracking > .b1 > br:first-of-type,
-.sws-tracking > .b1 > hr:first-of-type {
+.sws-tracking > .b1 > hr,
+.sws-guide #guide_rate,
+.sws-guide #guide_sta,
+.sws-tracking #track {
   display: none;
 }
 

@@ -1,7 +1,7 @@
+const testOutput = require('./test-output.cjs');
 // 运行真实编码器页面和参数处理，避免预览把两轴表单拼成同一轴
 const fs = require('node:fs'),
   path = require('node:path'),
-  os = require('node:os'),
   cp = require('node:child_process');
 module.exports = ({ absolute = false } = {}) => {
   const root = path.join(__dirname, '../SmartWebServer/src'),
@@ -74,7 +74,7 @@ String keyValueToggleBoolSelected(String on,String off,bool b){return on+"|"+(b?
  www.args={{"revert","2"}};encAxisTileGet();assert(encoders.settings.axis2.ticksPerDeg==9000);assert(encoders.settings.axis2.reverse==ON);assert(encoders.settings.axis2.diffTo==90);
  www.args={{"enc","o2e"}};syncTileGet();assert(encoders.from==1);www.args={{"enc","e2o"}};syncTileGet();assert(encoders.to==1);www.args={{"enc","on"}};syncTileGet();assert(encoders.settings.autoSync);www.args={{"enc","off"}};syncTileGet();assert(!encoders.settings.autoSync);
  }`;
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sws-encoders-')),
+  const dir = fs.mkdtempSync(path.join(testOutput, 'sws-encoders-')),
     src = path.join(dir, 'encoder.cpp'),
     exe = path.join(dir, 'encoder-render.exe');
   fs.writeFileSync(src, code);
