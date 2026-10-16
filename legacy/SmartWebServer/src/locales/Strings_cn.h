@@ -304,6 +304,7 @@
 #define L_TRK_FASTER "加快"
 #define L_TRK_SLOWER "减慢"
 #define L_TRK_RESET "重置 (默认)"
+#define L_TRK_AXES "补偿轴模式"
 #define L_TRK_COMP "补偿跟踪速率 (指向模型/大气折射)"
 #define L_TRK_FULL "全补偿"
 #define L_TRK_REFR "仅大气折射"

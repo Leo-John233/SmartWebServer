@@ -166,3 +166,7 @@
 #ifndef L_SYNC_TARGET
 #define L_SYNC_TARGET "Sync current target"
 #endif
+
+#ifndef L_TRK_AXES
+#define L_TRK_AXES "Compensation axes"
+#endif

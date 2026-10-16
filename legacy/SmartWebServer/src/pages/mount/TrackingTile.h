@@ -23,19 +23,20 @@ const char html_trackingPreset[] PROGMEM =
 "</div>";
 
 const char html_trackingCompensationType[] PROGMEM =
-L_TRK_COMP ": <br />"
+"<fieldset class='sws-tracking-setting'><legend>" L_TRK_COMP "</legend><div class='sws-tracking-options'>"
 "<button id='ot_on'  class='btns_right' onpointerdown=\"s('rr','otk')\"  type='button'>" L_TRK_FULL "</button>"
 "<button id='ot_ref' class='btns_mid'   onpointerdown=\"s('rr','on')\"   type='button'>" L_TRK_REFR "</button>"
-"<button id='ot_off' class='btns_left'  onpointerdown=\"s('rr','off')\"  type='button'>" L_OFF "</button><br />\n";
+"<button id='ot_off' class='btns_left'  onpointerdown=\"s('rr','off')\"  type='button'>" L_OFF "</button></div></fieldset>\n";
 
 const char html_trackingCompensationAxes[] PROGMEM =
+"<fieldset class='sws-tracking-setting'><legend>" L_TRK_AXES "</legend><div class='sws-tracking-options'>"
 "<button id='ot_dul' class='btns_right' onpointerdown=\"s('rr','don')\"  type='button'>" L_TRK_DUAL "</button>"
 "<button id='ot_sgl' class='btns_left'  onpointerdown=\"s('rr','doff')\" type='button'>" L_TRK_SINGLE "</button>"
-"<br /><br />\n";
+"</div></fieldset>\n";
 
 const char html_baseFrequency[] PROGMEM =
-L_FREQUENCY_ADJUST ": <br />"
+"<fieldset class='sws-tracking-setting'><legend>" L_FREQUENCY_ADJUST "</legend><div class='sws-tracking-options sws-frequency-options'>"
 "<button onpointerdown=\"s('tk','f')\" type='button'>+ (0.02Hz " L_TRK_FASTER ")</button>"
 "<button onpointerdown=\"s('tk','-')\" type='button'>- (0.02Hz " L_TRK_SLOWER ")</button>"
 "<button onpointerdown=\"s('tk','r')\" type='button'>" L_TRK_RESET "</button>"
-"<br />\n";
+"</div></fieldset>\n";
