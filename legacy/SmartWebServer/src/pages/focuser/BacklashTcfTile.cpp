@@ -10,13 +10,10 @@ void focuserBacklashTcfTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "13em", L_BACKLASH " / " L_TCF_COEF);
-  data.concat(temp);
-
-  data.concat(F("<div style='float: right; text-align: right;' id='f_temp' class='c'>"));
+  data.concat(F("<div class='b1 sws-accessory-parameter-card'><div class='sws-device-card-head'><h2>" L_BACKLASH " / " L_TCF_COEF "</h2><span id='f_temp' class='sws-accessory-status c'>"));
   snprintf_P(temp, sizeof(temp), L_TEMPERATURE " %s", state.focuserTemperatureStr);
   data.concat(temp);
-  data.concat(F("</div><br /><hr><div class='sws-accessory-metrics'>"));
+  data.concat(F("</span></div><div class='sws-accessory-metrics'>"));
 
   snprintf_P(temp, sizeof(temp), html_backlashValue, state.focuserBacklashStr);
   data.concat(temp);
@@ -31,9 +28,9 @@ void focuserBacklashTcfTile(String &data)
   snprintf_P(temp, sizeof(temp), html_tcfCoefValue, state.focuserTcfCoefStr);
   data.concat(temp);
 
-  data.concat(F("</div><hr>"));
+  data.concat(F("</div>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
+  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS);
   data.concat(temp);
 
   state.updateFocuser();
@@ -59,7 +56,7 @@ void focuserBacklashTcfTile(String &data)
     // TCF Coef
     snprintf_P(temp, sizeof(temp), html_tcfCoef, state.focuserTcfCoefStr);
     data.concat(temp);
-    data.concat(F("<button type='submit'>" L_UPLOAD "</button>\n"));
+    data.concat(F("<div class='sws-accessory-form-actions'><button type='submit'>" L_SAVE_SETTINGS "</button></div>\n"));
 
     data.concat(FPSTR(html_form_end));
 

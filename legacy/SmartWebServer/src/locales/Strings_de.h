@@ -582,3 +582,8 @@
 #define L_ROT_CW "Im Uhrzeigersinn"
 #define L_HOME_REFERENCE_HELP "Zur Referenzposition zurückkehren oder die aktuelle Position als Referenz setzen"
 #define L_UNIT_STEPS "Schritte"
+
+// 附件定位速度与参数保存
+#define L_POSITIONING_RATE "Positioniergeschwindigkeitsstufe"
+#define L_POSITIONING_SPEED "Aktuelle Positioniergeschwindigkeit"
+#define L_SAVE_SETTINGS "Einstellungen speichern"

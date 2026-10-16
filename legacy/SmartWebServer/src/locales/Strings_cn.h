@@ -577,3 +577,8 @@
 #define L_ROT_CW "顺时针"
 #define L_HOME_REFERENCE_HELP "返回设备参考位置，或将当前位置设为参考位置"
 #define L_UNIT_STEPS "步"
+
+// 附件定位速度与参数保存
+#define L_POSITIONING_RATE "定位速度档位"
+#define L_POSITIONING_SPEED "当前定位速度"
+#define L_SAVE_SETTINGS "保存设置"

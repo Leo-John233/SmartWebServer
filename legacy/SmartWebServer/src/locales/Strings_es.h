@@ -572,3 +572,8 @@
 #define L_ROT_CW "Horario"
 #define L_HOME_REFERENCE_HELP "Vuelva a la posición de referencia o establezca la posición actual como referencia"
 #define L_UNIT_STEPS "pasos"
+
+// 附件定位速度与参数保存
+#define L_POSITIONING_RATE "Nivel de velocidad de posicionamiento"
+#define L_POSITIONING_SPEED "Velocidad de posicionamiento actual"
+#define L_SAVE_SETTINGS "Guardar ajustes"

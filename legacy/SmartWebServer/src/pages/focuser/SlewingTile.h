@@ -34,10 +34,10 @@ const char html_focuserOut[] PROGMEM =
   "<button class='bbh' ontouchstart=\"ft(event,'outf')\" ontouchend=\"fu(event,'outf')\" ontouchcancel=\"fu(event,'outf')\" ontouchmove=\"return fc(event)\" onpointerdown=\"fp(event,'outf')\" onpointerup=\"fr(event,'outf')\" onpointercancel=\"fr(event,'outf')\" oncontextmenu=\"return fc(event)\" type='button'><span>" ARROW_UU "</span><small>" L_FOC_OUT "</small></button>";
 
 const char html_focuserSlewSpeed[] PROGMEM =
-"<div class='sws-accessory-live-rate'><span>" L_CURRENT_MAXRATE "</span><strong id='foc_rate' class='c'>%s</strong></div>";
+"<div class='sws-accessory-live-rate'><span>" L_POSITIONING_SPEED "</span><strong id='foc_rate' class='c'>%s</strong></div>";
 
 const char html_focuserGotoSelect[] PROGMEM =
-"<div class='sws-choice-source' data-label='" L_SET_LABEL " " L_RATE "'>"
+"<div class='sws-choice-source' data-label='" L_POSITIONING_RATE "'>"
   "<button id='foc_rate_vf' class='btns_right' onpointerdown=\"s('foc','vf')\" type='button'>" L_VFAST "</button>"
   "<button id='foc_rate_f' class='btns_mid' onpointerdown=\"s('foc','f')\"  type='button'>" L_FAST "</button>"
   "<button id='foc_rate_n' class='btns_mid' onpointerdown=\"s('foc','n')\"  type='button'>" L_NORMAL "</button>"

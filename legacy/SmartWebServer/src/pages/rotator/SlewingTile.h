@@ -34,10 +34,10 @@ const char html_rotateCw[] PROGMEM =
   "<button class='bbh' ontouchstart=\"rt(event,'cwf')\" ontouchend=\"ru(event,'cwf')\" ontouchcancel=\"ru(event,'cwf')\" ontouchmove=\"return rc(event)\" onpointerdown=\"rp(event,'cwf')\" onpointerup=\"rr(event,'cwf')\" onpointercancel=\"rr(event,'cwf')\" oncontextmenu=\"return rc(event)\" type='button'><span>" ARROW_RR "</span><small>" L_ROT_CW "</small></button><br />";
 
 const char html_rotateSlewSpeed[] PROGMEM =
-"<div class='sws-accessory-live-rate'><span>" L_CURRENT_MAXRATE "</span><strong id='rot_rate' class='c'>%s</strong></div>";
+"<div class='sws-accessory-live-rate'><span>" L_POSITIONING_SPEED "</span><strong id='rot_rate' class='c'>%s</strong></div>";
 
 const char html_rotateGotoSelect[] PROGMEM =
-"<div class='sws-choice-source' data-label='" L_SET_LABEL " " L_RATE "'>"
+"<div class='sws-choice-source' data-label='" L_POSITIONING_RATE "'>"
   "<button id='rot_rate_vf' class='btns_right' onpointerdown=\"s('rot','vf')\" type='button'>" L_VFAST "</button>"
   "<button id='rot_rate_f' class='btns_mid' onpointerdown=\"s('rot','f')\"  type='button'>" L_FAST "</button>"
   "<button id='rot_rate_n' class='btns_mid' onpointerdown=\"s('rot','n')\"  type='button'>" L_NORMAL "</button>"

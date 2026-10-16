@@ -14,16 +14,12 @@ void rotatorBacklashTile(String &data)
   if (!onStep.command(":rb#", temp1)) strcpy(temp1, "0");
   int backlash = atoi(temp1);
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "13em", L_BACKLASH);
-  data.concat(temp);
-  data.concat(F("<br /><hr>"));
+  data.concat(F("<div class='b1 sws-accessory-parameter-card'><div class='sws-device-card-head'><h2>" L_BACKLASH "</h2></div>"));
 
   snprintf_P(temp, sizeof(temp), html_backlashValue, backlash);
   data.concat(temp);
 
-  data.concat(F("<hr>"));
-
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
+  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS);
   data.concat(temp);
 
   snprintf_P(temp, sizeof(temp), html_form_begin, "rotator.htm");
@@ -31,7 +27,7 @@ void rotatorBacklashTile(String &data)
 
   snprintf_P(temp, sizeof(temp), html_configBlAxis3, backlash);
   data.concat(temp);
-  data.concat(F("<button type='submit'>" L_UPLOAD "</button>\n"));
+  data.concat(F("<div class='sws-accessory-form-actions'><button type='submit'>" L_SAVE_SETTINGS "</button></div>\n"));
 
   data.concat(FPSTR(html_form_end));
   www.sendContentAndClear(data);

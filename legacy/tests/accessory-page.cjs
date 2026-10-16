@@ -25,7 +25,7 @@ struct String:std::string{using std::string::string;void concat(const char*s){ap
 struct Web{std::string output;void sendContentAndClear(String&s){output+=s;s.clear();}}www;
 struct Status{int focuserCount=${count},mountType=MT_ALTAZM;bool derotatorFound=${derotator};bool focuserPresent[6]={${Array.from({length:6},(_,i)=>i<count?'true':'false').join(',')}};int getVersionMajor(){return ${version};}}status;
 struct State{bool focuserSlewing=false,rotatorSlewing=false,focuserTcfEnable=true;int focuserSelected=1;
- const char*focuserPositionStr="12500 µm",*rotatorPositionStr="45°30′",*focuserSlewSpeedStr="300 µm/s",*rotateSlewSpeedStr="3°/s",*focuserTemperatureStr="18.6 °C",*focuserBacklashStr="12",*focuserDeadbandStr="8",*focuserTcfCoefStr="-2.5";void updateFocuser(){}}state;
+ const char*focuserPositionStr="12500 µm",*rotatorPositionStr="45°30′",*focuserSlewSpeedStr="0.30mm/s",*rotateSlewSpeedStr="3.0&deg;/s",*focuserTemperatureStr="18.6 °C",*focuserBacklashStr="12",*focuserDeadbandStr="8",*focuserTcfCoefStr="-2.5";void updateFocuser(){}}state;
 struct Device{bool command(const char*,char*out){strcpy(out,"16");return true;}}onStep;
 `;
   code+=read('locales/Strings_cn.h')+'\n'+clean(read('pages/htmlHeaders.h'))+'\n'+clean(read('pages/htmlScripts.h'))+'\n';

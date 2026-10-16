@@ -573,3 +573,8 @@
 #define L_ROT_CW "時計回り"
 #define L_HOME_REFERENCE_HELP "基準位置へ戻るか、現在位置を基準位置に設定します"
 #define L_UNIT_STEPS "ステップ"
+
+// 附件定位速度与参数保存
+#define L_POSITIONING_RATE "位置決め速度の段階"
+#define L_POSITIONING_SPEED "現在の位置決め速度"
+#define L_SAVE_SETTINGS "設定を保存"

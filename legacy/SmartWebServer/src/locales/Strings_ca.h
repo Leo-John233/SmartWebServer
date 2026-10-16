@@ -572,3 +572,8 @@
 #define L_ROT_CW "Horari"
 #define L_HOME_REFERENCE_HELP "Torneu a la posició de referència del dispositiu o establiu la posició actual com a referència"
 #define L_UNIT_STEPS "passos"
+
+// 附件定位速度与参数保存
+#define L_POSITIONING_RATE "Nivell de velocitat de posicionament"
+#define L_POSITIONING_SPEED "Velocitat de posicionament actual"
+#define L_SAVE_SETTINGS "Desa la configuració"

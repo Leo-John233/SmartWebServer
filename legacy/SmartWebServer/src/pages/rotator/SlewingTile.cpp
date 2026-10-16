@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Rotator Slewing tile
 #include "SlewingTile.h"
+#include <stdlib.h>
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -77,8 +78,15 @@ extern void rotatorSlewingTileGet()
   v = www.arg("rs");
   if (!v.equals(EmptyStr))
   {
-    double f = v.toFloat();
-    if (f >= -360.0 || f <= 360.0)
+    // 与网页数值输入一致，仅接受完整十进制数和有效角度范围
+    const char *text = v.c_str();
+    char *end;
+    bool decimal = true;
+    for (const char *c = text; *c; c++) {
+      if (!((*c >= '0' && *c <= '9') || *c == '+' || *c == '-' || *c == '.' || *c == 'e' || *c == 'E')) decimal = false;
+    }
+    double f = strtod(text, &end);
+    if (decimal && end != text && *end == 0 && f >= -360.0 && f <= 360.0)
     {
       char temp[80], temp1[40];
       convert.doubleToDms(temp1, f, true, true, PM_HIGH);

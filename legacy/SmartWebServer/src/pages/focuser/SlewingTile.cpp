@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Focuser Slewing tile
 #include "SlewingTile.h"
+#include <stdlib.h>
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -76,11 +77,15 @@ extern void focuserSlewingTileGet()
   v = www.arg("fs");
   if (!v.equals(EmptyStr))
   {
-    int p = v.toInt();
-    if (p >= -500000 || p <= 500000)
+    // 必须是完整整数且同时满足上下限，避免越界或格式错误的目标被截断后发送
+    const char *text = v.c_str();
+    char *end;
+    long p = strtol(text, &end, 10);
+    bool startsNumber = (*text >= '0' && *text <= '9') || *text == '+' || *text == '-';
+    if (startsNumber && end != text && *end == 0 && p >= -500000 && p <= 500000)
     {
       char temp[80];
-      snprintf(temp, sizeof(temp), ":FS%d#", p);
+      snprintf(temp, sizeof(temp), ":FS%ld#", p);
       onStep.commandBool(temp);
     }
   }

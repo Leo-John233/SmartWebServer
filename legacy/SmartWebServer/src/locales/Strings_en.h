@@ -574,3 +574,8 @@
 #define L_ROT_CW "Clockwise"
 #define L_HOME_REFERENCE_HELP "Return to the device reference position, or set the current position as the reference"
 #define L_UNIT_STEPS "steps"
+
+// 附件定位速度与参数保存
+#define L_POSITIONING_RATE "Positioning speed preset"
+#define L_POSITIONING_SPEED "Current positioning speed"
+#define L_SAVE_SETTINGS "Save settings"

@@ -574,3 +574,8 @@
 #define L_ROT_CW "În sens orar"
 #define L_HOME_REFERENCE_HELP "Reveniți la poziția de referință sau setați poziția curentă ca referință"
 #define L_UNIT_STEPS "pași"
+
+// 附件定位速度与参数保存
+#define L_POSITIONING_RATE "Treaptă de viteză de poziționare"
+#define L_POSITIONING_SPEED "Viteza curentă de poziționare"
+#define L_SAVE_SETTINGS "Salvează setările"
