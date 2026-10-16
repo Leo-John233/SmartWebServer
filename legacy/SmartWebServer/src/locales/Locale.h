@@ -51,6 +51,16 @@
   #define UNITS METRIC
 #endif
 
+// 未提供专用停止文字时沿用当前语言的停止描述
+#ifndef BUTTON_STOP
+  #define BUTTON_STOP L_STOP
+#endif
+
+// 未提供本地翻译时保留通用同步文字
+#ifndef L_COORD_SYNC
+  #define L_COORD_SYNC "Sync"
+#endif
+
 // misc. locale support functions
 #ifndef DISPLAY_UNITS
   #define DISPLAY_UNITS UNITS

@@ -55,11 +55,15 @@ void gotoTile(String &data)
 
   www.sendContentAndClear(data);
 
+  // 定位动作与位置数据显示分开，避免按钮和速率文字挤在同一行
+  data.concat(F("<div class='sws-actions'>"));
   data.concat(FPSTR(html_gotoGo));
   data.concat(F("&nbsp;&nbsp;&nbsp;"));
   data.concat(FPSTR(html_gotoStop));
   data.concat(F("&nbsp;&nbsp;&nbsp;"));
   data.concat(FPSTR(html_gotoContinue));
+  data.concat(FPSTR(html_gotoSync));
+  data.concat(F("</div>"));
   data.concat(F("<hr>"));
   www.sendContentAndClear(data);
 

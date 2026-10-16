@@ -19,11 +19,14 @@ void homeParkTile(String &data)
   data.concat(getHomeParkStateStr());
   data.concat(F("</div><br /><hr>"));
 
+  // 归位与停车各占一组，常用操作在同一行排列
+  data.concat(F("<div class='sws-home-actions'><div>"));
   data.concat(FPSTR(html_homeReturn));
   data.concat(FPSTR(html_homeReset));
-  data.concat(F("<br />"));
+  data.concat(F("</div><div>"));
   data.concat(FPSTR(html_unpark));
   data.concat(FPSTR(html_park));
+  data.concat(F("</div></div>"));
   data.concat(F("<hr>"));
 
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");

@@ -4,6 +4,7 @@ let demoSaved=JSON.parse(localStorage.getItem(demoKey)||'{}');
 function demoNotice(message){let e=document.getElementById('demo-toast');if(!e){e=document.createElement('div');e.id='demo-toast';e.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;background:#59303b;color:#f1dbe2;padding:12px 20px;border-radius:10px;max-width:85vw';e.setAttribute('role','status');document.body.appendChild(e);}e.textContent=message;clearTimeout(window.demoToastTimer);window.demoToastTimer=setTimeout(()=>e.remove(),2300);}
 function demoText(id,value){const e=document.getElementById(id);if(e)e.textContent=value;}
 function s(key,value){
+  if(key==='dr'&&(value==='T1'||value==='T0')){document.getElementById('trk_on').style.background=value==='T1'?'#994b57':'#823b46';document.getElementById('trk_off').style.background=value==='T0'?'#994b57':'#823b46';}
   demoSaved[key]=value;localStorage.setItem(demoKey,JSON.stringify(demoSaved));
   const labels={T1:'已开启追踪',T0:'已关闭追踪',Ts:'已选择恒星速',Tl:'已选择月球速',Th:'已选择太阳速',Tk:'已选择大气折射修正速',go:'正在前往目标',stop:'已停止',cat_prev:'M31 仙女座星系',cat_next:'M42 猎户座星云',cat_select:'已设为目标',cat_download:'星表已载入',clear:'星表已清除'};
   if(key==='lib'){demoText('cat_message',labels[value]||'已更新');const area=document.getElementById('cat_data');if(area&&value==='cat_download')area.value='$Messier\nM31,SG,00:42:44,+41*16:09\nM42,DN,05:35:17,-05*23:28';}

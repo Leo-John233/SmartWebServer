@@ -48,6 +48,9 @@ const char html_gotoGo[] PROGMEM =
 const char html_gotoStop[] PROGMEM =
   "<button onpointerdown=\"s('goto','stop')\" type='button' class='bb' style='height: 3em; width: 5em; color: White;' title='" L_HINT_EMERGENCY_STOP "'>" L_STOP "!</button>";
 
+// 同步操作移至定位动作区，继续使用原有同步命令
+const char html_gotoSync[] PROGMEM = "<button class='sws-sync' onpointerdown=\"g('sy')\" type='button'>" L_COORD_SYNC "</button>";
+
 const char html_gotoContinue[] PROGMEM =
   "<button id='gto_active' onpointerdown=\"s('goto','mp_cnt')\" type='button' disabled class='bb' title='" L_HINT_CONTINUE_GOTO "'>" ARROW_R2 HOME_CH ARROW_R2 "</button>";
 

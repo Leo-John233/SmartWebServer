@@ -174,6 +174,10 @@
 #define BUTTON_E "东"
 #define BUTTON_W "西"
 #define BUTTON_SYNC "@"
+// 方向盘中心停止文字与坐标同步文字分别定义
+#define BUTTON_STOP "stop"
+// 定位区使用文字标识同步操作，避免与方向盘停止键混淆
+#define L_COORD_SYNC "同步"
 
 #define L_HINT_CLOCK "设置日期/时间"
 #define L_HINT_CONTINUE_GOTO "继续 Goto (当在零位暂停时)"

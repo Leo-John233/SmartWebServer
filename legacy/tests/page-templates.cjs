@@ -5,7 +5,7 @@ module.exports=function(root){
   for(const dir of ['index','mount','focuser','rotator','encoders','auxiliary'])for(const name of fs.readdirSync(path.join(base,dir)))if(name.endsWith('.h'))files.push(dir+'/'+name);
   files.push('htmlHeaders.h','LibraryHelp.h','htmlScripts.h');
   const clean=s=>s.replace(/^[ \t]*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
-  let code='#define ON 1\n#define OFF 0\n#define PROGMEM\n#define DRIVE_CONFIGURATION ON\n#define DISPLAY_COORDINATE_ORIGIN ON\n#define DISPLAY_RESET_CONTROLS ON\n#define HOME_OFFSET_RANGE_AXIS1 3600\n#define HOME_OFFSET_RANGE_AXIS2 3600\n#define STR_INNER(x) #x\n#define STR(x) STR_INNER(x)\n';
+  let code='#define ON 1\n#define OFF 0\n#define PROGMEM\n#define DISPLAY_WEATHER ON\n#define DISPLAY_INTERNAL_TEMPERATURE ON\n#define WIFI 2\n#define OPERATIONAL_MODE WIFI\n#define DRIVE_CONFIGURATION ON\n#define DISPLAY_COORDINATE_ORIGIN ON\n#define DISPLAY_RESET_CONTROLS ON\n#define HOME_OFFSET_RANGE_AXIS1 3600\n#define HOME_OFFSET_RANGE_AXIS2 3600\n#define STR_INNER(x) #x\n#define STR(x) STR_INNER(x)\n';
   code+=fs.readFileSync(path.join(root,'src/locales/Strings_cn.h'),'utf8')+'\n';
   files.forEach((file,i)=>code+='\nPREVIEW_FILE_'+i+'\n'+clean(fs.readFileSync(path.join(base,file),'utf8'))+'\n');
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sws-templates-')),input=path.join(dir,'templates.cpp');fs.writeFileSync(input,code);

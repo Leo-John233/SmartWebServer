@@ -63,9 +63,7 @@ void handleRoot()
 
   // 概况与驱动分区展示，详细参数在卡片内展开
   data.concat(F("<div class='sws-controller'><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_CONTROLLER " " L_STATUS "</h2><p></p></div><div class='sws-overview-grid'>"));
-  #if DISPLAY_WEATHER == ON
-    ambientTile(data);
-  #endif
+
 
   statusTile(data);
   data.concat(F("</div></section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_DRIVER "</h2><p></p></div><div class='sws-axis-grid'>"));

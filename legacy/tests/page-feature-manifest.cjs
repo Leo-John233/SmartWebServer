@@ -11,7 +11,6 @@ module.exports = {
     "axisTileGet"
   ],
   "index/Index.cpp": [
-    "ambientTile",
     "statusTile",
     "axisTile",
     "servoTile",
@@ -40,7 +39,8 @@ module.exports = {
   "index/StatusTile.cpp": [
     "statusTile",
     "statusTileAjax",
-    "statusTileGet"
+    "statusTileGet",
+    "ambientTile"
   ],
   "mount/AlignTile.cpp": [
     "alignTile",
@@ -211,5 +211,4 @@ module.exports = {
   "auxiliary/Auxiliary.cpp": [],
   "network/Network.cpp": [],
   "network/NetworkWifi.cpp": []
-}
-;
+};

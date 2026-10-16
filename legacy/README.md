@@ -66,3 +66,12 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - 导航采用内嵌实心 SVG，桌面侧栏和手机导航共用，设备离线时无需加载字体或图片
 - 赤道仪按参考图重绘为倾斜镜筒、镜口和底座，其他入口分别使用芯片、Wi-Fi、对焦镜头、旋转箭头、开关和编码盘
 - 造型参考 [MDI 望远镜](https://pictogrammers.com/library/mdi/icon/telescope/)、[芯片](https://pictogrammers.com/library/mdi/icon/chip/)、[镜头](https://pictogrammers.com/library/mdi/icon/camera-iris/)与[调节器](https://pictogrammers.com/library/mdi/icon/tune/)，路径在项目内重绘
+
+## 控制器概览与赤道仪操作区
+
+- 控制器状态、无线信号、内部温度和环境指标合并为一个概览，设置及重启说明在设置区展开
+- 环境指标受 DISPLAY_WEATHER 控制，内部温度受 DISPLAY_INTERNAL_TEMPERATURE 控制，功能显示继续遵循固件版本和设备能力条件
+- 赤道仪首屏提供跟踪开关、速率下拉框和圆形方向盘，下拉框代理原有命令并同步后台状态
+- 中心 stop 使用独立的 BUTTON_STOP 文字定义，执行停止命令，坐标同步移到 Goto 区域并显示同步
+- 归位和停车分组排列，定位、校准、限位、星表和其他已有操作继续保留
+- 演示展示启用环境功能的模拟设备组合，当前固件配置仍保持 DISPLAY_WEATHER 为 OFF

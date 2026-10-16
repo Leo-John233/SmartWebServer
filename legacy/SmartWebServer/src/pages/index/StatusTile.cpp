@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Controller Status tile
 #include "StatusTile.h"
+#include "AmbientTile.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -13,16 +14,17 @@ void statusTile(String &data)
 
   snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "11em", L_STATE);
   data.concat(temp);
-  data.concat(F("<br /><hr>"));
+  // 状态和环境数据共享紧凑指标区，设置仍保留在独立展开区
+  data.concat(F("<br /><hr><div class='sws-metrics'>"));
 
   // General status
 
   // get hardware name
   if (status.getVersionMajor() > 10 || (status.getVersionMajor() == 10 && status.getVersionMinor() >= 26)) {
     if (onStep.command(":GVH#", temp)) {
-      data.concat(F(L_HARDWARE ": <span class='c'>"));
+      data.concat(F("<div class='sws-metric'><span>" L_HARDWARE "</span><strong class='c'>"));
       data.concat(temp);
-      data.concat(F("</span><br />"));
+      data.concat(F("</strong></div>"));
     }
   }
 
@@ -45,7 +47,10 @@ void statusTile(String &data)
     data.concat(temp);
   #endif
 
-  data.concat(F("<hr>"));
+  #if DISPLAY_WEATHER == ON
+    ambientTile(data);
+  #endif
+  data.concat(F("</div><hr>"));
   www.sendContentAndClear(data);
 
   int mountType = 0;
