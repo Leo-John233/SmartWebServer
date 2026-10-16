@@ -39,7 +39,7 @@
 
 // IP 地址设置 (IP ADDRESS SETTINGS) -----------------------------------------------------------------------------------------------
 
-#define MDNS_NAME                "onstep" //   "onstep",  mDNS 设备名称。                                                     按需
+#define MDNS_NAME               "OnStepX" //   "onstep",  mDNS 设备名称。                                                     按需
 
 // SWS 的唯一（以太网）MAC 地址
 #define MAC {0xDE,0xAD,0xBE,0xEF,0xFE,0xEE}
@@ -47,7 +47,7 @@
 // 以下设置存储在 NV (EEPROM) 中，SWS 不会识别下面的设置，除非是第一次上传或擦除 NV。
 // 但是，这些设置（如适用）可以在运行时通过网页界面更改。
 #define AP_ENABLED                   true //        true, 启用 WiFi 热点 (Access Point) 模式。                                按需
-#define AP_SSID                  "ONSTEP" //    "ONSTEP", WiFi 热点名称 (SSID)。                                              按需
+#define AP_SSID                 "ONSTEPX" //    "ONSTEP", WiFi 热点名称 (SSID)。                                              按需
 #define AP_PASSWORD            "password" //  "password", WiFi 热点密码。                                                     按需
 #define AP_CHANNEL                      7 //           7, WiFi 热点信道。                                                     按需
 #define AP_IP_ADDR          {192,168,0,1} // ..,168,0,1}, WiFi 热点 IP 地址。                                                 按需
