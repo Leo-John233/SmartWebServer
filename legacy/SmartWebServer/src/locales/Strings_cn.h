@@ -34,7 +34,7 @@
 #define L_DP_ZERO "全功率加热下限"
 #define L_DP_SPAN "停止加热上限"
 #define L_POWER "功率"
-#define L_GUIDE "导星"
+#define L_GUIDE "方位控制"
 #define L_CENTER "居中"
 #define L_BLUE "蓝"
 #define L_GREEN "绿"
