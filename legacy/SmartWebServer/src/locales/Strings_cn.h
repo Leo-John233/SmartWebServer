@@ -399,13 +399,14 @@
 
 // ----------------------------  WiFi ----------------------------
 
-#define L_NETWORK_PERFORMANCE "性能和兼容性"
-#define L_NETWORK_CMD_TO "命令通道串口读取超时:"
-#define L_NETWORK_WWW_TO "Web通道串口读取超时："
+// 网络设置使用简短提示，避免把登录密码误认为修改密码
+#define L_NETWORK_PERFORMANCE "通信设置"
+#define L_NETWORK_CMD_TO "命令等待时间"
+#define L_NETWORK_WWW_TO "网页等待时间"
 
 #define L_NETWORK_STA_TITLE "终端模式 Station (连接到路由器)" // Station mode
 #define L_NETWORK_PWD "密码"
-#define L_NETWORK_PWD_MSG "至少8个字符。"
+#define L_NETWORK_PWD_MSG "至少 8 个字符"
 #define L_NETWORK_EN_DHCP "启用DHCP"
 #define L_NETWORK_EN_DHCP_MSG "注意：如果启用DHCP，上述地址将被忽略"
 #define L_NETWORK_EN_STA "启用终端模式 (Station)"
@@ -415,23 +416,23 @@
 #define L_NETWORK_CHA "信道"
 #define L_NETWORK_EN_AP_MODE "启用热点模式 (AP)"
 
-#define L_NETWORK_CONFIG_SECURITY "网络配置安全"
+#define L_NETWORK_CONFIG_SECURITY "修改管理密码"
 
 #define L_NETWORK_AP "热点模式 (AP)"
 
-#define L_NETWORK_RESTART_MSG "您必须手动<u>重启</u>才能使更改生效。"
+#define L_NETWORK_RESTART_MSG "设置已保存，请重启设备"
 
-#define L_NETWORK_TITLE "输入密码以更改 WiFi 配置:"
+#define L_NETWORK_TITLE "输入管理密码后设置网络"
 
-#define L_NETWORK_ADVICE1 "设置：<br/> <br/>"
-#define L_NETWORK_ADVICE2 "建议仅启用 <i>终端模式</i> <b>或</b> <i>热点模式</i> 之一。同时启用可能导致性能问题！ <BR/>"
-#define L_NETWORK_ADVICE3 "如果希望 OnStep 连接到家庭WiFi，请仅启用终端模式并 "
-#define L_NETWORK_ADVICE4 "禁用热点模式。如果 OnStep 无法连接到家庭WiFi "
-#define L_NETWORK_ADVICE5 "热点模式会自动重新激活。这在野外无WiFi环境 "
-#define L_NETWORK_ADVICE6 "或防止被锁定时很有用。<br/> <br/>"
-#define L_NETWORK_ADVICE7 "如果因WiFi问题无法连接，可使用Arduino IDE重置ESP闪存（恢复默认设置）"
-#define L_NETWORK_ADVICE8 "在Arduino工具菜单中，将 Erase Flash 选项改为 'All Flash Contents' "
-#define L_NETWORK_ADVICE9 "然后再次上传WiFi固件。"
+#define L_NETWORK_ADVICE1 "登录后可以：<br/><br/>"
+#define L_NETWORK_ADVICE2 "搜索附近 Wi-Fi，输入密码连接路由器<br/>"
+#define L_NETWORK_ADVICE3 "修改设备热点的名称和密码<br/>"
+#define L_NETWORK_ADVICE4 "查看连接状态和访问地址<br/><br/>"
+#define L_NETWORK_ADVICE5 "设备热点与路由器连接可以同时开启<br/>"
+#define L_NETWORK_ADVICE6 "切换 Wi-Fi 时手机可能短暂断线，重新连接热点即可<br/><br/>"
+#define L_NETWORK_ADVICE7 "这里需要的是管理密码，不是路由器密码<br/>"
+#define L_NETWORK_ADVICE8 "未修改过时，默认管理密码为 password<br/>"
+#define L_NETWORK_ADVICE9 "修改过密码的设备请使用已保存的管理密码"
 
 // --------------------------- Constants -------------------------
 

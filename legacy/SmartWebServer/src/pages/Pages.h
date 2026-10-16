@@ -34,5 +34,10 @@ void auxAjax();
 #endif
 
 void handleNetwork();
+#if OPERATIONAL_MODE == WIFI
+// 网络设置接口与后台配网轮询只在无线模式下启用
+void handleWifiNetwork();
+void pollWifiNetwork();
+#endif
 
 void handleNotFound();

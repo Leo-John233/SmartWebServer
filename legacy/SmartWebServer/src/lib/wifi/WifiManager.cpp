@@ -138,6 +138,8 @@ bool WifiManager::init() {
 
 #if STA_AUTO_RECONNECT == true
   void WifiManager::reconnectStation() {
+    // 网页配网有独立的超时与重试流程，不重复发起连接
+    if (networkBusy || webManaged || !settings.stationEnabled) return;
     if (WiFi.status() != WL_CONNECTED) {
       VLF("MSG: WiFi, attempting reconnect");
       WiFi.disconnect();

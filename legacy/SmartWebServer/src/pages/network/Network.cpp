@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Setup Network
 #include "Network.h"
+#include "NetworkWifi.h"
 
 #include "../../lib/ethernet/EthernetManager.h"
 #include "../../lib/wifi/WifiManager.h"
@@ -40,6 +41,8 @@ void handleNetwork() {
   data.concat(FPSTR(html_main_css_core));
   www.sendContentAndClear(data);
   data.concat(FPSTR(html_main_css_end));
+  // 只在网络页面覆盖旧样式，使手机端不再横向溢出
+  data.concat(FPSTR(html_network_css));
   data.concat(FPSTR(html_head_end));
   www.sendContentAndClear(data);
 
@@ -72,46 +75,8 @@ void handleNetwork() {
     sprintf_P(temp, htmL_NETWORKSerial, cmdTimeout, webTimeout); data.concat(temp);
     
     #if OPERATIONAL_MODE == WIFI
-      sprintf_P(temp, htmL_NETWORKSSID1, wifiManager.sta->ssid, ""); data.concat(temp);
-
-      uint8_t macsta[6] = {0,0,0,0,0,0};
-      WiFi.macAddress(macsta);
-      temp1[0] = 0;
-      for (int i = 0; i < 6; i++) {
-        char temp2[200];
-        sprintf(temp2, "%s%02x:", temp1, macsta[i]);
-        strcpy(temp1, temp2);
-      }
-      temp1[strlen(temp1) - 1] = 0;
-
-      sprintf_P(temp,htmL_NET_MAC,"sta", temp1); data.concat(temp);
-      www.sendContentAndClear(data);
-      sprintf_P(temp,htmL_NET_IP, "sta", (int)wifiManager.sta->ip[0], "sta", (int)wifiManager.sta->ip[1], "sta", (int)wifiManager.sta->ip[2], "sta", (int)wifiManager.sta->ip[3]); data.concat(temp);
-      sprintf_P(temp,htmL_NET_GW, "sta", (int)wifiManager.sta->gw[0], "sta", (int)wifiManager.sta->gw[1], "sta", (int)wifiManager.sta->gw[2], "sta", (int)wifiManager.sta->gw[3]); data.concat(temp);
-      sprintf_P(temp,htmL_NET_SN, "sta", (int)wifiManager.sta->sn[0], "sta", (int)wifiManager.sta->sn[1], "sta", (int)wifiManager.sta->sn[2], "sta", (int)wifiManager.sta->sn[3]); data.concat(temp);
-
-      sprintf_P(temp,htmL_NETWORKSSID2, wifiManager.sta->dhcpEnabled ? "checked" : "",wifiManager.settings.stationEnabled ? "checked" : ""); data.concat(temp);
-      data.concat(FPSTR(htmL_NETWORKSSID3A));
-      sprintf_P(temp,htmL_NETWORKSSID3B, wifiManager.settings.ap.ssid, "", wifiManager.settings.ap.channel); data.concat(temp);
-      www.sendContentAndClear(data);
-    
-      uint8_t macap[6] = {0,0,0,0,0,0};
-      WiFi.softAPmacAddress(macap);
-      temp1[0] = 0;
-      for (int i = 0; i < 6; i++) {
-        char temp2[200];
-        sprintf(temp2, "%s%02x:", temp1, macap[i]);
-        strcpy(temp1, temp2);
-      }
-      temp1[strlen(temp1) - 1] = 0;
-      
-      sprintf_P(temp,htmL_NET_MAC,"ap", temp1); data.concat(temp);
-      www.sendContentAndClear(data);
-      sprintf_P(temp,htmL_NET_IP, "ap", (int)wifiManager.settings.ap.ip[0], "ap", (int)wifiManager.settings.ap.ip[1], "ap", (int)wifiManager.settings.ap.ip[2], "ap", (int)wifiManager.settings.ap.ip[3]); data.concat(temp);
-      sprintf_P(temp,htmL_NET_GW, "ap", (int)wifiManager.settings.ap.gw[0], "ap", (int)wifiManager.settings.ap.gw[1], "ap", (int)wifiManager.settings.ap.gw[2], "ap", (int)wifiManager.settings.ap.gw[3]); data.concat(temp);
-      sprintf_P(temp,htmL_NET_SN, "ap", (int)wifiManager.settings.ap.sn[0], "ap", (int)wifiManager.settings.ap.sn[1], "ap", (int)wifiManager.settings.ap.sn[2], "ap", (int)wifiManager.settings.ap.sn[3]); data.concat(temp);
-
-      sprintf_P(temp,htmL_NETWORKSSID7, wifiManager.settings.accessPointEnabled ? "checked" : ""); data.concat(temp);
+      // 保留原有管理密码登录，登录后显示新的路由器和热点设置
+      renderWifiNetwork(data);
     #else
       data.concat(FPSTR(htmL_NETWORK_ETH_BEG));
 

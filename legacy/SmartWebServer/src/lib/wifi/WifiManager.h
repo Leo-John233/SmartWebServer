@@ -104,6 +104,9 @@ class WifiManager {
     };
 
     bool active = false;
+    // 网页配网接管连接时暂停原来的重连任务，避免扫描或连接被打断
+    bool networkBusy = false;
+    bool webManaged = false;
     int stationNumber = 1;
 
   private:

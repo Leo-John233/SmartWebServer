@@ -253,6 +253,10 @@ Again:
   #endif
 
   www.on("/net.htm", handleNetwork);
+  #if OPERATIONAL_MODE == WIFI
+    // 网络页面通过独立接口读取状态、搜索 Wi-Fi 和提交连接设置
+    www.on("/net-wifi", handleWifiNetwork);
+  #endif
 
   www.on("/", handleRoot);
   
@@ -311,6 +315,10 @@ Again:
 }
 
 void loop(void) {
+  #if OPERATIONAL_MODE == WIFI
+    // 逐步处理扫描和连接，避免等待路由器时阻塞设备的其他任务
+    pollWifiNetwork();
+  #endif
   #if (BLE_GAMEPAD == ON && ESP32)
     bleTimers(); Y;
     bleConnTest(); Y;
