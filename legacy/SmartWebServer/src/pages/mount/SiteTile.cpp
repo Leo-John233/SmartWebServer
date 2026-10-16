@@ -44,6 +44,9 @@ void siteTile(String &data)
   data.concat(temp);
   www.sendContentAndClear(data);
 
+  // 经纬度与时区输入共用紧凑网格，保留原有表单参数
+  data.concat(F("<div class='sws-site-fields'>"));
+
   // Latitude
   data.concat(FPSTR(html_latMsg));
   if (!onStep.command(status.getVersionMajor() > 3 ? ":GtH#" : ":Gt#", reply))
@@ -99,7 +102,7 @@ void siteTile(String &data)
   data.concat(FPSTR(html_offsetFooterMsg));
   www.sendContentAndClear(data);
 
-  data.concat(F("<br /><button type='submit'>" L_UPLOAD "</button>\n"));
+  data.concat(F("</div><div class='sws-site-submit'><button type='submit'>" L_UPLOAD "</button></div>\n"));
   data.concat(FPSTR(html_form_end));
 
   data.concat(FPSTR(html_collapsable_end));

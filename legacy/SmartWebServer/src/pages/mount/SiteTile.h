@@ -12,13 +12,13 @@ extern void siteTileAjax(String &data);
 extern void siteTileGet();
 
 const char html_browserTime[] PROGMEM =
-  "<div class='sws-browser-time'><span id=\"datetime\"></span> " L_TIME_BROWSER_UT
+  "<div class='sws-time-summary'><div class='sws-browser-time'><span class='sws-time-label'>" L_TIME_BROWSER_UT "</span><strong id=\"datetime\"></strong>"
   "<script>update_date_time();</script>"
   "</div>\n";
 
-const char html_date[] PROGMEM = "<div class='sws-device-time'><span id='date_ut' class='c'>%s</span>";
-const char html_time[] PROGMEM = "&nbsp;<span id='time_ut' class='c'>%s</span>&nbsp;" L_UT;
-const char html_sidereal[] PROGMEM = "</div><div class='sws-sidereal-time'>(<span id='time_lst' class='c'>%s</span>&nbsp; " L_LST ")</div>";
+const char html_date[] PROGMEM = "<div class='sws-device-time'><span class='sws-time-label'>" L_UT "</span><div><span id='date_ut' class='c'>%s</span>";
+const char html_time[] PROGMEM = " <span id='time_ut' class='c'>%s</span></div>";
+const char html_sidereal[] PROGMEM = "</div><div class='sws-sidereal-time'><span class='sws-time-label'>" L_LST "</span><strong id='time_lst' class='c'>%s</strong></div></div>";
 const char html_site[] PROGMEM =
 "<div class='sws-location-values'><div>" L_LAT "<strong id='site_lat' class='c'>%s</strong></div>"
 "<div>" L_LONG "<strong id='site_long' class='c'>%s</strong></div></div>";
