@@ -7,6 +7,10 @@
   #define SERIAL_ONSTEP Serial
 #endif
 
+#ifndef RA_BRAKE_PIN
+  #define RA_BRAKE_PIN       5   // GPIO5 控制 RA 弹簧抱闸：LOW 锁定，HIGH 释放
+#endif
+
 #ifndef LED_STATUS_PIN
   #define LED_STATUS_PIN     2   // pin GPIO2 is the status led
 #endif
@@ -19,7 +23,7 @@
 
 #define AXIS1_ENCODER_A_PIN  14  // pin# for Axis1 encoder, for A or CW  or MA/CLK
 #define AXIS1_ENCODER_B_PIN  12  // pin# for Axis1 encoder, for B or CCW or SLO (this is pin13 on the ESP-M3)
-#define AXIS2_ENCODER_A_PIN  5   // pin# for Axis2 encoder, for A or CW  or MA/CLK (this is pin16 on the ESP-M3 and can go logic high at boot)
+#define AXIS2_ENCODER_A_PIN  OFF // GPIO5 已分配给 RA_BRAKE_PIN，不再作为第二轴编码器 A
 #define AXIS2_ENCODER_B_PIN  4   // pin# for Axis2 encoder, for B or CCW or SLO
 
 #if AXIS1_ENCODER == OFF || AXIS2_ENCODER == OFF

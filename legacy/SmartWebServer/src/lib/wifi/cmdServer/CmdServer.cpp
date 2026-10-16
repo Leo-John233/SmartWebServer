@@ -5,6 +5,7 @@
 
   #include "../../tasks/OnTask.h"
   #include "../../../libApp/cmd/Cmd.h"
+  #include "../../../libApp/boardIo/Activity.h"
 
   CmdServer::CmdServer(uint32_t port, long clientTimeoutMs, bool persist) {
     cmdSvr = nullptr;
@@ -51,6 +52,7 @@
       // get the data
       int c = cmdSvrClient.read();
       if (c < 0 || c > 255) break;
+      swsNetworkActivity();
       
       // insert into the command buffer
       cmdBuffer[cmdBufferPos] = (char)c;
@@ -68,6 +70,7 @@
         if (strlen(result) > 0) {
           if (cmdSvrClient && cmdSvrClient.connected()) {
             cmdSvrClient.print(result); // there was a delay(2); after this
+            swsNetworkActivity();
           }
         }
 

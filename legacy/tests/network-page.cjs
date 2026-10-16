@@ -57,6 +57,7 @@ void pageHeader(int){}
 void processNetworkGet(){}
 void renderWifiNetwork(String&);
 void sendPageResource(const char*);
+void swsNetworkActivity(){}
 `;
   code += require('./locale-source.cjs')() + '\n' + require('./page-support.cjs')() + '\n';
   for (const file of ['htmlHeaders.h', 'htmlMessages.h', 'Page.h', 'network/Network.h', 'network/ui/Styles.h', 'network/ui/View.h', 'network/ui/Script.h'])

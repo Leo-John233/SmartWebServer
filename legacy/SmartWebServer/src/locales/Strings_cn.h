@@ -696,3 +696,17 @@
 #define L_MF_DIRECT "直接翻转"
 #define L_MF_VIA_HOME "经零位翻转"
 #define L_MF_PAUSE_HOME "到零位后暂停"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "网络活动指示灯"
+#define L_IO_ACTIVITY_HELP "显示网页和控制连接的数据收发；主控断开时仍闪烁。"
+#define L_IO_BRAKE_TITLE "赤经轴抱闸保护"
+#define L_IO_BRAKE_HELP "开启：驱动反馈正常后释放；异常或超时锁定。关闭：保持释放。"
+#define L_IO_BRAKE_STARTING "启动中 · 已锁定"
+#define L_IO_BRAKE_DISABLED "保护关闭 · 已释放"
+#define L_IO_BRAKE_WAITING "等待驱动反馈 · 已锁定"
+#define L_IO_BRAKE_FAULT "驱动反馈异常 · 已锁定"
+#define L_IO_BRAKE_STALE "驱动反馈超时 · 已锁定"
+#define L_IO_BRAKE_RELEASED "驱动反馈正常 · 已释放"
+#define L_IO_RELEASE_CONFIRM "关闭保护会释放抱闸，即使驱动反馈异常。是否继续？"
+#define L_IO_SAVE_FAILED "设置未保存，请重试。"

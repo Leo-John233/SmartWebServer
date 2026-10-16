@@ -1,6 +1,8 @@
 #include "../Page.h"
 #include "../Appearance.h"
 #include "../Pages.common.h"
+#include "../Request.h"
+#include "../../libApp/boardIo/Activity.h"
 
 // 固定大小分段读取 Flash；也可只发送 style/script 标签内的内容。
 void sendPageResource(const char *content, size_t length) {
@@ -10,6 +12,7 @@ void sendPageResource(const char *content, size_t length) {
     memcpy_P(part, content + offset, count);
     part[count] = 0;
     www.sendContent(part);
+    swsNetworkActivity();
   }
 }
 
@@ -39,27 +42,31 @@ static void servePageStyles() {
   const size_t skip = sizeof("\n<style>") - 1, tail = sizeof("</style>\n") - 1;
   const size_t base = strlen_P(html_shared_styles) - skip - tail;
   const size_t editors = strlen_P(html_editor_styles) - skip - tail;
-  www.setContentLength(base + editors);
+  const size_t io = strlen_P(html_board_io_styles) - skip - tail;
+  www.setContentLength(base + editors + io);
   www.sendHeader("Cache-Control", "public, max-age=31536000, immutable");
   www.send(200, "text/css; charset=utf-8", String());
   sendPageResource(html_shared_styles + skip, base);
   sendPageResource(html_editor_styles + skip, editors);
+  sendPageResource(html_board_io_styles + skip, io);
 }
 
 static void servePageControls() {
   const size_t skip = sizeof("\n<script>") - 1, tail = sizeof("</script>\n") - 1;
   const size_t controls = strlen_P(html_page_controls) - skip - tail;
   const size_t editors = strlen_P(html_settings_editors) - skip - tail;
-  www.setContentLength(controls + editors);
+  const size_t io = strlen_P(html_board_io_script) - skip - tail;
+  www.setContentLength(controls + editors + io);
   www.sendHeader("Cache-Control", "public, max-age=31536000, immutable");
   www.send(200, "application/javascript; charset=utf-8", String());
   sendPageResource(html_page_controls + skip, controls);
   sendPageResource(html_settings_editors + skip, editors);
+  sendPageResource(html_board_io_script + skip, io);
 }
 
 void registerPageResources() {
-  www.on("/sws-ui.css", servePageStyles);
-  www.on("/sws-ui.js", servePageControls);
+  registerPageHandler("/sws-ui.css", servePageStyles);
+  registerPageHandler("/sws-ui.js", servePageControls);
 }
 
 // 帮助和错误页面也复用同一缓存，不缓存设备数据、表单或登录状态。

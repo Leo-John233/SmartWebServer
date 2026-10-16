@@ -693,3 +693,17 @@
 #define L_MF_DIRECT "Direct flip"
 #define L_MF_VIA_HOME "Via home"
 #define L_MF_PAUSE_HOME "Pause at home"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "Network activity LED"
+#define L_IO_ACTIVITY_HELP "Shows web and control data traffic; still blinks when the controller is disconnected."
+#define L_IO_BRAKE_TITLE "RA brake protection"
+#define L_IO_BRAKE_HELP "On: release after healthy driver feedback; lock on faults or timeout. Off: keep released."
+#define L_IO_BRAKE_STARTING "Starting · locked"
+#define L_IO_BRAKE_DISABLED "Protection off · released"
+#define L_IO_BRAKE_WAITING "Waiting for driver feedback · locked"
+#define L_IO_BRAKE_FAULT "Driver feedback fault · locked"
+#define L_IO_BRAKE_STALE "Driver feedback timeout · locked"
+#define L_IO_BRAKE_RELEASED "Driver feedback healthy · released"
+#define L_IO_RELEASE_CONFIRM "Turning protection off releases the brake even if driver feedback is faulty. Continue?"
+#define L_IO_SAVE_FAILED "Settings were not saved. Please retry."

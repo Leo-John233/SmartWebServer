@@ -692,3 +692,17 @@
 #define L_MF_DIRECT "直接反転"
 #define L_MF_VIA_HOME "ホーム経由で反転"
 #define L_MF_PAUSE_HOME "ホームで一時停止"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "ネットワーク通信ランプ"
+#define L_IO_ACTIVITY_HELP "ウェブと制御の通信を表示します。主制御装置に未接続のときも点滅します。"
+#define L_IO_BRAKE_TITLE "赤経軸ブレーキ保護"
+#define L_IO_BRAKE_HELP "オン：ドライバーの正常な応答後に解除し、異常や応答切れでロックします。オフ：解除を維持します。"
+#define L_IO_BRAKE_STARTING "起動中・ロック"
+#define L_IO_BRAKE_DISABLED "保護オフ・解除"
+#define L_IO_BRAKE_WAITING "ドライバー応答待ち・ロック"
+#define L_IO_BRAKE_FAULT "ドライバー応答異常・ロック"
+#define L_IO_BRAKE_STALE "ドライバー応答切れ・ロック"
+#define L_IO_BRAKE_RELEASED "ドライバー応答正常・解除"
+#define L_IO_RELEASE_CONFIRM "保護をオフにすると、ドライバー応答が異常でもブレーキを解除します。続行しますか？"
+#define L_IO_SAVE_FAILED "設定を保存できませんでした。再試行してください。"

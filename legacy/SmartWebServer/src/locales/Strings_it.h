@@ -693,3 +693,17 @@
 #define L_MF_DIRECT "Inversione diretta"
 #define L_MF_VIA_HOME "Passa da origine"
 #define L_MF_PAUSE_HOME "Pausa a origine"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "LED attività di rete"
+#define L_IO_ACTIVITY_HELP "Indica i dati web e di controllo; continua a lampeggiare se il controller è scollegato."
+#define L_IO_BRAKE_TITLE "Protezione freno AR"
+#define L_IO_BRAKE_HELP "Attiva: rilascia dopo un riscontro corretto del driver; blocca in caso di errore o timeout. Inattiva: resta rilasciato."
+#define L_IO_BRAKE_STARTING "Avvio · bloccato"
+#define L_IO_BRAKE_DISABLED "Protezione disattivata · rilasciato"
+#define L_IO_BRAKE_WAITING "Attesa riscontro driver · bloccato"
+#define L_IO_BRAKE_FAULT "Errore riscontro driver · bloccato"
+#define L_IO_BRAKE_STALE "Riscontro driver scaduto · bloccato"
+#define L_IO_BRAKE_RELEASED "Riscontro driver corretto · rilasciato"
+#define L_IO_RELEASE_CONFIRM "Disattivare la protezione rilascia il freno anche con un riscontro del driver errato. Continuare?"
+#define L_IO_SAVE_FAILED "Impostazioni non salvate. Riprovare."

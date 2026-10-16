@@ -691,3 +691,17 @@
 #define L_MF_DIRECT "Canvi directe"
 #define L_MF_VIA_HOME "Passa per origen"
 #define L_MF_PAUSE_HOME "Pausa a origen"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "LED d’activitat de xarxa"
+#define L_IO_ACTIVITY_HELP "Mostra les dades web i de control; continua parpellejant si el controlador està desconnectat."
+#define L_IO_BRAKE_TITLE "Protecció del fre d’AR"
+#define L_IO_BRAKE_HELP "Activada: allibera amb resposta correcta del motor; bloqueja amb error o temps excedit. Desactivada: manté alliberat."
+#define L_IO_BRAKE_STARTING "Iniciant · bloquejat"
+#define L_IO_BRAKE_DISABLED "Protecció desactivada · alliberat"
+#define L_IO_BRAKE_WAITING "Esperant resposta del motor · bloquejat"
+#define L_IO_BRAKE_FAULT "Error de resposta del motor · bloquejat"
+#define L_IO_BRAKE_STALE "Temps de resposta excedit · bloquejat"
+#define L_IO_BRAKE_RELEASED "Resposta del motor correcta · alliberat"
+#define L_IO_RELEASE_CONFIRM "Desactivar la protecció allibera el fre fins i tot si falla la resposta del motor. Voleu continuar?"
+#define L_IO_SAVE_FAILED "No s’ha desat la configuració. Torneu-ho a provar."

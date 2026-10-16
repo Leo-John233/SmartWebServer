@@ -195,6 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(e);
     return;
   }
+  // 返回控制器页面时恢复模拟服务中的 IO 设置，避免静态预览重新显示默认值。
+  if (document.querySelector('.sws-io-controls'))
+    fetch('/board-io', {cache:'no-store'}).then(r=>r.json()).then(settings=>{
+      document.querySelectorAll('.sws-io-controls [data-setting]').forEach(button=>{
+        button.dataset.selected=String(settings[button.dataset.setting]);
+      });
+      demoText('sws-io-brake-state',settings.message);
+    }).catch(()=>{});
   for (const [id, value] of Object.entries({
     last_err: '无',
     work_load: '15%',

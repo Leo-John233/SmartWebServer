@@ -19,6 +19,7 @@ function nativeResources() {
     ...templates['ui/Controls.h'],
     ...templates['ui/Editors.h'],
     ...templates['ui/Navigation.h'],
+    ...templates['boardIo/View.h'],
   };
   let code = `
 #include <string>
@@ -64,6 +65,8 @@ struct Web {
 #define sendContentAndClear(x) sendContent(x); x="";
 struct Status {bool onStepFound=true;int focuserFound=1,rotatorFound=1,auxiliaryFound=1;}status;
 void pageHeader(int){}
+void swsNetworkActivity(){}
+void registerPageHandler(const char*,void(*)()){}
 `;
   for (const [key, value] of Object.entries(values))
     code += 'const char ' + key + '[]=' + JSON.stringify(value) + ';\n';
@@ -120,7 +123,9 @@ int main(){
 }`;
   const source = path.join(work, 'resources.cpp'), exe = path.join(work, 'resources.exe');
   const ino=fs.readFileSync(path.join(root,'SmartWebServer.ino'),'utf8');
-  const routes=[...ino.matchAll(/www\.on\(/g)].length + 2;
+  const routeSetup=ino.slice(ino.indexOf('registerPageResources();'),ino.indexOf('www.onNotFound'))
+    .replace(/#if OPERATIONAL_MODE == WIFI[\s\S]*?#endif/g,'');
+  const routes=[...routeSetup.matchAll(/registerPageHandler\(/g)].length + 2;
   const ethernet=fs.readFileSync(path.join(root,'src/lib/ethernet/webServer/WebServer.h'),'utf8');
   assert(routes<=Number(ethernet.match(/#define WEB_HANDLER_COUNT_MAX\s+(\d+)/)[1]), '新增资源不超过以太网路由容量');
   assert(Buffer.byteLength(templates['htmlScripts.h'].html_script_ajax_get.replace('%s','auxiliary-ajax-get.txt')) < 240, '普通命令脚本不超出原页面缓冲区');
@@ -130,8 +135,8 @@ int main(){
   const css = fs.readFileSync(path.join(work, 'styles.css'), 'utf8');
   const js = fs.readFileSync(path.join(work, 'controls.js'), 'utf8');
   assert(!/<\/?(?:style|script)>/.test(css + js), '静态资源不包含 HTML 包装标签');
-  assert.equal(css, templates['ui/Styles.h'].html_shared_styles.slice(8, -9) + templates['ui/Editors.h'].html_editor_styles.slice(8, -9));
-  assert.equal(js, templates['ui/Controls.h'].html_page_controls.slice(9, -10) + templates['ui/Editors.h'].html_settings_editors.slice(9, -10));
+  assert.equal(css, templates['ui/Styles.h'].html_shared_styles.slice(8, -9) + templates['ui/Editors.h'].html_editor_styles.slice(8, -9) + templates['boardIo/View.h'].html_board_io_styles.slice(8,-9));
+  assert.equal(js, templates['ui/Controls.h'].html_page_controls.slice(9, -10) + templates['ui/Editors.h'].html_settings_editors.slice(9, -10) + templates['boardIo/View.h'].html_board_io_script.slice(9,-10));
   return { css, js, appearance: fs.readFileSync(path.join(work, 'appearance.html'), 'utf8') };
 }
 

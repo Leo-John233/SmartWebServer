@@ -22,8 +22,8 @@ const templates=require('../tests/page-templates.cjs')(root),cp=require('node:ch
 shared=templates['Appearance.h'].html_shared_appearance;shellScript=templates['Appearance.h'].html_shell_script;
 // 与固件相同，公共样式和控件脚本按版本缓存；内容仍来自真实模板。
 const resources = {
-  css: templates['ui/Styles.h'].html_shared_styles.slice(8,-9) + templates['ui/Editors.h'].html_editor_styles.slice(8,-9),
-  js: templates['ui/Controls.h'].html_page_controls.slice(9,-10) + templates['ui/Editors.h'].html_settings_editors.slice(9,-10),
+  css: templates['ui/Styles.h'].html_shared_styles.slice(8,-9) + templates['ui/Editors.h'].html_editor_styles.slice(8,-9) + templates['boardIo/View.h'].html_board_io_styles.slice(8,-9),
+  js: templates['ui/Controls.h'].html_page_controls.slice(9,-10) + templates['ui/Editors.h'].html_settings_editors.slice(9,-10) + templates['boardIo/View.h'].html_board_io_script.slice(9,-10),
 };
 const resourceVersion = require('node:crypto').createHash('sha256').update(resources.css+resources.js).digest('hex').slice(0,12);
 shared = '<link rel="stylesheet" href="/sws-ui.css?v='+resourceVersion+'"><script src="/sws-ui.js?v='+resourceVersion+'"></script>';

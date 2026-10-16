@@ -7,6 +7,7 @@ const pages=['/index.htm','/mount.htm','/net.htm','/focuser.htm','/rotator.htm',
 const networks=[{ssid:'Redmi_Hotel',rssi:-48,open:false},{ssid:'Observatory',rssi:-62,open:false},{ssid:'Guest',rssi:-73,open:true},{ssid:'Home Wi-Fi',rssi:-55,open:false}];
 let connectAt=0,scanAt=0,fail=false;
 let encoderAutoSync=false;
+const boardIoState={activity:true,protection:true};
 const server=http.createServer(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   const url=new URL(req.url,'http://127.0.0.1');let body='';for await(const chunk of req){body+=chunk;if(body.length>65536){res.writeHead(413);res.end();return;}}
@@ -16,6 +17,14 @@ const server=http.createServer(async(req,res)=>{
     return url.pathname.endsWith('.css')?send(resources.css,'text/css; charset=utf-8'):send(resources.js,'application/javascript; charset=utf-8');
   }
   if(url.pathname==='/demo.js')return send(client,'text/javascript; charset=utf-8');
+  if(url.pathname==='/board-io'){
+    if(req.method==='POST'){
+      const setting=args.get('setting'),enabled=args.get('enabled');
+      if(!['activity','protection'].includes(setting)||!['0','1'].includes(enabled)){res.statusCode=400;return send('{}','application/json');}
+      boardIoState[setting]=enabled==='1';
+    }
+    return send(JSON.stringify({...boardIoState,message:boardIoState.protection?'驱动反馈正常 · 已释放':'保护关闭 · 已释放'}),'application/json; charset=utf-8');
+  }
   if(url.pathname==='/net-wifi'){
     const action=url.searchParams.get('action');
     if(action==='scan'){if(!scanAt)scanAt=Date.now()+1000;const running=Date.now()<scanAt;if(!running)scanAt=0;return send(JSON.stringify({running,networks:running?[]:networks}),'application/json');}

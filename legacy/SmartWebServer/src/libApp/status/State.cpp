@@ -3,6 +3,7 @@
 
 #include "../../lib/tasks/OnTask.h"
 #include "../../libApp/cmd/Cmd.h"
+#include "../boardIo/BoardIo.h"
 
 void pollState() { state.poll(); }
 void pollStateSlow() { state.pollSlow(); }
@@ -66,6 +67,7 @@ void State::pollGpio()
 
   if (!onStep.command(":GXGO#", result) || strlen(result) != 8) return;
   for (int i = 0; i < 8; i++) {
+    if (boardIo.ownsPin(vGpioPin[i])) continue;
     if (vGpioPin[i] != OFF) {
 
       if (result[i] == 'O' || result[i] == '0' || result[i] == '1' || result[i] >= (char)128) {

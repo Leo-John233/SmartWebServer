@@ -6,3 +6,4 @@
 #include "ui/Controls.h"
 #include "ui/Editors.h"
 #include "ui/Navigation.h"
+#include "boardIo/View.h"

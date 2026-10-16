@@ -691,3 +691,17 @@
 #define L_MF_DIRECT "Inversión directa"
 #define L_MF_VIA_HOME "Pasar por origen"
 #define L_MF_PAUSE_HOME "Pausar en origen"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "LED de actividad de red"
+#define L_IO_ACTIVITY_HELP "Muestra el tráfico web y de control; sigue parpadeando si se desconecta el controlador."
+#define L_IO_BRAKE_TITLE "Protección del freno de AR"
+#define L_IO_BRAKE_HELP "Activada: libera tras una respuesta correcta del motor; bloquea ante fallos o falta de respuesta. Desactivada: permanece libre."
+#define L_IO_BRAKE_STARTING "Iniciando · bloqueado"
+#define L_IO_BRAKE_DISABLED "Protección desactivada · liberado"
+#define L_IO_BRAKE_WAITING "Esperando respuesta del motor · bloqueado"
+#define L_IO_BRAKE_FAULT "Fallo de respuesta del motor · bloqueado"
+#define L_IO_BRAKE_STALE "Tiempo de respuesta agotado · bloqueado"
+#define L_IO_BRAKE_RELEASED "Respuesta del motor correcta · liberado"
+#define L_IO_RELEASE_CONFIRM "Desactivar la protección libera el freno incluso si falla la respuesta del motor. ¿Continuar?"
+#define L_IO_SAVE_FAILED "No se guardaron los ajustes. Inténtelo de nuevo."

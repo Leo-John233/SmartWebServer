@@ -6,6 +6,8 @@
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 #include "../../lib/tasks/OnTask.h"
+#include "../boardIo/BoardIo.h"
+#include "../../libApp/boardIo/BoardIo.h"
 
 // create the related webpage tile
 void statusTile(String &data)
@@ -61,7 +63,7 @@ void statusTile(String &data)
       mountType = atoi(temp);
     }
   #endif
-  bool displayCollapsable = DISPLAY_RESET_CONTROLS != OFF || mountType != 0;
+  bool displayCollapsable = DISPLAY_RESET_CONTROLS != OFF || mountType != 0 || boardIo.activityAvailable() || boardIo.brakeAvailable();
 
   if (displayCollapsable)
   {
@@ -69,6 +71,8 @@ void statusTile(String &data)
     data.concat(temp);
     www.sendContentAndClear(data);
   }
+
+  boardIoTile(data);
 
   #if DRIVE_CONFIGURATION == ON
     if (mountType >= 1 && mountType <= 3)

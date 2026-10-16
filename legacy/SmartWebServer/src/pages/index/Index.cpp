@@ -5,6 +5,7 @@
 #include "../Page.h"
 #include "../ui/Layouts.h"
 #include "../Pages.common.h"
+#include "../boardIo/BoardIo.h"
 
 void processIndexGet();
 
@@ -140,6 +141,8 @@ void indexAjax() {
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
+  // 本机设置状态在主控掉线时也继续返回。
+  boardIoTileAjax(data);
 
   if (status.onStepFound)
   {

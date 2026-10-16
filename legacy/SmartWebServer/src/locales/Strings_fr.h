@@ -693,3 +693,17 @@
 #define L_MF_DIRECT "Retournement direct"
 #define L_MF_VIA_HOME "Passer par origine"
 #define L_MF_PAUSE_HOME "Pause à origine"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "Voyant d’activité réseau"
+#define L_IO_ACTIVITY_HELP "Indique les échanges web et de commande ; clignote toujours si le contrôleur est déconnecté."
+#define L_IO_BRAKE_TITLE "Protection du frein AD"
+#define L_IO_BRAKE_HELP "Activée : libération après retour moteur correct ; blocage en cas de défaut ou de délai dépassé. Désactivée : frein libéré."
+#define L_IO_BRAKE_STARTING "Démarrage · bloqué"
+#define L_IO_BRAKE_DISABLED "Protection désactivée · libéré"
+#define L_IO_BRAKE_WAITING "Attente du retour moteur · bloqué"
+#define L_IO_BRAKE_FAULT "Défaut du retour moteur · bloqué"
+#define L_IO_BRAKE_STALE "Retour moteur expiré · bloqué"
+#define L_IO_BRAKE_RELEASED "Retour moteur correct · libéré"
+#define L_IO_RELEASE_CONFIRM "Désactiver la protection libère le frein même si le retour moteur est défaillant. Continuer ?"
+#define L_IO_SAVE_FAILED "Réglages non enregistrés. Réessayez."

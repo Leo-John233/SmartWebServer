@@ -78,7 +78,7 @@ function functions(source) {
 }
 if (require.main === module) {
   const routes = (s) =>
-    [...s.matchAll(/www\.on\("([^"]+)",\s*(\w+)\)/g)].map((m) => m[1] + '=' + m[2]);
+    [...s.matchAll(/(?:www\.on|registerPageHandler)\("([^"]+)",\s*(\w+)\)/g)].map((m) => m[1] + '=' + m[2]);
   const original = routes(git('SmartWebServer.ino')),
     current = routes(read('SmartWebServer.ino'));
   for (const route of original) assert(current.includes(route), route + ' 原路由必须保留');

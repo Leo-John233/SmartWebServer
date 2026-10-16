@@ -6,6 +6,7 @@
 #include "../../libApp/cmd/Cmd.h"
 #include "../../libApp/misc/Misc.h"
 #include "../../locales/Locale.h"
+#include "../boardIo/BoardIo.h"
 #if OPERATIONAL_MODE == WIFI
   #include "../../lib/wifi/WifiManager.h"
 #endif
@@ -107,7 +108,9 @@ void State::axisStatusUpdate() {
       char cmd[40];
       char reply[40];
       snprintf(cmd, sizeof(cmd), ":GXU%d#", axis + 1);
-      if (onStep.command(cmd, reply) && reply[0] != '0') {
+      const bool received = onStep.command(cmd, reply);
+      if (axis == 0) boardIo.driverFeedback(received, reply);
+      if (received && reply[0] != '0') {
         driverStatusFailedAttempts[axis] = 0;
         driver[axis].valid = true;
         driver[axis].communicationFailure = strstr(reply, "ST,OA,OB,GA,GB,OT,PW");

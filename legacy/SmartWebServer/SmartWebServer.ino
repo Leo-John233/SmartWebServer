@@ -57,6 +57,7 @@ bool otaEnabled = false;
 #include "src/libApp/bleGamepad/BleGamepad.h"
 #include "src/libApp/encoders/Encoders.h"
 #include "src/libApp/status/Status.h"
+#include "src/libApp/boardIo/BoardIo.h"
 
 #include "src/pages/Pages.h"
 
@@ -101,6 +102,7 @@ void pollCmdSvr() {
 }
 
 void setup(void) {
+  boardIo.initPins();
   #if OPERATIONAL_MODE == WIFI
     WiFi.disconnect();
     WiFi.softAPdisconnect(true); // 断开之前的 WiFi 连接，重置状态
@@ -286,39 +288,40 @@ Again:
 
   VLF("MSG: Set webpage handlers"); // 设置网页路由处理程序
   registerPageResources();
-  www.on("/index.htm", handleRoot);
-  www.on("/index-ajax-get.txt", indexAjaxGet);
-  www.on("/index.txt", indexAjax);
+  registerPageHandler("/index.htm", handleRoot);
+  registerPageHandler("/index-ajax-get.txt", indexAjaxGet);
+  registerPageHandler("/index.txt", indexAjax);
 
-  www.on("/mount.htm", handleMount);
-  www.on("/mount-ajax-get.txt", mountAjaxGet);
-  www.on("/mount-ajax.txt", mountAjax);
-  www.on("/libraryHelp.htm", handleLibraryHelp);
+  registerPageHandler("/mount.htm", handleMount);
+  registerPageHandler("/mount-ajax-get.txt", mountAjaxGet);
+  registerPageHandler("/mount-ajax.txt", mountAjax);
+  registerPageHandler("/libraryHelp.htm", handleLibraryHelp);
 
-  www.on("/rotator.htm", handleRotator);
-  www.on("/rotator-ajax-get.txt", rotatorAjaxGet);
-  www.on("/rotator-ajax.txt", rotatorAjax);
+  registerPageHandler("/rotator.htm", handleRotator);
+  registerPageHandler("/rotator-ajax-get.txt", rotatorAjaxGet);
+  registerPageHandler("/rotator-ajax.txt", rotatorAjax);
 
-  www.on("/focuser.htm", handleFocuser);
-  www.on("/focuser-ajax-get.txt", focuserAjaxGet);
-  www.on("/focuser-ajax.txt", focuserAjax);
+  registerPageHandler("/focuser.htm", handleFocuser);
+  registerPageHandler("/focuser-ajax-get.txt", focuserAjaxGet);
+  registerPageHandler("/focuser-ajax.txt", focuserAjax);
 
-  www.on("/auxiliary.htm", handleAux);
-  www.on("/auxiliary-ajax-get.txt", auxAjaxGet);
-  www.on("/auxiliary-ajax.txt", auxAjax);
+  registerPageHandler("/auxiliary.htm", handleAux);
+  registerPageHandler("/auxiliary-ajax-get.txt", auxAjaxGet);
+  registerPageHandler("/auxiliary-ajax.txt", auxAjax);
   #if ENCODERS == ON
-    www.on("/enc.htm", handleEncoders);
-    www.on("/enc-ajax-get.txt", encAjaxGet);
-    www.on("/enc-ajax.txt", encAjax);
+    registerPageHandler("/enc.htm", handleEncoders);
+    registerPageHandler("/enc-ajax-get.txt", encAjaxGet);
+    registerPageHandler("/enc-ajax.txt", encAjax);
   #endif
 
-  www.on("/net.htm", handleNetwork);
+  registerPageHandler("/net.htm", handleNetwork);
   #if OPERATIONAL_MODE == WIFI
     // 网络页面通过独立接口读取状态、搜索 Wi-Fi 和提交连接设置
-    www.on("/net-wifi", handleWifiNetwork);
+    registerPageHandler("/net-wifi", handleWifiNetwork);
+    if (boardIo.activityAvailable() || boardIo.brakeAvailable()) registerPageHandler("/board-io", handleBoardIo);
   #endif
 
-  www.on("/", handleRoot);
+  registerPageHandler("/", handleRoot);
   
   www.onNotFound(handleNotFound);
 
@@ -380,6 +383,7 @@ Again:
   }
 
   state.init();
+  boardIo.begin();
 
   VF("MSG: Setup, starting cmd channel polling"); // 启动命令通道轮询
   VF(" task (rate 5ms priority 2)... ");

@@ -701,3 +701,17 @@
 #define L_MF_DIRECT "Direkt umschwenken"
 #define L_MF_VIA_HOME "Über Ausgangsposition"
 #define L_MF_PAUSE_HOME "An Ausgangsposition pausieren"
+
+// 本机网络指示与 RA 抱闸保护
+#define L_IO_ACTIVITY_TITLE "Netzwerkaktivitäts-LED"
+#define L_IO_ACTIVITY_HELP "Zeigt Web- und Steuerdaten an; blinkt weiterhin bei getrennter Steuerung."
+#define L_IO_BRAKE_TITLE "RA-Bremsschutz"
+#define L_IO_BRAKE_HELP "Ein: Freigabe nach fehlerfreier Treiberrückmeldung; Sperre bei Fehler oder Zeitüberschreitung. Aus: bleibt gelöst."
+#define L_IO_BRAKE_STARTING "Start · gesperrt"
+#define L_IO_BRAKE_DISABLED "Schutz aus · gelöst"
+#define L_IO_BRAKE_WAITING "Warte auf Treiberrückmeldung · gesperrt"
+#define L_IO_BRAKE_FAULT "Fehlerhafte Treiberrückmeldung · gesperrt"
+#define L_IO_BRAKE_STALE "Treiberrückmeldung überfällig · gesperrt"
+#define L_IO_BRAKE_RELEASED "Treiberrückmeldung fehlerfrei · gelöst"
+#define L_IO_RELEASE_CONFIRM "Das Ausschalten löst die Bremse auch bei fehlerhafter Treiberrückmeldung. Fortfahren?"
+#define L_IO_SAVE_FAILED "Einstellungen nicht gespeichert. Bitte erneut versuchen."

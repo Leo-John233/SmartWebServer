@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_pro
 module.exports=function(root,language=process.env.SWS_TEST_LANGUAGE||'cn'){
   const base=path.join(root,'src/pages'),files=[];
   for(const dir of ['index','mount','focuser','rotator','encoders','auxiliary'])for(const name of fs.readdirSync(path.join(base,dir)))if(name.endsWith('.h'))files.push(dir+'/'+name);
-  files.unshift('ui/Palette.h','ui/Text.h','ui/Layouts.h','htmlHeaders.h');files.push('LibraryHelp.h','htmlScripts.h','ui/Styles.h','ui/Controls.h','ui/Editors.h','ui/Navigation.h','network/ui/Styles.h','network/ui/View.h','network/ui/Script.h','network/Network.h');
+  files.unshift('ui/Palette.h','ui/Text.h','ui/Layouts.h','htmlHeaders.h');files.push('LibraryHelp.h','htmlScripts.h','ui/Styles.h','ui/Controls.h','ui/Editors.h','ui/Navigation.h','boardIo/View.h','network/ui/Styles.h','network/ui/View.h','network/ui/Script.h','network/Network.h');
   const clean=s=>s.replace(/^[ \t]*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
   let code='#define ON 1\n#define DISPLAY_SPECIAL_CHARS ON\n#define OFF 0\n#define PROGMEM\n#define DISPLAY_WEATHER ON\n#define DISPLAY_INTERNAL_TEMPERATURE ON\n#define WIFI 2\n#define OPERATIONAL_MODE WIFI\n#define DRIVE_CONFIGURATION ON\n#define DISPLAY_COORDINATE_ORIGIN ON\n#define DISPLAY_RESET_CONTROLS ON\n#define HOME_OFFSET_RANGE_AXIS1 3600\n#define HOME_OFFSET_RANGE_AXIS2 3600\n#define STR_INNER(x) #x\n#define STR(x) STR_INNER(x)\n';
   code+=require('./locale-source.cjs')(language)+'\n';
@@ -23,7 +23,7 @@ module.exports=function(root,language=process.env.SWS_TEST_LANGUAGE||'cn'){
     templates[files[i]]=values;
   }
   templates['Appearance.h'] = {
-    html_shared_appearance: templates['ui/Styles.h'].html_shared_styles + templates['ui/Editors.h'].html_editor_styles + templates['ui/Controls.h'].html_page_controls + templates['ui/Editors.h'].html_settings_editors,
+    html_shared_appearance: templates['ui/Styles.h'].html_shared_styles + templates['ui/Editors.h'].html_editor_styles + templates['ui/Controls.h'].html_page_controls + templates['ui/Editors.h'].html_settings_editors + templates['boardIo/View.h'].html_board_io_styles + templates['boardIo/View.h'].html_board_io_script,
     html_shell_script: templates['ui/Navigation.h'].html_shell_script,
   };
   templates['network/NetworkWifi.h'] = {
