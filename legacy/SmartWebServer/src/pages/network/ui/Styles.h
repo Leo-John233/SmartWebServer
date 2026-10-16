@@ -4,6 +4,34 @@
 // 新版通信与固件更新卡片限制在屏幕宽度内，避免手机页面横向滚动
 const char html_network_css[] PROGMEM = R"NET(
 <style>
+.sws-network-entry {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: minmax(260px, .85fr) minmax(0, 1.3fr);
+  align-items: start;
+  gap: 18px;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.sws-network-entry > .nw-card { margin: 0; padding: 24px; }
+.sws-network-entry h2 { font-size: 20px; line-height: 1.5; margin: 0; }
+.sws-entry-note { margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.8; }
+.sws-login-card form { margin: 20px 0 0; }
+.sws-login-card label { margin: 0 0 8px; font-size: 14px; }
+.sws-login-actions { display: flex; align-items: stretch; gap: 10px; }
+.sws-login-actions input:not([type='checkbox']) { flex: 1; min-width: 0; width: 0; min-height: 46px; text-align: left; }
+.sws-login-actions button { flex: 0 0 auto; margin: 0; min-height: 46px; padding: 8px 20px; }
+.sws-network-help ul { margin: 16px 0 0; padding-left: 20px; color: var(--muted); font-size: 14px; line-height: 1.85; }
+.sws-network-help li + li { margin-top: 12px; }
+.sws-network-help li { padding-left: 2px; overflow-wrap: anywhere; }
+.sws-network-help br { display: none; }
+.sws-network-help b { display: inline; }
+@media(max-width:800px) {
+  .sws-network-entry { grid-template-columns: minmax(0, 1fr); }
+  .sws-network-entry > .nw-card { padding: 20px; }
+}
+
 .nw-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

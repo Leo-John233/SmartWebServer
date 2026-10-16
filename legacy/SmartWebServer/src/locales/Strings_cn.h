@@ -457,15 +457,15 @@
 
 #define L_NETWORK_TITLE "输入密码以更改配置："
 
-#define L_NETWORK_ADVICE1 "网络设置说明：<br/><br/>"
-#define L_NETWORK_ADVICE2 "请仅启用站点模式 (Station) <b>或</b>热点模式 (Access Point) 之一，同时启用两者可能会导致性能问题<br/><br/>"
-#define L_NETWORK_ADVICE3 "如果您希望 OnStep 连接到家中的 WiFi 网络，请仅启用站点模式并"
-#define L_NETWORK_ADVICE4 "禁用热点模式如果 OnStep 无法连接到您家中的 WiFi 网络，它将"
-#define L_NETWORK_ADVICE5 "自动重新启用热点模式；当您外出前往暗夜观测点，以及"
-#define L_NETWORK_ADVICE6 "防止无法连接设备被锁死时，此功能非常有用<br/><br/>"
-#define L_NETWORK_ADVICE7 "如果因 WiFi 设置问题无法连接，您可以使用 Arduino IDE 重置 ESP 闪存（从而"
-#define L_NETWORK_ADVICE8 "恢复出厂默认设置）在 Arduino 的“工具 (Tools)”菜单中，将 Erase Flash 从 'Only Sketch'"
-#define L_NETWORK_ADVICE9 "更改为 'All Flash Contents'，然后重新上传 WiFi-Bluetooth 固件程序"
+#define L_NETWORK_ADVICE1 "网络连接说明"
+#define L_NETWORK_ADVICE2 "连接路由器时使用 Wi-Fi STA，直接连接设备时使用设备热点 AP"
+#define L_NETWORK_ADVICE3 "建议优先使用一种连接方式"
+#define L_NETWORK_ADVICE4 "，配网或无路由器时可保留设备热点"
+#define L_NETWORK_ADVICE5 "，确认路由器连接正常后可关闭热点"
+#define L_NETWORK_ADVICE6 ""
+#define L_NETWORK_ADVICE7 "无法连接设备时，可通过 Arduino IDE 清除配置后重新烧录固件"
+#define L_NETWORK_ADVICE8 "：在“工具”中将 Erase Flash 设为 All Flash Contents"
+#define L_NETWORK_ADVICE9 "，此操作会清除所有已保存的设置"
 
 // --------------------------- Constants -------------------------
 

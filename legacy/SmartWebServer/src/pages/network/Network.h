@@ -104,13 +104,14 @@ const char html_reboot[] PROGMEM =
 "\n";
 
 const char html_login[] PROGMEM =
-"<br/><form method='post' action='/net.htm'>"
-"<br/>" L_NETWORK_TITLE "<br />"
-"<input style='width:8em; text-align:left;' name='login' type='password' minlength='3' maxlength='31'>"
-"<button type='submit'>" L_OK "</button>"
-"</form><br/><br/><br/>"
+"<div class='sws-network-entry'><section class='nw-card sws-login-card'>"
+"<h2>" L_WEB_PASSWORD_TITLE "</h2><p id='sws-login-help' class='sws-entry-note'>" L_WEB_PASSWORD_HELP "</p>"
+"<form method='post' action='/net.htm'><label for='sws-login-password'>" L_NETWORK_PWD "</label>"
+"<div class='sws-login-actions'><input id='sws-login-password' name='login' type='password' minlength='3' maxlength='31' required autocomplete='current-password' aria-describedby='sws-login-help'>"
+"<button type='submit'>" L_OK "</button></div></form></section>"
 #if OPERATIONAL_MODE == WIFI
-  L_NETWORK_ADVICE1 L_NETWORK_ADVICE2 L_NETWORK_ADVICE3 L_NETWORK_ADVICE4 L_NETWORK_ADVICE5 L_NETWORK_ADVICE6 L_NETWORK_ADVICE7 L_NETWORK_ADVICE8 L_NETWORK_ADVICE9 
-  "<br/><br/>"
+"<section class='nw-card sws-network-help'><h2>" L_NETWORK_ADVICE1 "</h2>"
+"<ul><li>" L_NETWORK_ADVICE2 "</li><li>" L_NETWORK_ADVICE3 L_NETWORK_ADVICE4 L_NETWORK_ADVICE5 L_NETWORK_ADVICE6 "</li>"
+"<li>" L_NETWORK_ADVICE7 L_NETWORK_ADVICE8 L_NETWORK_ADVICE9 "</li></ul></section>"
 #endif
-"\n";
+"</div>\n";
