@@ -72,21 +72,21 @@ void statusTile(String &data)
     www.sendContentAndClear(data);
   }
 
+  data.concat(F("<div class='sws-controller-settings'>"));
   boardIoTile(data);
 
   #if DRIVE_CONFIGURATION == ON
     if (mountType >= 1 && mountType <= 3)
     {
-      snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
-      data.concat(temp);
-      snprintf_P(temp, sizeof(temp), html_indexMountType, mountType);
-      data.concat(temp);
-      data.concat(F("<button type='submit'>" L_UPLOAD "</button> "));
-      data.concat(F("<button name='revert' value='0' type='submit'>" L_REVERT "</button>\n"));
-      data.concat(FPSTR(html_form_end));
+      char mountForm[1024];
+      snprintf_P(mountForm, sizeof(mountForm), html_indexMountType,
+        mountType == 1 ? " selected" : "", mountType == 2 ? " selected" : "", mountType == 3 ? " selected" : "");
+      data.concat(mountForm);
       www.sendContentAndClear(data);
     }
   #endif
+
+  data.concat(F("</div>"));
 
   #if DISPLAY_RESET_CONTROLS != OFF
     if (mountType != 0) data.concat(F("<br /><hr>"));

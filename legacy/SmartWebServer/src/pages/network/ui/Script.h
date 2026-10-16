@@ -24,6 +24,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   function message(text, error = false) {
     $('nw-message').textContent = text;
     $('nw-message').className = error ? 'nw-error' : '';
+    $('nw-message').hidden = !text;
   }
   function sync() {
     $('nw-static').hidden = sta.elements.dhcp.checked;
@@ -201,9 +202,14 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       $('nw-ap-name').textContent = s.apSsid;
       $('nw-ap-ip').textContent = s.apActive ? s.apIp : '—';
       renderNetworks();
-      if (s.message && s.message !== lastNotice) {
-        lastNotice = s.message;
-        message(s.message, s.failed);
+      // 已连接及访问地址已在网络卡片内显示，不在卡片外重复提示。
+      const noticeKey = JSON.stringify([s.message, s.failed, s.connected, s.connecting, s.pending]);
+      if (noticeKey !== lastNotice) {
+        lastNotice = noticeKey;
+        const connectionShown = s.connected && !s.failed && !s.connecting && !s.pending &&
+          (s.message === )NET" SWS_JS_TEXT(L_UI_CONNECTED) R"NET( ||
+           (s.message || '').startsWith()NET" SWS_JS_TEXT(L_UI_CONNECTED_ADDRESS) R"NET());
+        message(connectionShown ? '' : (s.message || ''), s.failed);
       }
       lock(s.connecting || s.pending);
       if (!autoScanned && s.sta.enabled && !working) {

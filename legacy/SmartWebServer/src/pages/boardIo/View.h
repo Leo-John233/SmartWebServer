@@ -4,17 +4,27 @@
 // 复用 Wi-Fi 页面的开关造型；硬件状态经原来的控制器轮询返回。
 const char html_board_io_styles[] PROGMEM = R"IO(
 <style>
-.sws-io-controls { display:grid; gap:0; margin:0 0 20px; }
-.sws-io-control { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 20px; align-items:center; padding:18px 0; border-bottom:1px solid var(--border); }
-.sws-io-control h3 { margin:0 0 6px; font-size:17px; line-height:1.5; }
-.sws-io-control p { margin:0; color:var(--muted); font-size:14px; line-height:1.7; }
+.sws-overview-grid .content { padding:12px 0 0; background:transparent; }
+.sws-overview-grid .content > br { display:none; }
+.sws-controller-settings { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 0 18px; }
+.sws-io-controls { display:contents; }
+.sws-io-control, .sws-mount-type { min-width:0; margin:0; padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--field); }
+.sws-io-control { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 16px; align-content:start; align-items:center; }
+.sws-io-control h3, .sws-mount-type > label { margin:0; font-size:17px; font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
+.sws-io-control p { grid-column:1 / -1; margin:0; color:var(--muted); font-size:14px; font-weight:400; line-height:1.7; }
 .sws-io-control button.sws-switch { margin:0; width:44px; min-width:44px; height:26px; min-height:26px; padding:3px; background:#494949; flex-shrink:0; }
 .sws-io-control button.sws-switch::after { width:18px; height:18px; background:#fff; }
-.sws-io-control button.sws-switch[aria-checked='true'] { background:#8b2020; }
+.sws-io-control button.sws-switch[aria-checked='true'] { background:var(--accent); }
 .sws-io-control button.sws-switch[aria-checked='true']::after { transform:translateX(18px); }
-.sws-io-status { grid-column:1 / -1; color:var(--text); font-size:14px; line-height:1.6; }
-.sws-io-error { margin:10px 0; color:var(--alert,#d6b786); font-size:14px; }
-@media(max-width:480px) { .sws-io-control { gap:10px 12px; padding:16px 0; } .sws-io-control h3 { font-size:16px; } }
+.sws-io-status { grid-column:1 / -1; padding-top:10px; border-top:1px solid var(--border); color:var(--text); font-size:14px; font-weight:400; line-height:1.6; }
+.sws-io-error { grid-column:1 / -1; order:1; margin:0; color:var(--alert,#d6b786); font-size:14px; }
+.sws-io-error:empty { display:none; }
+.sws-mount-type { display:flex; flex-direction:column; gap:12px; }
+.sws-controller .sws-mount-type select { width:100%; min-width:0; min-height:42px; margin:0; font-size:15px; }
+.sws-setting-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; }
+.sws-controller .sws-setting-actions button { min-height:36px; margin:0; padding:6px 14px; font-size:14px; }
+.sws-setting-actions button[name='revert'] { background:#333; }
+@media(max-width:800px) { .sws-controller-settings { grid-template-columns:minmax(0,1fr); gap:10px; } .sws-io-control, .sws-mount-type { padding:16px; } }
 </style>
 )IO";
 
@@ -67,9 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
 const char html_board_io_begin[] PROGMEM =
   "<section class='sws-io-controls' data-confirm=\"" L_IO_RELEASE_CONFIRM "\" data-error=\"" L_IO_SAVE_FAILED "\">";
 const char html_board_io_activity[] PROGMEM =
-  "<div class='sws-io-control'><div><h3>" L_IO_ACTIVITY_TITLE "</h3><p>" L_IO_ACTIVITY_HELP "</p></div>"
-  "<button type='button' id='sws-io-activity' class='sws-switch' role='switch' aria-label=\"" L_IO_ACTIVITY_TITLE "\" aria-checked='%s' data-selected='%s' data-setting='activity'></button></div>";
+  "<div class='sws-io-control'><h3>" L_IO_ACTIVITY_TITLE "</h3>"
+  "<button type='button' id='sws-io-activity' class='sws-switch' role='switch' aria-label=\"" L_IO_ACTIVITY_TITLE "\" aria-checked='%s' data-selected='%s' data-setting='activity'></button>"
+  "<p>" L_IO_ACTIVITY_HELP "</p></div>";
 const char html_board_io_brake[] PROGMEM =
-  "<div class='sws-io-control'><div><h3>" L_IO_BRAKE_TITLE "</h3><p>" L_IO_BRAKE_HELP "</p></div>"
+  "<div class='sws-io-control'><h3>" L_IO_BRAKE_TITLE "</h3>"
   "<button type='button' id='sws-io-protection' class='sws-switch' role='switch' aria-label=\"" L_IO_BRAKE_TITLE "\" aria-checked='%s' data-selected='%s' data-setting='protection'></button>"
-  "<div id='sws-io-brake-state' class='sws-io-status' role='status'>%s</div></div>";
+  "<p>" L_IO_BRAKE_HELP "</p><div id='sws-io-brake-state' class='sws-io-status' role='status'>%s</div></div>";

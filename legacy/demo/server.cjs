@@ -23,7 +23,7 @@ const server=http.createServer(async(req,res)=>{
       if(!['activity','protection'].includes(setting)||!['0','1'].includes(enabled)){res.statusCode=400;return send('{}','application/json');}
       boardIoState[setting]=enabled==='1';
     }
-    return send(JSON.stringify({...boardIoState,message:boardIoState.protection?'驱动反馈正常 · 已释放':'保护关闭 · 已释放'}),'application/json; charset=utf-8');
+    return send(JSON.stringify({...boardIoState,message:boardIoState.protection?'驱动正常，已松闸':'保护关闭，已松闸'}),'application/json; charset=utf-8');
   }
   if(url.pathname==='/net-wifi'){
     const action=url.searchParams.get('action');

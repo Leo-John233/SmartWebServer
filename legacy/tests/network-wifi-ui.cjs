@@ -10,7 +10,7 @@ const templates = require('./page-templates.cjs')(path.join(__dirname, '../Smart
 const shared = templates['Appearance.h'].html_shared_appearance;
 const css = templates['network/NetworkWifi.h'].html_network_css;
 const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${css}${shared}</head><body><div class="b">${require('./network-page.cjs')({fragment:true})}</div></body></html>`;
-const state = {sta:{enabled:true,ssid:'Home Wi-Fi',open:false,dhcp:true,ip:'192.168.1.55',gw:'192.168.1.1',sn:'255.255.255.0'},ap:{enabled:true,ssid:'ONSTEPX',channel:7,ip:'192.168.0.1',gw:'192.168.0.1',sn:'255.255.255.0'},connected:true,connecting:false,pending:false,failed:false,apActive:true,ssid:'Home Wi-Fi',ip:'192.168.1.55',rssi:-55,apIp:'192.168.0.1',apSsid:'ONSTEPX',message:''};
+const state = {sta:{enabled:true,ssid:'Home Wi-Fi',open:false,dhcp:true,ip:'192.168.1.55',gw:'192.168.1.1',sn:'255.255.255.0'},ap:{enabled:true,ssid:'ONSTEPX',channel:7,ip:'192.168.0.1',gw:'192.168.0.1',sn:'255.255.255.0'},connected:true,connecting:false,pending:false,failed:false,apActive:true,ssid:'Home Wi-Fi',ip:'192.168.1.55',rssi:-55,apIp:'192.168.0.1',apSsid:'ONSTEPX',message:'已连接'};
 const networks=[{ssid:'Home Wi-Fi',rssi:-43,open:false},{ssid:'Observatory',rssi:-58,open:false},{ssid:'Guest',rssi:-70,open:true},{ssid:'Home Wi-Fi',rssi:-80,open:false},{ssid:'<img src=x onerror=alert(1)>',rssi:-90,open:false}];
 const previewMock=`<script>const mockState=${JSON.stringify(state)};window.fetch=async(url,opts)=>{const p=new URLSearchParams(opts&&opts.body||'');const action=p.get('action')||new URL(url,location.href).searchParams.get('action');let data=mockState;if(action==='scan')data={running:false,networks:${JSON.stringify(networks.filter(n=>!n.ssid.startsWith('<')))}};if(action==='connect'||action==='ap')data={message:'这是外观预览，未连接真实硬件'};return {ok:true,json:async()=>data};};</script>`;
 fs.mkdirSync(output,{recursive:true});fs.writeFileSync(path.join(output,'network-preview.html'),html.replace('<script>',previewMock+'<script>'));
@@ -26,6 +26,16 @@ return route.fulfill({contentType:'application/json',body:JSON.stringify(respons
 await page.goto('http://sws.test/');await page.waitForFunction(()=>document.querySelectorAll('#nw-results button').length===3&&!document.querySelector('#nw-scan').disabled);
 // 无需打开详情就能看到实时访问地址
 assert.equal(await page.locator('#nw-access').isVisible(),true);assert.equal(await page.locator('#nw-access-ip').innerText(),'192.168.1.55');
+assert.equal(await page.locator('#nw-message').isVisible(),false,'卡片下方不再重复已连接');
+assert.equal(await page.locator('#nw-sta-badge').innerText(),'已连接','保留卡片内连接状态');
+assert.equal(await page.locator('#nw-enabled').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(118, 27, 27)','Wi-Fi 开关使用主题暗红');
+state.message='连接成功，局域网访问地址：http://192.168.1.55';
+await page.waitForTimeout(2800);assert.equal(await page.locator('#nw-message').isVisible(),false,'不重复成功消息中的访问地址');
+state.message='热点设置已保存';await page.waitForFunction(()=>document.querySelector('#nw-message').textContent==='热点设置已保存');
+assert.equal(await page.locator('#nw-message').isVisible(),true,'热点操作反馈仍显示');
+state.failed=true;state.message='连接失败，请重试';await page.waitForFunction(()=>document.querySelector('#nw-message').classList.contains('nw-error'));
+assert.equal(await page.locator('#nw-message').innerText(),state.message,'连接错误仍显示');
+state.failed=false;state.message='';await page.waitForFunction(()=>document.querySelector('#nw-message').hidden);
 assert(scans>=2,'进入页面自动搜索并等待扫描完成');assert.equal(await page.locator('#nw-results img').count(),0,'SSID must be rendered as text');
 assert.equal(await page.locator('#nw-current .nw-selected').innerText(),'✓');assert.equal(await page.locator('#nw-current .nw-network-meta').innerText(),'-55 dBm');assert.equal(await page.locator('#nw-results .nw-selected').count(),0);
 // 检查信号档位及边界；图标跟随实时连接状态更新，未启用的弧保持暗色。

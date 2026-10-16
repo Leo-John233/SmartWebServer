@@ -23,8 +23,11 @@ const char html_indexWorkload[] PROGMEM = "<div class='sws-metric'><span>" L_WOR
 #endif
 
 const char html_indexMountType[] PROGMEM =
-  L_PAGE_MOUNT L_ADV_MOUNT_TYPE ":<br /><input style='width: 7em;' value='%d' type='number' name='mountt' min='1' max='3' step='1'>"
-  "<br /><br />\n";
+  "<form class='sws-mount-type' method='get' action='/index.htm'><label for='sws-mount-type'>" L_MOUNT_TYPE "</label>"
+  "<select id='sws-mount-type' name='mountt'><option value='1'%s>" L_MOUNT_GEM "</option>"
+  "<option value='2'%s>" L_MOUNT_FORK "</option><option value='3'%s>" L_MOUNT_ALTAZ "</option></select>"
+  "<div class='sws-setting-actions'><button type='submit'>" L_UPLOAD "</button>"
+  "<button name='revert' value='0' type='submit'>" L_REVERT "</button></div></form>\n";
 
 const char html_resetNotes[] PROGMEM =
   "Notes:<ul>"

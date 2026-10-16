@@ -149,7 +149,7 @@ input[type='checkbox'],
 input[type='radio'] {
   width: 18px;
   height: 18px;
-  accent-color: #8b2020;
+  accent-color: var(--accent);
   vertical-align: middle;
   padding: 0;
 }
@@ -165,7 +165,7 @@ button {
 button:hover:not(:disabled) {
   background-image: linear-gradient(rgb(185 185 185 / 8%), rgb(185 185 185 / 8%));
 }
-button[data-selected='true']:not(:disabled) {
+button[data-selected='true']:not(:disabled):not([role='switch']) {
   background-image: linear-gradient(rgb(185 185 185 / 22%), rgb(185 185 185 / 22%)) !important;
   box-shadow: none;
 }
@@ -1872,8 +1872,8 @@ h2.sws-section-title {
   background: #fff;
 }
 .sws-mount button.sws-switch[aria-checked='true'] {
-  background: #8b2020;
-  border-color: #8b2020;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .sws-mount button.sws-switch[aria-checked='true']::after {
   transform: translateX(18px);

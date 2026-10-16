@@ -125,5 +125,5 @@ const char html_network_wifi[] PROGMEM = R"NET(
 <div class="nw-actions"><button type="submit">)NET"
  L_UI_AP_SAVE
  R"NET(</button></div></form></section>
-</div><p id="nw-message" role="status" aria-live="polite"></p>
+</div><p id="nw-message" role="status" aria-live="polite" hidden></p>
 )NET";

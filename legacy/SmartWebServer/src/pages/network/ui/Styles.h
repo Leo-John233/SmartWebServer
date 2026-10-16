@@ -45,7 +45,7 @@ const char html_network_css[] PROGMEM = R"NET(
   width: 20px;
   height: 20px;
   vertical-align: middle;
-  accent-color: #8b2020;
+  accent-color: var(--accent);
   margin: 0 8px 0 0;
 }
 
@@ -299,8 +299,8 @@ const char html_network_css[] PROGMEM = R"NET(
   transition: transform 0.15s;
 }
 .nw-switch:checked {
-  background: #8b2020;
-  border-color: #8b2020;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .nw-switch:checked:before {
   transform: translateX(18px);

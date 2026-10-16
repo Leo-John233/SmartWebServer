@@ -70,6 +70,8 @@ const statuses = {
         motion,
         axis: fs.readFileSync(axisPath, 'utf8'),
       });
+      const mountForm=templates['index/StatusTile.h'].html_indexMountType.replace('%s',' selected').replace('%s','').replace('%s','');
+      assert(Buffer.byteLength(mountForm)<1024,language+' 赤道仪类型表单适配固件缓冲区');
       const bodies = {
         index: pages.controller,
         mount: pages.mount,
