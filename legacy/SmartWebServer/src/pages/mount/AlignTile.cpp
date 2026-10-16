@@ -79,7 +79,7 @@ void alignTile(String &data)
     snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
     data.concat(temp);
 
-    data.concat(L_REFINE_POLAR_ALIGN ":<br /><br />");
+    data.concat(F("<h3 class='sws-refine-title'>" L_REFINE_POLAR_ALIGN "</h3>"));
     data.concat(FPSTR(html_alignRefine));
 
     data.concat(FPSTR(html_collapsable_end));

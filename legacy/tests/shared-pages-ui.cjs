@@ -35,6 +35,8 @@ await page.screenshot({path:path.join(out,'mount-pc.png')});
 // 等高与开关外观检查，同时验证坐标提交和失败反馈
 const selectedNav=await page.locator('.t a[aria-current=page]').evaluate(e=>{const style=getComputedStyle(e),icon=e.querySelector('svg').getBoundingClientRect(),label=e.querySelector('span').getBoundingClientRect();return {color:style.color,background:style.backgroundColor,shadow:style.boxShadow,vertical:icon.bottom<=label.top};});
 assert.equal(selectedNav.color,'rgb(255, 255, 255)');assert.equal(selectedNav.background,'rgb(71, 75, 81)');assert.equal(selectedNav.shadow,'none');assert(selectedNav.vertical,'桌面选中导航的图标在文字上方');
+const sidebar=await page.locator('.t').evaluate(e=>{const r=e.getBoundingClientRect(),middle=r.x+r.width/2;const offset=node=>{const range=document.createRange();range.selectNodeContents(node);const b=range.getBoundingClientRect();return Math.abs(b.x+b.width/2-middle);};return{width:r.width,logo:offset(e.querySelector('font')),note:offset(e.querySelector('.sws-sidebar-note'))};});
+assert(sidebar.width<180,'桌面侧栏适当收窄');assert(sidebar.logo<2&&sidebar.note<2,'品牌与底部说明相对侧栏居中');
 const geometry=await frame().evaluate(()=>{const guide=document.querySelector('.sws-guide>.b1').getBoundingClientRect(),tracking=document.querySelector('.sws-tracking>.b1').getBoundingClientRect(),toggle=document.querySelector('.sws-switch').getBoundingClientRect();return {delta:Math.abs(guide.bottom-tracking.bottom),width:toggle.width,height:toggle.height};});assert(geometry.delta<1);assert.equal(geometry.width,44);assert.equal(geometry.height,26);
 assert.equal(await page.frameLocator('#sws-frame').locator('#gto_pier').innerText(),'中天翻转，由西向东');
 const coordinateForm=page.frameLocator('#sws-frame').locator('#sws-coordinate-form');
@@ -45,11 +47,16 @@ await coordinateForm.locator('[name=dec_d]').fill('90');await coordinateForm.loc
 
 // 展开实际生成的表单，检查曾在预览中缺失的输入项与提交动作
 await frame().evaluate(()=>document.querySelectorAll('.sws-mount .collapsible').forEach(e=>e.click()));
+assert.equal(await page.frameLocator('#sws-frame').locator('.sws-refine-steps li').count(),3,'精调极轴说明分成三个步骤');
+assert.equal(await page.frameLocator('#sws-frame').locator('.sws-limits-form fieldset').count(),2,'回差与运动限位分组');
+assert.equal(await page.frameLocator('#sws-frame').locator('#pec_sta').innerText(),defs.L_PEC_UNK,'未获得 PEC 状态时明确显示未知');
+assert(await page.frameLocator('#sws-frame').locator('.sws-align').evaluate(e=>e.getBoundingClientRect().bottom-e.querySelector('.sws-refine-action').getBoundingClientRect().bottom<60),'校准卡片不被同排较长表单拉高');
+assert(await page.frameLocator('#sws-frame').locator('#date_ut').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=18),'设备时间采用清楚的大字号');
 for(const name of ['t1','t2','t3','g1','g2','g3','u1','u2','hc1','hc2','hl','ol','b1','b2','el','wl','spwr']){const input=page.frameLocator('#sws-frame').locator('[name="'+name+'"]');assert.equal(await input.count(),1,name+' 输入项完整');assert(await input.isVisible(),name+' 输入项可见');assert(await input.evaluate(e=>e.form&&e.form.querySelector('button[type=submit]')),name+' 有可提交表单');}
 const editor=page.frameLocator('#sws-frame').locator('#cat_data');assert(await editor.isVisible(),'星表数据框可编辑');await editor.fill('M31,SG,00:42:44,+41*16:09');assert(await page.frameLocator('#sws-frame').locator('#cat_upload').isEnabled(),'填写星表后可上传');
 for(const cls of ['sws-site','sws-library','sws-homepark','sws-align','sws-limits','sws-pec'])await page.frameLocator('#sws-frame').locator('.'+cls).screenshot({path:path.join(out,cls+'-pc.png')});
 await page.frameLocator('#sws-frame').locator('.sws-target').screenshot({path:path.join(out,'goto-settings-pc.png')});
-for(const width of [390,320]){await page.setViewportSize({width,height:900});const overflow=await frame().evaluate(()=>[...document.querySelectorAll('.sws-mount .b1')].filter(e=>e.scrollWidth>e.clientWidth+1).map(e=>({class:e.className,width:e.clientWidth,scroll:e.scrollWidth,children:[...e.querySelectorAll('*')].filter(x=>x.getBoundingClientRect().right>e.getBoundingClientRect().right).map(x=>x.outerHTML.slice(0,160))})));assert.deepEqual(overflow,[],'展开后的卡片在手机内无横向溢出 '+width);if(width===390)for(const cls of ['sws-site','sws-library','sws-homepark'])await page.frameLocator('#sws-frame').locator('.'+cls).screenshot({path:path.join(out,cls+'-mobile.png')});}
+for(const width of [1024,390,320]){await page.setViewportSize({width,height:900});const overflow=await frame().evaluate(()=>[...document.querySelectorAll('.sws-mount .b1')].filter(e=>e.scrollWidth>e.clientWidth+1).map(e=>({class:e.className,width:e.clientWidth,scroll:e.scrollWidth,children:[...e.querySelectorAll('*')].filter(x=>x.getBoundingClientRect().right>e.getBoundingClientRect().right).map(x=>x.outerHTML.slice(0,160))})));assert.deepEqual(overflow,[],'展开后的卡片在手机内无横向溢出 '+width);if(width===390)for(const cls of ['sws-site','sws-library','sws-homepark'])await page.frameLocator('#sws-frame').locator('.'+cls).screenshot({path:path.join(out,cls+'-mobile.png')});}
 await page.setViewportSize({width:1440,height:1000});
 
 // 检查新控件代理原有命令，并响应后台状态变化

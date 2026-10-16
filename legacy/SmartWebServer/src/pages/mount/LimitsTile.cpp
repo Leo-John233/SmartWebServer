@@ -64,7 +64,7 @@ void limitsTile(String &data)
   data.concat(temp);
 
   // Backlash
-  data.concat(F(L_BACKLASH "<br />"));
+  data.concat(F("<div class='sws-limits-form'><fieldset><legend>" L_BACKLASH "</legend>"));
 
   snprintf_P(temp, sizeof(temp), html_configBlAxis1, backlashAxis1);
   data.concat(temp);
@@ -73,7 +73,7 @@ void limitsTile(String &data)
   snprintf_P(temp, sizeof(temp), html_configBlAxis2, backlashAxis2);
   data.concat(temp);
 
-  data.concat(F("<br />" L_LIMITS_TITLE "<br />"));
+  data.concat(F("</fieldset><fieldset><legend>" L_LIMITS_TITLE "</legend>"));
 
   // Overhead and Horizon Limits
   snprintf_P(temp, sizeof(temp), html_configMinAlt, minAlt);
@@ -94,7 +94,7 @@ void limitsTile(String &data)
   else
     data.concat(F("<br />\n"));
 
-  data.concat(F("<button type='submit'>" L_UPLOAD "</button>\n"));
+  data.concat(F("</fieldset><div class='sws-form-footer'><button type='submit'>" L_UPLOAD "</button></div></div>\n"));
 
   data.concat(FPSTR(html_form_end));
   www.sendContentAndClear(data);

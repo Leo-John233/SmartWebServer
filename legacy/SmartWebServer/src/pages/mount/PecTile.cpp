@@ -79,7 +79,7 @@ void pecTileAjax(String &data)
     if (temp[0] == 'r') data.concat(L_PEC_WAIT_REC); else
     if (temp[0] == 'R') data.concat(L_PEC_RECORDING); else data.concat(L_PEC_UNK);
     if (status.pecRecording) data.concat(F(" (" L_PEC_EEWRITING ")"));
-  } else { data.concat("?"); }
+  } else { data.concat(L_PEC_UNK); }
   data.concat("\n");
 
   www.sendContentAndClear(data);

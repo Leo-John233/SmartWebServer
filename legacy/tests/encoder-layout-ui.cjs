@@ -11,18 +11,6 @@ const collapse = templates['htmlScripts.h'].html_script_collapsible;
 const output = process.argv[2] || require('node:os').tmpdir();
 fs.mkdirSync(output, { recursive: true });
 
-function luminance(color) {
-  const channels = color
-    .match(/\d+/g)
-    .slice(0, 3)
-    .map(Number)
-    .map((value) => {
-      const v = value / 255;
-      return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-    });
-  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
-}
-
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   try {
@@ -71,10 +59,15 @@ function luminance(color) {
     const normalBackground = await syncButton.evaluate((e) => getComputedStyle(e).backgroundColor);
     await syncButton.hover();
     await page.mouse.down();
-    assert.notEqual(
+    assert.equal(
       await syncButton.evaluate((e) => getComputedStyle(e).backgroundColor),
       normalBackground,
-      '按下操作按钮时立即显示不同底色',
+      '按下时保留按钮基底色',
+    );
+    assert.match(
+      await syncButton.evaluate((e) => getComputedStyle(e).backgroundImage),
+      /rgba.*0\.32/,
+      '按下时叠加半透明灰色遮罩',
     );
     await page.mouse.up();
     await page.getByRole('button', { name: '同步 编码器 -> OnStep', exact: true }).click();
@@ -86,15 +79,12 @@ function luminance(color) {
     const colors = await page.evaluate(() => ({
       selected: getComputedStyle(document.getElementById('enc_as_on')).backgroundColor,
       normal: getComputedStyle(document.getElementById('enc_as_off')).backgroundColor,
-      border: getComputedStyle(document.getElementById('enc_as_on')).borderColor,
+      overlay: getComputedStyle(document.getElementById('enc_as_on')).backgroundImage,
       value: getComputedStyle(document.getElementById('enc_a1')).color,
       text: getComputedStyle(document.body).getPropertyValue('--text').trim(),
     }));
-    assert(
-      (luminance(colors.selected) + 0.05) / (luminance(colors.normal) + 0.05) >= 2,
-      '选中按钮的底色亮度与未选中状态至少相差 2:1',
-    );
-    assert.notEqual(colors.border, colors.normal);
+    assert.equal(colors.selected, colors.normal, '选中状态不切换基底色');
+    assert.match(colors.overlay, /rgba.*0\.22/, '后台选中状态采用透明灰色遮罩');
     assert.equal(colors.value, 'rgb(212, 212, 212)', '读数使用主题浅灰');
     await page.locator('#enc_as_off').click();
     await page.waitForFunction(

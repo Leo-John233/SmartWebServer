@@ -3,7 +3,6 @@ const demoKey = 'sws-demo' + location.pathname;
 function demoSelected(button, selected) {
   if (!button) return;
   button.dataset.selected = String(selected);
-  button.style.background = selected ? 'var(--selected)' : 'var(--accent)';
 }
 let demoSaved = JSON.parse(localStorage.getItem(demoKey) || '{}');
 function demoNotice(message) {

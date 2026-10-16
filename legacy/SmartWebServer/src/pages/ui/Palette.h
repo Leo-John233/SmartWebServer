@@ -86,12 +86,6 @@
 #define COLOR_SERVO_PEN_4 "#cccccc"
 #endif
 
-#ifndef COLOR_CONTROL_SELECTED
-#define COLOR_CONTROL_SELECTED "#656d78"
-#endif
-#ifndef COLOR_CONTROL_HOVER
-#define COLOR_CONTROL_HOVER "#902525"
-#endif
 #ifndef SWS_COLOR_PANEL
 #define SWS_COLOR_PANEL "#191919"
 #endif

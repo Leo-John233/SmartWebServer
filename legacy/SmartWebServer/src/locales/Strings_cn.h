@@ -10,8 +10,8 @@
 #define L_ARE_YOU_SURE "您确定吗"
 #define L_LOGOUT "注销"
 
-#define L_UT "世界时 (UT)"
-#define L_LST "恒星时 (LST)"
+#define L_UT "世界时"
+#define L_LST "恒星时"
 #define L_LONG "经度"
 #define L_LAT "纬度"
 #define L_EAST "东"
@@ -22,7 +22,7 @@
 
 #define L_NONE "无"
 #define L_AUTO "自动"
-#define L_SET_LABEL "转到 (Goto)"
+#define L_SET_LABEL "移动到目标"
 #define L_OK "确定"
 #define L_ON "开"
 #define L_OFF "关"
@@ -51,7 +51,7 @@
 
 // ---------------------------- Index ----------------------------
 // date/time
-#define L_TIME_BROWSER_UT "世界时 UT (网页浏览器)"
+#define L_TIME_BROWSER_UT "浏览器世界时"
 
 // weather
 #define L_TEMPERATURE "温度"
@@ -71,7 +71,7 @@
 #define L_POLAR_ALIGN "极轴校准"
 
 // pier side
-#define L_PIER_SIDE "镜筒侧 (Pier Side)"
+#define L_PIER_SIDE "镜筒侧"
 #define L_MERIDIAN_FLIPS "中天翻转"
 #define L_ALIGN_MESSAGE "赤道仪相对天极："
 #define L_MERIDIAN_FLIP_W_TO_E "中天翻转，由西向东"
@@ -88,7 +88,7 @@
 
 // home
 #define L_HOMING "正在回零"
-#define L_AT_HOME "在零位 (Home)"
+#define L_AT_HOME "在零位"
 #define L_SLEWING "高速移动中"
 #define L_PPS_SYNC "PPS秒脉冲同步"
 #define L_HOME_REV "反向"
@@ -198,7 +198,7 @@
 #define L_HINT_ROTATOR_PAR "移动旋转器至视差角"
 #define L_HINT_DEROTATE_OFF "关闭消旋"
 
-#define L_ALIGN "校准 (Align)"
+#define L_ALIGN "校准"
 #define L_AUX_FEATURES "辅助功能"
 
 #define L_FOCUSER "调焦器"
@@ -291,9 +291,9 @@
 
 #define L_REFINE_POLAR_ALIGN "精调极轴校准"
 #define L_REFINE_PA "精调极轴"
-#define L_REFINE_MESSAGE1 "完成赤道仪设置并进行 3 星以上校准Goto 指向北天极 (NCP) 或南天极 (SCP) 附近、赤纬在 50 至 80&deg; 之间（北或南）的亮星"
-#define L_REFINE_MESSAGE2 "按下 [精调极轴] 按钮使用赤道仪的极轴调节螺丝重新将该恒星居中"
-#define L_REFINE_MESSAGE3 "根据需要可重新对赤道仪进行多星校准"
+#define L_REFINE_MESSAGE1 "先完成赤道仪设置及三星或更多星校准，再指向北天极或南天极附近、赤纬绝对值在 50 至 80&deg; 之间的一颗亮星"
+#define L_REFINE_MESSAGE2 "点击“精调极轴”后，使用赤道仪的极轴调节螺丝，将这颗恒星重新调至视场中心"
+#define L_REFINE_MESSAGE3 "如需进一步提高精度，可重新进行多星校准"
 
 #define L_PARK "停放"
 #define L_SET_PARK "设置停放位"
@@ -361,9 +361,9 @@
 
 // location
 #define L_LOCATION_TITLE "时间与地点"
-#define L_LOCATION_LONG "经度 度 分 秒 &pm;180，西经(W)为 +"
-#define L_LOCATION_LAT  "纬度 度 分 秒 &pm;90，北纬(N)为 +"
-#define L_LOCATION_RANGE_UTC_OFFSET "UTC 偏移量，时与分 -14 至 +12"
+#define L_LOCATION_LONG "经度 度 分 秒 &pm;180，西经为 +"
+#define L_LOCATION_LAT  "纬度 度 分 秒 &pm;90，北纬为 +"
+#define L_LOCATION_RANGE_UTC_OFFSET "世界时偏移，时与分 -14 至 +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "与常规时区符号相反，此处适用于标准时间（非夏令时，例如东八区填 -08:00）"
 
 // advanced configuration
@@ -483,7 +483,7 @@
 #define L_PAGE_AUXILIARY "辅助设备"
 #define L_PAGE_LIBRARY "星表库"
 #define L_PAGE_ENCODERS "编码器"
-#define L_PAGE_PEC "PEC"
+#define L_PAGE_PEC "周期误差校正"
 #define L_SETTINGS "设置"
 #define L_CONTROLS "控制"
 #define L_PAGE_CONFIG "配置"
@@ -539,11 +539,11 @@
 // 紧凑控制面板和坐标输入的统一文字
 #define L_HOME_ACTIONS "零位操作"
 #define L_PARK_ACTIONS "停放操作"
-#define L_COORD_GOTO "按坐标 GOTO"
+#define L_COORD_GOTO "按坐标定位"
 #define L_COORD_SYSTEM "坐标系"
-#define L_COORD_JNOW "赤经／赤纬（JNOW）"
-#define L_COORD_RA "赤经 RA"
-#define L_COORD_DEC "赤纬 DEC"
+#define L_COORD_JNOW "赤经／赤纬（当前历元）"
+#define L_COORD_RA "赤经"
+#define L_COORD_DEC "赤纬"
 #define L_COORD_SIGN "正负"
 #define L_COORD_H "时"
 #define L_COORD_D "度"
@@ -562,7 +562,7 @@
 // 坐标状态面板的标签
 #define L_COORD_AZ "方位角"
 #define L_COORD_ALT "高度角"
-#define L_GOTO_ACTION "GOTO"
+#define L_GOTO_ACTION "定位"
 #define L_GOTO_TARGET "转到当前目标"
 #define L_SYNC_TARGET "同步当前目标"
 

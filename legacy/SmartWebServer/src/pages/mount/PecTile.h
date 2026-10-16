@@ -12,8 +12,7 @@ extern void pecTileAjax(String &data);
 extern void pecTileGet();
 
 const char html_pecStatus[] PROGMEM = 
-"<div style='float: left'>" L_PEC_STATUS ":</div><br/>"
-"<div id='pec_sta'>?</div>";
+"<div class='sws-pec-status'><span>" L_PEC_STATUS "</span><strong id='pec_sta'>" L_PEC_UNK "</strong></div>";
 
 const char html_pecControls1[] PROGMEM =
 "<button onpointerdown=\"s('pec','play')\" type='submit'>" L_PEC_PLAY "</button>";
