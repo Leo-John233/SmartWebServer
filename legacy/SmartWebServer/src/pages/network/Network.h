@@ -78,7 +78,7 @@ const char htmL_NET_SN[] PROGMEM =
   "<br/><hr><form method='post' action='/net.htm'>"
   L_NETWORK_PWD ": <input style='width:8em; text-align:left;' name='otapwd' type='password' minlength='8' maxlength='63'> (" L_NETWORK_PWD_MSG ")<br/>"
   #if DISPLAY_RESET_CONTROLS != OFF
-    "<br/><button onclick=\"return confirm('" L_ARE_YOU_SURE "?')\" type='submit' name='otareboot' value='1'>" L_REBOOT_OTA "</button></form>\n"
+    "<br/><button " SWS_CONFIRM_ATTRIBUTE " onclick=\"return confirm(this.dataset.confirm)\" type='submit' name='otareboot' value='1'>" L_REBOOT_OTA "</button></form>\n"
   #else
     L_NETWORK_EN_OTA ": <input type='checkbox' name='otaen' value='1' %s><br/>"
     "<br/><button type='submit'>" L_UPLOAD "</button></form>\n"

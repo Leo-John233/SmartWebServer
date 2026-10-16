@@ -3,6 +3,7 @@
 #include "Rotator.h"
 
 #include "../Page.h"
+#include "../ui/Layouts.h"
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 
@@ -65,14 +66,14 @@ void handleRotator() {
   www.sendContentAndClear(data);
 
   // 旋转、参考位置和补偿分区，消旋仅在设备支持时显示
-  data.concat(F("<div class='sws-device-layout sws-accessory-layout'><div class='sws-accessory-grid'><div class='sws-accessory-main'><section class='sws-device-primary sws-accessory-motion'>"));
+  data.concat(FPSTR(html_layout_rotator_begin));
   rotatorSlewingTile(data);
-  data.concat(F("</section><section class='sws-accessory-home'>"));
+  data.concat(FPSTR(html_layout_accessory_home));
   rotatorHomeTile(data);
-  data.concat(F("</section></div><section class='sws-accessory-settings'>"));
+  data.concat(FPSTR(html_layout_accessory_settings));
   rotatorBacklashTile(data);
   if (status.derotatorFound) deRotatorTile(data);
-  data.concat(F("</section></div></div>"));
+  data.concat(FPSTR(html_layout_accessory_end));
 
   data.concat(FPSTR(html_page_and_body_end));
 

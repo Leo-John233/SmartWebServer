@@ -11,6 +11,6 @@ void handleNotFound() {
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageAppearance();
-  www.sendContent("<main class='sws-document sws-empty'><span class='sws-brand-small'>404</span><h1>找不到这个页面</h1><p>页面地址可能有误，或设备未启用这项功能</p><a href='/index.htm' target='_top'>返回控制器</a></main></body></html>");
+  www.sendContent("<main class='sws-document sws-empty'><span class='sws-brand-small'>404</span><h1>" L_UI_NOT_FOUND "</h1><p>" L_UI_NOT_FOUND_NOTE "</p><a href='/index.htm' target='_top'>" L_UI_BACK_CONTROLLER "</a></main></body></html>");
   www.sendContent("");
 }

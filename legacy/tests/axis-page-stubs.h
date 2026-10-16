@@ -13,6 +13,7 @@
 #define FPSTR(x) x
 #define snprintf_P snprintf
 #define strcpy_P strcpy
+#define strncpy_P strncpy
 #define ON 1
 #define OFF 0
 #define DRIVE_CONFIGURATION ON

@@ -95,7 +95,49 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - 新增 JNOW 赤经赤纬输入，可填写时分秒、正负号与度分秒后执行 GOTO 或同步，J2000 和方位高度转换尚未提供
 - 坐标使用单次请求在设备端校验，先设置赤经赤纬，两项都被设备接受后才执行动作，失败和连接中断在表单内提示，不自动重发
 - 原有目标 GOTO、目标同步、停止和继续入口保留，零位与停放分为两个操作区，设置停放位移到常用操作，解除停放仍可用
-- 按钮移除装饰 emoji，新增文字集中在 Strings_cn.h，其他语言提供默认文字
+- 按钮移除装饰 emoji，新增文字集中在 locales 的语言文件中，各语言条目与 Strings_cn.h 对齐
 - 星表、地点、校准、限位与 PEC 的间距同步收紧，手机表单仍保留足够的操作空间
 - `node legacy/tests/coordinate-input.cjs` 检查坐标边界、负零赤纬、非法输入、命令顺序和设备拒绝时不启动运动
 - 坐标接口沿用项目现有 Sr、Sd、MS 和 CS 命令，协议参考 [OnStep 命令实现](https://github.com/hjd1964/OnStep/blob/release-4.24/Command.ino)
+
+## 界面与原始逻辑分离
+
+界面保持固件内置，不需要单独部署前端，也不增加运行时语言切换。多语言继续使用原始的 `Config.h: DISPLAY_LANGUAGE → src/locales/Locale.h → Strings_xx.h`；`L_us` 仍使用英文与英制单位。原始辅助页面直接写出的 DP、sec、x 等文字保留原样。
+
+| 修改内容 | 维护位置，相对于 SmartWebServer/src |
+| --- | --- |
+| 暗红、灰黑配色 | `pages/ui/Palette.h` |
+| 公共布局与手机适配 | `pages/ui/Styles.h` |
+| 页面分区 HTML | `pages/ui/Layouts.h` |
+| 跟踪开关、倍率下拉框、坐标表单增强 | `pages/ui/Controls.h` |
+| 侧栏、手机导航与标签切换 | `pages/ui/Navigation.h` |
+| 界面资源分段输出 | `pages/ui/Presentation.cpp` |
+| Wi-Fi 样式、HTML、浏览器脚本与渲染入口 | `pages/network/ui/` |
+| Wi-Fi 配网处理与状态 | `pages/network/NetworkWifi.cpp` |
+| 界面文字 | `locales/Strings_*.h` |
+| 各卡片内容、动态数据和设备条件 | 原来的 `pages/*/*Tile.h` 与 `*Tile.cpp` |
+
+`Appearance.h` 保留为公共界面的包含入口；原来的页面处理函数只调用界面入口或分区模板，继续读取设备状态并处理参数。选中状态使用 `data-selected`，不再根据按钮的 RGB 颜色判断。配色保留 SWS 原有的 `COLOR_*` 配置覆盖方式。
+
+确认按钮通过 `Text.h` 将文案放在 HTML 属性中，事件从属性读取，避免语言中的单引号破坏脚本。直接嵌入脚本的语言宏使用 `SWS_JS_TEXT` 在编译时转义，不增加语言字典、运行时查询或额外接口。
+
+上游更新仍可能改动卡片的参数、设备条件或 HTML 标识，这些部分不能完全独立。合并时保留上游的业务修复，再核对下面的接入点；不要把新上游整份页面覆盖成本地旧页面：
+
+1. 原始路由、登录验证、页面参数处理及设备命令；新增坐标输入沿用 mount 接口，Wi-Fi 配网扩展仍在 `/net-wifi`。
+2. 页面头部的 `pageAppearance()`、普通标签的 `servePageShell()`，以及分区模板的输出位置。
+3. 卡片 `id`、表单 `name` 和 AJAX 键值；`Controls.h` 对已有控件的代理依赖这些标识。
+4. 已确认的后台修复：轴参数边界校验、附件目标边界、编码器第二轴恢复默认值、长语言标签缓冲区。它们保留在所属模块，不能作为样式覆盖处理。
+
+## 上游与多语言回归
+
+以下检查使用真实语言宏、页面生成函数及后台处理代码；模拟设备数据不能替代实机验证。
+
+- `node legacy/tests/page-interfaces.cjs`：与已合并上游 `193a818` 对照原始路由、请求处理入口、设备通信及键值编码。后续更新基准时须核对测试中的版本号与已审查的差异。
+- `node legacy/tests/pages-languages.cjs <输出目录>`：检查全部 10 种语言选择的控件、提交参数、事件脚本以及桌面和 320/390 像素布局。
+- `node legacy/tests/firmware-languages.cjs <compile_commands.json> <输出目录>`：使用真实 Arduino 工具链检查 10 种语言下的全部网页源文件；清单由 Arduino CLI 的 `compile --only-compilation-database` 生成。只修改隔离副本中的语言配置，不改写工程 Config.h。
+- `node legacy/tests/locales.cjs`：检查 9 个语言文件的宏、格式占位符、特殊符号分支和坐标表单。
+- `node legacy/tests/encoders-page.cjs`：执行真实编码器页面与参数处理，检查第二轴默认值不误用第一轴配置。
+- `node legacy/tests/accessory-commands.cjs` 与 `node legacy/tests/coordinate-input.cjs`：检查附件控制、输入边界、坐标命令顺序与设备拒绝。
+- 另运行上述配网、公共界面和辅助设备浏览器检查，并分别编译 ESP8266 与 ESP32 固件。
+
+本次将新增导航、配网和错误提示统一接入语言文件；扩充轴参数标签缓冲区，防止长文案截断输入控件。辅助页回归按真实请求完成时机等待，保留原固件的延迟提交行为。

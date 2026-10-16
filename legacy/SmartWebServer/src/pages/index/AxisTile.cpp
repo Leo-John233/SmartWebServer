@@ -16,7 +16,8 @@ bool axisTile(int axis, String &data)
   double value;
   long min, max;
   int type;
-  char name[40];
+  // 欧洲语言的 PID 标签包含 HTML 标记，保留后缀空间并限制复制长度
+  char name[80];
 
   if (axis <= 1 && status.mountFound != SD_TRUE) return success;
   if (axis == 2 && status.rotatorFound != SD_TRUE) return success;
@@ -66,34 +67,36 @@ bool axisTile(int axis, String &data)
               int i = atoi(&name[1]);
               if (i >= 1 && i <= AXPN_COUNT) {
                 switch (i) {
-                  case 1: strcpy_P(name, html_axpn_1); break;
-                  case 2: strcpy_P(name, html_axpn_2); break;
-                  case 3: strcpy_P(name, html_axpn_3); break;
-                  case 4: strcpy_P(name, html_axpn_4); break;
-                  case 5: strcpy_P(name, html_axpn_5); break;
-                  case 6: strcpy_P(name, html_axpn_6); break;
-                  case 7: strcpy_P(name, html_axpn_7); break;
-                  case 8: strcpy_P(name, html_axpn_8); break;
-                  case 9: strcpy_P(name, html_axpn_9); break;
-                  case 10: strcpy_P(name, html_axpn_10); break;
-                  case 11: strcpy_P(name, html_axpn_11); break;
-                  case 12: strcpy_P(name, html_axpn_12); break;
-                  case 13: strcpy_P(name, html_axpn_13); break;
-                  case 14: strcpy_P(name, html_axpn_14); break;
-                  case 15: strcpy_P(name, html_axpn_15); break;
-                  case 16: strcpy_P(name, html_axpn_16); break;
-                  case 17: strcpy_P(name, html_axpn_17); break;
-                  case 18: strcpy_P(name, html_axpn_18); break;
-                  case 19: strcpy_P(name, html_axpn_19); break;
-                  case 20: strcpy_P(name, html_axpn_20); break;
-                  case 21: strcpy_P(name, html_axpn_21); break;
-                  case 22: strcpy_P(name, html_axpn_22); break;
-                  case 23: strcpy_P(name, html_axpn_23); break;
-                  case 24: strcpy_P(name, html_axpn_24); break;
-                  case 25: strcpy_P(name, html_axpn_25); break;
-                  case 26: strcpy_P(name, html_axpn_26); break;
+                  case 1: strncpy_P(name, html_axpn_1, sizeof(name) - 11); break;
+                  case 2: strncpy_P(name, html_axpn_2, sizeof(name) - 11); break;
+                  case 3: strncpy_P(name, html_axpn_3, sizeof(name) - 11); break;
+                  case 4: strncpy_P(name, html_axpn_4, sizeof(name) - 11); break;
+                  case 5: strncpy_P(name, html_axpn_5, sizeof(name) - 11); break;
+                  case 6: strncpy_P(name, html_axpn_6, sizeof(name) - 11); break;
+                  case 7: strncpy_P(name, html_axpn_7, sizeof(name) - 11); break;
+                  case 8: strncpy_P(name, html_axpn_8, sizeof(name) - 11); break;
+                  case 9: strncpy_P(name, html_axpn_9, sizeof(name) - 11); break;
+                  case 10: strncpy_P(name, html_axpn_10, sizeof(name) - 11); break;
+                  case 11: strncpy_P(name, html_axpn_11, sizeof(name) - 11); break;
+                  case 12: strncpy_P(name, html_axpn_12, sizeof(name) - 11); break;
+                  case 13: strncpy_P(name, html_axpn_13, sizeof(name) - 11); break;
+                  case 14: strncpy_P(name, html_axpn_14, sizeof(name) - 11); break;
+                  case 15: strncpy_P(name, html_axpn_15, sizeof(name) - 11); break;
+                  case 16: strncpy_P(name, html_axpn_16, sizeof(name) - 11); break;
+                  case 17: strncpy_P(name, html_axpn_17, sizeof(name) - 11); break;
+                  case 18: strncpy_P(name, html_axpn_18, sizeof(name) - 11); break;
+                  case 19: strncpy_P(name, html_axpn_19, sizeof(name) - 11); break;
+                  case 20: strncpy_P(name, html_axpn_20, sizeof(name) - 11); break;
+                  case 21: strncpy_P(name, html_axpn_21, sizeof(name) - 11); break;
+                  case 22: strncpy_P(name, html_axpn_22, sizeof(name) - 11); break;
+                  case 23: strncpy_P(name, html_axpn_23, sizeof(name) - 11); break;
+                  case 24: strncpy_P(name, html_axpn_24, sizeof(name) - 11); break;
+                  case 25: strncpy_P(name, html_axpn_25, sizeof(name) - 11); break;
+                  case 26: strncpy_P(name, html_axpn_26, sizeof(name) - 11); break;
                 }
               }
+
+              name[sizeof(name) - 11] = 0;
 
               // if element 7 (reverse) is present, which it always is, show the Motor/Driver identification string
               if (i == 7) {

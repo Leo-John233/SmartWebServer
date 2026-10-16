@@ -61,7 +61,7 @@ int webTimeout=200;
 unsigned long millis(){return 0;}
 void handleNotFound(){www.output="NOT_FOUND";}
 `;
- code+=read('locales/Strings_cn.h')+'\n'+clean(read('pages/htmlHeaders.h'))+'\n'+clean(read('pages/htmlScripts.h'))+'\n'+clean(read('pages/htmlMessages.h'))+'\n'+clean(read('pages/Page.h'))+'\n';
+ code+=require('./locale-source.cjs')()+'\n'+require('./page-support.cjs')()+'\n'+clean(read('pages/htmlHeaders.h'))+'\n'+clean(read('pages/htmlScripts.h'))+'\n'+clean(read('pages/htmlMessages.h'))+'\n'+clean(read('pages/Page.h'))+'\n';
  code+='void pageHeader(int){}bool servePageShell(int){return false;}\n';
  code+=misc.slice(misc.indexOf('uint8_t timeToByte('),misc.indexOf('void localeTemperature('))+'\n';
  const auxiliarySource=sourceRef?cp.execFileSync('git',['show',sourceRef+':src/pages/auxiliary/Auxiliary.cpp'],{encoding:'utf8'}):read('pages/auxiliary/Auxiliary.cpp');

@@ -20,14 +20,14 @@ const char html_pecControls1[] PROGMEM =
 
 const char html_pecControls2[] PROGMEM =
 "<button onpointerdown=\"s('pec','stop')\" type='submit'>" L_STOP "</button><br /><br />"
-"<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('pec','clr')\" type='submit'>" L_PEC_CLEAR "</button>"
-"<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('pec','rec')\" type='submit'>" L_PEC_REC "</button><br />";
+"<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('pec','clr')\" type='submit'>" L_PEC_CLEAR "</button>"
+"<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('pec','rec')\" type='submit'>" L_PEC_REC "</button><br />";
 
 const char html_pecControls3[] PROGMEM =
 "<p class='sws-help'>" L_PEC_CLEAR_MESSAGE "</p>";
 
 const char html_pecControls4[] PROGMEM =
-"<div class='sws-pec-write'><button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('pec','wrt')\" type='submit'>" L_PEC_EEWRITE "</button><p class='sws-help'>" L_PEC_EEWRITE_MESSAGE "</p></div>";
+"<div class='sws-pec-write'><button " SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('pec','wrt')\" type='submit'>" L_PEC_EEWRITE "</button><p class='sws-help'>" L_PEC_EEWRITE_MESSAGE "</p></div>";
 
 const char html_configAxisSpwr[] PROGMEM =
 L_PEC_STEPS_PER_WORM_ROTATION ":<br />"

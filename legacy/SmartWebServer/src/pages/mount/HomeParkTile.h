@@ -15,7 +15,7 @@ extern void homeParkTileGet();
 const char html_homeReturn[] PROGMEM =
 "<button onpointerdown=\"g('qh')\" type='button'>" L_RETURN_HOME "</button>";
 const char html_homeReset[] PROGMEM =
-"<button class='sws-secondary' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) g('qr')\" type='button'>" L_RESET_HOME "</button>";
+"<button class='sws-secondary'" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) g('qr')\" type='button'>" L_RESET_HOME "</button>";
 
 // Parking
 const char html_unpark[] PROGMEM =
@@ -38,6 +38,6 @@ const char html_homeOffsetAxis2[] PROGMEM =
 
 #ifdef HOME_SWITCH_DIRECTION_CONTROL
   const char html_homeReverse[] PROGMEM =
-    "<button id='hrev1' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('hr','1')\" type='button'>Axis1 Reverse</button>"
-    "<button id='hrev2' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('hr','2')\" type='button'>Axis2 Reverse</button><br />";
+    "<button id='hrev1'" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('hr','1')\" type='button'>Axis1 Reverse</button>"
+    "<button id='hrev2'" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('hr','2')\" type='button'>Axis2 Reverse</button><br />";
 #endif

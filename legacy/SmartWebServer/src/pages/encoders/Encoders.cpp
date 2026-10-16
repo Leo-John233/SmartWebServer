@@ -3,6 +3,7 @@
 #include "Encoders.h"
 
 #include "../Page.h"
+#include "../ui/Layouts.h"
 #include "../Pages.common.h"
 
 #if ENCODERS == ON
@@ -67,12 +68,12 @@ void handleEncoders()
   www.sendContentAndClear(data);
 
   // 同步状态与两轴参数分区排列，避免窄屏并排挤压
-  data.concat(F("<div class='sws-device-layout'><section class='sws-device-selector'>"));
+  data.concat(FPSTR(html_layout_encoders_begin));
   syncTile(data);
-  data.concat(F("</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_ENC_CONF "</h2><p></p></div><div class='sws-settings-grid'>"));
+  data.concat(FPSTR(html_layout_encoders_settings));
   encAxisTile(0, data);
   encAxisTile(1, data);
-  data.concat(F("</div></section></div>"));
+  data.concat(FPSTR(html_layout_encoders_end));
 
   data.concat(FPSTR(html_page_and_body_end));
 

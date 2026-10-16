@@ -16,7 +16,7 @@ const char html_syncOnStepNow[] PROGMEM =
 
 #ifdef ENC_ABSOLUTE
   const char html_zeroEncodersNow[] PROGMEM =
-    "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('enc','zro')\" type='button'>" L_ENC_ORIGIN_TO_ONS "</button>"
+    "<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('enc','zro')\" type='button'>" L_ENC_ORIGIN_TO_ONS "</button>"
     "<br />\n";
 #endif
 

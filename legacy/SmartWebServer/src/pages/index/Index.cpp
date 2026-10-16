@@ -3,6 +3,7 @@
 #include "Index.h"
 
 #include "../Page.h"
+#include "../ui/Layouts.h"
 #include "../Pages.common.h"
 
 void processIndexGet();
@@ -62,11 +63,11 @@ void handleRoot()
   www.sendContentAndClear(data);
 
   // 概况与驱动分区展示，详细参数在卡片内展开
-  data.concat(F("<div class='sws-controller'><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_CONTROLLER " " L_STATUS "</h2><p></p></div><div class='sws-overview-grid'>"));
+  data.concat(FPSTR(html_layout_controller_begin));
 
 
   statusTile(data);
-  data.concat(F("</div></section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_DRIVER "</h2><p></p></div><div class='sws-axis-grid'>"));
+  data.concat(FPSTR(html_layout_controller_axes));
 
   int numShown = 0;
   int numAxes = 5;
@@ -76,7 +77,7 @@ void handleRoot()
     if (axisTile(axis, data)) numShown++;
   }
 
-  data.concat(F("</div></section>"));
+  data.concat(FPSTR(html_layout_controller_axes_end));
 
   #if DISPLAY_SERVO_MONITOR == ON
     data.concat(F("<hr>"));
@@ -91,7 +92,7 @@ void handleRoot()
   #endif
 
   #if DRIVE_CONFIGURATION == ON
-    data.concat(F("<details class='sws-more' open><summary>" L_ADV_SET_TITLE "</summary>"));
+    data.concat(FPSTR(html_layout_controller_advanced));
     if (numShown == 0) data.concat(F("<br />" L_ADV_SET_NO_EDIT "<br />"));
 
     snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
@@ -112,9 +113,9 @@ void handleRoot()
   #endif
 
   #if DRIVE_CONFIGURATION == ON
-    data.concat(F("</details>"));
+    data.concat(FPSTR(html_layout_controller_advanced_end));
   #endif
-  data.concat(F("</div>"));
+  data.concat(FPSTR(html_layout_controller_end));
   data.concat(FPSTR(html_script_collapsible));
 
   data.concat(FPSTR(html_page_and_body_end));

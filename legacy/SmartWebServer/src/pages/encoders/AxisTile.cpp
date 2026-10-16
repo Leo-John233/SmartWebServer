@@ -171,7 +171,7 @@ extern void encAxisTileGet() {
     }
     if (v.equals("2")) {
       encoders.settings.axis2.ticksPerDeg = AXIS2_ENCODER_TICKS_DEG;
-      encoders.settings.axis2.reverse = AXIS1_ENCODER_REVERSE;
+      encoders.settings.axis2.reverse = AXIS2_ENCODER_REVERSE;
       encoders.settings.axis2.diffTo = AXIS2_ENCODER_DIFF_LIMIT_TO;
       updateNV = true;
     }

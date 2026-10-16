@@ -33,7 +33,7 @@ struct Device {const char* commandString(const char*){return "126";}bool command
 struct Convert {void stripNumericStr(char*s){int n=atoi(s);sprintf(s,"%d",n);}} convert;
 const char*getHomeParkStateStr(){return "待机";}
 `;
- code+=read('src/locales/Strings_cn.h')+'\n'+clean(read('src/pages/htmlHeaders.h'))+'\n';
+ code+=require('./locale-source.cjs')()+'\n'+require('./page-support.cjs')()+'\n'+clean(read('src/pages/htmlHeaders.h'))+'\n';
  for(const f of files)code+=clean(read('src/pages/mount/'+f+'Tile.h'))+'\n';
  for(const f of files){let s=clean(read('src/pages/mount/'+f+'Tile.cpp'));s=s.split('// use Ajax')[0];code+=s+'\n';}
  code+='int main(){String data;';for(const f of files)code+='std::cout<<"PREVIEW_'+f+'\\n";www.output.clear();'+f[0].toLowerCase()+f.slice(1)+'Tile(data);std::cout<<www.output<<data;data.clear();';code+='}';

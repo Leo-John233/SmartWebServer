@@ -13,6 +13,6 @@ L_DOWN_MESSAGE1 L_DOWN_MESSAGE2 "</p><ul>"
 " <li>" L_DOWN_MESSAGE7 "</li><br />"
 #if DISPLAY_RESET_CONTROLS != OFF
   "<br /><form method='get' action='/configuration.htm'>"
-  "<button name='advanced' type='submit' value='reset' onclick=\"return confirm('" L_ARE_YOU_SURE "?');\" >" L_RESET "</button></form>\n"
+  "<button name='advanced' type='submit' value='reset'" SWS_CONFIRM_ATTRIBUTE " onclick=\"return confirm(this.dataset.confirm);\" >" L_RESET "</button></form>\n"
 #endif
 "</ul></section>\n";

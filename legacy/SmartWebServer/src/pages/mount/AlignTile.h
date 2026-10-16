@@ -22,5 +22,5 @@ const char html_alignAccept[] PROGMEM =
 
 const char html_alignRefine[] PROGMEM =
   "<p class='sws-help'>" L_REFINE_MESSAGE1 "</p><p class='sws-help'>" L_REFINE_MESSAGE2 "</p><p class='sws-help'>" L_REFINE_MESSAGE3 "</p>"
-  "<button id='rpa' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('rp','a')\" type='button'>" L_REFINE_PA "</button>"
+  "<button id='rpa'" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('rp','a')\" type='button'>" L_REFINE_PA "</button>"
   "<br />";

@@ -53,7 +53,7 @@ const char html_libDownloadCatalog[] PROGMEM =
 "&nbsp;<button id='cat_download' type='button' onclick=\"busy(); s('lib','cat_download');\" disabled>" L_DOWNLOAD "</button>\n";
 
 const char html_libClearCatalog[] PROGMEM =
-"&nbsp;<button id='lib_clear' type='button' onclick=\"busy(); if (confirm('" L_ARE_YOU_SURE "?')) s('lib','clear')\">" L_CAT_CLEAR_LIB "</button>\n";
+"&nbsp;<button id='lib_clear' type='button' " SWS_CONFIRM_ATTRIBUTE " onclick=\"busy(); if (confirm(this.dataset.confirm)) s('lib','clear')\">" L_CAT_CLEAR_LIB "</button>\n";
 
 const char html_libEditCatalog[] PROGMEM =
 "<label for='cat_data' class='sws-editor-label'>" L_CAT_DATA "</label>"

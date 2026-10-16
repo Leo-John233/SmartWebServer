@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Page.h"
+#include "../ui/Layouts.h"
 #include "../Pages.common.h"
 
 extern void handleNotFound();
@@ -65,15 +66,15 @@ void handleFocuser() {
   www.sendContentAndClear(data);
 
   // 主操作与参数区并排，手机端按操作顺序堆叠
-  data.concat(F("<div class='sws-device-layout sws-accessory-layout'><section class='sws-device-selector'>"));
+  data.concat(FPSTR(html_layout_focuser_begin));
   focuserSelectTile(data);
-  data.concat(F("</section><div class='sws-accessory-grid'><div class='sws-accessory-main'><section class='sws-device-primary sws-accessory-motion'>"));
+  data.concat(FPSTR(html_layout_focuser_motion));
   focuserSlewingTile(data);
-  data.concat(F("</section><section class='sws-accessory-home'>"));
+  data.concat(FPSTR(html_layout_accessory_home));
   focuserHomeTile(data);
-  data.concat(F("</section></div><section class='sws-accessory-settings'>"));
+  data.concat(FPSTR(html_layout_accessory_settings));
   focuserBacklashTcfTile(data);
-  data.concat(F("</section></div></div>"));
+  data.concat(FPSTR(html_layout_accessory_end));
 
   data.concat(FPSTR(html_page_and_body_end));
 

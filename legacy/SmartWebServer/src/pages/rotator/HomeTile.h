@@ -13,5 +13,5 @@ extern void rotatorHomeTileGet();
 const char html_rotatorHome[] PROGMEM =
   "<button onpointerdown=\"s('rot','home')\" type='button'>"
   L_RETURN_HOME "</button>"
-  "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('rot','reset')\" type='button'>"
+  "<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('rot','reset')\" type='button'>"
   L_RESET_HOME "</button>";

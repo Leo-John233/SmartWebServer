@@ -13,10 +13,8 @@
 #define PAGE_ENCODERS 5
 #define PAGE_NETWORK 6
 
-void pageAppearance();
+#include "ui/Presentation.h"
 void pageHeader(int selected);
-// 普通标签请求返回固定导航外壳，内容请求继续使用原有页面处理
-bool servePageShell(int selected);
 
 const char html_onstep_header_begin[] PROGMEM = "<div class='t'><table width='100%%'><tr><td><b><font size='5'>";
 const char html_onstep_header_title[] PROGMEM = "</font></b></td><td align='right'><b>Smart Web Server ";

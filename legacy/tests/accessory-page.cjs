@@ -28,7 +28,7 @@ struct State{bool focuserSlewing=false,rotatorSlewing=false,focuserTcfEnable=tru
  const char*focuserPositionStr="12500 µm",*rotatorPositionStr="45°30′",*focuserSlewSpeedStr="0.30mm/s",*rotateSlewSpeedStr="3.0&deg;/s",*focuserTemperatureStr="18.6 °C",*focuserBacklashStr="12",*focuserDeadbandStr="8",*focuserTcfCoefStr="-2.5";void updateFocuser(){}}state;
 struct Device{bool command(const char*,char*out){strcpy(out,"16");return true;}}onStep;
 `;
-  code+=read('locales/Strings_cn.h')+'\n'+clean(read('pages/htmlHeaders.h'))+'\n'+clean(read('pages/htmlScripts.h'))+'\n';
+  code+=require('./locale-source.cjs')()+'\n'+require('./page-support.cjs')()+'\n'+clean(read('pages/htmlHeaders.h'))+'\n'+clean(read('pages/htmlScripts.h'))+'\n';
   for(const tile of tiles)code+=clean(read('pages/'+kind+'/'+tile+'Tile.h'))+'\n';
   for(const tile of tiles)code+=clean(read('pages/'+kind+'/'+tile+'Tile.cpp')).split('// use Ajax')[0]+'\n';
   code+='int main(){String data;';

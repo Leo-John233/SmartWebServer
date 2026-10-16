@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Page.h"
+#include "../ui/Layouts.h"
 #include "../Pages.common.h"
 
 void processMountGet();
@@ -67,25 +68,25 @@ void handleMount()
   www.sendContentAndClear(data);
 
   // 常用移动与定位放在首屏，校准和限位放入独立设置区
-  data.concat(F("<div class='sws-mount'><div class='sws-control-grid'><section class='sws-guide'>"));
+  data.concat(FPSTR(html_layout_mount_begin));
   guideTile(data);
-  data.concat(F("</section><section class='sws-target'>"));
+  data.concat(FPSTR(html_layout_mount_target));
   gotoTile(data);
-  data.concat(F("</section><section class='sws-tracking'>"));
+  data.concat(FPSTR(html_layout_mount_tracking));
   trackingTile(data);
-  data.concat(F("</section></div><section class='sws-home'>"));
+  data.concat(FPSTR(html_layout_mount_home));
   homeParkTile(data);
-  data.concat(F("</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_LOCATION_TITLE " / " L_PAGE_LIBRARY "</h2><p></p></div><div class='sws-settings-grid sws-site-library'>"));
+  data.concat(FPSTR(html_layout_mount_site));
   siteTile(data);
   libraryTile(data);
-  data.concat(F("</div></section><details class='sws-more' open><summary>" L_ALIGN " / " L_LIMITS_TITLE " / " L_PAGE_PEC "</summary><div class='sws-settings-grid sws-advanced-grid'>"));
+  data.concat(FPSTR(html_layout_mount_advanced));
   alignTile(data);
   limitsTile(data);
   if (status.pecEnabled) pecTile(data);
   #if DISPLAY_COORDINATE_ORIGIN == ON
     coordinateTile(data);
   #endif
-  data.concat(F("</div></details></div>"));
+  data.concat(FPSTR(html_layout_mount_end));
 
   data.concat(FPSTR(html_page_and_body_end));
 

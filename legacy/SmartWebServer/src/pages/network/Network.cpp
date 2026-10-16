@@ -2,6 +2,7 @@
 // Setup Network
 #include "Network.h"
 #include "NetworkWifi.h"
+#include "ui/Styles.h"
 #include <Arduino.h>
 
 #include "../../lib/nv/Nv.h"
@@ -9,6 +10,7 @@
 #include "../../lib/wifi/WifiManager.h"
 
 #include "../Page.h"
+#include "../ui/Layouts.h"
 #include "../Pages.common.h"
 
 extern int webTimeout;
@@ -72,7 +74,7 @@ void handleNetwork() {
   }
 
   // page contents
-  data.concat(F("<div class=\"sws-network-layout\">"));
+  data.concat(FPSTR(html_layout_network_begin));
 
   if (restartRequired) {
     restartRequired = false;
@@ -133,9 +135,9 @@ void handleNetwork() {
     www.sendContentAndClear(data);
 
     // 账号设置独占一行，通信与固件更新按屏幕宽度排列
-    data.concat(F("<section class='sws-account'>"));
+    data.concat(FPSTR(html_layout_network_account));
     data.concat(FPSTR(html_logout));
-    data.concat(F("</section>"));
+    data.concat(FPSTR(html_layout_network_account_end));
   }
 
   sstrcpy(temp, "</div></div></body></html>");

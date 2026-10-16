@@ -1,19 +1,27 @@
-// 由预处理器展开真实模板和中文语言宏，避免预览自行改写描述
+// 由预处理器展开真实模板和选定语言宏，避免预览自行改写描述
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cp=require('node:child_process');
-module.exports=function(root){
+module.exports=function(root,language=process.env.SWS_TEST_LANGUAGE||'cn'){
   const base=path.join(root,'src/pages'),files=[];
   for(const dir of ['index','mount','focuser','rotator','encoders','auxiliary'])for(const name of fs.readdirSync(path.join(base,dir)))if(name.endsWith('.h'))files.push(dir+'/'+name);
-  files.unshift('htmlHeaders.h');files.push('LibraryHelp.h','htmlScripts.h');
+  files.unshift('ui/Palette.h','ui/Text.h','ui/Layouts.h','htmlHeaders.h');files.push('LibraryHelp.h','htmlScripts.h','ui/Styles.h','ui/Controls.h','ui/Navigation.h','network/ui/Styles.h','network/ui/View.h','network/ui/Script.h','network/Network.h');
   const clean=s=>s.replace(/^[ \t]*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
   let code='#define ON 1\n#define DISPLAY_SPECIAL_CHARS ON\n#define OFF 0\n#define PROGMEM\n#define DISPLAY_WEATHER ON\n#define DISPLAY_INTERNAL_TEMPERATURE ON\n#define WIFI 2\n#define OPERATIONAL_MODE WIFI\n#define DRIVE_CONFIGURATION ON\n#define DISPLAY_COORDINATE_ORIGIN ON\n#define DISPLAY_RESET_CONTROLS ON\n#define HOME_OFFSET_RANGE_AXIS1 3600\n#define HOME_OFFSET_RANGE_AXIS2 3600\n#define STR_INNER(x) #x\n#define STR(x) STR_INNER(x)\n';
-  code+=fs.readFileSync(path.join(root,'src/locales/Strings_cn.h'),'utf8')+'\n';
+  code+=require('./locale-source.cjs')(language)+'\n';
   files.forEach((file,i)=>code+='\nPREVIEW_FILE_'+i+'\n'+clean(fs.readFileSync(path.join(base,file),'utf8'))+'\n');
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sws-templates-')),input=path.join(dir,'templates.cpp');fs.writeFileSync(input,code);
   const result=cp.spawnSync(process.env.CXX||'g++',['-E','-P',input],{encoding:'utf8',maxBuffer:8*1024*1024});if(result.status!==0)throw Error(result.stderr);
   const templates={};for(const section of result.stdout.split(/PREVIEW_FILE_/).slice(1)){
     const i=Number(section.match(/^\d+/)[0]),values={};
-    for(const m of section.matchAll(/const char (\w+)\[\]\s*=\s*((?:"(?:\\.|[^"\\])*"\s*)+);/g))values[m[1]]=[...m[2].matchAll(/"(?:\\.|[^"\\])*"/g)].map(x=>JSON.parse(x[0])).join('');
+    Object.assign(values,require('./cpp-strings.cjs')(section));
     templates[files[i]]=values;
   }
+  templates['Appearance.h'] = {
+    html_shared_appearance: templates['ui/Styles.h'].html_shared_styles + templates['ui/Controls.h'].html_page_controls,
+    html_shell_script: templates['ui/Navigation.h'].html_shell_script,
+  };
+  templates['network/NetworkWifi.h'] = {
+    ...templates['network/ui/Styles.h'],
+    html_network_wifi: templates['network/ui/View.h'].html_network_wifi + templates['network/ui/Script.h'].html_network_wifi_script,
+  };
   return templates;
 };

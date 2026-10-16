@@ -13,6 +13,6 @@
   const char html_coordinateBasis[] PROGMEM =
     L_COORD_ORIGIN_MSG
     "<br /><br />"
-    "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('ob','set')\" type='button'>" L_COORD_ORIGIN "</button>"
+    "<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('ob','set')\" type='button'>" L_COORD_ORIGIN "</button>"
     "<br />\n";
 #endif

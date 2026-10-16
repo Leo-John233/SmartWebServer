@@ -90,7 +90,7 @@ bool configureStation() {
   connecting = true;
   wifiManager.networkBusy = true;
   failed = false;
-  notice = "正在连接路由器，最多等待 25 秒；若页面断开，请重新连接设备热点";
+  notice = L_UI_CONNECTING_NOTE;
   return true;
 }
 void connectionFailed(const String &reason) {
@@ -99,7 +99,7 @@ void connectionFailed(const String &reason) {
   wifiManager.networkBusy = false;
   WiFi.disconnect();
   bool available = apActive() || startAp();
-  notice = reason + (available ? " 设备热点仍可用于重新配网" : " 热点启动失败，请重启设备\n");
+  notice = reason + (available ? L_UI_AP_AVAILABLE : L_UI_AP_FAILED);
   lastRetry = millis();
 }
 // 页面只读取配置和运行状态，不返回任何保存的密码
@@ -126,25 +126,13 @@ String configJson() {
 }
 }
 
-void renderWifiNetwork(String &data) {
-  // 分段发送页面，避免一次复制整页造成设备内存紧张
-  www.sendContentAndClear(data);
-  const size_t length = sizeof(html_network_wifi) - 1;
-  char chunk[513];
-  for (size_t offset = 0; offset < length; offset += 512) {
-    size_t count = length - offset < 512 ? length - offset : 512;
-    memcpy_P(chunk, html_network_wifi + offset, count); chunk[count] = 0;
-    www.sendContent(chunk);
-  }
-}
-
 void handleWifiNetwork() {
   // 沿用网络页面的登录状态，未登录时不能扫描或修改配置
-  if (loginRequired) { error(403, "请先输入管理密码登录"); return; }
+  if (loginRequired) { error(403, L_UI_LOGIN_FIRST); return; }
   String action = www.arg("action");
   if (action == "status") { reply(200, configJson()); return; }
-  if (www.method() != HTTP_POST) { error(405, "请使用 POST 提交"); return; }
-  if (pending || connecting) { error(409, "连接正在进行，请稍候"); return; }
+  if (www.method() != HTTP_POST) { error(405, L_UI_POST_REQUIRED); return; }
+  if (pending || connecting) { error(409, L_UI_BUSY); return; }
 
   if (action == "scan") {
     if (!scanning) {
@@ -154,12 +142,12 @@ void handleWifiNetwork() {
       wifiManager.networkBusy = true;
       WiFi.scanDelete();
       int result = WiFi.scanNetworks(true, false);
-      if (result == -2) { endScan(); error(503, "无法启动扫描，请稍后重试"); return; }
+      if (result == -2) { endScan(); error(503, L_UI_SCAN_START_FAILED); return; }
       scanning = true; scanStarted = millis();
     }
     int count = WiFi.scanComplete();
     if (count == -1) { reply(200, "{\"running\":true}"); return; }
-    if (count < 0) { endScan(); error(503, "扫描失败，请重试"); return; }
+    if (count < 0) { endScan(); error(503, L_UI_SCAN_FAILED); return; }
     String json = "{\"running\":false,\"networks\":[";
     // 最多返回 24 条结果，限制密集网络环境下的内存占用
     int limit = count < 24 ? count : 24;
@@ -175,15 +163,15 @@ void handleWifiNetwork() {
     }
     json += "]}"; endScan(); reply(200, json); return;
   }
-  if (scanning) { error(409, "请等待扫描完成"); return; }
-  if (action != "connect" && action != "ap") { error(400, "未知操作"); return; }
+  if (scanning) { error(409, L_UI_SCAN_WAIT); return; }
+  if (action != "connect" && action != "ap") { error(400, L_UI_UNKNOWN_ACTION); return; }
   proposed = wifiManager.settings;
   proposedStation = *wifiManager.sta;
   proposedPassword = *wifiManager.staPwd;
   bool enabled = www.arg("enabled") == "1";
   String ssid = www.arg("ssid"), password = www.arg("password");
   if (ssid.length() == 0 || ssid.length() > 31 || password.length() > 31) {
-    error(400, "Wi-Fi 名称不能为空；名称和密码均不能超过 31 字节（中文会占多个字节）"); return;
+    error(400, L_UI_CREDENTIAL_LENGTH); return;
   }
   if (action == "connect") {
     StationSettings &s = proposedStation;
@@ -191,15 +179,15 @@ void handleWifiNetwork() {
     bool open = www.arg("open") == "1";
     if (enabled && !open && ((password.length() && password.length() < 8) ||
         (!password.length() && (ssid != s.ssid || strlen(savedPassword) < 8)))) {
-      error(400, "请输入 Wi-Fi 密码，无密码的网络请勾选无需密码"); return;
+      error(400, L_UI_PASSWORD_REQUIRED); return;
     }
     proposed.stationEnabled = enabled;
     s.dhcpEnabled = www.arg("dhcp") == "1";
-    if (!s.dhcpEnabled && !addresses(s.ip, s.gw, s.sn)) { error(400, "请检查静态 IP、网关和子网掩码"); return; }
+    if (!s.dhcpEnabled && !addresses(s.ip, s.gw, s.sn)) { error(400, L_UI_BAD_STATIC); return; }
     if (enabled && !s.dhcpEnabled && overlap(s.ip, s.sn, proposed.ap.ip, proposed.ap.sn)) {
-      error(400, "STA 与设备热点网段重叠，请更改其中一个网段"); return;
+      error(400, L_UI_STA_OVERLAP); return;
     }
-    if (!enabled && !proposed.accessPointEnabled) { error(400, "请先启用设备热点，再关闭 STA"); return; }
+    if (!enabled && !proposed.accessPointEnabled) { error(400, L_UI_ENABLE_AP_FIRST); return; }
     // 关闭状态下更换网络名称时清除旧密码，防止下次误用其他网络的密码
     bool changedNetwork = ssid != s.ssid;
     strcpy(s.ssid, ssid.c_str());
@@ -209,18 +197,18 @@ void handleWifiNetwork() {
     pending = 1;
   } else {
     AccessPointSettings &a = proposed.ap;
-    if (password.length() && password.length() < 8) { error(400, "热点密码需为 8–31 字节"); return; }
+    if (password.length() && password.length() < 8) { error(400, L_UI_AP_PASSWORD_LENGTH); return; }
     if (!enabled && (WiFi.status() != WL_CONNECTED || !proposed.stationEnabled)) {
-      error(400, "请先成功连接路由器，再关闭设备热点"); return;
+      error(400, L_UI_CONNECT_FIRST); return;
     }
-    if (!addresses(a.ip, a.gw, a.sn)) { error(400, "请检查热点 IP、网关和子网掩码"); return; }
+    if (!addresses(a.ip, a.gw, a.sn)) { error(400, L_UI_BAD_AP_IP); return; }
     if (enabled && WiFi.status() == WL_CONNECTED) {
       IPAddress ip = WiFi.localIP(), mask = WiFi.subnetMask();
-      if (overlap(a.ip, a.sn, &ip[0], &mask[0])) { error(400, "热点与路由器网段重叠，请更改热点网段"); return; }
+      if (overlap(a.ip, a.sn, &ip[0], &mask[0])) { error(400, L_UI_AP_OVERLAP); return; }
     }
     String channel = www.arg("channel");
     int ch = channel.toInt();
-    if (ch < 1 || ch > 11 || String(ch) != channel) { error(400, "热点信道应为 1–11"); return; }
+    if (ch < 1 || ch > 11 || String(ch) != channel) { error(400, L_UI_BAD_CHANNEL); return; }
     strcpy(a.ssid, ssid.c_str());
     if (password.length()) strcpy(a.pwd, password.c_str());
     a.channel = ch;
@@ -228,7 +216,7 @@ void handleWifiNetwork() {
     pending = 2;
   }
   scheduledAt = millis(); failed = false;
-  notice = "设置已收到，正在应用，请稍候";
+  notice = L_UI_APPLYING;
   reply(202, "{\"message\":" + quote(notice) + "}");
 }
 
@@ -241,7 +229,7 @@ void pollWifiNetwork() {
     // 延迟应用期间若路由器掉线，取消关闭热点，保留可用入口
     if (operation == 2 && !proposed.accessPointEnabled && WiFi.status() != WL_CONNECTED) {
       failed = true;
-      notice = "路由器已断开，设备热点保持开启";
+      notice = L_UI_ROUTER_LOST;
       return;
     }
     wifiManager.settings = proposed;
@@ -256,17 +244,17 @@ void pollWifiNetwork() {
       // 配网期间保留热点，连接失败后仍能通过热点修改设置
       if (wifiManager.settings.stationEnabled) {
         if (!apActive()) startAp();
-        if (!configureStation()) connectionFailed("无法应用 IP 设置");
+        if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED);
       } else {
         WiFi.disconnect(); WiFi.enableSTA(false);
         if (!apActive()) startAp();
-        notice = "已断开路由器，设备热点仍可使用";
+        notice = L_UI_STA_DISCONNECTED;
       }
     } else {
       if (wifiManager.settings.accessPointEnabled) {
-        if (!startAp()) { failed = true; notice = "热点设置应用失败，请检查配置并重试"; }
-        else notice = "热点设置已保存，连接路由器后会自动调整信道";
-      } else { WiFi.softAPdisconnect(true); notice = "热点已关闭，请通过路由器分配的 IP 访问设备"; }
+        if (!startAp()) { failed = true; notice = L_UI_AP_APPLY_FAILED; }
+        else notice = L_UI_AP_SAVED;
+      } else { WiFi.softAPdisconnect(true); notice = L_UI_AP_CLOSED; }
     }
     wifiManager.writeSettings();
   }
@@ -275,14 +263,14 @@ void pollWifiNetwork() {
       IPAddress ip = WiFi.localIP(), mask = WiFi.subnetMask();
       AccessPointSettings &a = wifiManager.settings.ap;
       if (apActive() && overlap(a.ip, a.sn, &ip[0], &mask[0])) {
-        connectionFailed("路由器分配的地址与设备热点网段冲突，请先修改热点网段");
+        connectionFailed(L_UI_DHCP_OVERLAP);
       } else {
         connecting = false; wifiManager.networkBusy = false; failed = false;
-        notice = "连接成功，局域网访问地址：http://" + WiFi.localIP().toString();
+        notice = L_UI_CONNECTED_ADDRESS + WiFi.localIP().toString();
         lastRetry = now;
       }
     } else if (now - connectStarted > 25000) {
-      connectionFailed("没有连上 Wi-Fi，请检查密码或靠近路由器后重试");
+      connectionFailed(L_UI_CONNECT_FAILED);
     }
   }
   #if STA_AUTO_RECONNECT == true
@@ -290,7 +278,7 @@ void pollWifiNetwork() {
     if (wifiManager.webManaged && wifiManager.settings.stationEnabled && !connecting && !scanning && !pending &&
         WiFi.status() != WL_CONNECTED && now - lastRetry > 30000) {
       lastRetry = now;
-      if (!configureStation()) connectionFailed("无法应用 IP 设置");
+      if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED);
     }
   #endif
 }

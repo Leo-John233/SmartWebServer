@@ -13,5 +13,5 @@ extern void focuserHomeTileGet();
 const char html_focuserHome[] PROGMEM =
   "<button onpointerdown=\"gf('Fh')\" type='button'>"
   L_RETURN_HOME "</button>"
-  "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) gf('FH')\" type='button'>"
+  "<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) gf('FH')\" type='button'>"
   L_RESET_HOME "</button>";
