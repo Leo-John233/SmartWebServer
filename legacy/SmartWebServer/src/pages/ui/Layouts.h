@@ -60,10 +60,10 @@ const char html_layout_rotator_begin[] PROGMEM =
   "<div class='sws-device-layout sws-accessory-layout'><div class='sws-accessory-grid'><div class='sws-accessory-main'><section class='sws-device-primary sws-accessory-motion'>";
 
 const char html_layout_encoders_begin[] PROGMEM =
-  "<div class='sws-device-layout'><section class='sws-device-selector'>";
+  "<div class='sws-device-layout sws-encoder-layout'><section class='sws-encoder-sync-section'>";
 
 const char html_layout_encoders_settings[] PROGMEM =
-  "</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_ENC_CONF "</h2><p></p></div><div class='sws-settings-grid'>";
+  "</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_ENC_CONF "</h2></div><div class='sws-encoder-grid'>";
 
 const char html_layout_encoders_end[] PROGMEM =
   "</div></section></div>";

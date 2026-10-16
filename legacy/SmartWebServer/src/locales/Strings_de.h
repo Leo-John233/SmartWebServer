@@ -688,3 +688,5 @@
 #define L_UI_NOT_FOUND_NOTE "Adresse möglicherweise falsch oder Funktion nicht aktiviert"
 #define L_UI_BACK_CONTROLLER "Zurück zum Controller"
 #define L_UI_CONTENT "Seiteninhalt"
+
+#define L_ENC_SYNC_CONTROL "Synchronisierung"

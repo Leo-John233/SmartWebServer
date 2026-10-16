@@ -12,7 +12,7 @@
 // create the related webpage tile
 void encAxisTile(int axis, String &data)
 {
-  char temp[240] = "";
+  char temp[512] = "";
   char ticksPerDegStr[32] = "";
   float ticksPerDeg = 0;
   bool reverse = false;
@@ -23,17 +23,17 @@ void encAxisTile(int axis, String &data)
     ticksPerDeg = encoders.settings.axis1.ticksPerDeg;
     reverse = encoders.settings.axis1.reverse == ON;
     diffTo = encoders.settings.axis1.diffTo;
-    snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", "Axis1 RA/Azm");
+    snprintf_P(temp, sizeof(temp), html_encoderAxisBegin, "Axis1 RA/Azm");
   }
   else if (axis == 1)
   {
     ticksPerDeg = encoders.settings.axis2.ticksPerDeg;
     reverse = encoders.settings.axis2.reverse == ON;
     diffTo = encoders.settings.axis2.diffTo;
-    snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", "Axis2 Dec/Alt");
+    snprintf_P(temp, sizeof(temp), html_encoderAxisBegin, "Axis2 Dec/Alt");
   }
   data.concat(temp);
-  data.concat(F("<br /><hr>"));
+  data.concat(F("<div class='sws-encoder-readings'>"));
 
   if (axis == 0)
   {
@@ -50,18 +50,20 @@ void encAxisTile(int axis, String &data)
     data.concat(temp);
   }
 
+  data.concat(F("</div><dl class='sws-encoder-values'>"));
+
   dtostrf(ticksPerDeg, 1, 3, ticksPerDegStr);
   convert.stripNumericStr(ticksPerDegStr);
 
   snprintf_P(temp, sizeof(temp), html_encAxisValueTpd, ticksPerDegStr);
   data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_encAxisValueReverse, reverse ? "true" : "false");
+  snprintf_P(temp, sizeof(temp), html_encAxisValueReverse, reverse ? L_ON : L_OFF);
   data.concat(temp);
   snprintf_P(temp, sizeof(temp), html_encAxisValueSyncThreshold, diffTo);
   data.concat(temp);
   www.sendContentAndClear(data);
 
-  data.concat(F("<hr>"));
+  data.concat(F("</dl>"));
 
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
   data.concat(temp);
@@ -75,6 +77,7 @@ void encAxisTile(int axis, String &data)
   data.concat(temp);
   www.sendContentAndClear(data);
 
+  data.concat(F("<div class='sws-encoder-form-actions'>"));
   data.concat(FPSTR(html_encUpload));
   snprintf_P(temp, sizeof(temp), html_encAxisRevert, axis + 1);
   data.concat(temp);

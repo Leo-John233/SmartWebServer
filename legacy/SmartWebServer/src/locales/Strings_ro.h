@@ -680,3 +680,5 @@
 #define L_UI_NOT_FOUND_NOTE "Adresa este greșită sau funcția nu este activată"
 #define L_UI_BACK_CONTROLLER "Înapoi la controler"
 #define L_UI_CONTENT "Conținutul paginii"
+
+#define L_ENC_SYNC_CONTROL "Controlul sincronizării"

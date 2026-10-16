@@ -679,3 +679,5 @@
 #define L_UI_NOT_FOUND_NOTE "アドレスが正しくないか機能が無効です"
 #define L_UI_BACK_CONTROLLER "コントローラーへ戻る"
 #define L_UI_CONTENT "ページ内容"
+
+#define L_ENC_SYNC_CONTROL "同期制御"

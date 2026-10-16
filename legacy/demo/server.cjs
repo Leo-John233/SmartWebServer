@@ -6,6 +6,7 @@ const client=fs.readFileSync(path.join(__dirname,'simulation.js'),'utf8');
 const pages=['/index.htm','/mount.htm','/net.htm','/focuser.htm','/rotator.htm','/auxiliary.htm','/enc.htm'];
 const networks=[{ssid:'Redmi_Hotel',rssi:-48,open:false},{ssid:'Observatory',rssi:-62,open:false},{ssid:'Guest',rssi:-73,open:true},{ssid:'Home Wi-Fi',rssi:-55,open:false}];
 let connectAt=0,scanAt=0,fail=false;
+let encoderAutoSync=false;
 const server=http.createServer(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   const url=new URL(req.url,'http://127.0.0.1');let body='';for await(const chunk of req){body+=chunk;if(body.length>65536){res.writeHead(413);res.end();return;}}
@@ -31,6 +32,14 @@ const server=http.createServer(async(req,res)=>{
   }
   if(url.pathname==='/auxiliary-ajax-get.txt'){if(!auxiliaryDevice.command(url.searchParams))res.statusCode=400;return send('','text/plain');}
   if(url.pathname==='/auxiliary-ajax.txt')return send(auxiliaryDevice.poll(),'text/plain');
+  if(url.pathname==='/enc-ajax-get.txt') {
+    const action=url.searchParams.get('enc');
+    if(action==='on'||action==='off')encoderAutoSync=action==='on';
+    return send('','text/plain');
+  }
+  if(url.pathname==='/enc-ajax.txt')return send(
+    'enc_as_on|'+(encoderAutoSync?'selected':'unselected')+'\n'+
+    'enc_as_off|'+(encoderAutoSync?'unselected':'selected')+'\n', 'text/plain');
   if(url.pathname.endsWith('.txt')||url.pathname==='/preview-poll')return send('','text/plain');
   if(url.pathname==='/libraryHelp.htm')return send(head+'</head><body>'+shared+'<main class="sws-document"><h1>天体库</h1>'+Object.values(templates['LibraryHelp.h']).join('')+'</main></body></html>');
   const page=url.pathname==='/'?'/index.htm':url.pathname;

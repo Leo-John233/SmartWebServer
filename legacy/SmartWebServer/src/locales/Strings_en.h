@@ -680,3 +680,5 @@
 #define L_UI_NOT_FOUND_NOTE "The address may be incorrect or this feature is not enabled"
 #define L_UI_BACK_CONTROLLER "Back to controller"
 #define L_UI_CONTENT "Page content"
+
+#define L_ENC_SYNC_CONTROL "Sync control"

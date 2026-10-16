@@ -680,3 +680,5 @@
 #define L_UI_NOT_FOUND_NOTE "Indirizzo errato o funzione non attivata"
 #define L_UI_BACK_CONTROLLER "Torna al controller"
 #define L_UI_CONTENT "Contenuto della pagina"
+
+#define L_ENC_SYNC_CONTROL "Controllo sincronizzazione"

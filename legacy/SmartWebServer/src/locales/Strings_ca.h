@@ -678,3 +678,5 @@
 #define L_UI_NOT_FOUND_NOTE "L’adreça és incorrecta o la funció no està activada"
 #define L_UI_BACK_CONTROLLER "Torna al controlador"
 #define L_UI_CONTENT "Contingut de la pàgina"
+
+#define L_ENC_SYNC_CONTROL "Control de sincronització"

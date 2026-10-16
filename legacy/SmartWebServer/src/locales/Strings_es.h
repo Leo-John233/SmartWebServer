@@ -678,3 +678,5 @@
 #define L_UI_NOT_FOUND_NOTE "Dirección incorrecta o función no activada"
 #define L_UI_BACK_CONTROLLER "Volver al controlador"
 #define L_UI_CONTENT "Contenido de la página"
+
+#define L_ENC_SYNC_CONTROL "Control de sincronización"

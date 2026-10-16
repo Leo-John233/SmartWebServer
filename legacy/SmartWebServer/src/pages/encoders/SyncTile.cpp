@@ -12,32 +12,15 @@
 // create the related webpage tile
 void syncTile(String &data)
 {
-  char temp[240] = "";
-
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", "Sync Control");
-  data.concat(temp);
-  data.concat(F("<br /><hr>"));
-
-  snprintf_P(temp, sizeof(temp), html_form_begin, "enc.htm");
-  data.concat(temp);
-
+  data.concat(F("<div class='b1 sws-encoder-sync'><div class='sws-device-card-head'><h2>" L_ENC_SYNC_CONTROL "</h2></div><div class='sws-encoder-sync-grid'><div class='sws-encoder-sync-actions'>"));
   data.concat(FPSTR(html_syncOnStepNow));
   data.concat(FPSTR(html_syncEncodersNow));
-
-  data.concat(FPSTR(html_syncAuto));
-  www.sendContentAndClear(data);
-
-  data.concat(F("<br />"));
-
   #ifdef ENC_ABSOLUTE
     data.concat(FPSTR(html_zeroEncodersNow));
-    www.sendContentAndClear(data);
   #endif
-
-  data.concat(F("<hr>"));
-
-  data.concat(FPSTR(html_form_end));
-
+  data.concat(F("</div>"));
+  data.concat(FPSTR(html_syncAuto));
+  data.concat(F("</div>"));
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
 }

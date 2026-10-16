@@ -3,7 +3,7 @@ const demoKey = 'sws-demo' + location.pathname;
 function demoSelected(button, selected) {
   if (!button) return;
   button.dataset.selected = String(selected);
-  button.style.background = selected ? 'var(--accent-hover)' : 'var(--accent)';
+  button.style.background = selected ? 'var(--selected)' : 'var(--accent)';
 }
 let demoSaved = JSON.parse(localStorage.getItem(demoKey) || '{}');
 function demoNotice(message) {
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
       demoNotice(
         ['q', 'stop', 'n0', 's0', 'e0', 'w0'].includes(value)
           ? '模拟移动已停止'
-          : u.pathname === '/auxiliary-ajax-get.txt' || (accessory && !moving)
+          : ['/auxiliary-ajax-get.txt', '/enc-ajax-get.txt'].includes(u.pathname) || (accessory && !moving)
             ? '模拟设置已更新'
             : '正在模拟移动',
       );

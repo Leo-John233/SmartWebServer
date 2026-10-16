@@ -683,3 +683,5 @@
 #define L_UI_NOT_FOUND_NOTE "页面地址可能有误，或设备未启用这项功能"
 #define L_UI_BACK_CONTROLLER "返回控制器"
 #define L_UI_CONTENT "标签内容"
+
+#define L_ENC_SYNC_CONTROL "同步控制"
