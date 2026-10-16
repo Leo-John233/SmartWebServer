@@ -14,6 +14,8 @@
 #define WIFI_STA 1
 #define HTTP_POST 1
 #define WL_CONNECTED 3
+#define WL_CONNECT_FAILED 4
+#define WL_NO_SSID_AVAIL 1
 #define WIFI_AUTH_OPEN 0
 #define STA_AUTO_RECONNECT true
 #define memcpy_P memcpy
@@ -42,13 +44,14 @@ struct StationPassword{char password[64]="password";};
 struct WifiSettings{char masterPassword[32]="password";bool accessPointEnabled=true;AccessPointSettings ap;bool stationEnabled=false,stationApFallback=true;};
 struct Manager {WifiSettings settings;StationSettings station[3];StationPassword stationPassword[3];int stationNumber=1,writes=0;StationSettings *sta=&station[0];StationPassword *staPwd=&stationPassword[0];bool networkBusy=false,webManaged=false;void setStation(int n){sta=&station[n-1];staPwd=&stationPassword[n-1];}void writeSettings(){writes++;}} wifiManager;
 struct WifiFake {
-  int mode=2,connection=0,scan=-1,begins=0,disconnects=0;bool configOk=true;uint8_t local[4]={192,168,1,55},mask[4]={255,255,255,0};
+  int mode=2,connection=0,scan=-1,begins=0,disconnects=0;bool configOk=true,autoReconnect=true;uint8_t local[4]={192,168,1,55},mask[4]={255,255,255,0};
   int getMode(){return mode;}int status(){return connection;}int RSSI(int i=0){return -45-i;}
   String SSID(int i=-1){return i<0?"Home":"<img>\"\\\n";}
   IPAddress localIP(){return IPAddress(local);}IPAddress subnetMask(){return IPAddress(mask);}IPAddress softAPIP(){return IPAddress(wifiManager.settings.ap.ip);}
   bool softAP(const char*,const char*,int){mode|=2;return true;}bool softAPConfig(IPAddress,IPAddress,IPAddress){return true;}
   void softAPdisconnect(bool){mode&=~2;}void enableSTA(bool v){if(v)mode|=1;else mode&=~1;}
   void disconnect(){connection=0;disconnects++;}void persistent(bool){}
+  void setAutoReconnect(bool value){autoReconnect=value;}
   bool config(IPAddress,IPAddress,IPAddress,IPAddress=IPAddress()){return configOk;}
   void begin(const char*,const char*){begins++;}void scanDelete(){}int scanNetworks(bool,bool){return -1;}int scanComplete(){return scan;}int encryptionType(int){return 0;}
 } WiFi;

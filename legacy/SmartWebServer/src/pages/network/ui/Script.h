@@ -13,7 +13,12 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     scanning = false,
     working = false,
     submitting = false,
-    scanTries = 0,
+    scanStarted = 0,
+    scanBusy = false,
+    paused = false,
+    statusTimer = null,
+    scanTimer = null,
+    revision = 0,
     lastNotice = '',
     statusBusy = false,
     current = null,
@@ -21,6 +26,11 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     autoScanned = false,
     listKey = '',
     enableDraft = false;
+  const reads = new Set();
+  function scheduleStatus(delay = 2500) {
+    clearTimeout(statusTimer);
+    if (!paused && !document.hidden) statusTimer = setTimeout(status, delay);
+  }
   function message(text, error = false) {
     $('nw-message').textContent = text;
     $('nw-message').className = error ? 'nw-error' : '';
@@ -39,7 +49,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     document
       .querySelectorAll('.nw-row')
       .forEach((b) => (b.disabled = !loaded || working || scanning));
-    ap.querySelector('[type=submit]').disabled = !loaded || working;
+    ap.querySelector('[type=submit]').disabled = !loaded || scanning || working;
   }
   function lock(value) {
     working = value || submitting;
@@ -48,7 +58,11 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   // 请求设置超时，断网时停止等待，避免不断堆积连接
   async function api(action, params) {
     const controller = new AbortController(),
-      timer = setTimeout(() => controller.abort(), 8000);
+      timeout = action === 'scan' ? Math.max(1, Math.min(8000, 30000 - (Date.now() - scanStarted))) : 8000,
+      timer = setTimeout(() => controller.abort(), timeout);
+    const read = action === 'status' || action === 'scan';
+    if (read) reads.add(controller);
+    if (params) revision++;
     try {
       const options = { cache: 'no-store', signal: controller.signal };
       if (params) {
@@ -60,8 +74,12 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
         data = await response.json();
       if (!response.ok) throw Error(data.error || )NET" SWS_JS_TEXT(L_UI_FAILED) R"NET();
       return data;
+    } catch (error) {
+      if (['AbortError','TypeError','SyntaxError'].includes(error.name)) throw Error()NET" SWS_JS_TEXT(L_UI_CONNECTION_LOST) R"NET();
+      throw error;
     } finally {
       clearTimeout(timer);
+      reads.delete(controller);
     }
   }
   function fields(form, data) {
@@ -175,10 +193,12 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   $('nw-close').onclick = $('nw-cancel').onclick = () => dialog.close();
   // 轮询只更新设备状态，不覆盖弹窗中正在编辑的内容
   async function status() {
-    if (statusBusy || document.hidden || document.body.inert) return;
+    if (statusBusy || scanning || submitting || paused || document.hidden || document.body.inert) { scheduleStatus(); return; }
     statusBusy = true;
+    const ticket = revision;
     try {
       const s = await api('status');
+      if (ticket !== revision || paused) return;
       current = s;
       if (!loaded) {
         fields(ap, s.ap);
@@ -217,20 +237,27 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
         startScan();
       }
     } catch (e) {
+      if (paused || ticket !== revision) return;
       lastNotice = '';
       message()NET" SWS_JS_TEXT(L_UI_CONNECTION_LOST) R"NET(, true);
+      lock(false);
     } finally {
       statusBusy = false;
+      scheduleStatus();
     }
   }
   async function scan() {
+    clearTimeout(scanTimer);
+    if (scanBusy || paused || document.hidden) return;
+    scanBusy = true;
     try {
+      if (Date.now() - scanStarted >= 30000) throw Error()NET" SWS_JS_TEXT(L_UI_SCAN_TIMEOUT) R"NET();
       const r = await api('scan', {});
+      if (paused) return;
       if (r.running) {
-        if (++scanTries > 30) throw Error()NET" SWS_JS_TEXT(L_UI_SCAN_TIMEOUT) R"NET();
-        setTimeout(scan, 1000);
         return;
       }
+      scanning = false;
       const seen = new Set();
       networks = r.networks
         .sort((a, b) => b.rssi - a.rssi)
@@ -242,16 +269,23 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       renderNetworks();
       $('nw-scan-state').textContent = networks.length ? )NET" SWS_JS_TEXT(L_UI_PICK_NETWORK) R"NET( : )NET" SWS_JS_TEXT(L_UI_NO_NETWORKS) R"NET(;
     } catch (e) {
-      $('nw-scan-state').textContent = e.message;
+      if (paused) return;
+      scanning = false;
+      $('nw-scan-state').textContent = Date.now() - scanStarted >= 30000 ? )NET" SWS_JS_TEXT(L_UI_SCAN_TIMEOUT) R"NET( : e.message;
+    } finally {
+      scanBusy = false;
+      sync();
+      if (scanning) {
+        if (!paused && !document.hidden) scanTimer = setTimeout(scan, 1000);
+      } else scheduleStatus(0);
     }
-    scanning = false;
-    sync();
   }
   // 进入已开启 Wi-Fi 的页面和打开开关时自动搜索，也保留手动刷新入口
   function startScan() {
     if (scanning || working || !loaded) return;
     scanning = true;
-    scanTries = 0;
+    scanStarted = Date.now();
+    clearTimeout(statusTimer);
     $('nw-scan-state').textContent = )NET" SWS_JS_TEXT(L_UI_SEARCHING) R"NET(;
     sync();
     scan();
@@ -338,9 +372,27 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
         await status();
       }
     };
-  sync();
-  status();
-  setInterval(status, 2500);
+  // 后台页面停止读取；回来后重新读取状态，不重发任何设置或连接命令。
+  const pause = window.swsPausePolling, resume = window.swsResumePolling;
+  window.swsPausePolling = () => {
+    paused = true;
+    revision++;
+    clearTimeout(statusTimer); clearTimeout(scanTimer);
+    reads.forEach(controller => controller.abort());
+    if (pause) pause();
+  };
+  window.swsResumePolling = () => {
+    paused = false;
+    if (resume) resume();
+    if (scanning) scan(); else status();
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) window.swsPausePolling(); else window.swsResumePolling();
+  });
+  window.addEventListener('pagehide', window.swsPausePolling);
+  window.addEventListener('pageshow', () => { if (!paused) return; window.swsResumePolling(); });
+  window.addEventListener('online', () => { if (!paused) status(); });
+  sync(); status();
 })();
 </script>
 )NET";

@@ -18,10 +18,10 @@ fs.mkdirSync(output,{recursive:true});fs.writeFileSync(path.join(output,'network
 const browser=await chromium.launch({channel:'msedge',headless:true});
 try {
 const page=await browser.newPage({viewport:{width:1440,height:1080}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
-let scans=0,submitted,submissions=0,includeHostile=true,rejectConnect=false,scanFailure=false;
+let scans=0,submitted,submissions=0,includeHostile=true,rejectConnect=false,scanFailure=false,delayedConnect=false;
 await page.route('http://sws.test/**',async route=>{const req=route.request(),url=new URL(req.url());if(url.pathname==='/')return route.fulfill({contentType:'text/html',body:html});const p=new URLSearchParams(req.postData()||''),action=p.get('action')||url.searchParams.get('action');let response=state;
 if(action==='scan'){scans++;if(scanFailure)return route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:'搜索失败，请重试'})});response=scans===1?{running:true}:{running:false,networks:includeHostile?networks:networks.filter(n=>!n.ssid.startsWith('<'))};}
-if(action==='connect'){submissions++;submitted=p;if(rejectConnect)return route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'密码错误，请重试'})});response={message:'正在连接'};state.sta={...state.sta,enabled:p.get('enabled')==='1',ssid:p.get('ssid'),open:p.get('open')==='1',dhcp:p.get('dhcp')==='1'};state.connected=state.sta.enabled;state.ssid=p.get('ssid');state.ip='192.168.1.55';state.message=state.connected?'连接成功':'已断开路由器';}
+if(action==='connect'){submissions++;submitted=p;if(rejectConnect)return route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'密码错误，请重试'})});response={message:'正在连接'};state.sta={...state.sta,enabled:p.get('enabled')==='1',ssid:p.get('ssid'),open:p.get('open')==='1',dhcp:p.get('dhcp')==='1'};state.connected=state.sta.enabled&&!delayedConnect;state.connecting=delayedConnect;state.failed=false;state.ssid=p.get('ssid');state.ip='192.168.1.55';state.message=state.connected?'连接成功':'已断开路由器';}
 return route.fulfill({contentType:'application/json',body:JSON.stringify(response)});});
 await page.goto('http://sws.test/');await page.waitForFunction(()=>document.querySelectorAll('#nw-results button').length===3&&!document.querySelector('#nw-scan').disabled);
 const account=page.locator('.sws-account');
@@ -73,6 +73,17 @@ await page.getByRole('button',{name:/Observatory/}).click();await page.locator('
 // 轮询不会覆盖正在输入的密码，错误显示在弹窗中以便直接重试
 await page.waitForTimeout(2800);assert.equal(await page.locator('#nw-password').inputValue(),'test-only-pass');rejectConnect=true;await page.locator('#nw-connect').click();await page.waitForFunction(()=>document.querySelector('#nw-dialog-error').textContent.includes('密码错误'));assert.equal(await page.locator('#nw-dialog').isVisible(),true);assert.equal(await page.locator('#nw-password').inputValue(),'test-only-pass');
 rejectConnect=false;await page.locator('#nw-connect').click();await page.waitForFunction(()=>!document.querySelector('#nw-dialog').open&&document.querySelector('#nw-current').textContent.includes('Observatory'));assert.equal(submitted.get('ssid'),'Observatory');assert.equal(submitted.get('password'),'test-only-pass');assert.equal(submitted.get('dhcp'),'1');assert.equal(await page.locator('#nw-current .nw-selected').innerText(),'✓');
+// 实际密码错误是 HTTP 接受之后异步失败，失败反馈必须解锁页面供再次输入。
+delayedConnect=true;
+await page.getByRole('button',{name:/^Home Wi-Fi /}).click();await page.locator('#nw-password').fill('wrong-password');await page.locator('#nw-connect').click();
+await page.waitForFunction(()=>document.querySelector('#nw-enabled').disabled&&!document.querySelector('#nw-dialog').open);
+state.connecting=false;state.failed=true;state.message='没有连上 Wi-Fi，请检查密码后重试';
+await page.waitForFunction(()=>!document.querySelector('#nw-enabled').disabled&&document.querySelector('#nw-message').classList.contains('nw-error'));
+assert.equal(await page.locator('#nw-ap-ip').innerText(),'192.168.0.1','失败后保留热点访问入口');
+assert.equal(await page.locator('#nw-manual').isEnabled(),true,'异步失败后允许重新输入');
+delayedConnect=false;await page.getByRole('button',{name:/^Home Wi-Fi /}).click();await page.locator('#nw-password').fill('correct-password');await page.locator('#nw-connect').click();
+await page.waitForFunction(()=>!document.querySelector('#nw-dialog').open&&document.querySelector('#nw-current').textContent.includes('Home Wi-Fi'));
+assert.equal(submitted.get('password'),'correct-password');
 // 开放网络直接显示确认提示，不出现密码框或容易误解的复选框
 await page.getByRole('button',{name:/Guest/}).click();assert.equal(await page.locator('#nw-password-fields').isVisible(),false);assert.equal(await page.locator('#nw-open-note').isVisible(),true);await page.locator('#nw-connect').click();await page.waitForFunction(()=>!document.querySelector('#nw-dialog').open);assert.equal(submitted.get('open'),'1');assert.equal(submitted.has('password'),false);
 await page.locator('#nw-manual').click();assert.equal(await page.locator('#nw-security').isVisible(),true);await page.locator('#nw-ssid').fill('Hidden Wi-Fi');await page.locator('#nw-security').selectOption('open');assert.equal(await page.locator('#nw-password-fields').isVisible(),false);await page.locator('#nw-security').selectOption('password');assert.equal(await page.locator('#nw-password-fields').isVisible(),true);

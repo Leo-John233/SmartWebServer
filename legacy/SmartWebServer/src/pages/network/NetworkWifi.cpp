@@ -7,12 +7,16 @@ extern bool loginRequired;
 
 namespace {
 bool scanning = false, scanAddedSta = false, connecting = false, failed = false;
+bool stationRetryBlocked = false;
 uint8_t pending = 0; // 1 表示连接路由器，2 表示设置热点，先返回网页响应再切换网络
 unsigned long scheduledAt = 0, connectStarted = 0, scanStarted = 0, lastRetry = 0;
 // 上游将路由器参数和密码独立保存，提交时一起暂存并在应用时更新
 WifiSettings proposed;
 StationSettings proposedStation;
 StationPassword proposedPassword;
+StationSettings previousStation;
+StationPassword previousPassword;
+bool stationCandidate = false;
 String notice;
 
 // 转义网络名称中的引号和控制字符，保证扫描结果始终是合法 JSON
@@ -79,6 +83,8 @@ void endScan() {
 // 发起连接后立即返回，由主循环判断成功或超时
 bool configureStation() {
   StationSettings &s = *wifiManager.sta;
+  // 网页连接由本状态机管理，避免 SDK 重连与网页重试同时争用无线接口。
+  WiFi.setAutoReconnect(false);
   WiFi.enableSTA(true);
   WiFi.disconnect();
   IPAddress zero((uint32_t)0);
@@ -88,6 +94,7 @@ bool configureStation() {
   WiFi.begin(s.ssid, wifiManager.staPwd->password);
   connectStarted = millis();
   connecting = true;
+  stationRetryBlocked = false;
   wifiManager.networkBusy = true;
   failed = false;
   notice = L_UI_CONNECTING_NOTE;
@@ -96,8 +103,18 @@ bool configureStation() {
 void connectionFailed(const String &reason) {
   connecting = false;
   failed = true;
+  stationRetryBlocked = true;
   wifiManager.networkBusy = false;
+  WiFi.setAutoReconnect(false);
   WiFi.disconnect();
+  // 结束失败的 STA 尝试，保留 AP，停止错误凭据引起的后台扫描和重连。
+  WiFi.enableSTA(false);
+  // 回滚未验证的凭据，后续保存热点等设置时也不能把错误密码一并写入。
+  if (stationCandidate) {
+    *wifiManager.sta = previousStation;
+    *wifiManager.staPwd = previousPassword;
+    stationCandidate = false;
+  }
   bool available = apActive() || startAp();
   notice = reason + (available ? L_UI_AP_AVAILABLE : L_UI_AP_FAILED);
   lastRetry = millis();
@@ -223,7 +240,7 @@ void handleWifiNetwork() {
 void pollWifiNetwork() {
   unsigned long now = millis();
   // 浏览器关闭后也会释放扫描缓存，并恢复原来的无线模式
-  if (scanning && now - scanStarted > 45000) endScan();
+  if (scanning && now - scanStarted >= 30000) endScan();
   if (pending && now - scheduledAt >= 1000) {
     uint8_t operation = pending; pending = 0;
     // 延迟应用期间若路由器掉线，取消关闭热点，保留可用入口
@@ -235,6 +252,9 @@ void pollWifiNetwork() {
     wifiManager.settings = proposed;
     wifiManager.setStation(wifiManager.stationNumber);
     if (operation == 1) {
+      previousStation = *wifiManager.sta;
+      previousPassword = *wifiManager.staPwd;
+      stationCandidate = proposed.stationEnabled;
       *wifiManager.sta = proposedStation;
       *wifiManager.staPwd = proposedPassword;
     }
@@ -249,6 +269,7 @@ void pollWifiNetwork() {
         WiFi.disconnect(); WiFi.enableSTA(false);
         if (!apActive()) startAp();
         notice = L_UI_STA_DISCONNECTED;
+        wifiManager.writeSettings();
       }
     } else {
       if (wifiManager.settings.accessPointEnabled) {
@@ -256,10 +277,12 @@ void pollWifiNetwork() {
         else notice = L_UI_AP_SAVED;
       } else { WiFi.softAPdisconnect(true); notice = L_UI_AP_CLOSED; }
     }
-    wifiManager.writeSettings();
+    // 连接参数验证成功后再持久化，失败密码不能覆盖原有可用配置。
+    if (operation == 2) wifiManager.writeSettings();
   }
   if (connecting) {
-    if (WiFi.status() == WL_CONNECTED) {
+    const int connection = WiFi.status();
+    if (connection == WL_CONNECTED) {
       IPAddress ip = WiFi.localIP(), mask = WiFi.subnetMask();
       AccessPointSettings &a = wifiManager.settings.ap;
       if (apActive() && overlap(a.ip, a.sn, &ip[0], &mask[0])) {
@@ -268,14 +291,20 @@ void pollWifiNetwork() {
         connecting = false; wifiManager.networkBusy = false; failed = false;
         notice = L_UI_CONNECTED_ADDRESS + WiFi.localIP().toString();
         lastRetry = now;
+        if (stationCandidate) {
+          stationCandidate = false;
+          wifiManager.writeSettings();
+        }
       }
+    } else if (connection == WL_CONNECT_FAILED || connection == WL_NO_SSID_AVAIL) {
+      connectionFailed(L_UI_CONNECT_FAILED);
     } else if (now - connectStarted > 25000) {
       connectionFailed(L_UI_CONNECT_FAILED);
     }
   }
   #if STA_AUTO_RECONNECT == true
-    // 网页配网后使用较长重试间隔，给扫描和修改密码留出时间
-    if (wifiManager.webManaged && wifiManager.settings.stationEnabled && !connecting && !scanning && !pending &&
+    // 成功连接后意外掉线可重试；明确失败后等待用户修改，避免反复锁住配网入口。
+    if (wifiManager.webManaged && !stationRetryBlocked && wifiManager.settings.stationEnabled && !connecting && !scanning && !pending &&
         WiFi.status() != WL_CONNECTED && now - lastRetry > 30000) {
       lastRetry = now;
       if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED);
