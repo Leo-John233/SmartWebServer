@@ -58,6 +58,11 @@ const char html_editor_styles[] PROGMEM = R"UI(
 .sws-clock-value strong { display:block; font-size:19px; line-height:1.6; font-weight:600; font-variant-numeric:tabular-nums; }
 .sws-sidereal-clock { display:flex; gap:10px; margin-top:6px; font-size:13px; color:var(--muted); }
 .sws-sidereal-clock strong { font-weight:400; }
+.sws-site .sws-astronomy-time { margin-top:22px; padding-top:16px; border-top:1px solid var(--border); }
+.sws-site .sws-astronomy-time .sws-field-label { margin-bottom:6px; }
+.sws-site .sws-astronomy-time .sws-clock-value strong { font-size:20px; line-height:1.5; font-weight:500; font-variant-numeric:tabular-nums; }
+.sws-site .sws-astronomy-time #date_ut, .sws-site .sws-astronomy-time #time_ut { font-size:inherit; }
+.sws-site .sws-astronomy-time .sws-sidereal-clock { margin-top:10px; font-size:14px; }
 .sws-editor .sws-clock-action { margin:0; display:flex; justify-content:flex-end; }
 .sws-editor .sws-clock-action button { width:auto; min-height:42px; margin:0; font-size:14px; white-space:normal; }
 .sws-browser-clock { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; margin:14px 0 0; font-size:12px; color:var(--muted); }

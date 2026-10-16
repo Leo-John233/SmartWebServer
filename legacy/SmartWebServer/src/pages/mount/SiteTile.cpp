@@ -85,11 +85,12 @@ void siteTile(String &data)
   data.concat(F("</div><div class='sws-editor-footer'><button type='reset' class='sws-secondary'>" L_UI_CANCEL "</button><button type='submit'>" L_SAVE_SETTINGS "</button></div></form>"));
   // 时间同步仍使用原始日期时间参数；位置读数标识保留给原有轮询。
   data.concat(F("<div class='sws-clock-controls'>"));
+  data.concat(FPSTR(html_localTime));
+  data.concat(FPSTR(html_setDateTime));
+  data.concat(F("</div>"));
   snprintf_P(temp, sizeof(temp), html_date, state.dateStr); data.concat(temp);
   snprintf_P(temp, sizeof(temp), html_time, state.timeStr); data.concat(temp);
   snprintf_P(temp, sizeof(temp), html_sidereal, state.lastStr); data.concat(temp);
-  data.concat(FPSTR(html_setDateTime));
-  data.concat(F("</div>"));
   data.concat(FPSTR(html_browserTime));
   snprintf_P(temp, sizeof(temp), html_site, state.latitudeStr, state.longitudeStr); data.concat(temp);
   data.concat(FPSTR(html_tile_end));

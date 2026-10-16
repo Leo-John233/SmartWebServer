@@ -13,9 +13,10 @@ extern void siteTileGet();
 
 const char html_browserTime[] PROGMEM =
   "<p class='sws-browser-clock' hidden><span>" L_TIME_BROWSER_UT "</span><strong id='datetime'></strong><script>update_date_time();</script></p>";
-const char html_date[] PROGMEM = "<div class='sws-site-clock'><div class='sws-clock-value'><span class='sws-field-label'>" L_SITE_TIME "</span><input id='sws-local-time' readonly aria-label='" L_SITE_TIME "' value='—'><strong hidden><span id='date_ut' class='c'>%s</span>";
+const char html_localTime[] PROGMEM = "<div class='sws-site-clock'><span class='sws-field-label'>" L_SITE_TIME "</span><input id='sws-local-time' readonly aria-label='" L_SITE_TIME "' value='—'></div>";
+const char html_date[] PROGMEM = "<div class='sws-astronomy-time'><div class='sws-clock-value'><span class='sws-field-label'>" L_UT "</span><strong><span id='date_ut' class='c'>%s</span>";
 const char html_time[] PROGMEM = " <span id='time_ut' class='c'>%s</span></strong></div>";
-const char html_sidereal[] PROGMEM = "<div class='sws-sidereal-clock' hidden><span>" L_LST "</span><strong id='time_lst' class='c'>%s</strong></div></div>";
+const char html_sidereal[] PROGMEM = "<div class='sws-sidereal-clock'><span>" L_LST "</span><strong id='time_lst' class='c'>%s</strong></div></div>";
 const char html_site[] PROGMEM =
   "<div hidden><span id='site_lat'>%s</span><span id='site_long'>%s</span></div>";
 const char html_setDateTime[] PROGMEM =

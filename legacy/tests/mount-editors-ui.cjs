@@ -28,6 +28,12 @@ const html = '<!doctype html><meta charset="utf-8"><meta name="viewport" content
     await page.goto('http://editors.test/');
     await page.clock.setFixedTime(new Date('2026-10-17T00:00:00Z'));
     assert.equal(await page.locator('#sws-local-time').inputValue(),'2026-10-16 18:08:38');
+    assert.equal(await page.locator('#date_ut').count(),1);assert.equal(await page.locator('#time_lst').count(),1);
+    assert(await page.locator('#date_ut').isVisible());assert(await page.locator('#time_lst').isVisible());
+    assert.equal(await page.locator('#time_ut').innerText(),'10:08:38');
+    assert.equal(await page.locator('#time_lst').innerText(),'19:52:26');
+    const footerPosition=await page.evaluate(()=>document.querySelector('.sws-astronomy-time').getBoundingClientRect().top>=document.querySelector('.sws-clock-controls').getBoundingClientRect().bottom);
+    assert(footerPosition,'世界时和恒星时位于同步区下方');
     await page.evaluate(()=>{document.getElementById('time_ut').textContent='23:59:59';});
     await page.waitForFunction(()=>document.getElementById('sws-local-time').value==='2026-10-17 07:59:59');
     await page.evaluate(()=>{document.getElementById('time_ut').textContent='10:08:38';});
