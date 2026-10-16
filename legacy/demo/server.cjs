@@ -1,0 +1,35 @@
+// 仅在本机提供模拟设备，不连接串口或真实硬件
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
+const {doc,state,head,shared,templates}=require('./render.cjs');
+const client=fs.readFileSync(path.join(__dirname,'simulation.js'),'utf8');
+const pages=['/index.htm','/mount.htm','/net.htm','/focuser.htm','/rotator.htm','/auxiliary.htm','/enc.htm'];
+const networks=[{ssid:'Redmi_Hotel',rssi:-48,open:false},{ssid:'Observatory',rssi:-62,open:false},{ssid:'Guest',rssi:-73,open:true},{ssid:'Home Wi-Fi',rssi:-55,open:false}];
+let connectAt=0,scanAt=0,fail=false;
+const server=http.createServer(async(req,res)=>{
+  res.setHeader('Cache-Control','no-store');
+  const url=new URL(req.url,'http://127.0.0.1');let body='';for await(const chunk of req){body+=chunk;if(body.length>65536){res.writeHead(413);res.end();return;}}
+  const args=new URLSearchParams(body),send=(data,type='text/html; charset=utf-8')=>{res.setHeader('Content-Type',type);res.end(data);};
+  if(url.pathname==='/demo.js')return send(client,'text/javascript; charset=utf-8');
+  if(url.pathname==='/net-wifi'){
+    const action=url.searchParams.get('action');
+    if(action==='scan'){if(!scanAt)scanAt=Date.now()+1000;const running=Date.now()<scanAt;if(!running)scanAt=0;return send(JSON.stringify({running,networks:running?[]:networks}),'application/json');}
+    if(action==='connect'){
+      if(args.get('enabled')==='1'&&!args.get('ssid')){res.statusCode=400;return send(JSON.stringify({message:'请输入 Wi-Fi 名称'}),'application/json');}
+      for(const k of ['ssid','ip','gw','sn'])if(args.has(k))state.sta[k]=args.get(k);
+      for(const k of ['enabled','open','dhcp'])state.sta[k]=args.get(k)==='1';
+      fail=args.get('password')==='wrongpass';state.connected=false;state.connecting=state.sta.enabled;state.failed=false;connectAt=Date.now()+2200;state.message=state.sta.enabled?'正在连接':'已关闭路由器连接';
+    }
+    if(action==='ap'){for(const k of ['ssid','ip','gw','sn'])if(args.has(k))state.ap[k]=args.get(k);state.ap.enabled=args.get('enabled')==='1';state.ap.channel=Number(args.get('channel')||7);state.apActive=state.ap.enabled;state.apIp=state.ap.ip;state.apSsid=state.ap.ssid;state.message='热点设置已保存';}
+    if(state.connecting&&Date.now()>=connectAt){state.connecting=false;state.connected=!fail;state.failed=fail;state.ssid=state.sta.ssid;state.ip=state.sta.dhcp?'192.168.31.229':state.sta.ip;state.message=fail?'密码错误，请重新输入':'已连接';}
+    return send(JSON.stringify(state),'application/json');
+  }
+  if(url.pathname.endsWith('.txt')||url.pathname==='/preview-poll')return send('','text/plain');
+  if(url.pathname==='/libraryHelp.htm')return send(head+'</head><body>'+shared+'<main class="sws-document"><h1>天体库</h1>'+Object.values(templates['LibraryHelp.h']).join('')+'</main></body></html>');
+  const page=url.pathname==='/'?'/index.htm':url.pathname;
+  if(!pages.includes(page)){res.statusCode=404;return send('页面不存在');}
+  let html=doc(page,url.searchParams.has('view')||req.method==='POST');
+  // 模拟脚本先于内联按钮脚本加载，保存值仅写入浏览器本地存储
+  html=html.replace('</head>','<script src="/demo.js"></script></head>');
+  send(html);
+});
+server.listen(Number(process.env.SWS_DEMO_PORT||8765),'127.0.0.1',()=>console.log('SWS demo ready http://127.0.0.1:'+server.address().port));
