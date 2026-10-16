@@ -561,3 +561,6 @@
 #define L_GOTO_ACTION "GOTO"
 #define L_GOTO_TARGET "現在の目標へ移動"
 #define L_SYNC_TARGET "現在の目標に同期"
+
+// 侧栏说明沿用语言资源管理
+#define L_SIDEBAR_NOTE "OnStep スマート制御"

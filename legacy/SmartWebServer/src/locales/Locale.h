@@ -174,3 +174,7 @@
 #ifndef L_DEVICE_TRACKING
 #define L_DEVICE_TRACKING "Device tracking"
 #endif
+
+#ifndef L_SIDEBAR_NOTE
+#define L_SIDEBAR_NOTE "OnStep smart control"
+#endif

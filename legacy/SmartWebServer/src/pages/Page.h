@@ -21,7 +21,7 @@ bool servePageShell(int selected);
 const char html_onstep_header_begin[] PROGMEM = "<div class='t'><table width='100%%'><tr><td><b><font size='5'>";
 const char html_onstep_header_title[] PROGMEM = "</font></b></td><td align='right'><b>Smart Web Server ";
 const char html_onstep_header_links[] PROGMEM = ")</b></td></tr></table>";
-const char html_onstep_header_end[] PROGMEM = "</div>\n";
+const char html_onstep_header_end[] PROGMEM = "<span id='sws-sidebar-label' hidden>" L_SIDEBAR_NOTE "</span></div>\n";
 const char html_onstep_page_begin[] PROGMEM = "<div class='b'>\n";
 
 const char html_links_idx_begin[] PROGMEM = "<a href='/index.htm' ";

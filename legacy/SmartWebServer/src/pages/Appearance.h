@@ -93,7 +93,7 @@ html.sws-embedded body{background:#101012}html.sws-embedded .b{background:transp
 /* 设备跟踪开关行与方位控制标题采用统一层级 */
 .sws-track-switch{min-height:28px;margin:0 0 16px;clear:both}.sws-track-switch>span,.sws-mount .sws-guide>.b1>div:first-child{font-size:16px;font-weight:600;line-height:28px}
 /* 隐藏旧页头的名称区域，版本信息由原始服务端数据移至页头右侧 */
-.sws-shell .t table{display:none}.sws-version{font-size:11px;line-height:1.5;color:var(--muted);text-align:right;overflow-wrap:anywhere;max-width:50%}@media(max-width:700px){.sws-version{font-size:10px;max-width:45%}.sws-topbar{align-items:flex-start}}
+.sws-shell .t td:last-child{display:none}.sws-version{font-size:11px;line-height:1.5;color:var(--muted);text-align:right;overflow-wrap:anywhere;max-width:50%}@media(max-width:700px){.sws-version{font-size:10px;max-width:45%}.sws-topbar{align-items:flex-start}}
 </style>
 <script>
 // 坐标由单次请求提交，保留错误反馈且不在连接中断时自动重发运动指令
@@ -153,6 +153,8 @@ const more=document.createElement('button');more.type='button';more.className='s
 const closeMore=()=>{nav.dataset.expanded='false';more.setAttribute('aria-expanded','false');};more.onclick=()=>{const expanded=nav.dataset.expanded!=='true';nav.dataset.expanded=String(expanded);more.setAttribute('aria-expanded',String(expanded));};if(extras.children.length)nav.appendChild(more);document.querySelector('.t').appendChild(nav);
 addEventListener('keydown',e=>{if(e.key==='Escape')closeMore();});document.addEventListener('click',e=>{if(!nav.contains(e.target))closeMore();});
 // 版本沿用原始页头的服务端输出，不额外写入品牌名称
+// 左侧配置名称保留原始页头来源，说明从当前语言资源读取
+const note=document.createElement('div');note.className='sws-sidebar-note';note.textContent=document.getElementById('sws-sidebar-label').textContent;document.querySelector('.t').appendChild(note);
 const topbar=document.createElement('header');topbar.className='sws-topbar';topbar.innerHTML='<div><h1 id="sws-page-title"></h1><p id="sws-page-description"></p></div>';const version=document.createElement('span');version.className='sws-version';version.textContent=document.querySelector('.t td:last-child')?.textContent||'';if(version.textContent)topbar.appendChild(version);hint.before(topbar);
 const normalize=path=>path==='/'?'/index.htm':path;
 function resize(){const bottom=matchMedia('(max-width:700px)').matches?document.querySelector('.t').getBoundingClientRect().height:0;frame.style.height=Math.max(180,innerHeight-frame.getBoundingClientRect().top-bottom)+'px';}

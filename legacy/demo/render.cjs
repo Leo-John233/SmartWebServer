@@ -9,7 +9,10 @@ const headers=read('src/pages/htmlHeaders.h'),pageHeader=read('src/pages/Page.h'
 for(const source of [headers,read('src/locales/Strings_cn.h')])for(const m of source.matchAll(/^#define\s+(\w+)\s+("(?:\\.|[^"\\])*")/gm))defs[m[1]]=JSON.parse(m[2]);
 function constant(source,name){const m=new RegExp('const char '+name+'\\[\\] PROGMEM\\s*=').exec(source);if(!m)throw Error(name);let value='';for(const t of source.slice(m.index+m[0].length).matchAll(/"(?:\\.|[^"\\])*"|\b[A-Za-z_]\w*\b|;/g)){if(t[0]===';')return value;if(t[0][0]==='"')value+=JSON.parse(t[0]);else if(t[0] in defs)value+=defs[t[0]];else throw Error('未知宏 '+t[0]);}}
 const h=n=>constant(headers,n),p=n=>constant(pageHeader,n);
-const title=p('html_onstep_header_begin')+'OnStepX'+p('html_onstep_header_title')+'2.10h (OnStep10.28w'+p('html_onstep_header_links')+['idx','mnt','net','foc','rot','aux','enc'].map(k=>p('html_links_'+k+'_begin')+p('html_links_'+k+'_end')).join('')+p('html_onstep_header_end');
+// 模拟主控的配置名称，空名称与固件一样回退到 OnStep
+const configName=process.env.SWS_DEMO_CONFIG_NAME??'OnStepX';
+const displayName=(configName||'OnStep').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const title=p('html_onstep_header_begin')+displayName+p('html_onstep_header_title')+'2.10h (OnStep10.28w'+p('html_onstep_header_links')+['idx','mnt','net','foc','rot','aux','enc'].map(k=>p('html_links_'+k+'_begin')+p('html_links_'+k+'_end')).join('')+p('html_onstep_header_end');
 const head=h('html_head_begin')+h('html_main_css_begin')+h('html_main_css_core')+h('html_main_css_control')+h('html_main_css_collapse')+h('html_main_css_end');
 const tile=(title,body)=>h('html_tile_text_beg').replace('%s','22em').replace('%s','18em').replace('%s',title)+'<br><hr>'+body+h('html_tile_end');
 const networkSource=read('src/pages/network/Network.h').replace(/#if DISPLAY_RESET_CONTROLS != OFF[\s\S]*?#else([\s\S]*?)#endif/,'$1'),n=name=>constant(networkSource,name);

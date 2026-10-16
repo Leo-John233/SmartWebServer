@@ -562,3 +562,6 @@
 #define L_GOTO_ACTION "GOTO"
 #define L_GOTO_TARGET "Deplasare la ținta curentă"
 #define L_SYNC_TARGET "Sincronizare cu ținta curentă"
+
+// 侧栏说明沿用语言资源管理
+#define L_SIDEBAR_NOTE "Control inteligent OnStep"

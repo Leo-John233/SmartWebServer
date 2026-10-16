@@ -560,3 +560,6 @@
 #define L_GOTO_ACTION "GOTO"
 #define L_GOTO_TARGET "Ir al objetivo actual"
 #define L_SYNC_TARGET "Sincronizar el objetivo actual"
+
+// 侧栏说明沿用语言资源管理
+#define L_SIDEBAR_NOTE "Control inteligente OnStep"
