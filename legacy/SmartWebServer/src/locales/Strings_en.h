@@ -719,3 +719,10 @@
 #define L_WEB_PASSWORD_RULE "3–31 characters; leave blank to keep the current password"
 #define L_IO_BRAKE_STOPPING "STOP sent, waiting for standstill"
 #define L_IO_BRAKE_STOP_FAILED "STOP not sent, released"
+
+#define L_SITE_TIME "Time"
+#define L_SITE_LOCATE "Locate"
+#define L_SITE_LOCATE_FAILED "Location unavailable, allow access or edit manually"
+#define L_TRACK_REJECTED "Controller rejected tracking; check park, home and driver status"
+#define L_TRACK_TIMEOUT "Controller response timed out; check connection"
+#define L_TRACK_INVALID "Invalid controller response; retry"

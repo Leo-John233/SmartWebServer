@@ -727,3 +727,10 @@
 #define L_WEB_PASSWORD_RULE "3–31 Zeichen; leer lassen, um das Passwort beizubehalten"
 #define L_IO_BRAKE_STOPPING "STOP gesendet, warte auf Stillstand"
 #define L_IO_BRAKE_STOP_FAILED "STOP nicht gesendet, gelöst"
+
+#define L_SITE_TIME "Zeit"
+#define L_SITE_LOCATE "Standort"
+#define L_SITE_LOCATE_FAILED "Standort nicht verfügbar, Zugriff erlauben oder manuell bearbeiten"
+#define L_TRACK_REJECTED "Nachführung abgelehnt; Park-, Referenz- und Treiberstatus prüfen"
+#define L_TRACK_TIMEOUT "Antwortzeit überschritten; Verbindung prüfen"
+#define L_TRACK_INVALID "Ungültige Antwort; erneut versuchen"

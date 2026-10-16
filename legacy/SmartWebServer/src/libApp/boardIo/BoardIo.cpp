@@ -31,8 +31,8 @@ void BoardIo::begin() {
   // 无法建立输出监控任务时维持初始化电平；启用保护时仍保持启动抱闸。
   if (!tasks.add(20, 0, true, 1, pollBoardOutputs, "BoardIO")) return;
   started_ = true;
-  // 与命令通道同优先级，允许在网页让出执行权时采样，避免长页面使反馈过期。
-  if (brakeAvailable()) tasks.add(BoardIoPolicy::PollIntervalMs, 0, true, 2, pollBoardDriver, "RaBrake");
+  // 低于命令通道及网页，缺失驱动的查询不能抢占用户操作。
+  if (brakeAvailable()) tasks.add(BoardIoPolicy::PollIntervalMs, 0, true, 4, pollBoardDriver, "RaBrake");
   tick();
 }
 

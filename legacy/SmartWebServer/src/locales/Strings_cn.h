@@ -722,3 +722,10 @@
 #define L_WEB_PASSWORD_RULE "3–31 个字符，留空不修改"
 #define L_IO_BRAKE_STOPPING "已发停止，等待静止反馈"
 #define L_IO_BRAKE_STOP_FAILED "停止指令未发出，保持松闸"
+
+#define L_SITE_TIME "时间"
+#define L_SITE_LOCATE "定位"
+#define L_SITE_LOCATE_FAILED "无法获取位置，请允许定位权限或手动编辑"
+#define L_TRACK_REJECTED "主控拒绝跟踪操作，请检查停放、回零及驱动状态"
+#define L_TRACK_TIMEOUT "主控应答超时，请检查连接"
+#define L_TRACK_INVALID "主控应答异常，请重试"

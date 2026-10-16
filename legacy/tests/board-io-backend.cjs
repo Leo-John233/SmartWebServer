@@ -210,6 +210,10 @@ int main(){
   www.args["enabled"]="1";nv().store.fail=true;handleBoardIo();assert(www.code==500&&pins[5]==LOW);nv().store.fail=false;
   handleBoardIo();assert(www.code==200&&pins[5]==HIGH);
   www.methodValue=HTTP_GET;handleBoardIo();assert(www.code==200);www.methodValue=2;handleBoardIo();assert(www.code==405);
+  BoardIoPolicy absent;absent.configure(true,true,0);absent.driverFeedback(false,"",10);
+  assert(!absent.feedbackDue(260)&&!absent.feedbackDue(1009)&&absent.feedbackDue(1010));
+  absent.driverFeedback(true,"0",1010);assert(!absent.stopRequired()&&absent.releaseBrake(true,1010));
+  absent.driverFeedback(true,"ST,,,,,,,",2010);assert(absent.feedbackDue(2260));
   BoardIoPolicy rollover;rollover.configure(true,true,0xfffffe00u);rollover.driverFeedback(true,"ST,,,,,,,GF",0xfffffe00u);
   assert(rollover.stopRequired());rollover.stopResult(true);
   rollover.driverFeedback(true,"ST,,,,,,,GF",0xffffff00u);assert(rollover.releaseBrake(true,0xffffff00u));

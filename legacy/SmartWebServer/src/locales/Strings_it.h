@@ -719,3 +719,10 @@
 #define L_WEB_PASSWORD_RULE "3–31 caratteri; lasciare vuoto per mantenere la password"
 #define L_IO_BRAKE_STOPPING "STOP inviato, attesa arresto"
 #define L_IO_BRAKE_STOP_FAILED "STOP non inviato, rilasciato"
+
+#define L_SITE_TIME "Ora"
+#define L_SITE_LOCATE "Localizza"
+#define L_SITE_LOCATE_FAILED "Posizione non disponibile, consentire accesso o modificare manualmente"
+#define L_TRACK_REJECTED "Inseguimento rifiutato; verificare parcheggio, origine e driver"
+#define L_TRACK_TIMEOUT "Risposta scaduta; verificare la connessione"
+#define L_TRACK_INVALID "Risposta non valida; riprovare"

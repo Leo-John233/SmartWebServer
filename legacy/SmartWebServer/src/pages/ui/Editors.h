@@ -30,6 +30,17 @@ const char html_editor_styles[] PROGMEM = R"UI(
 .sws-signed-input > input:not([hidden]) { width:0 !important; flex:1; min-width:0; margin:0; }
 .sws-editor .sws-signed-input > select { width:62px; flex-shrink:0; }
 .sws-editor .sws-timezone-select { width:100%; margin:0; }
+.sws-site .sws-unit-inputs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.sws-site .sws-unit-inputs > select { width:100%; height:44px; }
+.sws-site .sws-site-fields { gap:26px; }
+.sws-zone-row { display:grid; grid-template-columns:minmax(0,3fr) minmax(90px,1fr); gap:10px; }
+.sws-site .sws-locate, .sws-site .sws-clock-action button { background:var(--accent); width:100%; height:44px; margin:0; }
+.sws-site .sws-clock-controls { display:grid; grid-template-columns:minmax(0,3fr) minmax(90px,1fr); align-items:end; border:0; padding-top:0; margin-top:26px; gap:10px; }
+.sws-site #sws-local-time { width:100%; margin:0; font-size:16px; text-align:left; padding:8px 12px; }
+.sws-site.sws-editor .sws-clock-action small { display:block; width:100%; }
+.sws-site.sws-editor .sws-clock-action button { width:100%; white-space:normal; overflow-wrap:anywhere; padding:6px; }
+.sws-zone-row > *, .sws-site .sws-clock-controls > form { min-width:0; }
+.sws-site .sws-locate { min-width:0; padding:6px; overflow-wrap:anywhere; }
 .sws-editor .sws-help { margin:10px 0 0; font-size:12px; line-height:1.7; color:var(--muted); }
 .sws-editor .sws-limits-form { display:grid; gap:22px; }
 .sws-editor .sws-number-field { display:block; margin:0; }
@@ -112,8 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
       input.before(label); label.append(input, text);
       if (unit?.nodeType === Node.TEXT_NODE) unit.remove();
     });
-    signedInput(site.elements.g1, [['-', )UI" SWS_JS_TEXT(BUTTON_E) R"UI(], ['+', )UI" SWS_JS_TEXT(BUTTON_W) R"UI(]]);
-    signedInput(site.elements.t1, [['+', )UI" SWS_JS_TEXT(BUTTON_N) R"UI(], ['-', )UI" SWS_JS_TEXT(BUTTON_S) R"UI(]]);
+    signedInput(site.elements.g1, [['-', 'E'], ['+', 'W']]);
+    signedInput(site.elements.t1, [['+', 'N'], ['-', 'S']]);
     const hours = site.elements.u1, minutes = site.elements.u2;
     const group = hours.closest('fieldset'), select = document.createElement('select');
     select.className = 'sws-timezone-select';
@@ -129,12 +140,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     group.querySelector('.sws-unit-inputs').hidden = true;
     group.querySelector('.sws-help').hidden = true;
-    group.append(select);
+    const row = document.createElement('div'), locate = document.createElement('button'), notice = document.createElement('p');
+    row.className = 'sws-zone-row'; locate.className = 'sws-locate'; locate.type = 'button';
+    locate.textContent = )UI" SWS_JS_TEXT(L_SITE_LOCATE) R"UI(;
+    notice.className = 'sws-help'; notice.setAttribute('role','status'); notice.hidden = true;
+    row.append(select,locate); group.append(row,notice);
     select.onchange = () => {
       const west = Number(select.value);
       hours.value = (west < 0 ? '-' : '') + Math.floor(Math.abs(west)/60);
       minutes.value = Math.abs(west)%60;
     };
+    locate.onclick = () => {
+      if(site.closest('.sws-editor').dataset.editing!=='true')return;
+      notice.hidden = true;
+      const revision=site.closest('.sws-editor').dataset.editRevision;
+      const current=()=>site.closest('.sws-editor').dataset.editing==='true'&&site.closest('.sws-editor').dataset.editRevision===revision;
+      const failed = () => { if(!current())return; locate.disabled=false; notice.textContent=)UI" SWS_JS_TEXT(L_SITE_LOCATE_FAILED) R"UI(; notice.hidden=false; };
+      if (!navigator.geolocation) { failed(); return; }
+      locate.disabled = true;
+      navigator.geolocation.getCurrentPosition(position => {
+        if(!current())return;
+        locate.disabled = false;
+        for (const [prefix,coordinate,negative] of [['g',position.coords.longitude,position.coords.longitude>=0],['t',position.coords.latitude,position.coords.latitude<0]]) {
+          const total=Math.round(Math.abs(coordinate)*3600), source=site.elements[prefix+'1'];
+          const value=source.parentElement.querySelector('input:not([hidden])'), direction=source.closest('fieldset').querySelector('.sws-unit-inputs > select');
+          value.value=Math.floor(total/3600); direction.value=negative?'-':'+';
+          value.dispatchEvent(new Event('input')); direction.dispatchEvent(new Event('change'));
+          site.elements[prefix+'2'].value=Math.floor(total%3600/60);
+          if(site.elements[prefix+'3']) site.elements[prefix+'3'].value=total%60;
+        }
+        const year=new Date().getFullYear(), west=Math.max(new Date(year,0,1).getTimezoneOffset(),new Date(year,6,1).getTimezoneOffset());
+        if([...select.options].some(o=>Number(o.value)===west)){select.value=west;select.onchange();}
+      },failed,{timeout:10000,maximumAge:60000});
+    };
+    const updateLocalTime = () => {
+      const date=document.getElementById('date_ut').textContent.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/), time=document.getElementById('time_ut').textContent.match(/^(\d{2}):(\d{2}):(\d{2})$/);
+      const output=document.getElementById('sws-local-time');
+      if(!date||!time){output.value='—';return;}
+      const h=hours.defaultValue,m=[...minutes.options].find(o=>o.defaultSelected)?.value || '0',west=(Math.abs(Number(h))*60+Number(m))*(h.startsWith('-')?-1:1);
+      const d=new Date(Date.UTC(Number(date[3])+(date[3].length===2?2000:0),Number(date[1])-1,Number(date[2]),Number(time[1]),Number(time[2]),Number(time[3]))-west*60000);
+      output.value=d.toISOString().slice(0,19).replace('T',' ');
+    };
+    for(const id of ['date_ut','time_ut']) new MutationObserver(updateLocalTime).observe(document.getElementById(id),{childList:true,characterData:true,subtree:true});
+    updateLocalTime();
   }
   const limits = document.getElementById('sws-limits-form');
   if (limits) ['hl','el','wl'].forEach(name => signedInput(limits.elements[name], [['+','+'], ['-','−']]));
@@ -149,6 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', remember);
     const setEditing = (editing) => {
       card.dataset.editing = String(editing);
+      card.dataset.editRevision=String(Number(card.dataset.editRevision||0)+1);
+      const locate=form.querySelector('.sws-locate');if(locate)locate.disabled=!editing;
       fields.forEach(field => { if (field.tagName === 'SELECT') field.disabled = !editing; else field.readOnly = !editing; });
       edit.disabled = editing; edit.setAttribute('aria-expanded', String(editing));
     };

@@ -102,7 +102,13 @@ void mountAjaxGet()
   www.send(200, "text/plain", String());
 
   // 坐标操作返回本次结果，避免与其他控制参数混合执行
-  if (!www.arg("coord_action").equals(EmptyStr)) gotoCoordinatesGet();
+  if (www.arg("dr").equals("T1") || www.arg("dr").equals("T0")) {
+    // 跟踪开关必须返回主控的实际应答，不能用 HTTP 200 代替设备成功。
+    char reply[80] = "";
+    const bool received = onStep.command(www.arg("dr").equals("T1") ? ":Te#" : ":Td#", reply);
+    www.sendContent(!received ? "timeout" : !strcmp(reply, "1") ? "ok" : !strcmp(reply, "0") ? "rejected" : "invalid");
+  }
+  else if (!www.arg("coord_action").equals(EmptyStr)) gotoCoordinatesGet();
   else processMountGet();
 
   www.sendContent("");

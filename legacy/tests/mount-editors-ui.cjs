@@ -16,14 +16,29 @@ const html = '<!doctype html><meta charset="utf-8"><meta name="viewport" content
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   try {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } }), errors = [], submissions = [];
-    page.on('pageerror', e => errors.push(e.message));
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1100 }, timezoneId:'America/New_York' }), errors = [], submissions = [];
+    let trackingReply='ok'; const trackingRequests=[];
+    page.on('pageerror', e => { errors.push(e.message); console.error(e.stack); });
     await page.route('http://editors.test/**', route => {
       const url = new URL(route.request().url());
+      if(url.pathname==='/mount-ajax-get.txt'){trackingRequests.push(url.searchParams.get('dr'));return route.fulfill({body:trackingReply});}
       if (url.searchParams.size) submissions.push(Object.fromEntries(url.searchParams));
       return route.fulfill({ contentType: 'text/html', body: html });
     });
     await page.goto('http://editors.test/');
+    await page.clock.setFixedTime(new Date('2026-10-17T00:00:00Z'));
+    assert.equal(await page.locator('#sws-local-time').inputValue(),'2026-10-16 18:08:38');
+    await page.evaluate(()=>{document.getElementById('time_ut').textContent='23:59:59';});
+    await page.waitForFunction(()=>document.getElementById('sws-local-time').value==='2026-10-17 07:59:59');
+    await page.evaluate(()=>{document.getElementById('time_ut').textContent='10:08:38';});
+    const toggle=page.locator('.sws-track-switch [role=switch]');
+    await toggle.click();await page.waitForFunction(()=>document.querySelector('.sws-track-switch [role=switch]').getAttribute('aria-checked')==='true');
+    assert.equal(trackingRequests.pop(),'T1');
+    trackingReply='rejected';await toggle.click();await page.getByRole('status').filter({hasText:'主控拒绝'}).waitFor();
+    assert.equal(await toggle.getAttribute('aria-checked'),'true');assert.equal(trackingRequests.pop(),'T0');
+    trackingReply='timeout';await toggle.click();await page.getByRole('status').filter({hasText:'主控应答超时'}).waitFor();
+    trackingReply='invalid';await toggle.click();await page.getByRole('status').filter({hasText:'主控应答异常'}).waitFor();
+    trackingReply='ok';await toggle.click();await page.waitForFunction(()=>document.querySelector('.sws-track-switch [role=switch]').getAttribute('aria-checked')==='false');
     const site = page.locator('#sws-site-form'), limits = page.locator('#sws-limits-form');
     const degree = name => page.locator('[name='+name+']').locator('..').locator('input:not([hidden])');
     const direction = name => page.locator('[name='+name+']').locator('xpath=ancestor::fieldset').locator('.sws-unit-inputs > select');
@@ -83,7 +98,31 @@ const html = '<!doctype html><meta charset="utf-8"><meta name="viewport" content
     await page.waitForURL('**/mount.htm?qb=st**');
     assert.equal(submissions[2].qb, 'st');
     for (const key of ['dm','dd','dy','th','tm','ts']) assert(/^\d+$/.test(submissions[2][key]), key+' 时间同步参数完整');
+    assert.equal(submissions[2].th,'8','同步使用设备 UTC+8 而非浏览器纽约时区');
+    assert.equal(submissions[2].dd,'17');
     assert(!('g1' in submissions[2]), '时间同步与位置设置各自提交');
+    await page.evaluate(()=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(ok){ok({coords:{longitude:-122.25,latitude:47.5}});}}});});
+    assert.equal(await page.locator('.sws-locate').isEnabled(),false);
+    await page.locator('[data-edit-form=sws-site-form]').click();
+    await page.locator('.sws-locate').click();
+    assert.equal(await degree('g1').inputValue(),'122');assert.equal(await direction('g1').inputValue(),'+');
+    assert.equal(await site.locator('[name=g2]').inputValue(),'15');assert.equal(await site.locator('[name=t2]').inputValue(),'30');
+    assert.equal(await timezone.inputValue(),'300');assert.equal(submissions.length,3,'定位只填充待保存设置');
+    await site.locator('button[type=reset]').click();await page.waitForFunction(()=>document.querySelector('.sws-site').dataset.editing==='false');
+    await page.evaluate(()=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(ok,fail){fail({code:1});}}});});
+    await page.locator('[data-edit-form=sws-site-form]').click();
+    await page.locator('.sws-locate').click();await page.getByRole('status').filter({hasText:'无法获取位置'}).waitFor();
+    await site.locator('button[type=reset]').click();await page.waitForFunction(()=>document.querySelector('.sws-site').dataset.editing==='false');
+    await page.evaluate(()=>document.querySelector('.sws-zone-row').nextElementSibling.hidden=true);
+    await page.locator('[data-edit-form=sws-site-form]').click();
+    await page.evaluate(()=>{navigator.geolocation.getCurrentPosition=ok=>window.pendingLocation=ok;});
+    await page.locator('.sws-locate').click();
+    await site.locator('button[type=reset]').click();await page.waitForFunction(()=>document.querySelector('.sws-site').dataset.editing==='false');
+    await page.evaluate(()=>pendingLocation({coords:{longitude:1,latitude:2}}));
+    assert.equal(await degree('g1').inputValue(),'121','取消后迟到的定位结果不能改写位置');
+    assert.equal(await page.locator('.sws-locate').isEnabled(),false);
+    const colors=await page.evaluate(()=>({site:getComputedStyle(document.querySelector('.sws-site')).backgroundColor,limits:getComputedStyle(document.querySelector('.sws-limits')).backgroundColor,locate:getComputedStyle(document.querySelector('.sws-locate')).backgroundColor,sync:getComputedStyle(document.querySelector('.sws-clock-action button')).backgroundColor}));
+    assert.equal(colors.site,colors.limits);assert.equal(colors.locate,colors.sync);
     await page.locator('.sws-site-limits').screenshot({path:path.join(output,'position-limits-readonly.png')});
     await page.locator('.sws-home-actions').screenshot({path:path.join(output,'home-park-compact.png')});
     for (const width of [1440,1024,390,320]) {

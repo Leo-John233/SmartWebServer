@@ -132,5 +132,7 @@ bool BoardIoPolicy::releaseBrake(bool connected, uint32_t now) const {
 }
 
 bool BoardIoPolicy::feedbackDue(uint32_t now) const {
-  return protection_ && (!feedbackSeen_ || uint32_t(now - feedbackAt_) >= PollIntervalMs);
+  // 无驱动/不支持反馈时降低探测频率，避免串口超时占满命令服务时间。
+  const uint32_t interval = validFeedback_ ? PollIntervalMs : FeedbackStaleMs;
+  return protection_ && (!feedbackSeen_ || uint32_t(now - feedbackAt_) >= interval);
 }

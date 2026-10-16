@@ -143,13 +143,35 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.append(name, toggle);
     on.hidden = true;
     off.hidden = true;
-    toggle.onclick = () => {
+    const result = document.createElement('p');
+    result.className = 'sws-help'; result.setAttribute('role', 'status'); result.hidden = true;
+    wrap.after(result);
+    let pending = false;
+    toggle.onclick = async () => {
+      if (pending) return;
       const checked = toggle.getAttribute('aria-checked') === 'true';
-      (checked ? off : on).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      pending = true; toggle.disabled = true; result.hidden = true;
+      window.swsPendingCommands = (window.swsPendingCommands || 0) + 1;
+      const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch('/mount-ajax-get.txt?dr=' + (checked ? 'T0' : 'T1'), {cache:'no-store',signal:controller.signal});
+        if (!response.ok) throw Error();
+        const reply = (await response.text()).trim();
+        if (reply === 'ok') {
+          on.dataset.selected = String(!checked); off.dataset.selected = String(checked);
+        } else {
+          result.textContent = reply === 'rejected' ? )UI" SWS_JS_TEXT(L_TRACK_REJECTED) R"UI( : reply === 'timeout' ? )UI" SWS_JS_TEXT(L_TRACK_TIMEOUT) R"UI( : )UI" SWS_JS_TEXT(L_TRACK_INVALID) R"UI(;
+          result.hidden = false;
+        }
+      } catch (_) { result.textContent = )UI" SWS_JS_TEXT(L_TRACK_TIMEOUT) R"UI(; result.hidden = false; }
+      finally {
+        clearTimeout(timer); window.swsPendingCommands--; pending = false; sync();
+        if (window.autoFastRun) autoFastRun();
+      }
     };
     const sync = () => {
       toggle.setAttribute('aria-checked', String(on.dataset.selected === 'true'));
-      toggle.disabled = on.disabled && off.disabled;
+      toggle.disabled = pending || (on.disabled && off.disabled);
     };
     const observer = new MutationObserver(sync);
     [on, off].forEach((b) =>

@@ -39,6 +39,7 @@ const server=http.createServer(async(req,res)=>{
     if(state.connecting&&Date.now()>=connectAt){state.connecting=false;state.connected=!fail;state.failed=fail;state.ssid=state.sta.ssid;state.ip=state.sta.dhcp?'192.168.31.229':state.sta.ip;state.message=fail?'密码错误，请重新输入':'已连接';}
     return send(JSON.stringify(state),'application/json');
   }
+  if(url.pathname==='/mount-ajax-get.txt'&&['T1','T0'].includes(url.searchParams.get('dr')))return send('ok','text/plain');
   if(url.pathname==='/mount-ajax-get.txt'&&url.searchParams.has('coord_action')){
     const q=url.searchParams,fields=['ra_h','ra_m','ra_s','dec_d','dec_m','dec_s'],max=[23,59,59,90,59,59];
     const valid=fields.every((k,i)=>/^\d+$/.test(q.get(k)||'')&&Number(q.get(k))<=max[i])&&['+','-'].includes(q.get('dec_sign'))&&['go','sync'].includes(q.get('coord_action'))&&!(Number(q.get('dec_d'))===90&&(Number(q.get('dec_m'))||Number(q.get('dec_s'))));

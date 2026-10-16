@@ -719,3 +719,10 @@
 #define L_WEB_PASSWORD_RULE "3–31 de caractere; lăsați gol pentru a păstra parola"
 #define L_IO_BRAKE_STOPPING "STOP trimis, așteptare repaus"
 #define L_IO_BRAKE_STOP_FAILED "STOP netrimis, eliberată"
+
+#define L_SITE_TIME "Ora"
+#define L_SITE_LOCATE "Localizare"
+#define L_SITE_LOCATE_FAILED "Locație indisponibilă, permiteți accesul sau editați manual"
+#define L_TRACK_REJECTED "Urmărire refuzată; verificați parcarea, originea și driverul"
+#define L_TRACK_TIMEOUT "Răspuns expirat; verificați conexiunea"
+#define L_TRACK_INVALID "Răspuns nevalid; reîncercați"
