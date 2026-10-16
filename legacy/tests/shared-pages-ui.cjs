@@ -96,7 +96,7 @@ for(const width of [1440,800,390,320]){
  const entry=page.frameLocator('#sws-frame').locator('.sws-network-entry');
  assert(await frame().evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'登录页面无横向溢出 '+width);
  const boxes=await entry.evaluate(e=>[...e.children].map(x=>{const r=x.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};}));
- assert(width===1440?boxes[1].left>=boxes[0].right:boxes[1].top>=boxes[0].bottom,'登录和说明按屏幕宽度排列 '+width);
+ assert(boxes[1].top>=boxes[0].bottom&&Math.abs(boxes[0].left-boxes[1].left)<1&&Math.abs(boxes[0].right-boxes[1].right)<1,'登录和完整说明在同一卡片内上下对齐 '+width);
  await entry.screenshot({path:path.join(out,'network-login-'+width+'.png')});
 }
 await page.setViewportSize({width:1440,height:1000});
