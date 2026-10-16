@@ -32,8 +32,15 @@ const char html_indexMountType[] PROGMEM =
   "<div class='sws-setting-actions'><button type='submit'>" L_UPLOAD "</button>"
   "<button name='revert' value='0' type='submit'>" L_REVERT "</button></div></form>\n";
 
-const char html_resetNotes[] PROGMEM =
-  "Notes:<ul>"
+const char html_indexResetBegin[] PROGMEM =
+  "<section class='sws-maintenance'><div class='sws-maintenance-copy'><h3>" L_RESET_TITLE "</h3><ul>"
   "<li>" L_RESET_MSG1 "</li>"
   "<li>" L_DOWN_MESSAGE1 "</li>"
-  "</ul>\n";
+  "</ul></div><div class='sws-maintenance-actions'>";
+const char html_indexReset[] PROGMEM =
+  "<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('boot','reset')\" type='button'>" L_RESET "</button>";
+const char html_indexWipe[] PROGMEM =
+  "<button class='sws-secondary'" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('boot','wipe')\" type='button'>" L_WIPE_RESET "</button>";
+const char html_indexFirmwareReset[] PROGMEM =
+  "<button class='sws-secondary'" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('boot','fwu')\" type='button'>" L_RESET_FWU "</button>";
+const char html_indexResetEnd[] PROGMEM = "</div></section>\n";

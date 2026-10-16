@@ -415,11 +415,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "Changing the ratio of Axis1 Steps per worm rotation and Steps per degree may corrupt the Library NV memory area, backup any catalogs first if needed."
 
 // reset control
-#define L_RESET_TITLE "OnStep Reboot Control:"
+#define L_RESET_TITLE "Restart and recovery"
 #define L_WIPE_RESET "Wipe all settings and Reboot OnStep"
 #define L_RESET "Reboot OnStep"
 #define L_RESET_FWU "Reboot OnStep for firmware upload"
-#define L_RESET_MSG1 "OnStep must be At Home or Parked, otherwise the reboot request is ignored."
+#define L_RESET_MSG1 "Reboot requests are accepted only when the mount is at home or parked"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -464,7 +464,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "Serial Interface to OnStep is Down!"
-#define L_DOWN_MESSAGE1 "If you just rebooted OnStep please wait for several seconds for everything to startup again, then check to be sure you're still connected to WiFi."
+#define L_DOWN_MESSAGE1 "After restarting, wait a few seconds and check the Wi-Fi connection"
 #define L_DOWN_MESSAGE2 "If this is a persistant problem here are other possible causes:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Baud rate mismatch due to reboot of only OnStep, power everything off/on again."
 #define L_DOWN_MESSAGE4 "Incorrectly configured SWS baud rate."
@@ -711,3 +711,9 @@
 #define L_MOUNT_GEM "German equatorial"
 #define L_MOUNT_FORK "Equatorial fork"
 #define L_MOUNT_ALTAZ "Altazimuth"
+#define L_WEB_PASSWORD_TITLE "Admin password"
+#define L_WEB_PASSWORD_HELP "Used to sign in to network settings, separate from the Wi-Fi password"
+#define L_WEB_PASSWORD_NEW "New admin password"
+#define L_WEB_PASSWORD_SAVE "Save password"
+#define L_WEB_LOGOUT "Sign out"
+#define L_WEB_PASSWORD_RULE "3–31 characters; leave blank to keep the current password"

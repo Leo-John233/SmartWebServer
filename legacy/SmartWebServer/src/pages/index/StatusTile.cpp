@@ -93,18 +93,13 @@ void statusTile(String &data)
   if (settingColumns) data.concat(F("</div>"));
 
   #if DISPLAY_RESET_CONTROLS != OFF
-    if (mountType != 0) data.concat(F("<br /><hr>"));
-    snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
-    data.concat(temp);
-    data.concat(L_RESET_TITLE "<br/><br/>");
-    data.concat(F("<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('boot','reset')\" type='button'>" L_RESET "!</button><br />"));
-    data.concat(F("<button" SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('boot','wipe')\" type='button'>" L_WIPE_RESET "!</button>"));
+    data.concat(FPSTR(html_indexResetBegin));
+    data.concat(FPSTR(html_indexReset));
+    data.concat(FPSTR(html_indexWipe));
     #if defined(BOOT0_PIN) && DISPLAY_RESET_CONTROLS == FWU
-      data.concat(F(" &nbsp;&nbsp;<button " SWS_CONFIRM_ATTRIBUTE " onpointerdown=\"if (confirm(this.dataset.confirm)) s('boot','fwu')\" type='button'>" L_RESET_FWU "!</button>"));
+      data.concat(FPSTR(html_indexFirmwareReset));
     #endif
-    data.concat(FPSTR(html_form_end));
-    data.concat(F("<br/>\n"));
-    data.concat(FPSTR(html_resetNotes));
+    data.concat(FPSTR(html_indexResetEnd));
     www.sendContentAndClear(data);
   #endif
 

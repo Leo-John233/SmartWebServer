@@ -421,11 +421,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "修改轴1的“蜗杆每转步数”与“每度步数”的比值可能会损坏星表非易失性存储区 (NV)，如有需要请先备份星表"
 
 // reset control
-#define L_RESET_TITLE "OnStep 重启控制："
+#define L_RESET_TITLE "重启与恢复"
 #define L_WIPE_RESET "擦除所有设置并重启 OnStep"
 #define L_RESET "重启 OnStep"
 #define L_RESET_FWU "重启 OnStep 以进行固件上传"
-#define L_RESET_MSG1 "OnStep 必须处于零位 (At Home) 或已停放 (Parked) 状态，否则重启请求将被忽略"
+#define L_RESET_MSG1 "仅在设备处于零位或已停放时接受重启请求"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -470,7 +470,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "与 OnStep 的串口通信已断开！"
-#define L_DOWN_MESSAGE1 "如果您刚刚重启了 OnStep，请等待几秒钟让系统重新启动完毕，然后检查确保您仍然连接在 WiFi 上"
+#define L_DOWN_MESSAGE1 "重启后等待几秒，再确认 Wi-Fi 已连接"
 #define L_DOWN_MESSAGE2 "如果此问题持续存在，可能的原因如下：<br /><ul>"
 #define L_DOWN_MESSAGE3 "仅重启了 OnStep 导致波特率不匹配，请将所有设备断电后再重新上电"
 #define L_DOWN_MESSAGE4 "SWS 固件的波特率配置不正确"
@@ -714,3 +714,9 @@
 #define L_MOUNT_GEM "德式赤道仪"
 #define L_MOUNT_FORK "叉式赤道仪"
 #define L_MOUNT_ALTAZ "地平经纬仪"
+#define L_WEB_PASSWORD_TITLE "管理密码"
+#define L_WEB_PASSWORD_HELP "用于登录网络设置，与 Wi-Fi 连接密码无关"
+#define L_WEB_PASSWORD_NEW "新管理密码"
+#define L_WEB_PASSWORD_SAVE "保存密码"
+#define L_WEB_LOGOUT "退出登录"
+#define L_WEB_PASSWORD_RULE "3–31 个字符，留空不修改"

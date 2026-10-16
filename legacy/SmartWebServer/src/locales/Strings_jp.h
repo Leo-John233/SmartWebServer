@@ -415,11 +415,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "軸1の「ウォーム1回転あたりのステップ数」と「1度あたりのステップ数」の比率を変更すると、ライブラリのNVメモリ領域が破損する可能性があります。必要に応じて、事前にカタログをバックアップしてください。"
 
 // reset control
-#define L_RESET_TITLE "OnStepX 再起動制御:"
+#define L_RESET_TITLE "再起動と復元"
 #define L_WIPE_RESET "全設定を消去して OnStepX を再起動"
 #define L_RESET "OnStepX を再起動"
 #define L_RESET_FWU "ファームウェア更新のために OnStepX を再起動"
-#define L_RESET_MSG1 "OnStepXは「ホーム位置」または「パーク済み」である必要があります。そうでない場合、再起動要求は無視されます。"
+#define L_RESET_MSG1 "ホーム位置またはパーク状態のときのみ再起動を受け付けます"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -463,7 +463,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "OnStepへのシリアルインターフェースがダウンしています！"
-#define L_DOWN_MESSAGE1 "OnStepを再起動したばかりの場合は、すべてが起動するまで数秒待ってから、WiFiに接続されているか確認してください。"
+#define L_DOWN_MESSAGE1 "再起動後は数秒待ち、Wi-Fi 接続を確認してください"
 #define L_DOWN_MESSAGE2 "問題が解決しない場合、以下の原因が考えられます:<br /><ul>"
 #define L_DOWN_MESSAGE3 "OnStepのみの再起動によるボーレートの不一致。すべての電源を一度切り、入れ直してください。"
 #define L_DOWN_MESSAGE4 "SWSのボーレート設定が間違っています。"
@@ -710,3 +710,9 @@
 #define L_MOUNT_GEM "ドイツ式赤道儀"
 #define L_MOUNT_FORK "フォーク式赤道儀"
 #define L_MOUNT_ALTAZ "経緯台"
+#define L_WEB_PASSWORD_TITLE "管理パスワード"
+#define L_WEB_PASSWORD_HELP "ネットワーク設定へのログイン用で、Wi-Fi 接続用とは別のパスワード"
+#define L_WEB_PASSWORD_NEW "新しい管理パスワード"
+#define L_WEB_PASSWORD_SAVE "パスワードを保存"
+#define L_WEB_LOGOUT "ログアウト"
+#define L_WEB_PASSWORD_RULE "3～31 文字、変更しない場合は空欄"

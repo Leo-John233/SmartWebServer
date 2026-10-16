@@ -415,11 +415,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "Modifier le rapport entre pas de l'Axis1 par rotation de vis sans fin et pas par degre peut corrompre la zone memoire NV de la bibliotheque, sauvegardez les catalogues au besoin."
 
 // reset control
-#define L_RESET_TITLE "Controle du redemarrage OnStep:"
+#define L_RESET_TITLE "Redémarrage et restauration"
 #define L_WIPE_RESET "Effacer tous les reglages et redemarrer OnStep"
 #define L_RESET "Redemarrer OnStep"
 #define L_RESET_FWU "Redemarrer OnStep pour televersement du firmware"
-#define L_RESET_MSG1 "OnStep doit etre a l'origine ou parque, sinon la demande de redemarrage est ignoree."
+#define L_RESET_MSG1 "Le redémarrage est accepté uniquement si la monture est à l’origine ou stationnée"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -464,7 +464,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "L'interface serie vers OnStep est indisponible!"
-#define L_DOWN_MESSAGE1 "Si vous venez de redemarrer OnStep, attendez quelques secondes que tout redemarre, puis verifiez que vous etes toujours connecte au WiFi."
+#define L_DOWN_MESSAGE1 "Après le redémarrage, attendez quelques secondes puis vérifiez la connexion Wi-Fi"
 #define L_DOWN_MESSAGE2 "Si ce probleme persiste, voici d'autres causes possibles:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Difference de debit en bauds a cause du redemarrage du seul OnStep, coupez puis rallumez tout."
 #define L_DOWN_MESSAGE4 "Debit en bauds SWS mal configure."
@@ -711,3 +711,9 @@
 #define L_MOUNT_GEM "Équatoriale allemande"
 #define L_MOUNT_FORK "Fourche équatoriale"
 #define L_MOUNT_ALTAZ "Altazimutale"
+#define L_WEB_PASSWORD_TITLE "Mot de passe administrateur"
+#define L_WEB_PASSWORD_HELP "Pour accéder aux réglages réseau, distinct du mot de passe Wi-Fi"
+#define L_WEB_PASSWORD_NEW "Nouveau mot de passe"
+#define L_WEB_PASSWORD_SAVE "Enregistrer le mot de passe"
+#define L_WEB_LOGOUT "Se déconnecter"
+#define L_WEB_PASSWORD_RULE "3–31 caractères ; laisser vide pour conserver le mot de passe"

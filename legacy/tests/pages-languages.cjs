@@ -143,7 +143,7 @@ const statuses = {
         for (const width of [1440, 390, 320]) {
           await page.setViewportSize({ width, height: 1100 });
           const overflow = await page.evaluate(() =>
-            [...document.querySelectorAll('.b1,.nw-card')]
+            [...document.querySelectorAll('.b1,.nw-card,.sws-account,.sws-maintenance')]
               .filter((e) => e.scrollWidth > e.clientWidth + 1)
               .map((e) => ({
                 text: e.textContent.slice(0, 90),

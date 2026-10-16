@@ -413,11 +413,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "Canviar la relació de passos de l'eix 1 per rotació del visemfi i passos per grau pot corrompre l'àrea de memòria NV de la biblioteca; si cal, feu una còpia de seguretat dels catàlegs primer."
 
 // reset control
-#define L_RESET_TITLE "Control de reinici d'OnStep:"
+#define L_RESET_TITLE "Reinici i recuperació"
 #define L_WIPE_RESET "Esborrar totes las configuracions i reiniciar OnStep"
 #define L_RESET "Reiniciar OnStep"
 #define L_RESET_FWU "Reiniciar OnStep per a carregar el firmware"
-#define L_RESET_MSG1 "L'OnStep ha d'estar en posició d'inici o aparcat, si no, s'ignora la sol·licitud de reinici."
+#define L_RESET_MSG1 "Només es pot reiniciar amb la muntura a origen o aparcada"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -462,7 +462,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "La interfície sèrie a OnStep no està activada!"
-#define L_DOWN_MESSAGE1 "Si acabeu de reiniciar l'OnStep, espereu uns segons fins que tot torni a iniciar-se i desprès verifiqueu que encara esteu connectats a la Wi-Fi."
+#define L_DOWN_MESSAGE1 "Després del reinici, espereu uns segons i comproveu la connexió Wi-Fi"
 #define L_DOWN_MESSAGE2 "Si el poblema persisteix, us mostro altres causes possibles:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Desigualtat en la velocitat de transmisió degut al reinici de nomès l'OnStep; apagueu i enceneu-ho tot de nou."
 #define L_DOWN_MESSAGE4 "Velocitat de baudis SWS configurada incorrectament."
@@ -709,3 +709,9 @@
 #define L_MOUNT_GEM "Equatorial alemanya"
 #define L_MOUNT_FORK "Forquilla equatorial"
 #define L_MOUNT_ALTAZ "Altazimutal"
+#define L_WEB_PASSWORD_TITLE "Contrasenya d’administració"
+#define L_WEB_PASSWORD_HELP "Per accedir a la configuració de xarxa, diferent de la contrasenya Wi-Fi"
+#define L_WEB_PASSWORD_NEW "Nova contrasenya"
+#define L_WEB_PASSWORD_SAVE "Desa la contrasenya"
+#define L_WEB_LOGOUT "Tanca la sessió"
+#define L_WEB_PASSWORD_RULE "3–31 caràcters; deixeu en blanc per no canviar-la"

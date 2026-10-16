@@ -422,11 +422,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "Durch Ändern des Verhältnisses von Axis1-Schritten pro Wurmdrehung und Schritten pro Grad kann der Speicherbereich von Library NV beschädigt werden. Sichern Sie bei Bedarf zuerst alle Kataloge."
 
 // reset control
-#define L_RESET_TITLE "OnStep Steuerung zurücksetzen:"
+#define L_RESET_TITLE "Neustart und Wiederherstellung"
 #define L_WIPE_RESET "Einstellungen zurücksetzen und OnStep neu starten"
 #define L_RESET "Zurücksetzen OnStep"
 #define L_RESET_FWU "Zurücksetzen OnStep zum Hochladen der Firmware"
-#define L_RESET_MSG1 "OnStep muss zu Hause oder geparkt sein, andernfalls wird die Rücksetzanforderung ignoriert."
+#define L_RESET_MSG1 "Ein Neustart wird nur in Ausgangsposition oder Parkstellung akzeptiert"
 
 // ----------------------------  WiFi ----------------------------
 
@@ -472,7 +472,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "Serielles Interface zur OnStep ist nicht verbunden!"
-#define L_DOWN_MESSAGE1 "Aus- und Wiedereinschalten kann helfen, wenn es eine Unstimmigkeit mit der Baudrate gibt."
+#define L_DOWN_MESSAGE1 "Nach dem Neustart einige Sekunden warten und die WLAN-Verbindung prüfen"
 #define L_DOWN_MESSAGE2 "Andere m&ouml;gliche Gr&uuml;nde:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Inkorrekt konfigurierte OnStep Baudrate."
 #define L_DOWN_MESSAGE4 "Inkorrekt konfigurierte ESP Baudrate."
@@ -719,3 +719,9 @@
 #define L_MOUNT_GEM "Deutsche Montierung"
 #define L_MOUNT_FORK "Äquatoriale Gabel"
 #define L_MOUNT_ALTAZ "Altazimutal"
+#define L_WEB_PASSWORD_TITLE "Administrationspasswort"
+#define L_WEB_PASSWORD_HELP "Für die Anmeldung an den Netzwerkeinstellungen, unabhängig vom WLAN-Passwort"
+#define L_WEB_PASSWORD_NEW "Neues Administrationspasswort"
+#define L_WEB_PASSWORD_SAVE "Passwort speichern"
+#define L_WEB_LOGOUT "Abmelden"
+#define L_WEB_PASSWORD_RULE "3–31 Zeichen; leer lassen, um das Passwort beizubehalten"

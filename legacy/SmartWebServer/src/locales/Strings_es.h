@@ -413,11 +413,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "Cambiar la relación de Pasos de Axis1 por rotación de engranajes y Pasos por grado puede dañar el área de memoria de Library NV, primero haga una copia de seguridad de los catálogos si es necesario."
 
 // reset control
-#define L_RESET_TITLE "Control de reinicio OnStep:"
+#define L_RESET_TITLE "Reinicio y recuperación"
 #define L_WIPE_RESET "Borrar todas las configuraciones y reiniciar OnStep"
 #define L_RESET "Reiniciar OnStep"
 #define L_RESET_FWU "Reiniciar OnStep para cargar el firmware"
-#define L_RESET_MSG1 "OnStep debe estar en Posicion de Inicio o Estacionado, de lo contrario se ignora la solicitud de reinicio."
+#define L_RESET_MSG1 "Solo se acepta reiniciar con la montura en origen o estacionada"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -462,7 +462,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "¡La interfaz serial para OnStep está inactiva!"
-#define L_DOWN_MESSAGE1 "Si acaba de reiniciar OnStep, espere unos segundos hasta que todo vuelva a iniciarse y luego verifique que todavía esté conectado a Wi-Fi."
+#define L_DOWN_MESSAGE1 "Tras reiniciar, espere unos segundos y compruebe la conexión Wi-Fi"
 #define L_DOWN_MESSAGE2 "Si este es un problema persistente, aquí hay otras posibles causas:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Desigualdad en la velocidad de transmisión debido al reinicio de OnStep solamente, apague y encienda todo de nuevo."
 #define L_DOWN_MESSAGE4 "Velocidad de baudios SWS configurada incorrectamente."
@@ -709,3 +709,9 @@
 #define L_MOUNT_GEM "Ecuatorial alemana"
 #define L_MOUNT_FORK "Horquilla ecuatorial"
 #define L_MOUNT_ALTAZ "Altazimutal"
+#define L_WEB_PASSWORD_TITLE "Contraseña de administración"
+#define L_WEB_PASSWORD_HELP "Para acceder a los ajustes de red, distinta de la contraseña Wi-Fi"
+#define L_WEB_PASSWORD_NEW "Nueva contraseña"
+#define L_WEB_PASSWORD_SAVE "Guardar contraseña"
+#define L_WEB_LOGOUT "Cerrar sesión"
+#define L_WEB_PASSWORD_RULE "3–31 caracteres; deje vacío para conservar la contraseña"

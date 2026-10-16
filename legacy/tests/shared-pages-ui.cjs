@@ -28,6 +28,22 @@ function doc(url,embedded){if(!embedded)return head+'</head><body>'+shared+title
 await page.route('http://sws.test/**',async route=>{const req=route.request(),url=new URL(req.url());if(url.pathname==='/preview-poll'){const k=url.searchParams.get('page');polls[k]=(polls[k]||0)+1;return route.fulfill({body:'ok'});}if(url.pathname==='/mount-ajax-get.txt'&&url.searchParams.has('coord_action')){coordinateRequests.push(Object.fromEntries(url.searchParams));return route.fulfill({body:coordinateReply});}if(url.pathname==='/mount-ajax-get.txt'){commands.push(url.searchParams.get('dr'));if(url.searchParams.get('dr')==='n1')await new Promise(resolve=>setTimeout(resolve,900));return route.fulfill({body:''});}if(['/focuser-ajax-get.txt','/rotator-ajax-get.txt'].includes(url.pathname)){accessoryRequests.push({page:url.pathname,...Object.fromEntries(url.searchParams)});return route.fulfill({body:''});}if(url.pathname==='/net-wifi')return route.fulfill({contentType:'application/json',body:JSON.stringify(url.searchParams.get('action')==='scan'?{running:false,networks:[{ssid:'Redmi_Hotel',rssi:-74,open:false},{ssid:'ChinaNet-DgEf',rssi:-48,open:false},{ssid:'Guest',rssi:-70,open:true}]}:state)});if(url.pathname==='/libraryHelp.htm'){const body=Object.values(templates['LibraryHelp.h']).join('');return route.fulfill({contentType:'text/html',body:head+'</head><body>'+shared+'<main class="sws-document"><header><h1>天体库使用帮助</h1><a href="/mount.htm">返回赤道仪</a></header>'+body+'</main></body></html>'});}if(url.pathname==='/missing'){return route.fulfill({status:404,contentType:'text/html',body:head+'</head><body>'+shared+'<main class="sws-document sws-empty"><h1>找不到这个页面</h1><p>页面地址可能有误，或设备未启用这项功能</p><a href="/index.htm">返回控制器</a></main></body></html>'});}if(req.method()==='POST')loggedIn=true;documents.push(url.pathname);return route.fulfill({contentType:'text/html',body:doc(url.pathname,url.searchParams.has('view')||req.method()==='POST'||url.searchParams.has('advanced'))});});
 await page.goto('http://sws.test/index.htm');const frame=()=>page.frames().find(f=>f.parentFrame());await page.frameLocator('#sws-frame').locator('.b1').first().waitFor();await page.evaluate(()=>window.previewMarker=42);
 const topNavigations=[];page.on('request',req=>{if(req.isNavigationRequest()&&req.frame()===page.mainFrame())topNavigations.push(req.url());});
+await page.frameLocator('#sws-frame').locator('.sws-overview-grid .collapsible').click();
+const maintenance=page.frameLocator('#sws-frame').locator('.sws-maintenance');
+assert.equal(await maintenance.locator('h3').innerText(),'重启与恢复');
+assert.equal(await maintenance.locator('li').count(),2);
+assert(!(await maintenance.innerText()).match(/Notes|At Home|Parked/),'说明使用清楚的当前语言文案');
+assert.equal(await maintenance.locator('button').count(),2,'保留原有重启与擦除重启操作');
+assert((await maintenance.locator('button').first().getAttribute('onpointerdown')).includes("s('boot','reset')"));
+assert((await maintenance.locator('button').nth(1).getAttribute('onpointerdown')).includes("s('boot','wipe')"));
+for(const width of [1440,390,320]){
+ await page.setViewportSize({width,height:1000});
+ assert(await maintenance.evaluate(e=>e.scrollWidth<=e.clientWidth),'重启卡片不横向溢出');
+ const layout=await maintenance.evaluate(e=>{const copy=e.querySelector('.sws-maintenance-copy').getBoundingClientRect(),actions=e.querySelector('.sws-maintenance-actions').getBoundingClientRect();return {separate:actions.left>=copy.right,below:actions.top>=copy.bottom,font:parseFloat(getComputedStyle(e.querySelector('li')).fontSize)};});
+ assert(layout.font>=14);assert(width===1440?layout.separate:layout.below,'桌面左右排列，手机说明位于按钮上方');
+ await maintenance.screenshot({path:path.join(out,'maintenance-'+width+'.png')});
+}
+await page.setViewportSize({width:1440,height:1000});
 await page.frameLocator('#sws-frame').locator('.sws-axis-grid .collapsible').first().click();await page.screenshot({path:path.join(out,'controller-pc.png')});await page.frameLocator('#sws-frame').locator('.sws-axis-grid .b1').first().screenshot({path:path.join(out,'axis-full-pc.png')});await page.locator('.t a[href="/mount.htm"]').click();await page.frameLocator('#sws-frame').locator('.sws-guide .sws-pad').waitFor();await page.waitForTimeout(350);const stopped=polls['/index.htm'];await page.waitForTimeout(450);assert.equal(polls['/index.htm'],stopped,'离开页面后旧轮询停止');
 await page.screenshot({path:path.join(out,'mount-pc.png')});
 // 等高与开关外观检查，同时验证坐标提交和失败反馈

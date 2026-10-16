@@ -87,12 +87,14 @@ const char htmL_NET_SN[] PROGMEM =
 #endif
 
 const char html_logout[] PROGMEM =
-"<br/>" L_NETWORK_CONFIG_SECURITY ":"
-"<br/><br/><form method='post' action='/net.htm'>"
-L_NETWORK_PWD ": <input style='width:8em; text-align:left;' name='webpwd' type='password' minlength='3' maxlength='31'> "
-"<button type='submit'>" L_UPLOAD "</button></form>"
-"<form method='post' action='/net.htm'>"
-"<button type='submit' name='logout' value='1'>" L_LOGOUT "</button></form><br />\n";
+"<h2>" L_WEB_PASSWORD_TITLE "</h2><p class='sws-account-note'>" L_WEB_PASSWORD_HELP "</p>"
+"<div class='sws-account-controls'><form method='post' action='/net.htm'>"
+"<label for='sws-web-password'>" L_WEB_PASSWORD_NEW "</label><div class='sws-password-actions'>"
+"<input id='sws-web-password' name='webpwd' type='password' minlength='3' maxlength='31' autocomplete='new-password' aria-describedby='sws-web-password-rule'>"
+"<button type='submit'>" L_WEB_PASSWORD_SAVE "</button></div></form>"
+"<form class='sws-logout-form' method='post' action='/net.htm'>"
+"<button class='sws-secondary' type='submit' name='logout' value='1'>" L_WEB_LOGOUT "</button></form></div>"
+"<p id='sws-web-password-rule' class='sws-account-note'>" L_WEB_PASSWORD_RULE "</p>\n";
 
 const char html_reboot[] PROGMEM =
 "<br/><br/><br/><br/><br/><form method='post' action='/net.htm'>"

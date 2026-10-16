@@ -249,8 +249,37 @@ a:visited {
 }
 .sws-account {
   grid-column: 1/-1;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  padding: 20px;
+  min-width: 0;
+}
+.sws-account h2 { margin:0 0 8px; font-size:20px; overflow-wrap:anywhere; }
+.sws-account-note { margin:8px 0 0; color:var(--muted); font-size:14px; line-height:1.7; }
+.sws-account-controls { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; max-width:760px; margin-top:18px; }
+.sws-account-controls form { flex:1 1 300px; min-width:0; }
+.sws-account-controls label { display:block; margin-bottom:8px; font-size:15px; }
+.sws-password-actions { display:flex; gap:10px; }
+.sws-account .sws-password-actions input { flex:1; width:0; min-width:0; min-height:44px; margin:0; }
+.sws-account-controls button { min-height:44px; margin:0; }
+.sws-account-controls .sws-logout-form { flex:0 0 auto; }
+button.sws-secondary { background:#303030; border-color:var(--border); }
+.sws-maintenance { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:20px; padding:18px; margin-top:18px; border:1px solid var(--border); border-radius:12px; background:var(--field); }
+.sws-maintenance h3 { margin:0; font-size:17px; line-height:1.5; }
+.sws-maintenance-copy ul { margin:10px 0 0; padding-left:20px; color:var(--muted); font-size:14px; line-height:1.8; }
+.sws-maintenance-copy li + li { margin-top:6px; }
+.sws-maintenance-actions { display:flex; flex-direction:column; gap:10px; }
+.sws-maintenance-actions button { min-height:44px; margin:0; font-size:15px; }
+@media(max-width:800px) {
+  .sws-maintenance { grid-template-columns:minmax(0,1fr); padding:16px; gap:16px; }
+  .sws-maintenance-actions { flex-direction:row; flex-wrap:wrap; }
+  .sws-maintenance-actions button { flex:1 1 200px; }
+}
+@media(max-width:480px) {
+  .sws-account { padding:16px; }
+  .sws-account-controls, .sws-password-actions { display:grid; grid-template-columns:minmax(0,1fr); }
+  .sws-account .sws-password-actions input, .sws-account-controls button { width:100%; }
 }
 
 html.sws-embedded body {
@@ -633,9 +662,6 @@ h2.sws-section-title {
 }
 .sws-tracking .b1 {
   line-height: 1.9;
-}
-.sws-account form {
-  margin-top: 10px;
 }
 
 @media (min-width: 1700px) {
@@ -1156,10 +1182,6 @@ h2.sws-section-title {
 }
 .sws-overview-grid .content {
   margin-top: 12px;
-}
-.sws-overview-grid .content ul {
-  font-size: 13px;
-  color: var(--muted);
 }
 
 .sws-control-grid {

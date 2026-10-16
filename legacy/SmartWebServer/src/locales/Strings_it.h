@@ -415,11 +415,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "Cambiare il rapporto tra Axis1 Steps per worm rotation e Steps per degree puo corrompere la memoria NV della Library; fai prima un backup dei cataloghi se serve."
 
 // reset control
-#define L_RESET_TITLE "Controllo riavvio OnStep:"
+#define L_RESET_TITLE "Riavvio e ripristino"
 #define L_WIPE_RESET "Cancella impostazioni e riavvia OnStep"
 #define L_RESET "Riavvia OnStep"
 #define L_RESET_FWU "Riavvia OnStep per upload firmware"
-#define L_RESET_MSG1 "OnStep deve essere a home o parcheggiato, altrimenti la richiesta di riavvio viene ignorata."
+#define L_RESET_MSG1 "Il riavvio è accettato solo con la montatura in origine o parcheggiata"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -464,7 +464,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "Interfaccia seriale verso OnStep non disponibile!"
-#define L_DOWN_MESSAGE1 "Se hai appena riavviato OnStep attendi alcuni secondi per il riavvio completo, poi verifica di essere ancora connesso al WiFi."
+#define L_DOWN_MESSAGE1 "Dopo il riavvio, attendere qualche secondo e verificare la connessione Wi-Fi"
 #define L_DOWN_MESSAGE2 "Se il problema persiste, ecco altre possibili cause:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Baud rate non corrispondente per riavvio del solo OnStep, spegni e riaccendi tutto."
 #define L_DOWN_MESSAGE4 "Baud rate SWS configurato in modo errato."
@@ -711,3 +711,9 @@
 #define L_MOUNT_GEM "Equatoriale tedesca"
 #define L_MOUNT_FORK "Forcella equatoriale"
 #define L_MOUNT_ALTAZ "Altazimutale"
+#define L_WEB_PASSWORD_TITLE "Password amministratore"
+#define L_WEB_PASSWORD_HELP "Per accedere alle impostazioni di rete, distinta dalla password Wi-Fi"
+#define L_WEB_PASSWORD_NEW "Nuova password"
+#define L_WEB_PASSWORD_SAVE "Salva password"
+#define L_WEB_LOGOUT "Esci"
+#define L_WEB_PASSWORD_RULE "3–31 caratteri; lasciare vuoto per mantenere la password"

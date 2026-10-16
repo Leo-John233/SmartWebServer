@@ -24,6 +24,15 @@ if(action==='scan'){scans++;if(scanFailure)return route.fulfill({status:503,cont
 if(action==='connect'){submissions++;submitted=p;if(rejectConnect)return route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'密码错误，请重试'})});response={message:'正在连接'};state.sta={...state.sta,enabled:p.get('enabled')==='1',ssid:p.get('ssid'),open:p.get('open')==='1',dhcp:p.get('dhcp')==='1'};state.connected=state.sta.enabled;state.ssid=p.get('ssid');state.ip='192.168.1.55';state.message=state.connected?'连接成功':'已断开路由器';}
 return route.fulfill({contentType:'application/json',body:JSON.stringify(response)});});
 await page.goto('http://sws.test/');await page.waitForFunction(()=>document.querySelectorAll('#nw-results button').length===3&&!document.querySelector('#nw-scan').disabled);
+const account=page.locator('.sws-account');
+assert.equal(await account.locator('h2').innerText(),'管理密码');
+assert((await account.innerText()).includes('与 Wi-Fi 连接密码无关'));
+assert.equal(await account.getByRole('button',{name:'保存密码',exact:true}).count(),1);
+assert.equal(await account.getByRole('button',{name:'退出登录',exact:true}).count(),1);
+assert.equal(await account.locator('[name=webpwd]').getAttribute('minlength'),'3');
+assert.equal(await account.locator('[name=webpwd]').getAttribute('maxlength'),'31');
+assert.equal(await account.locator('[name=webpwd]').evaluate(e=>e.form.method),'post');
+assert.equal(await account.locator('[name=logout]').getAttribute('value'),'1');
 // 无需打开详情就能看到实时访问地址
 assert.equal(await page.locator('#nw-access').isVisible(),true);assert.equal(await page.locator('#nw-access-ip').innerText(),'192.168.1.55');
 assert.equal(await page.locator('#nw-message').isVisible(),false,'卡片下方不再重复已连接');
@@ -54,7 +63,7 @@ state.rssi=-50;await page.waitForFunction(()=>document.querySelectorAll('#nw-cur
 state.rssi=-55;networks.splice(originalCount);
 // 刷新使用真实扫描流程，预览截图去除用于安全测试的特殊名称
 includeHostile=false;const scansBefore=scans;await page.locator('#nw-scan').click();await page.waitForFunction(()=>document.querySelectorAll('#nw-results button').length===2);assert(scans>scansBefore);
-await page.screenshot({path:path.join(output,'network-desktop.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list.png')});
+await page.screenshot({path:path.join(output,'network-desktop.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list.png')});await account.screenshot({path:path.join(output,'network-account-desktop.png')});
 await page.locator('#nw-current button').click();assert.equal(await page.locator('#nw-sta-ip').innerText(),'192.168.1.55');assert.equal(await page.locator('#nw-connect').innerText(),'保存设置');await page.locator('#nw-cancel').click();assert.equal(submissions,0);
 // 点选只打开密码窗口，取消后保持原连接且清除密码
 await page.getByRole('button',{name:/Observatory/}).click();assert.equal(await page.locator('#nw-dialog').isVisible(),true);assert.equal(await page.locator('#nw-ssid').inputValue(),'Observatory');assert.equal(submissions,0);
@@ -77,7 +86,7 @@ const beforeEnable=scans;await page.locator('#nw-enabled').check();await page.wa
 scanFailure=true;await page.locator('#nw-scan').click();await page.waitForFunction(()=>document.querySelector('#nw-scan-state').textContent.includes('搜索失败'));assert.equal(await page.locator('#nw-scan').isDisabled(),false);scanFailure=false;await page.locator('#nw-scan').click();await page.waitForFunction(()=>!document.querySelector('#nw-scan').disabled);
 // 使用已连接状态生成手机预览，弹窗单独截图
 state.connected=true;state.sta.enabled=true;state.sta.ssid=state.ssid='Home Wi-Fi';state.sta.open=false;state.message='';await page.waitForFunction(()=>document.querySelector('#nw-current').textContent.includes('Home Wi-Fi'));
-await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(output,'network-mobile.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list-mobile.png')});
+await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(output,'network-mobile.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list-mobile.png')});await account.screenshot({path:path.join(output,'network-account-mobile.png')});
 await page.getByRole('button',{name:/Observatory/}).click();await page.locator('#nw-password').fill('example-password');await page.screenshot({path:path.join(output,'network-password-mobile.png')});
 assert.equal((await page.locator('body').innerText()).includes('。'),false,'页面文案不使用句号');assert.deepEqual(errors,[]);console.log('PASS: RSSI strength levels, live connected signal, actual network page, auto/manual scan, current-network checkmark, safe SSIDs, modal cancel/retry, password toggle, open/hidden networks, static IP, enable/disable, scan recovery, mobile layout.');
 

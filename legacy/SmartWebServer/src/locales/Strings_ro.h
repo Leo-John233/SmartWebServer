@@ -415,11 +415,11 @@
 #define L_ADV_SET_FOOTER_MSG4 "Modificarea raportului dintre Axa1 Pași per rotație melc și Pași per grad poate corupe zona NV Library, faceți backup la cataloage înainte dacă e necesar."
 
 // reset control
-#define L_RESET_TITLE "Control Repornire OnStep:"
+#define L_RESET_TITLE "Repornire și restaurare"
 #define L_WIPE_RESET "Șterge toate setările și Repornește OnStep"
 #define L_RESET "Repornire OnStep"
 #define L_RESET_FWU "Repornire OnStep pentru încărcare firmware"
-#define L_RESET_MSG1 "OnStep trebuie să fie Acasă sau Parcat, altfel cererea de repornire este ignorată."
+#define L_RESET_MSG1 "Repornirea este acceptată doar cu montura la origine sau parcată"
 
 // ----------------------------  SETUP ----------------------------
 
@@ -464,7 +464,7 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "Interfața Serial către OnStep este Întreruptă!"
-#define L_DOWN_MESSAGE1 "Dacă tocmai ați repornit OnStep, așteptați câteva secunde pentru ca totul să pornească din nou, apoi verificați dacă sunteți încă conectat la WiFi."
+#define L_DOWN_MESSAGE1 "După repornire, așteptați câteva secunde și verificați conexiunea Wi-Fi"
 #define L_DOWN_MESSAGE2 "Dacă este o problemă persistentă iată alte cauze posibile:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Nepotrivire baud rate din cauza repornirii doar a OnStep, opriți/porniți totul din nou."
 #define L_DOWN_MESSAGE4 "Baud rate SWS configurat greșit."
@@ -711,3 +711,9 @@
 #define L_MOUNT_GEM "Ecuatorială germană"
 #define L_MOUNT_FORK "Furcă ecuatorială"
 #define L_MOUNT_ALTAZ "Altazimutală"
+#define L_WEB_PASSWORD_TITLE "Parolă de administrare"
+#define L_WEB_PASSWORD_HELP "Pentru accesul la setările de rețea, diferită de parola Wi-Fi"
+#define L_WEB_PASSWORD_NEW "Parolă nouă"
+#define L_WEB_PASSWORD_SAVE "Salvează parola"
+#define L_WEB_LOGOUT "Deconectare"
+#define L_WEB_PASSWORD_RULE "3–31 de caractere; lăsați gol pentru a păstra parola"
