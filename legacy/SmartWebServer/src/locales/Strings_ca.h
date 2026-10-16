@@ -563,3 +563,12 @@
 
 // 侧栏说明沿用语言资源管理
 #define L_SIDEBAR_NOTE "Control intel·ligent OnStep"
+
+// 调焦器与旋转器的操作说明
+#define L_HOLD_TO_MOVE "Manteniu premut per moure; deixeu anar per aturar"
+#define L_FOC_IN "Cap endins"
+#define L_FOC_OUT "Cap enfora"
+#define L_ROT_CCW "Antihorari"
+#define L_ROT_CW "Horari"
+#define L_HOME_REFERENCE_HELP "Torneu a la posició de referència del dispositiu o establiu la posició actual com a referència"
+#define L_UNIT_STEPS "passos"

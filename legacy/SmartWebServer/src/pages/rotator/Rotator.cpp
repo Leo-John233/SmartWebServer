@@ -64,15 +64,15 @@ void handleRotator() {
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // 旋转控制优先展示，归位和补偿各自分组
-  data.concat(F("<div class='sws-device-layout'><div class='sws-device-controls'><section class='sws-device-primary'>"));
+  // 旋转、参考位置和补偿分区，消旋仅在设备支持时显示
+  data.concat(F("<div class='sws-device-layout sws-accessory-layout'><div class='sws-accessory-grid'><div class='sws-accessory-main'><section class='sws-device-primary sws-accessory-motion'>"));
   rotatorSlewingTile(data);
-  data.concat(F("</section><section>"));
+  data.concat(F("</section><section class='sws-accessory-home'>"));
   rotatorHomeTile(data);
-  data.concat(F("</section></div><details class='sws-more' open><summary>" L_DEROTATOR " / " L_BACKLASH "</summary><div class='sws-settings-grid'>"));
-  if (status.derotatorFound) deRotatorTile(data);
+  data.concat(F("</section></div><section class='sws-accessory-settings'>"));
   rotatorBacklashTile(data);
-  data.concat(F("</div></details></div>"));
+  if (status.derotatorFound) deRotatorTile(data);
+  data.concat(F("</section></div></div>"));
 
   data.concat(FPSTR(html_page_and_body_end));
 

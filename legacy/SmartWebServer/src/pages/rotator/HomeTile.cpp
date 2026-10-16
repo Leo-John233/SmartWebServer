@@ -5,20 +5,12 @@
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 
-// create the related webpage tile
+// 两种设备只提供参考位置操作，不包含赤道仪停放功能
 void rotatorHomeTile(String &data)
 {
-  char temp[240] = "";
-
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_HOMING);
-  data.concat(temp);
-  data.concat(F("<br /><hr>"));
-
+  data.concat(F("<div class='b1 sws-accessory-home-card'><div class='sws-device-card-head'><h2>" L_HOME_ACTIONS "</h2></div><p class='sws-accessory-hint'>" L_HOME_REFERENCE_HELP "</p><div class='sws-accessory-home-actions'>"));
   data.concat(FPSTR(html_rotatorHome));
-
-  data.concat(F("<hr>"));
-
-  data.concat(FPSTR(html_tile_end));
+  data.concat(F("</div></div>"));
   www.sendContentAndClear(data);
 }
 

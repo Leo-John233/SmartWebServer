@@ -565,3 +565,12 @@
 
 // 侧栏说明沿用语言资源管理
 #define L_SIDEBAR_NOTE "OnStep smart control"
+
+// 调焦器与旋转器的操作说明
+#define L_HOLD_TO_MOVE "Hold to move, release to stop"
+#define L_FOC_IN "Inward"
+#define L_FOC_OUT "Outward"
+#define L_ROT_CCW "Counterclockwise"
+#define L_ROT_CW "Clockwise"
+#define L_HOME_REFERENCE_HELP "Return to the device reference position, or set the current position as the reference"
+#define L_UNIT_STEPS "steps"

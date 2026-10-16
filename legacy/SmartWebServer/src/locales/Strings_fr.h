@@ -565,3 +565,12 @@
 
 // 侧栏说明沿用语言资源管理
 #define L_SIDEBAR_NOTE "Commande intelligente OnStep"
+
+// 调焦器与旋转器的操作说明
+#define L_HOLD_TO_MOVE "Maintenir pour déplacer, relâcher pour arrêter"
+#define L_FOC_IN "Vers l’intérieur"
+#define L_FOC_OUT "Vers l’extérieur"
+#define L_ROT_CCW "Antihoraire"
+#define L_ROT_CW "Horaire"
+#define L_HOME_REFERENCE_HELP "Revenir à la position de référence ou définir la position actuelle comme référence"
+#define L_UNIT_STEPS "pas"

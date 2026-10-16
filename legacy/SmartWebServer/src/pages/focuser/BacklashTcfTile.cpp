@@ -10,18 +10,18 @@ void focuserBacklashTcfTile(String &data)
 {
   char temp[240] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "13em", "Backlash and TCF");
+  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "13em", L_BACKLASH " / " L_TCF_COEF);
   data.concat(temp);
 
   data.concat(F("<div style='float: right; text-align: right;' id='f_temp' class='c'>"));
   snprintf_P(temp, sizeof(temp), L_TEMPERATURE " %s", state.focuserTemperatureStr);
   data.concat(temp);
-  data.concat(F("</div><br /><hr>"));
+  data.concat(F("</div><br /><hr><div class='sws-accessory-metrics'>"));
 
   snprintf_P(temp, sizeof(temp), html_backlashValue, state.focuserBacklashStr);
   data.concat(temp);
 
-  snprintf_P(temp, sizeof(temp), html_tcfEnableValue, state.focuserTcfEnable ? "true" : "false");
+  snprintf_P(temp, sizeof(temp), html_tcfEnableValue, state.focuserTcfEnable ? L_ON : L_OFF);
   data.concat(temp);
 
   snprintf_P(temp, sizeof(temp), html_tcfDeadbandValue, state.focuserDeadbandStr);
@@ -31,7 +31,7 @@ void focuserBacklashTcfTile(String &data)
   snprintf_P(temp, sizeof(temp), html_tcfCoefValue, state.focuserTcfCoefStr);
   data.concat(temp);
 
-  data.concat(F("<hr>"));
+  data.concat(F("</div><hr>"));
 
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
   data.concat(temp);
@@ -48,7 +48,7 @@ void focuserBacklashTcfTile(String &data)
     data.concat(temp);
 
     // TCF Enable
-    snprintf_P(temp, sizeof(temp), html_tcfEnable, (int)state.focuserTcfEnable);
+    snprintf_P(temp, sizeof(temp), html_tcfEnable, state.focuserTcfEnable ? "" : "selected", state.focuserTcfEnable ? "selected" : "");
     data.concat(temp);
 
     // TCF Deadband
@@ -78,9 +78,9 @@ void focuserBacklashTcfTileAjax(String &data)
 
   snprintf(temp, sizeof(temp), L_TEMPERATURE " %s", state.focuserTemperatureStr);
   data.concat(keyValueString("f_temp", temp));
-  data.concat(keyValueString("f_bl", state.focuserBacklashStr, " step(s)"));
-  data.concat(keyValueString("f_tcf_en", state.focuserTcfEnable ? "true" : "false"));
-  data.concat(keyValueString("f_tcf_db", state.focuserDeadbandStr, " step(s)"));
+  data.concat(keyValueString("f_bl", state.focuserBacklashStr, " " L_UNIT_STEPS));
+  data.concat(keyValueString("f_tcf_en", state.focuserTcfEnable ? L_ON : L_OFF));
+  data.concat(keyValueString("f_tcf_db", state.focuserDeadbandStr, " " L_UNIT_STEPS));
   data.concat(keyValueString("f_tcf_coef", state.focuserTcfCoefStr));
 
   www.sendContentAndClear(data);

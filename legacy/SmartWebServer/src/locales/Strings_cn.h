@@ -568,3 +568,12 @@
 
 // 侧栏说明沿用语言资源管理
 #define L_SIDEBAR_NOTE "OnStep 智能控制"
+
+// 调焦器与旋转器的操作说明
+#define L_HOLD_TO_MOVE "按住移动，松开停止"
+#define L_FOC_IN "向内"
+#define L_FOC_OUT "向外"
+#define L_ROT_CCW "逆时针"
+#define L_ROT_CW "顺时针"
+#define L_HOME_REFERENCE_HELP "返回设备参考位置，或将当前位置设为参考位置"
+#define L_UNIT_STEPS "步"

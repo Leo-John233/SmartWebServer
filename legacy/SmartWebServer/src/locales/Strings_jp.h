@@ -564,3 +564,12 @@
 
 // 侧栏说明沿用语言资源管理
 #define L_SIDEBAR_NOTE "OnStep スマート制御"
+
+// 调焦器与旋转器的操作说明
+#define L_HOLD_TO_MOVE "押している間だけ移動し、離すと停止"
+#define L_FOC_IN "内側"
+#define L_FOC_OUT "外側"
+#define L_ROT_CCW "反時計回り"
+#define L_ROT_CW "時計回り"
+#define L_HOME_REFERENCE_HELP "基準位置へ戻るか、現在位置を基準位置に設定します"
+#define L_UNIT_STEPS "ステップ"

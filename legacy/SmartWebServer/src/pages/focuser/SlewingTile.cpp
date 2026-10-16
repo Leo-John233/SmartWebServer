@@ -5,46 +5,31 @@
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 
-// create the related webpage tile
+// 位置读数、目标输入与手动移动分别分组
 void focuserSlewingTile(String &data)
 {
   char temp[240] = "";
-
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_SLEWING);
-  data.concat(temp);
-  data.concat(F("<div style='float: right; text-align: right;' id='foc_sta' class='c'>"));
-  if (state.focuserSlewing) data.concat(L_ACTIVE); else data.concat(L_INACTIVE);
-  data.concat(F("</div><br /><hr>"));
-
-  data.concat(L_CURRENT ": <span id='focuserpos' class='c'>");
+  data.concat(F("<div class='b1 sws-accessory-motion-card'><div class='sws-device-card-head'><h2>" L_FOCUSER "</h2><span id='foc_sta' class='sws-accessory-status c'>"));
+  data.concat(state.focuserSlewing ? L_ACTIVE : L_INACTIVE);
+  data.concat(F("</span></div><div class='sws-accessory-position'><span>" L_CURRENT "</span><strong id='focuserpos' class='c'>"));
   data.concat(state.focuserPositionStr);
-  data.concat(F("</span><br /><br />"));
-
+  data.concat(F("</strong></div><div class='sws-accessory-goto'>"));
   data.concat(FPSTR(html_focPosition));
   if (status.getVersionMajor() >= 10) data.concat(FPSTR(html_focStop));
-  data.concat(F("<br />"));
+  data.concat(F("</div><p class='sws-accessory-hint'>" L_HOLD_TO_MOVE "</p><div class='sws-accessory-jog'>"));
   www.sendContentAndClear(data);
-
   data.concat(FPSTR(html_script_motion_controls_1));
   www.sendContentAndClear(data);
   data.concat(FPSTR(html_script_motion_controls_2));
   www.sendContentAndClear(data);
   data.concat(FPSTR(html_focuserIn));
   data.concat(FPSTR(html_focuserOut));
-
-  data.concat(F("<hr>"));
-
+  data.concat(F("</div>"));
   if (status.getVersionMajor() >= 10) {
-    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-    data.concat(temp);
-
+    data.concat(FPSTR(html_focuserGotoSelect));
     snprintf_P(temp, sizeof(temp), html_focuserSlewSpeed, state.focuserSlewSpeedStr);
     data.concat(temp);
-    data.concat(FPSTR(html_focuserGotoSelect));
-
-    data.concat(FPSTR(html_collapsable_end));
   }
-
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
 }

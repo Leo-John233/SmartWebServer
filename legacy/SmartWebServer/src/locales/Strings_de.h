@@ -573,3 +573,12 @@
 
 // 侧栏说明沿用语言资源管理
 #define L_SIDEBAR_NOTE "OnStep intelligente Steuerung"
+
+// 调焦器与旋转器的操作说明
+#define L_HOLD_TO_MOVE "Zum Bewegen gedrückt halten, zum Stoppen loslassen"
+#define L_FOC_IN "Nach innen"
+#define L_FOC_OUT "Nach außen"
+#define L_ROT_CCW "Gegen den Uhrzeigersinn"
+#define L_ROT_CW "Im Uhrzeigersinn"
+#define L_HOME_REFERENCE_HELP "Zur Referenzposition zurückkehren oder die aktuelle Position als Referenz setzen"
+#define L_UNIT_STEPS "Schritte"

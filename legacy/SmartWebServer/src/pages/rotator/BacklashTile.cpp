@@ -14,7 +14,7 @@ void rotatorBacklashTile(String &data)
   if (!onStep.command(":rb#", temp1)) strcpy(temp1, "0");
   int backlash = atoi(temp1);
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "13em", "Backlash");
+  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "13em", L_BACKLASH);
   data.concat(temp);
   data.concat(F("<br /><hr>"));
 

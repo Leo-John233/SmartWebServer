@@ -64,16 +64,16 @@ void handleFocuser() {
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // 先选择调焦器，再显示移动控制，补偿参数折叠收纳
-  data.concat(F("<div class='sws-device-layout'><section class='sws-device-selector'>"));
+  // 主操作与参数区并排，手机端按操作顺序堆叠
+  data.concat(F("<div class='sws-device-layout sws-accessory-layout'><section class='sws-device-selector'>"));
   focuserSelectTile(data);
-  data.concat(F("</section><div class='sws-device-controls'><section class='sws-device-primary'>"));
+  data.concat(F("</section><div class='sws-accessory-grid'><div class='sws-accessory-main'><section class='sws-device-primary sws-accessory-motion'>"));
   focuserSlewingTile(data);
-  data.concat(F("</section><section>"));
+  data.concat(F("</section><section class='sws-accessory-home'>"));
   focuserHomeTile(data);
-  data.concat(F("</section></div><details class='sws-more' open><summary>" L_BACKLASH " / " L_TCF_COEF "</summary><div class='sws-settings-grid'>"));
+  data.concat(F("</section></div><section class='sws-accessory-settings'>"));
   focuserBacklashTcfTile(data);
-  data.concat(F("</div></details></div>"));
+  data.concat(F("</section></div></div>"));
 
   data.concat(FPSTR(html_page_and_body_end));
 

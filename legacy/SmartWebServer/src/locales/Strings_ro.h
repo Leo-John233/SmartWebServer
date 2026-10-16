@@ -565,3 +565,12 @@
 
 // 侧栏说明沿用语言资源管理
 #define L_SIDEBAR_NOTE "Control inteligent OnStep"
+
+// 调焦器与旋转器的操作说明
+#define L_HOLD_TO_MOVE "Țineți apăsat pentru deplasare, eliberați pentru oprire"
+#define L_FOC_IN "Spre interior"
+#define L_FOC_OUT "Spre exterior"
+#define L_ROT_CCW "În sens antiorar"
+#define L_ROT_CW "În sens orar"
+#define L_HOME_REFERENCE_HELP "Reveniți la poziția de referință sau setați poziția curentă ca referință"
+#define L_UNIT_STEPS "pași"
