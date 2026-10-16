@@ -35,4 +35,5 @@ bool servePageShell(int selected) {
 void pageAppearance() {
   sendPageResource(html_shared_styles);
   sendPageResource(html_page_controls);
+  sendPageResource(html_settings_editors);
 }

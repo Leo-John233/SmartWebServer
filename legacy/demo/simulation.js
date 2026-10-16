@@ -23,6 +23,13 @@ function demoText(id, value) {
   const e = document.getElementById(id);
   if (e) e.textContent = value;
 }
+function demoParkState(parked) {
+  const park = document.getElementById('park'), unpark = document.getElementById('unpark');
+  if (!park || !unpark) return;
+  park.disabled = parked;
+  unpark.disabled = !parked;
+  demoText('hp_sta', parked ? '已停放' : '未停放');
+}
 // 使用真实设备接口更新模拟读数与选择状态
 let demoAccessoryTimer;
 function demoAccessory(url) {
@@ -94,6 +101,10 @@ function demoAccessory(url) {
 }
 addEventListener('pagehide', () => clearInterval(demoAccessoryTimer));
 function s(key, value) {
+  if (key === 'pk' && (value === 'p' || value === 'u')) {
+    demoSaved.parked = value === 'p';
+    demoParkState(demoSaved.parked);
+  }
   if (key === 'dr' && (value === 'T1' || value === 'T0')) {
     demoSelected(document.getElementById('trk_on'), value === 'T1');
     demoSelected(document.getElementById('trk_off'), value === 'T0');
@@ -201,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     demoSelected(button, true);
   }
   document.querySelectorAll('button[disabled]').forEach((e) => (e.disabled = false));
+  demoParkState(!!demoSaved.parked);
   document.querySelectorAll('input,select,textarea').forEach((e) => {
     if (e.name in demoSaved && e.type !== 'password') {
       if (e.type === 'checkbox') e.checked = demoSaved[e.name] === 'on';

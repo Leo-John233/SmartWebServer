@@ -19,7 +19,7 @@ const char html_homeReset[] PROGMEM =
 
 // Parking
 const char html_unpark[] PROGMEM =
-"<button id='unpark' onpointerdown=\"s('pk','u')\" type='button' disabled>" L_UNPARK "</button>";
+"<button hidden id='unpark' onpointerdown=\"s('pk','u')\" type='button' disabled>" L_UNPARK "</button>";
 const char html_park[] PROGMEM =
 "<button id='park' onpointerdown=\"s('pk','p')\" type='button' disabled>" L_PARK "</button>";
 const char html_setpark[] PROGMEM =

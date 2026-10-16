@@ -95,6 +95,7 @@ if (require.main === module) {
     'rotatorSlewingTileGet',
     'mountAjaxGet',
     'encAxisTileGet',
+    'siteTileGet', // 修正声明允许 -14 至 +12、实际却拒绝 -13/-14 的时区边界。
   ]);
   let unchanged = 0;
   const normalize = (s) => s.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '').replace(/\s/g, '');
@@ -130,6 +131,6 @@ if (require.main === module) {
       original.length +
       ' original routes, ' +
       unchanged +
-      ' unchanged request handlers, five reviewed fixes/extensions, device transport and key/value encoding',
+      ' unchanged request handlers, six reviewed fixes/extensions, device transport and key/value encoding',
   );
 }

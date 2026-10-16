@@ -682,3 +682,14 @@
 #define L_UI_CONTENT "Conținutul paginii"
 
 #define L_ENC_SYNC_CONTROL "Controlul sincronizării"
+
+// 位置与限位编辑卡片
+#define L_POSITION_INFO "Informații poziție"
+#define L_EDIT_POSITION "Editează poziția"
+#define L_LIMITS_SETTINGS "Limite"
+#define L_EDIT_LIMITS "Editează limitele"
+#define L_TIMEZONE "Fus orar"
+#define L_SYNC_TIME "Sincronizează ora"
+#define L_MF_DIRECT "Inversare directă"
+#define L_MF_VIA_HOME "Prin poziția inițială"
+#define L_MF_PAUSE_HOME "Pauză la poziția inițială"

@@ -682,3 +682,14 @@
 #define L_UI_CONTENT "Page content"
 
 #define L_ENC_SYNC_CONTROL "Sync control"
+
+// 位置与限位编辑卡片
+#define L_POSITION_INFO "Location information"
+#define L_EDIT_POSITION "Edit location"
+#define L_LIMITS_SETTINGS "Limit settings"
+#define L_EDIT_LIMITS "Edit limits"
+#define L_TIMEZONE "Time zone"
+#define L_SYNC_TIME "Sync time"
+#define L_MF_DIRECT "Direct flip"
+#define L_MF_VIA_HOME "Via home"
+#define L_MF_PAUSE_HOME "Pause at home"

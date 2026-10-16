@@ -681,3 +681,14 @@
 #define L_UI_CONTENT "ページ内容"
 
 #define L_ENC_SYNC_CONTROL "同期制御"
+
+// 位置与限位编辑卡片
+#define L_POSITION_INFO "位置情報"
+#define L_EDIT_POSITION "位置を編集"
+#define L_LIMITS_SETTINGS "制限設定"
+#define L_EDIT_LIMITS "制限を編集"
+#define L_TIMEZONE "タイムゾーン"
+#define L_SYNC_TIME "時刻を同期"
+#define L_MF_DIRECT "直接反転"
+#define L_MF_VIA_HOME "ホーム経由で反転"
+#define L_MF_PAUSE_HOME "ホームで一時停止"

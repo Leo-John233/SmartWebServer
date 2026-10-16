@@ -690,3 +690,14 @@
 #define L_UI_CONTENT "Seiteninhalt"
 
 #define L_ENC_SYNC_CONTROL "Synchronisierung"
+
+// 位置与限位编辑卡片
+#define L_POSITION_INFO "Standortinformationen"
+#define L_EDIT_POSITION "Standort bearbeiten"
+#define L_LIMITS_SETTINGS "Grenzwerte"
+#define L_EDIT_LIMITS "Grenzwerte bearbeiten"
+#define L_TIMEZONE "Zeitzone"
+#define L_SYNC_TIME "Zeit synchronisieren"
+#define L_MF_DIRECT "Direkt umschwenken"
+#define L_MF_VIA_HOME "Über Ausgangsposition"
+#define L_MF_PAUSE_HOME "An Ausgangsposition pausieren"

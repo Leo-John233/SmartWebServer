@@ -14,7 +14,8 @@ module.exports=({templates:t,defs:d,tile,h,motion,axis})=>{
   const actual=require('./mount-page.cjs')();
   const gt=t['mount/GotoTile.h'];
   const go=actual.Goto;
-  const mount='<div class="sws-mount"><div class="sws-control-grid"><section class="sws-guide">'+actual.Guide+'</section><section class="sws-target">'+go+'</section><section class="sws-tracking">'+actual.Tracking+'</section></div><section class="sws-home">'+actual.HomePark+'</section><div class="sws-settings-grid sws-site-library">'+actual.Site+actual.Library+'</div><details class="sws-more" open><summary>'+d.L_ALIGN+' / '+d.L_LIMITS_TITLE+' / '+d.L_PAGE_PEC+'</summary><div class="sws-settings-grid sws-advanced-grid">'+actual.Align+actual.Limits+actual.Pec+tile(d.L_COORD_ORIGIN_TITLE,controls('mount/CoordinateTile.h'))+'</div></details></div>';
+  const layout=t['ui/Layouts.h'];
+  const mount=layout.html_layout_mount_begin+actual.Guide+layout.html_layout_mount_tracking+actual.Tracking+layout.html_layout_mount_location+actual.Site+actual.Limits+layout.html_layout_mount_target+actual.Goto+layout.html_layout_mount_home+actual.HomePark+layout.html_layout_mount_library+actual.Library+layout.html_layout_mount_advanced+actual.Align+actual.Pec+tile(d.L_COORD_ORIGIN_TITLE,controls('mount/CoordinateTile.h'))+layout.html_layout_mount_end;
   const optional={};
   // 调焦器与旋转器执行真实卡片函数，保留条件判断与完整表单
   for(const kind of ['focuser','rotator']){

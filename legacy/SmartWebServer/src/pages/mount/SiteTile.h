@@ -12,28 +12,24 @@ extern void siteTileAjax(String &data);
 extern void siteTileGet();
 
 const char html_browserTime[] PROGMEM =
-  "<div class='sws-time-summary'><div class='sws-browser-time'><span class='sws-time-label'>" L_TIME_BROWSER_UT "</span><strong id=\"datetime\"></strong>"
-  "<script>update_date_time();</script>"
-  "</div>\n";
-
-const char html_date[] PROGMEM = "<div class='sws-device-time'><span class='sws-time-label'>" L_UT "</span><div><span id='date_ut' class='c'>%s</span>";
-const char html_time[] PROGMEM = " <span id='time_ut' class='c'>%s</span></div>";
-const char html_sidereal[] PROGMEM = "</div><div class='sws-sidereal-time'><span class='sws-time-label'>" L_LST "</span><strong id='time_lst' class='c'>%s</strong></div></div>";
+  "<p class='sws-browser-clock'><span>" L_TIME_BROWSER_UT "</span><strong id='datetime'></strong><script>update_date_time();</script></p>";
+const char html_date[] PROGMEM = "<div class='sws-site-clock'><div class='sws-clock-value'><span class='sws-field-label'>" L_UT "</span><strong><span id='date_ut' class='c'>%s</span>";
+const char html_time[] PROGMEM = " <span id='time_ut' class='c'>%s</span></strong></div>";
+const char html_sidereal[] PROGMEM = "<div class='sws-sidereal-clock'><span>" L_LST "</span><strong id='time_lst' class='c'>%s</strong></div></div>";
 const char html_site[] PROGMEM =
-"<div class='sws-location-values'><div>" L_LAT "<strong id='site_lat' class='c'>%s</strong></div>"
-"<div>" L_LONG "<strong id='site_long' class='c'>%s</strong></div></div>";
+  "<div hidden><span id='site_lat'>%s</span><span id='site_long'>%s</span></div>";
 const char html_setDateTime[] PROGMEM =
   "<form style='display: inline' method='get' action='/mount.htm'>\n"
   "<div class='sws-clock-action'>"
-  "<small><button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' type='submit'>" L_HINT_CLOCK "</button></small>"
+  "<small><button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' type='submit'>" L_SYNC_TIME "</button></small>"
   "</div>\n"
   "<input id='dm' type='hidden' name='dm'><input id='dd' type='hidden' name='dd'><input id='dy' type='hidden' name='dy'>"
   "<input id='th' type='hidden' name='th'><input id='tm' type='hidden' name='tm'><input id='ts' type='hidden' name='ts'>\n"
   "</form>\n";
 
-const char html_longMsg[] PROGMEM = "<fieldset class='sws-field-group'><legend>" L_LOCATION_LONG "</legend><div class='sws-unit-inputs'>";
-const char html_latMsg[] PROGMEM = "<fieldset class='sws-field-group'><legend>" L_LOCATION_LAT "</legend><div class='sws-unit-inputs'>";
-const char html_offsetMsg[] PROGMEM = "<fieldset class='sws-field-group'><legend>" L_LOCATION_RANGE_UTC_OFFSET "</legend><div class='sws-unit-inputs'>";
+const char html_longMsg[] PROGMEM = "<fieldset class='sws-field-group'><legend>" L_LONG "</legend><div class='sws-unit-inputs'>";
+const char html_latMsg[] PROGMEM = "<fieldset class='sws-field-group'><legend>" L_LAT "</legend><div class='sws-unit-inputs'>";
+const char html_offsetMsg[] PROGMEM = "<fieldset class='sws-field-group'><legend>" L_TIMEZONE "</legend><div class='sws-unit-inputs'>";
 const char html_offsetMin[] PROGMEM =
 "&nbsp;<select name='u2'><option value='0' %s>00</option><option value='30' %s>30</option><option value='45' %s>45</option></select>&nbsp;m\n";
 const char html_offsetFooterMsg[] PROGMEM = "</div><p class='sws-help'>" L_LOCATION_MESSAGE_UTC_OFFSET "</p></fieldset>";

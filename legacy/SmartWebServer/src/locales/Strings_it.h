@@ -682,3 +682,14 @@
 #define L_UI_CONTENT "Contenuto della pagina"
 
 #define L_ENC_SYNC_CONTROL "Controllo sincronizzazione"
+
+// 位置与限位编辑卡片
+#define L_POSITION_INFO "Informazioni posizione"
+#define L_EDIT_POSITION "Modifica posizione"
+#define L_LIMITS_SETTINGS "Limiti"
+#define L_EDIT_LIMITS "Modifica limiti"
+#define L_TIMEZONE "Fuso orario"
+#define L_SYNC_TIME "Sincronizza ora"
+#define L_MF_DIRECT "Inversione diretta"
+#define L_MF_VIA_HOME "Passa da origine"
+#define L_MF_PAUSE_HOME "Pausa a origine"

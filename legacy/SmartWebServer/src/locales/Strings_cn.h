@@ -184,9 +184,9 @@
 #define L_HINT_CONTINUE_GOTO "继续 Goto (当在零位暂停时)"
 #define L_HOME_PARK_TITLE "回零与停放"
 #define L_RETURN_HOME "返回零位"
-#define L_RESET_HOME "零位 (重置)"
+#define L_RESET_HOME "重设零位"
 #define L_UNPARK "解除停放"
-#define L_PARK "停放"
+#define L_PARK "停放设备"
 #define L_HINT_EMERGENCY_STOP "紧急停止！"
 #define L_HINT_RATE_SIDEREAL "恒星速率"
 #define L_HINT_RATE_LUNAR "月球速率"
@@ -295,8 +295,8 @@
 #define L_REFINE_MESSAGE2 "点击“精调极轴”后，使用赤道仪的极轴调节螺丝，将这颗恒星重新调至视场中心"
 #define L_REFINE_MESSAGE3 "如需进一步提高精度，可重新进行多星校准"
 
-#define L_PARK "停放"
-#define L_SET_PARK "设置停放位"
+#define L_PARK "停放设备"
+#define L_SET_PARK "重设停放位"
 #define L_SET_PARK_CURRENT_COORDS "将当前坐标设为停放位置"
 #define L_COORD_ORIGIN_TITLE "坐标原点"
 #define L_COORD_ORIGIN "设置坐标原点"
@@ -317,7 +317,7 @@
 #define L_MERIDIAN_FLIP_AUTO "到达限位时自动中天翻转"
 #define L_MERIDIAN_FLIP_NOW "立即执行"
 #define L_MERIDIAN_FLIP_PAUSE "中天翻转，在零位暂停"
-#define L_MERIDIAN_FLIP_HOMING "中天翻转回零中"
+#define L_MERIDIAN_FLIP_HOMING "中天翻转方式"
 #define L_MERIDIAN_FLIP_PPS "中天翻转，首选镜筒侧 (Pier Side)"
 
 #define L_ORIENTATION_AUTO "方向切换"
@@ -354,10 +354,10 @@
 
 // limits
 #define L_LIMITS_TITLE "地平线与天顶限位"
-#define L_LIMITS_RANGE_HORIZON "地平线限位，最小高度角 &pm;30&deg;"
-#define L_LIMITS_RANGE_OVERHEAD "天顶限位，最大高度角 60 至 90&deg;"
-#define L_LIMITS_RANGE_MERIDIAN_E "过中天限位，立柱东侧 &pm;270&deg;"
-#define L_LIMITS_RANGE_MERIDIAN_W "过中天限位，立柱西侧 &pm;270&deg;"
+#define L_LIMITS_RANGE_HORIZON "地平线限位（&pm;30&deg;）"
+#define L_LIMITS_RANGE_OVERHEAD "高度角上限（60 至 90&deg;）"
+#define L_LIMITS_RANGE_MERIDIAN_E "中天限位·东（&pm;270&deg;）"
+#define L_LIMITS_RANGE_MERIDIAN_W "中天限位·西（&pm;270&deg;）"
 
 // location
 #define L_LOCATION_TITLE "时间与地点"
@@ -539,7 +539,7 @@
 // 紧凑控制面板和坐标输入的统一文字
 #define L_HOME_ACTIONS "零位操作"
 #define L_PARK_ACTIONS "停放操作"
-#define L_COORD_GOTO "按坐标定位"
+#define L_COORD_GOTO "按坐标 GOTO"
 #define L_COORD_SYSTEM "坐标系"
 #define L_COORD_JNOW "赤经／赤纬（当前历元）"
 #define L_COORD_RA "赤经"
@@ -685,3 +685,14 @@
 #define L_UI_CONTENT "标签内容"
 
 #define L_ENC_SYNC_CONTROL "同步控制"
+
+// 位置与限位编辑卡片
+#define L_POSITION_INFO "位置信息"
+#define L_EDIT_POSITION "编辑位置"
+#define L_LIMITS_SETTINGS "限位设置"
+#define L_EDIT_LIMITS "编辑限位"
+#define L_TIMEZONE "时区"
+#define L_SYNC_TIME "同步时间"
+#define L_MF_DIRECT "直接翻转"
+#define L_MF_VIA_HOME "经零位翻转"
+#define L_MF_PAUSE_HOME "到零位后暂停"

@@ -67,21 +67,22 @@ void handleMount()
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // 常用移动与定位放在首屏，校准和限位放入独立设置区
+  // 移动控制之后显示位置与限位，再显示坐标 GOTO 和其余设置。
   data.concat(FPSTR(html_layout_mount_begin));
   guideTile(data);
-  data.concat(FPSTR(html_layout_mount_target));
-  gotoTile(data);
   data.concat(FPSTR(html_layout_mount_tracking));
   trackingTile(data);
+  data.concat(FPSTR(html_layout_mount_location));
+  siteTile(data);
+  limitsTile(data);
+  data.concat(FPSTR(html_layout_mount_target));
+  gotoTile(data);
   data.concat(FPSTR(html_layout_mount_home));
   homeParkTile(data);
-  data.concat(FPSTR(html_layout_mount_site));
-  siteTile(data);
+  data.concat(FPSTR(html_layout_mount_library));
   libraryTile(data);
   data.concat(FPSTR(html_layout_mount_advanced));
   alignTile(data);
-  limitsTile(data);
   if (status.pecEnabled) pecTile(data);
   #if DISPLAY_COORDINATE_ORIGIN == ON
     coordinateTile(data);

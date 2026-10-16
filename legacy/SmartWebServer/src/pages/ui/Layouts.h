@@ -24,19 +24,22 @@ const char html_layout_mount_begin[] PROGMEM =
   "<div class='sws-mount'><div class='sws-control-grid'><section class='sws-guide'>";
 
 const char html_layout_mount_target[] PROGMEM =
-  "</section><section class='sws-target'>";
+  "</div><section class='sws-target'>";
 
 const char html_layout_mount_tracking[] PROGMEM =
   "</section><section class='sws-tracking'>";
 
-const char html_layout_mount_home[] PROGMEM =
-  "</section></div><section class='sws-home'>";
+const char html_layout_mount_location[] PROGMEM =
+  "</section></div><div class='sws-site-limits'>";
 
-const char html_layout_mount_site[] PROGMEM =
-  "</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_LOCATION_TITLE " / " L_PAGE_LIBRARY "</h2><p></p></div><div class='sws-settings-grid sws-site-library'>";
+const char html_layout_mount_home[] PROGMEM =
+  "</section><section class='sws-home'>";
+
+const char html_layout_mount_library[] PROGMEM =
+  "</section><section class='sws-library-section'>";
 
 const char html_layout_mount_advanced[] PROGMEM =
-  "</div></section><details class='sws-more' open><summary>" L_ALIGN " / " L_LIMITS_TITLE " / " L_PAGE_PEC "</summary><div class='sws-settings-grid sws-advanced-grid'>";
+  "</section><details class='sws-more' open><summary>" L_ALIGN " / " L_PAGE_PEC "</summary><div class='sws-settings-grid sws-advanced-grid'>";
 
 const char html_layout_mount_end[] PROGMEM =
   "</div></details></div>";

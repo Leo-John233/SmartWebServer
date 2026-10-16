@@ -11,13 +11,7 @@ void limitsTile(String &data)
   char temp[640] = "";
   char reply[120] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", L_BACKLASH " / " L_LIMITS_TITLE);
-  // 卡片标记用于响应式布局，不改变设备功能判断
-  data.concat(temp);
-  data.concat(F("<div class='sws-card-marker' data-card='limits'></div>"));
-
-  data.concat(F("<br /><hr>"));
-
+  data.concat(F("<div class='b1 sws-limits sws-editor'><header class='sws-editor-heading'><h2>" L_LIMITS_SETTINGS "</h2><button class='sws-secondary sws-edit-button' type='button' data-edit-form='sws-limits-form'>" SWS_EDIT_ICON L_EDIT_LIMITS "</button></header>"));
   // get backlash and limits
   if (!onStep.command(":%BR#", reply)) strcpy(reply, "0");
   int backlashAxis1 = (int)strtol(&reply[0], NULL, 10);
@@ -39,48 +33,10 @@ void limitsTile(String &data)
   int degPastMerW = (int)strtol(&reply[0], NULL, 10);
   degPastMerW = round((degPastMerW * 15.0) / 60.0);
 
-  // 状态值与设置项使用相同的语言资源，数值单独对齐
-  data.concat(F("<div class='sws-limit-values'>"));
-  // show values
-  snprintf(temp, sizeof(temp), "<div><span>" L_BACKLASH_RANGE_AXIS1 "</span><strong id='limBl1' class='c'>%d</strong></div>", backlashAxis1);
-  data.concat(temp);
-  snprintf(temp, sizeof(temp), "<div><span>" L_BACKLASH_RANGE_AXIS2 "</span><strong id='limBl2' class='c'>%d</strong></div>", backlashAxis2);
-  data.concat(temp);
-  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_HORIZON "</span><strong id='limAltMin' class='c'>%d</strong></div>", minAlt);
-  data.concat(temp);
-  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_OVERHEAD "</span><strong id='limAltMax' class='c'>%d</strong></div>", maxAlt);
-  data.concat(temp);
-  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_MERIDIAN_E "</span><strong id='limMerE' class='c'>%d</strong></div>", degPastMerE);
-  data.concat(temp);
-  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_MERIDIAN_W "</span><strong id='limMerW' class='c'>%d</strong></div>", degPastMerW);
-  data.concat(temp);
-
-  data.concat(F("</div><hr>"));
-
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
-  data.concat(temp);
-
-  snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
-  data.concat(temp);
-
-  // Backlash
-  data.concat(F("<div class='sws-limits-form'><fieldset><legend>" L_BACKLASH "</legend>"));
-
-  snprintf_P(temp, sizeof(temp), html_configBlAxis1, backlashAxis1);
-  data.concat(temp);
-  www.sendContentAndClear(data);
-
-  snprintf_P(temp, sizeof(temp), html_configBlAxis2, backlashAxis2);
-  data.concat(temp);
-
-  data.concat(F("</fieldset><fieldset><legend>" L_LIMITS_TITLE "</legend>"));
-
+  data.concat(F("<form id='sws-limits-form' class='sws-settings-editor sws-limits-form' method='get' action='/mount.htm'>"));
   // Overhead and Horizon Limits
-  snprintf_P(temp, sizeof(temp), html_configMinAlt, minAlt);
-  data.concat(temp);
-
-  snprintf_P(temp, sizeof(temp), html_configMaxAlt, maxAlt);
-  data.concat(temp);
+  snprintf_P(temp, sizeof(temp), html_configMaxAlt, maxAlt); data.concat(temp);
+  snprintf_P(temp, sizeof(temp), html_configMinAlt, minAlt); data.concat(temp);
 
   // Meridian Limits
   if (status.mountType == MT_GEM)
@@ -94,13 +50,10 @@ void limitsTile(String &data)
   else
     data.concat(F("<br />\n"));
 
-  data.concat(F("</fieldset><div class='sws-form-footer'><button type='submit'>" L_UPLOAD "</button></div></div>\n"));
-
-  data.concat(FPSTR(html_form_end));
-  www.sendContentAndClear(data);
-
-  data.concat(FPSTR(html_collapsable_end));
-  data.concat(FPSTR(html_tile_end));
+  data.concat(F("<details class='sws-backlash-editor'><summary>" L_BACKLASH "</summary>"));
+  snprintf_P(temp, sizeof(temp), html_configBlAxis1, backlashAxis1); data.concat(temp);
+  snprintf_P(temp, sizeof(temp), html_configBlAxis2, backlashAxis2); data.concat(temp);
+  data.concat(F("</details><div class='sws-editor-footer'><button type='reset' class='sws-secondary'>" L_UI_CANCEL "</button><button type='submit'>" L_SAVE_SETTINGS "</button></div></form></div>"));
   www.sendContentAndClear(data);
 }
 

@@ -680,3 +680,14 @@
 #define L_UI_CONTENT "Contingut de la pàgina"
 
 #define L_ENC_SYNC_CONTROL "Control de sincronització"
+
+// 位置与限位编辑卡片
+#define L_POSITION_INFO "Informació de posició"
+#define L_EDIT_POSITION "Edita la posició"
+#define L_LIMITS_SETTINGS "Configuració de límits"
+#define L_EDIT_LIMITS "Edita els límits"
+#define L_TIMEZONE "Zona horària"
+#define L_SYNC_TIME "Sincronitza hora"
+#define L_MF_DIRECT "Canvi directe"
+#define L_MF_VIA_HOME "Passa per origen"
+#define L_MF_PAUSE_HOME "Pausa a origen"

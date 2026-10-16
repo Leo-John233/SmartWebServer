@@ -4,4 +4,5 @@
 #include "htmlHeaders.h"
 #include "ui/Styles.h"
 #include "ui/Controls.h"
+#include "ui/Editors.h"
 #include "ui/Navigation.h"

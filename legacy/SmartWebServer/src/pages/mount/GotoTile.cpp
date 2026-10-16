@@ -40,7 +40,7 @@ void gotoTile(String &data)
 {
   char temp[640] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_GOTO_ACTION);
+  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_COORD_GOTO);
   data.concat(temp);
 
   data.concat(F("<div style='float: right; text-align: right;' id='gto_status' class='c'>"));

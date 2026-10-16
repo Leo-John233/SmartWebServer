@@ -26,10 +26,11 @@ void homeParkTile(String &data)
   data.concat(FPSTR(html_homeReturn));
   data.concat(FPSTR(html_homeReset));
   data.concat(F("</div></div><div><h3>" L_PARK_ACTIONS "</h3><div class='sws-action-pair'>"));
+  data.concat(F("<div class='sws-park-toggle'>"));
   data.concat(FPSTR(html_park));
-  data.concat(FPSTR(html_setpark));
-  data.concat(F("</div><div class='sws-unpark-row'>"));
   data.concat(FPSTR(html_unpark));
+  data.concat(F("</div>"));
+  data.concat(FPSTR(html_setpark));
   data.concat(F("</div></div></div>"));
   data.concat(F("<hr>"));
 

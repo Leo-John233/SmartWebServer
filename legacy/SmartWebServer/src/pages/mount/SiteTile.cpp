@@ -17,57 +17,10 @@ void siteTile(String &data)
 {
   char temp[640] = "";
   char reply[80] = "";
+  bool negativeValue;
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", L_LOCATION_TITLE);
-  // 卡片标记用于响应式布局，不改变设备功能判断
-  data.concat(temp);
-  data.concat(F("<div class='sws-card-marker' data-card='site'></div>"));
-  data.concat(F("<br/><hr>"));
-
-  data.concat(FPSTR(html_browserTime));
-  snprintf_P(temp, sizeof(temp), html_date, state.dateStr);
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_time, state.timeStr);
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_sidereal, state.lastStr);
-  data.concat(temp);
-  www.sendContentAndClear(data);
-  
-  snprintf_P(temp, sizeof(temp), html_site, state.latitudeStr, state.longitudeStr);
-  data.concat(temp);
-  data.concat(FPSTR(html_setDateTime));
-  data.concat(F("<hr>"));
-
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
-  data.concat(temp);
-  www.sendContentAndClear(data);
-
-  // 经纬度与时区输入共用紧凑网格，保留原有表单参数
-  data.concat(F("<div class='sws-site-fields'>"));
-
-  // Latitude
-  data.concat(FPSTR(html_latMsg));
-  if (!onStep.command(status.getVersionMajor() > 3 ? ":GtH#" : ":Gt#", reply))
-    strcpy(reply, status.getVersionMajor() > 3 ? "+00*00:00" : "+00*00");
-  reply[3] = 0;
-  reply[6] = 0;
-  reply[9] = 0;
-  if (reply[0] == '+') reply[0] = '0';
-  convert.stripNumericStr(reply);
-  snprintf_P(temp, sizeof(temp), html_ninput_wide, "t1", reply, "-90", "90", "&deg;");
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_ninput, "t2", &reply[4], "0", "60", "'");
-  data.concat(temp);
-  if (status.getVersionMajor() > 3)
-  {
-    snprintf_P(temp, sizeof(temp), html_ninput, "t3", &reply[7], "0", "60", "\"");
-    data.concat(temp);
-  }
-  data.concat(F("</div></fieldset>"));
-  www.sendContentAndClear(data);
-
+  data.concat(F("<div class='b1 sws-site sws-editor'><header class='sws-editor-heading'><h2>" L_POSITION_INFO "</h2><button class='sws-secondary sws-edit-button' type='button' data-edit-form='sws-site-form'>" SWS_EDIT_ICON L_EDIT_POSITION "</button></header>"));
+  data.concat(F("<form id='sws-site-form' class='sws-settings-editor' method='get' action='/mount.htm'><div class='sws-site-fields'>"));
   // Longitude
   data.concat(FPSTR(html_longMsg));
   if (!onStep.command(status.getVersionMajor() > 3 ? ":GgH#" : ":Gg#", reply))
@@ -76,7 +29,9 @@ void siteTile(String &data)
   reply[7] = 0;
   reply[10] = 0;
   if (reply[0] == '+') reply[0] = '0';
+  negativeValue = reply[0] == '-';
   convert.stripNumericStr(reply);
+  if (negativeValue && atoi(reply) == 0) strcpy(reply, "-0");
   snprintf_P(temp, sizeof(temp), html_ninput_wide, "g1", reply, "-180", "180", "&deg;");
   data.concat(temp);
   snprintf_P(temp, sizeof(temp), html_ninput, "g2", &reply[5], "0", "60", "'");
@@ -89,12 +44,37 @@ void siteTile(String &data)
   data.concat(F("</div></fieldset>"));
   www.sendContentAndClear(data);
 
+  // Latitude
+  data.concat(FPSTR(html_latMsg));
+  if (!onStep.command(status.getVersionMajor() > 3 ? ":GtH#" : ":Gt#", reply))
+    strcpy(reply, status.getVersionMajor() > 3 ? "+00*00:00" : "+00*00");
+  reply[3] = 0;
+  reply[6] = 0;
+  reply[9] = 0;
+  if (reply[0] == '+') reply[0] = '0';
+  negativeValue = reply[0] == '-';
+  convert.stripNumericStr(reply);
+  if (negativeValue && atoi(reply) == 0) strcpy(reply, "-0");
+  snprintf_P(temp, sizeof(temp), html_ninput_wide, "t1", reply, "-90", "90", "&deg;");
+  data.concat(temp);
+  snprintf_P(temp, sizeof(temp), html_ninput, "t2", &reply[4], "0", "60", "'");
+  data.concat(temp);
+  if (status.getVersionMajor() > 3)
+  {
+    snprintf_P(temp, sizeof(temp), html_ninput, "t3", &reply[7], "0", "60", "\"");
+    data.concat(temp);
+  }
+  data.concat(F("</div></fieldset>"));
+  www.sendContentAndClear(data);
+
   // UTC Offset
   data.concat(FPSTR(html_offsetMsg));
   if (!onStep.command(":GG#", reply)) strcpy(reply, "+00");
   reply[3] = 0;
   if (reply[0] == '+') reply[0] = '0';
+  negativeValue = reply[0] == '-';
   convert.stripNumericStr(reply);
+  if (negativeValue && atoi(reply) == 0) strcpy(reply, "-0");
   snprintf_P(temp, sizeof(temp), html_ninput_wide, "u1", reply, "-14", "12", "h");
   data.concat(temp);
   snprintf_P(temp, sizeof(temp), html_offsetMin, reply[4] == '0' ? "selected" : "", reply[4] == '3' ? "selected" : "", reply[4] == '4' ? "selected" : "");
@@ -102,10 +82,16 @@ void siteTile(String &data)
   data.concat(FPSTR(html_offsetFooterMsg));
   www.sendContentAndClear(data);
 
-  data.concat(F("</div><div class='sws-site-submit'><button type='submit'>" L_UPLOAD "</button></div>\n"));
-  data.concat(FPSTR(html_form_end));
-
-  data.concat(FPSTR(html_collapsable_end));
+  data.concat(F("</div><div class='sws-editor-footer'><button type='reset' class='sws-secondary'>" L_UI_CANCEL "</button><button type='submit'>" L_SAVE_SETTINGS "</button></div></form>"));
+  // 时间同步仍使用原始日期时间参数；位置读数标识保留给原有轮询。
+  data.concat(F("<div class='sws-clock-controls'>"));
+  snprintf_P(temp, sizeof(temp), html_date, state.dateStr); data.concat(temp);
+  snprintf_P(temp, sizeof(temp), html_time, state.timeStr); data.concat(temp);
+  snprintf_P(temp, sizeof(temp), html_sidereal, state.lastStr); data.concat(temp);
+  data.concat(FPSTR(html_setDateTime));
+  data.concat(F("</div>"));
+  data.concat(FPSTR(html_browserTime));
+  snprintf_P(temp, sizeof(temp), html_site, state.latitudeStr, state.longitudeStr); data.concat(temp);
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
 }
@@ -216,7 +202,7 @@ extern void siteTileGet()
     if (v.charAt(0) == '-') sign = '-'; else sign = '+';
     int16_t h = abs(v.toInt());
     int16_t m = v1.toInt();
-    if (v.toInt() >= -14 && h <= 12 && (m == 0 || m == 30 || m == 45))
+    if (v.toInt() >= -14 && v.toInt() <= 12 && (m == 0 || m == 30 || m == 45))
     {
       snprintf(temp, sizeof(temp), ":SG%c%02d:%02d#", sign, h, m);
       onStep.commandBool(temp);

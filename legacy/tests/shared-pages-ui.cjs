@@ -52,11 +52,13 @@ await coordinateForm.locator('[name=dec_d]').fill('90');await coordinateForm.loc
 // 展开实际生成的表单，检查曾在预览中缺失的输入项与提交动作
 await frame().evaluate(()=>document.querySelectorAll('.sws-mount .collapsible').forEach(e=>e.click()));
 assert.equal(await page.frameLocator('#sws-frame').locator('.sws-refine-steps li').count(),3,'精调极轴说明分成三个步骤');
-assert.equal(await page.frameLocator('#sws-frame').locator('.sws-limits-form fieldset').count(),2,'回差与运动限位分组');
+await page.frameLocator('#sws-frame').locator('[data-edit-form=sws-site-form]').click();
+await page.frameLocator('#sws-frame').locator('[data-edit-form=sws-limits-form]').click();
+await page.frameLocator('#sws-frame').locator('.sws-backlash-editor').evaluate(e=>e.open=true);
 assert.equal(await page.frameLocator('#sws-frame').locator('#pec_sta').innerText(),defs.L_PEC_UNK,'未获得 PEC 状态时明确显示未知');
 assert(await page.frameLocator('#sws-frame').locator('.sws-align').evaluate(e=>e.getBoundingClientRect().bottom-e.querySelector('.sws-refine-action').getBoundingClientRect().bottom<60),'校准卡片不被同排较长表单拉高');
 assert(await page.frameLocator('#sws-frame').locator('#date_ut').evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=18),'设备时间采用清楚的大字号');
-for(const name of ['t1','t2','t3','g1','g2','g3','u1','u2','hc1','hc2','hl','ol','b1','b2','el','wl','spwr']){const input=page.frameLocator('#sws-frame').locator('[name="'+name+'"]');assert.equal(await input.count(),1,name+' 输入项完整');assert(await input.isVisible(),name+' 输入项可见');assert(await input.evaluate(e=>e.form&&e.form.querySelector('button[type=submit]')),name+' 有可提交表单');}
+for(const name of ['t1','t2','t3','g1','g2','g3','u1','u2','hc1','hc2','hl','ol','b1','b2','el','wl','spwr']){const input=page.frameLocator('#sws-frame').locator('[name="'+name+'"]');assert.equal(await input.count(),1,name+' 输入项完整');assert(await input.evaluate(e=>e.getClientRects().length>0||(e.hidden&&e.parentElement.querySelector('input:not([hidden])')?.getClientRects().length>0)||e.closest('fieldset')?.querySelector('.sws-timezone-select')?.getClientRects().length>0),name+' 有可见的原控件或编辑代理');assert(await input.evaluate(e=>e.form&&e.form.querySelector('button[type=submit]')),name+' 有可提交表单');}
 const editor=page.frameLocator('#sws-frame').locator('#cat_data');assert(await editor.isVisible(),'星表数据框可编辑');await editor.fill('M31,SG,00:42:44,+41*16:09');assert(await page.frameLocator('#sws-frame').locator('#cat_upload').isEnabled(),'填写星表后可上传');
 for(const cls of ['sws-site','sws-library','sws-homepark','sws-align','sws-limits','sws-pec'])await page.frameLocator('#sws-frame').locator('.'+cls).screenshot({path:path.join(out,cls+'-pc.png')});
 await page.frameLocator('#sws-frame').locator('.sws-target').screenshot({path:path.join(out,'goto-settings-pc.png')});
