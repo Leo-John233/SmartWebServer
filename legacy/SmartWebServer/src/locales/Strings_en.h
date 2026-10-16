@@ -697,8 +697,8 @@
 // 本机网络指示与 RA 抱闸保护
 #define L_IO_ACTIVITY_TITLE "Network activity LED"
 #define L_IO_ACTIVITY_HELP "Blinks on data traffic and while the controller is disconnected"
-#define L_IO_BRAKE_TITLE "RA brake protection"
-#define L_IO_BRAKE_HELP "Releases on healthy feedback, locks on faults or timeout; stays locked when off"
+#define L_IO_BRAKE_TITLE "RA stop and brake"
+#define L_IO_BRAKE_HELP "Driver faults send STOP before locking the brake; stays locked when off"
 #define L_IO_BRAKE_STARTING "Starting, locked"
 #define L_IO_BRAKE_DISABLED "Protection off, locked"
 #define L_IO_BRAKE_WAITING "Waiting for driver, locked"

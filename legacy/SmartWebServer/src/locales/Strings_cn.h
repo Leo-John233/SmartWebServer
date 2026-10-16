@@ -700,8 +700,8 @@
 // 本机网络指示与 RA 抱闸保护
 #define L_IO_ACTIVITY_TITLE "网络活动指示灯"
 #define L_IO_ACTIVITY_HELP "收发数据时闪烁，主控断开时持续闪烁"
-#define L_IO_BRAKE_TITLE "赤经轴抱闸保护"
-#define L_IO_BRAKE_HELP "驱动正常后松闸，异常或超时抱闸；关闭后保持抱闸"
+#define L_IO_BRAKE_TITLE "赤经轴停止与抱闸"
+#define L_IO_BRAKE_HELP "驱动异常时先停止再抱闸；关闭后保持抱闸"
 #define L_IO_BRAKE_STARTING "启动中，已抱闸"
 #define L_IO_BRAKE_DISABLED "保护关闭，已抱闸"
 #define L_IO_BRAKE_WAITING "等待驱动，已抱闸"

@@ -15,10 +15,11 @@ public:
   bool releaseBrake(bool connected, uint32_t now) const;
   bool activityEnabled() const { return activity_; }
   bool protectionEnabled() const { return protection_; }
+  bool driverFault() const { return fault_; }
   bool feedbackDue(uint32_t now) const;
 
 private:
   bool configured_ = false, activity_ = true, protection_ = true;
-  bool trafficSeen_ = false, feedbackSeen_ = false, healthy_ = false, ready_ = false;
+  bool trafficSeen_ = false, feedbackSeen_ = false, healthy_ = false, ready_ = false, fault_ = false;
   uint32_t trafficAt_ = 0, feedbackAt_ = 0, healthyAt_ = 0;
 };

@@ -697,8 +697,8 @@
 // 本机网络指示与 RA 抱闸保护
 #define L_IO_ACTIVITY_TITLE "LED attività di rete"
 #define L_IO_ACTIVITY_HELP "Lampeggia con i dati e con il controller scollegato"
-#define L_IO_BRAKE_TITLE "Protezione freno AR"
-#define L_IO_BRAKE_HELP "Rilascia con risposta normale, blocca per guasti o ritardi; disattivato resta bloccato"
+#define L_IO_BRAKE_TITLE "Arresto e freno AR"
+#define L_IO_BRAKE_HELP "Con un guasto invia STOP prima di bloccare il freno; disattivato resta bloccato"
 #define L_IO_BRAKE_STARTING "Avvio, bloccato"
 #define L_IO_BRAKE_DISABLED "Protezione disattivata, bloccato"
 #define L_IO_BRAKE_WAITING "Attesa driver, bloccato"

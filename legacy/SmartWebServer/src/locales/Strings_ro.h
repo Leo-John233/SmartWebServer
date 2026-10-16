@@ -697,8 +697,8 @@
 // 本机网络指示与 RA 抱闸保护
 #define L_IO_ACTIVITY_TITLE "LED activitate rețea"
 #define L_IO_ACTIVITY_HELP "Clipește la transferul de date și când controlerul este deconectat"
-#define L_IO_BRAKE_TITLE "Protecție frână AR"
-#define L_IO_BRAKE_HELP "Eliberează la răspuns normal, blochează la eroare sau expirare; oprită menține blocat"
+#define L_IO_BRAKE_TITLE "Oprire și frână AD"
+#define L_IO_BRAKE_HELP "La eroare trimite STOP înainte de blocarea frânei; oprită menține blocat"
 #define L_IO_BRAKE_STARTING "Pornire, blocată"
 #define L_IO_BRAKE_DISABLED "Protecție oprită, blocată"
 #define L_IO_BRAKE_WAITING "Așteptare driver, blocată"

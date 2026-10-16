@@ -2,7 +2,7 @@
 #include <cstring>
 
 // GXU1 的七个逗号分隔字段及末尾故障码；不把超时、0 或任意非空文本当作正常。
-static bool healthyDriverReply(const char *reply) {
+static bool readDriverReply(const char *reply, bool &fault) {
   const char *tokens[] = {"ST", "OA", "OB", "GA", "GB", "OT", "PW", "GF"};
   bool flags[8] = {};
   const char *field = reply;
@@ -14,9 +14,10 @@ static bool healthyDriverReply(const char *reply) {
     flags[i] = length != 0;
     if (end) field = end + 1;
   }
-  // 静止时的开路位可能是驱动芯片的无效诊断，沿用 SWS 原有显示判据。
-  return !flags[3] && !flags[4] && !flags[5] && !flags[6] && !flags[7] &&
-         (flags[0] || (!flags[1] && !flags[2]));
+  // ST 只表示静止；其余任一故障位均触发停止与抱闸，包括静止时的开路。
+  fault = false;
+  for (int i = 1; i < 8; i++) fault = fault || flags[i];
+  return true;
 }
 
 void BoardIoPolicy::configure(bool activity, bool protection, uint32_t now) {
@@ -24,6 +25,7 @@ void BoardIoPolicy::configure(bool activity, bool protection, uint32_t now) {
     feedbackSeen_ = false;
     healthy_ = false;
     ready_ = false;
+    fault_ = false;
     healthyAt_ = now;
   }
   configured_ = true;
@@ -37,7 +39,10 @@ void BoardIoPolicy::traffic(uint32_t now) {
 }
 
 void BoardIoPolicy::driverFeedback(bool received, const char *reply, uint32_t now) {
-  const bool healthy = received && reply && healthyDriverReply(reply);
+  bool fault = false;
+  const bool valid = received && reply && readDriverReply(reply, fault);
+  fault_ = valid && fault;
+  const bool healthy = valid && !fault_;
   if (!healthy_ || !feedbackSeen_ || uint32_t(now - feedbackAt_) > FeedbackStaleMs) {
     healthyAt_ = now;
     ready_ = false;

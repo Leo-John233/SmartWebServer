@@ -705,8 +705,8 @@
 // 本机网络指示与 RA 抱闸保护
 #define L_IO_ACTIVITY_TITLE "Netzwerkaktivitäts-LED"
 #define L_IO_ACTIVITY_HELP "Blinkt bei Datenverkehr und getrennter Steuerung"
-#define L_IO_BRAKE_TITLE "RA-Bremsschutz"
-#define L_IO_BRAKE_HELP "Gibt bei fehlerfreier Rückmeldung frei, sperrt bei Fehler oder Zeitüberschreitung; ausgeschaltet bleibt die Bremse gesperrt"
+#define L_IO_BRAKE_TITLE "RA-Stopp und Bremse"
+#define L_IO_BRAKE_HELP "Bei Treiberfehler zuerst STOP senden, dann Bremse sperren; ausgeschaltet bleibt sie gesperrt"
 #define L_IO_BRAKE_STARTING "Startet, gesperrt"
 #define L_IO_BRAKE_DISABLED "Schutz aus, gesperrt"
 #define L_IO_BRAKE_WAITING "Warte auf Treiber, gesperrt"

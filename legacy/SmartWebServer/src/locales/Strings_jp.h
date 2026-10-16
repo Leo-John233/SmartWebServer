@@ -696,8 +696,8 @@
 // 本机网络指示与 RA 抱闸保护
 #define L_IO_ACTIVITY_TITLE "ネットワーク通信ランプ"
 #define L_IO_ACTIVITY_HELP "通信中と主制御装置の未接続時に点滅"
-#define L_IO_BRAKE_TITLE "赤経軸ブレーキ保護"
-#define L_IO_BRAKE_HELP "正常応答で解除、異常や応答切れでロック、オフ時もロックを維持"
+#define L_IO_BRAKE_TITLE "赤経軸停止とブレーキ"
+#define L_IO_BRAKE_HELP "ドライバー異常時は停止指令後にロック、オフ時もロックを維持"
 #define L_IO_BRAKE_STARTING "起動中、ロック中"
 #define L_IO_BRAKE_DISABLED "保護オフ、ロック中"
 #define L_IO_BRAKE_WAITING "応答待ち、ロック中"

@@ -697,8 +697,8 @@
 // 本机网络指示与 RA 抱闸保护
 #define L_IO_ACTIVITY_TITLE "Voyant d’activité réseau"
 #define L_IO_ACTIVITY_HELP "Clignote pendant les échanges et si le contrôleur est déconnecté"
-#define L_IO_BRAKE_TITLE "Protection du frein AD"
-#define L_IO_BRAKE_HELP "Libère après un retour normal, bloque sur défaut ou délai dépassé ; désactivée, reste bloqué"
+#define L_IO_BRAKE_TITLE "Arrêt et frein AD"
+#define L_IO_BRAKE_HELP "Sur défaut du pilote, envoie STOP puis bloque le frein ; désactivée, reste bloqué"
 #define L_IO_BRAKE_STARTING "Démarrage, bloqué"
 #define L_IO_BRAKE_DISABLED "Protection désactivée, bloqué"
 #define L_IO_BRAKE_WAITING "Attente du pilote, bloqué"

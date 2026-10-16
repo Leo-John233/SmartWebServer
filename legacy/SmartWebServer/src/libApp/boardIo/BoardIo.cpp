@@ -39,14 +39,20 @@ void BoardIo::tick() {
   if (!started_) return;
   const uint32_t now = millis();
   const bool connected = status.onStepFound && status.mountFound == SD_TRUE;
+  const bool released = policy_.releaseBrake(connected, now);
+  // 故障持续期间不重复停止，重新开启或稳定恢复后允许处理下一次故障。
+  if (!stopping_ && (!policy_.protectionEnabled() || released)) stopIssued_ = false;
   #if SWS_ACTIVITY_LED_PIN != OFF
     const bool lit = policy_.ledLit(status.onStepFound, LED_STATUS_ON_STATE == LOW, now);
     const int level = lit ? LOW : HIGH;
     if (level != ledLevel_) { digitalWrite(SWS_ACTIVITY_LED_PIN, level); ledLevel_ = level; }
   #endif
   #if SWS_RA_BRAKE_PIN != OFF
-    const int brake = brakeAvailable() && policy_.releaseBrake(connected, now) ? HIGH : LOW;
-    if (brake != brakeLevel_) { digitalWrite(SWS_RA_BRAKE_PIN, brake); brakeLevel_ = brake; }
+    // 发送 STOP 期间即使其他任务调用 tick，也不能抢先改变抱闸输出。
+    if (!stopping_) {
+      const int brake = brakeAvailable() && released ? HIGH : LOW;
+      if (brake != brakeLevel_) { digitalWrite(SWS_RA_BRAKE_PIN, brake); brakeLevel_ = brake; }
+    }
   #endif
 }
 
@@ -76,6 +82,14 @@ void BoardIo::pollDriver() {
 void BoardIo::driverFeedback(bool received, const char *reply) {
   if (!started_ || !brakeAvailable()) return;
   policy_.driverFeedback(received, reply, millis());
+  if (policy_.protectionEnabled() && policy_.driverFault() && !stopIssued_) {
+    stopIssued_ = true;
+    stopping_ = true;
+    char response[80] = "";
+    // 与网页 STOP 相同的命令，不等待停稳；发送失败也继续抱闸。
+    onStep.processCommand(":Q#", response, 200);
+    stopping_ = false;
+  }
   tick();
 }
 
