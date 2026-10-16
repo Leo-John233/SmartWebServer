@@ -12,7 +12,7 @@ void handleLibraryHelp() {
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageAppearance();
-  data.concat(F("<main class='sws-document'><header><span class='sws-brand-small'>OnStepX</span><h1>" L_PAGE_LIBRARY "</h1><a href='/mount.htm' target='_top'>" L_PAGE_MOUNT "</a></header><section>"));
+  data.concat(F("<main class='sws-document'><header><h1>" L_PAGE_LIBRARY "</h1><a href='/mount.htm' target='_top'>" L_PAGE_MOUNT "</a></header><section>"));
   data.concat(FPSTR(html_libCatalogHelp1));
   www.sendContentAndClear(data);
   data.concat(FPSTR(html_libCatalogHelp2));
