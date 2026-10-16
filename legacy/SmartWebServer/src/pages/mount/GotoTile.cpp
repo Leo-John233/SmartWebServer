@@ -50,6 +50,8 @@ void gotoTile(String &data)
   data.concat(state.pierSideStr);
   data.concat(F("</span></div><hr>"));
 
+  // 坐标信息在左，常用定位操作在右
+  data.concat(F("<div class='sws-goto-overview'>"));
   data.concat(FPSTR(html_mountPositionLabels));
   snprintf_P(temp, sizeof(temp), html_mountPositionAxis1, state.indexAzmStr, state.indexRaStr, state.targetRaStr);
   data.concat(temp);
@@ -58,14 +60,13 @@ void gotoTile(String &data)
 
   www.sendContentAndClear(data);
 
-  // 定位动作与位置数据显示分开，避免按钮和速率文字挤在同一行
+  // 四个操作按钮组成两行，窄屏时整体移到坐标下方
   data.concat(F("<div class='sws-actions'>"));
   data.concat(FPSTR(html_gotoGo));
   data.concat(FPSTR(html_gotoStop));
-  data.concat(F("&nbsp;&nbsp;&nbsp;"));
   data.concat(FPSTR(html_gotoContinue));
   data.concat(FPSTR(html_gotoSync));
-  data.concat(F("</div>"));
+  data.concat(F("</div></div>"));
   data.concat(FPSTR(html_coordinateInput));
   data.concat(F("<hr>"));
   www.sendContentAndClear(data);
