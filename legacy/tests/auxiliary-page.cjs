@@ -6,7 +6,7 @@ const defaults=[
  {name:'Aux3',purpose:3,values:[1,1.5,4,3.2],voltage:12.1,current:.8},
  {name:'Aux4',purpose:4,values:[0,30,5,10]},
 ];
-module.exports=({features=defaults}={})=>{
+module.exports=({features=defaults,sourceRef}={})=>{
  const root=path.join(__dirname,'../SmartWebServer/src'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
  const clean=s=>s.replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
  const fixture=Array.from({length:8},(_,i)=>({name:'Aux'+(i+1),purpose:0,values:[0,0,0,0],...features[i]}));
@@ -64,7 +64,9 @@ void handleNotFound(){www.output="NOT_FOUND";}
  code+=read('locales/Strings_cn.h')+'\n'+clean(read('pages/htmlHeaders.h'))+'\n'+clean(read('pages/htmlScripts.h'))+'\n'+clean(read('pages/htmlMessages.h'))+'\n'+clean(read('pages/Page.h'))+'\n';
  code+='void pageHeader(int){}bool servePageShell(int){return false;}\n';
  code+=misc.slice(misc.indexOf('uint8_t timeToByte('),misc.indexOf('void localeTemperature('))+'\n';
- code+=clean(read('pages/auxiliary/Auxiliary.h'))+'\n'+clean(read('pages/auxiliary/Auxiliary.cpp'))+'\n';
+ const auxiliarySource=sourceRef?cp.execFileSync('git',['show',sourceRef+':src/pages/auxiliary/Auxiliary.cpp'],{encoding:'utf8'}):read('pages/auxiliary/Auxiliary.cpp');
+ const auxiliaryHeader=sourceRef?cp.execFileSync('git',['show',sourceRef+':src/pages/auxiliary/Auxiliary.h'],{encoding:'utf8'}):read('pages/auxiliary/Auxiliary.h');
+ code+=clean(auxiliaryHeader)+'\n'+clean(auxiliarySource)+'\n';
  code+='int main(){handleAux();std::cout<<www.output<<"\\nPREVIEW_AJAX\\n";www.output.clear();auxAjax();std::cout<<www.output<<"PREVIEW_TIMES\\n";for(int i=0;i<256;i++)std::cout<<byteToTime(i)<<"\\n";}';
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'sws-auxiliary-')),input=path.join(dir,'render.cpp'),exe=path.join(dir,'auxiliary-render.exe');fs.writeFileSync(input,code);
  cp.execFileSync(process.env.CXX||'g++',['-std=c++11',input,'-o',exe],{stdio:'pipe'});
@@ -74,7 +76,7 @@ void handleNotFound(){www.output="NOT_FOUND";}
 };
 if(require.main===module){
  const assert=require('node:assert/strict'),preview=module.exports();
- assert.equal((preview.body.match(/class='b1'/g)||[]).length,4);
+ assert.equal((preview.body.match(/class='b1 sws-aux-card'/g)||[]).length,4);
  for(const key of ['x1v1','x2v1','x3v1','x3v2','x3v3','x4v1','x4v2','x4v3','x4v4'])assert(preview.body.includes(key),key+' 按通道生成');
  assert.equal((preview.body.match(/type='range'/g)||[]).length,6);
  assert(preview.ajax.includes('x2v1|50\n'));assert(preview.ajax.includes('x4v2|30\n'));assert.equal(preview.timeValues[86],30);

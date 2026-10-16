@@ -15,17 +15,17 @@ const char html_auxStartStop1[] PROGMEM = "<button onpointerdown=\"s('";
 const char html_auxStartStop2[] PROGMEM = "','1')\" type='button'>" L_START "</button><button onpointerdown=\"s('";
 const char html_auxStartStop3[] PROGMEM = "','0')\" type='button'>" L_STOP "</button>\n";
 
-const char html_auxAnalog[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='0' max='255' value='";
+const char html_auxAnalog[] PROGMEM ="<input type='range' min='0' max='255' value='";
 #if UNITS == METRIC
-  const char html_auxHeater[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='-10' max='40' value='";
+  const char html_auxHeater[] PROGMEM ="<input type='range' min='-10' max='40' value='";
   #define DEW_HEATER_CONTROL_SCALE 2.0F
 #else
-  const char html_auxHeater[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='-9' max='36' value='";
+  const char html_auxHeater[] PROGMEM ="<input type='range' min='-9' max='36' value='";
   #define DEW_HEATER_CONTROL_SCALE 1.0F
 #endif
-const char html_auxExposure[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='0' max='255' value='";
-const char html_auxDelay[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='10' max='255' value='";
-const char html_auxCount[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='1' max='255' value='";
+const char html_auxExposure[] PROGMEM ="<input type='range' min='0' max='255' value='";
+const char html_auxDelay[] PROGMEM ="<input type='range' min='10' max='255' value='";
+const char html_auxCount[] PROGMEM ="<input type='range' min='1' max='255' value='";
 const char html_auxAuxE[] PROGMEM = "</div>\n";
 
 const char html_auxEnd[] PROGMEM = "<br />\n";

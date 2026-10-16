@@ -10,6 +10,41 @@
 extern void handleNotFound();
 void processAuxGet();
 
+// 通道名称来自主控配置，作为文本输出并保留完整名称
+void auxiliaryName(String &data, const char *name) {
+  for (const char *c = name; *c; ++c) {
+    if (*c == '&') data.concat(F("&amp;"));
+    else if (*c == '<') data.concat(F("&lt;"));
+    else if (*c == '>') data.concat(F("&gt;"));
+    else { char text[2] = {*c, 0}; data.concat(text); }
+  }
+}
+
+// 每行固定为标签、操作和读数，沿用原有状态节点与请求参数
+void auxiliaryRowBegin(String &data, int channel, int field, const char *label) {
+  char temp[80];
+  snprintf(temp, sizeof(temp), "<div class='sws-aux-row'><span class='sws-aux-label' id='aux%d-label%d'>", channel, field);
+  data.concat(temp);
+  data.concat(label);
+  data.concat(F("</span><div class='sws-aux-controls'>"));
+}
+
+void auxiliarySliderRow(String &data, int channel, int field, const char *label, const char *control, int value, const char *reading, const char *unit) {
+  char temp[160];
+  auxiliaryRowBegin(data, channel, field, label);
+  data.concat(FPSTR(control));
+  snprintf(temp, sizeof(temp), "%d' aria-labelledby='aux%d-title aux%d-label%d' onchange=\"sz('x%dv%d',this.value)\">", value, channel, channel, field, channel, field);
+  data.concat(temp);
+  data.concat(F("</div><span class='sws-aux-value'>"));
+  snprintf(temp, sizeof(temp), "<span id='x%dv%d'>", channel, field);
+  data.concat(temp);
+  data.concat(reading);
+  data.concat(F("</span>"));
+  data.concat(unit);
+  data.concat(F("</span></div>"));
+  www.sendContentAndClear(data);
+}
+
 void handleAux() {
   char temp[240] = "";
   char temp1[80] = "";
@@ -66,184 +101,89 @@ void handleAux() {
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // 输出通道按功能独立分组，窄屏自动单列
-  data.concat(F("<div class='sws-device-layout'><div class='sws-section-head'><h2 class='sws-section-title'>" L_AUX_FEATURES "</h2><p></p></div><div class='sws-aux-grid'>"));
-
-  // Auxiliary Features --------------------------------------
-  int j = 0;
+  // 原始 SWS 的功能类型、文字来源与参数保持不变，只调整布局
+  data.concat(F("<div class='sws-device-layout sws-auxiliary'><div class='sws-aux-grid'>"));
   if (status.auxiliaryFound == SD_TRUE) {
-
     for (int i = 0; i < 8; i++) {
       state.selectFeature(i);
-
-      if (state.featurePurpose() <= 0) continue;
-
-      char title[40];
-      strcpy(title, state.featureName());
-      strcat(title, " ");
-      switch (state.featurePurpose()) {
-        case SWITCH: strcat(title, "Switch"); break;
-        case ANALOG_OUTPUT: strcat(title, "Analog Out"); break;
-        case DEW_HEATER: strcat(title, "Dew Heater"); break;
-        case INTERVALOMETER: strcat(title, "Intervalometer"); break;
-        default: strcat(title, "Unknown");
+      int purpose = state.featurePurpose(), channel = i + 1;
+      if (purpose <= 0) continue;
+      const char *type = "Unknown";
+      switch (purpose) {
+        case SWITCH: type = "Switch"; break;
+        case ANALOG_OUTPUT: type = "Analog Out"; break;
+        case DEW_HEATER: type = "Dew Heater"; break;
+        case INTERVALOMETER: type = "Intervalometer"; break;
       }
-      snprintf_P(temp, sizeof(temp), html_tile_beg, "27em", "8em", title); data.concat(temp);
-
-      data.concat(F("<div style='float: right; text-align: right;' class='c'>"));
-
-      float voltageV = state.featureVoltage();
-      float currentI = state.featureCurrent();
-
+      data.concat(F("<div class='b1 sws-aux-card'><header class='sws-aux-head'><div class='sws-aux-title'><span>"));
+      auxiliaryName(data, state.featureName());
+      snprintf(temp, sizeof(temp), "</span><h2 id='aux%d-title'>", channel);
+      data.concat(temp);
+      data.concat(type);
+      data.concat(F("</h2></div><div class='sws-aux-power c'>"));
+      float voltageV = state.featureVoltage(), currentI = state.featureCurrent();
       if (!isnan(voltageV)) {
-        snprintf(temp, sizeof(temp), "<span id='vout%d'>?</span>V", i + 1);
+        snprintf(temp, sizeof(temp), "<span><span id='vout%d'>?</span> V</span>", channel);
         data.concat(temp);
-        if (!isnan(currentI)) data.concat(" @ ");
       }
-
       if (!isnan(currentI)) {
-        snprintf(temp, sizeof(temp), "<span id='iout%d'>?</span>A", i + 1);
+        snprintf(temp, sizeof(temp), "<span><span id='iout%d'>?</span> A</span>", channel);
         data.concat(temp);
       }
+      data.concat(F("</div></header><div class='sws-aux-body'>"));
+      www.sendContentAndClear(data);
 
-      data.concat(F("</div><br /><hr>"));
-
-      if (state.featurePurpose() == SWITCH) {
-        data.concat(F("<div style='float: left; width: 8em; height: 2em; line-height: 2em'>"));
-
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        snprintf_P(temp, sizeof(temp), html_auxOnSwitch, i + 1, i + 1); data.concat(temp);
-        snprintf_P(temp, sizeof(temp), html_auxOffSwitch, i + 1, i + 1); data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-
-        data.concat(F("</div>\n"));
-        www.sendContentAndClear(data);
-        j++;
-      } else
-      if (state.featurePurpose() == ANALOG_OUTPUT) {
-        data.concat(F("<div style='float: left; width: 8em; height: 2em; line-height: 2em'>"));
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        data.concat(FPSTR(html_auxAnalog));
-        snprintf(temp, sizeof(temp), "%d' onchange=\"sz('x%dv1',this.value)\">", state.featureValue1(), i + 1);
-        data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        snprintf(temp, sizeof(temp), "<span id='x%dv1'>%d</span>%%", i + 1, (int)lround((state.featureValue1()/255.0)*100.0));
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-        www.sendContentAndClear(data);
-        j++;
-      } else
-      if (state.featurePurpose() == DEW_HEATER) {
-        data.concat(F("<div style='float: left; width: 8em; height: 2em; line-height: 2em'>"));
+      if (purpose == SWITCH || purpose == DEW_HEATER) {
         #if UNITS == METRIC
-          data.concat("DP " L_DP_MSG " (&deg;C)");
+          const char *dewLabel = "DP " L_DP_MSG " (&deg;C)";
         #else
-          data.concat("DP " L_DP_MSG " (&deg;F)");
+          const char *dewLabel = "DP " L_DP_MSG " (&deg;F)";
         #endif
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        snprintf_P(temp, sizeof(temp), html_auxOnSwitch, i + 1, i + 1); data.concat(temp);
-        snprintf_P(temp, sizeof(temp), html_auxOffSwitch, i + 1, i + 1); data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        dtostrf(celsiusToNativeRelative(state.featureValue4()), 3, 1, temp1);
-        snprintf(temp, sizeof(temp), "&Delta;<span id='x%dv4'>%s</span>&deg;" TEMPERATURE_UNITS_ABV "\n", i + 1, temp1);
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-
-        data.concat(F("<div style='float: left; width: 8em; height: 2em; line-height: 2em'>"));
-        data.concat(L_DP_ZERO);
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        data.concat(FPSTR(html_auxHeater));
-        snprintf(temp, sizeof(temp), "%d' onchange=\"sz('x%dv2',this.value)\">", (int)lround(celsiusToNativeRelative(state.featureValue2())*DEW_HEATER_CONTROL_SCALE), i + 1);
-        data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        dtostrf(celsiusToNativeRelative(state.featureValue2()), 3, 1, temp1);
-        snprintf(temp, sizeof(temp), "<span id='x%dv2'>%s</span>&deg;" TEMPERATURE_UNITS_ABV "\n", i + 1, temp1);
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-        
-        data.concat(F("<div style='float: left; width: 8em; height: 2em; line-height: 2em'>"));
-        data.concat(L_DP_SPAN);
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        data.concat(FPSTR(html_auxHeater));
-        snprintf(temp, sizeof(temp), "%d' onchange=\"sz('x%dv3',this.value)\">", (int)lround(celsiusToNativeRelative(state.featureValue3())*DEW_HEATER_CONTROL_SCALE), i + 1);
-        data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        dtostrf(celsiusToNativeRelative(state.featureValue3()), 3, 1, temp1);
-        snprintf(temp, sizeof(temp), "<span id='x%dv3'>%s</span>&deg;" TEMPERATURE_UNITS_ABV "\n", i + 1, temp1);
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-
+        auxiliaryRowBegin(data, channel, 1, purpose == SWITCH ? "" : dewLabel);
+        snprintf_P(temp, sizeof(temp), html_auxOnSwitch, channel, channel); data.concat(temp);
+        snprintf_P(temp, sizeof(temp), html_auxOffSwitch, channel, channel); data.concat(temp);
+        data.concat(F("</div><span class='sws-aux-value'>"));
+        if (purpose == DEW_HEATER) {
+          dtostrf(celsiusToNativeRelative(state.featureValue4()), 3, 1, temp1);
+          snprintf(temp, sizeof(temp), "&Delta;<span id='x%dv4'>%s</span>&deg;" TEMPERATURE_UNITS_ABV, channel, temp1);
+          data.concat(temp);
+        }
+        data.concat(F("</span></div>"));
         www.sendContentAndClear(data);
-        j++;
-      } else
-      if (state.featurePurpose() == INTERVALOMETER) {
-        data.concat(F("<div style='float: left; width: 8em; height: 2em; line-height: 2em'>"));
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        data.concat(FPSTR(html_auxStartStop1));
-        snprintf(temp, sizeof(temp), "x%dv1",i+1);
-        data.concat(temp);
-        data.concat(FPSTR(html_auxStartStop2));
-        snprintf(temp, sizeof(temp), "x%dv1",i+1);
-        data.concat(temp);
-        data.concat(FPSTR(html_auxStartStop3));
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        snprintf(temp, sizeof(temp), "<span id='x%dv1'>-</span>\n",i+1);
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-
-        data.concat(F("<div style='float: left; text-align: right; width: 8em; height: 2em; line-height: 2em'>"));
-        data.concat(L_CAMERA_COUNT);
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        data.concat(FPSTR(html_auxCount));
-        snprintf(temp, sizeof(temp), "%d' onchange=\"sz('x%dv4',this.value)\">",(int)state.featureValue4(),i+1);
-        data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        dtostrf(state.featureValue4(),0,0,temp1);
-        snprintf(temp, sizeof(temp), "<span id='x%dv4'>%s</span> x\n",i+1,temp1);
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-
-        data.concat(F("<div style='float: left; text-align: right; width: 8em; height: 2em; line-height: 2em'>"));
-        data.concat(L_CAMERA_EXPOSURE);
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        data.concat(FPSTR(html_auxExposure));
-        snprintf(temp, sizeof(temp), "%d' onchange=\"sz('x%dv2',this.value)\">",(int)timeToByte(state.featureValue2()),i+1);
-        data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        float v; int d;
-        v=state.featureValue2(); if (v < 1.0) d=3; else if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
-        dtostrf(v,0,d,temp1);
-        snprintf(temp, sizeof(temp), "<span id='x%dv2'>%s</span> sec\n",i+1,temp1);
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-
-        data.concat(F("<div style='float: left; text-align: right; width: 8em; height: 2em; line-height: 2em'>"));
-        data.concat(L_CAMERA_DELAY);
-        data.concat(F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>"));
-        data.concat(FPSTR(html_auxDelay));
-        snprintf(temp, sizeof(temp), "%d' onchange=\"sz('x%dv3',this.value)\">",(int)timeToByte(state.featureValue3()),i+1);
-        data.concat(temp);
-        data.concat(F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>"));
-        v=state.featureValue3(); if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
-        dtostrf(v,0,d,temp1);
-        snprintf(temp, sizeof(temp), "<span id='x%dv3'>%s</span> sec\n",i+1,temp1);
-        data.concat(temp);
-        data.concat(F("</div>\n"));
-
-        www.sendContentAndClear(data);
-        j++;
       }
-      data.concat(FPSTR(html_auxAuxE));
+      if (purpose == ANALOG_OUTPUT) {
+        snprintf(temp1, sizeof(temp1), "%d", (int)lround((state.featureValue1()/255.0)*100.0));
+        auxiliarySliderRow(data, channel, 1, "", html_auxAnalog, state.featureValue1(), temp1, "%");
+      } else if (purpose == DEW_HEATER) {
+        dtostrf(celsiusToNativeRelative(state.featureValue2()), 3, 1, temp1);
+        auxiliarySliderRow(data, channel, 2, L_DP_ZERO, html_auxHeater, (int)lround(celsiusToNativeRelative(state.featureValue2())*DEW_HEATER_CONTROL_SCALE), temp1, "&deg;" TEMPERATURE_UNITS_ABV);
+        dtostrf(celsiusToNativeRelative(state.featureValue3()), 3, 1, temp1);
+        auxiliarySliderRow(data, channel, 3, L_DP_SPAN, html_auxHeater, (int)lround(celsiusToNativeRelative(state.featureValue3())*DEW_HEATER_CONTROL_SCALE), temp1, "&deg;" TEMPERATURE_UNITS_ABV);
+      } else if (purpose == INTERVALOMETER) {
+        auxiliaryRowBegin(data, channel, 1, "");
+        data.concat(FPSTR(html_auxStartStop1));
+        snprintf(temp, sizeof(temp), "x%dv1", channel); data.concat(temp);
+        data.concat(FPSTR(html_auxStartStop2)); data.concat(temp);
+        data.concat(FPSTR(html_auxStartStop3));
+        snprintf(temp, sizeof(temp), "</div><span class='sws-aux-value' id='x%dv1'>-</span></div>", channel); data.concat(temp);
+        dtostrf(state.featureValue4(), 0, 0, temp1);
+        auxiliarySliderRow(data, channel, 4, L_CAMERA_COUNT, html_auxCount, (int)state.featureValue4(), temp1, " x");
+        float value = state.featureValue2();
+        int digits = value < 1.0 ? 3 : value < 10.0 ? 2 : value < 30.0 ? 1 : 0;
+        dtostrf(value, 0, digits, temp1);
+        auxiliarySliderRow(data, channel, 2, L_CAMERA_EXPOSURE, html_auxExposure, (int)timeToByte(value), temp1, " sec");
+        value = state.featureValue3();
+        digits = value < 10.0 ? 2 : value < 30.0 ? 1 : 0;
+        dtostrf(value, 0, digits, temp1);
+        auxiliarySliderRow(data, channel, 3, L_CAMERA_DELAY, html_auxDelay, (int)timeToByte(value), temp1, " sec");
+      }
+      data.concat(F("</div></div>"));
+      www.sendContentAndClear(data);
     }
-    data.concat(F("<br class='clear' />"));
   }
-
-  data.concat(FPSTR(html_auxEnd));
-  
   data.concat(F("</div></div>"));
   data.concat(FPSTR(html_page_and_body_end));
   www.sendContentAndClear(data);
-
   www.sendContent("");
 }
 

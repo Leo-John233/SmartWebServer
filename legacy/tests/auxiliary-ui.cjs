@@ -2,6 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require('../../webui/node_modules/playwright');
 const preview=require('./auxiliary-page.cjs')(),device=require('../demo/auxiliary.cjs')(preview);
+const original=require('./auxiliary-page.cjs')({sourceRef:'193a81809f5b19b3afa2a8c58f18291c2f0b0475'});
 const entries=text=>Object.fromEntries(text.trim().split('\n').map(line=>{const split=line.indexOf('|');return [line.slice(0,split),line.slice(split+1).trim()];}));
 assert.deepEqual(entries(device.poll()),entries(preview.ajax),'模拟初始状态与实际 C++ 输出一致');
 const command=values=>device.command(new URLSearchParams(values));
@@ -17,6 +18,9 @@ const out=process.argv[2]||require('node:os').tmpdir();fs.mkdirSync(out,{recursi
  const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[],requests=[];page.on('pageerror',e=>errors.push(e.stack));
  await page.route('http://auxiliary.test/**',route=>{const u=new URL(route.request().url());if(u.pathname==='/auxiliary-ajax-get.txt'){requests.push(Object.fromEntries(u.searchParams));return route.fulfill({status:device.command(u.searchParams)?200:400,body:''});}if(u.pathname==='/auxiliary-ajax.txt')return route.fulfill({body:device.poll()});return route.fulfill({contentType:'text/html; charset=utf-8',body:'<!doctype html><head><meta charset="utf-8">'+appearance+'</head><body>'+preview.body+'</body>'});});
  await page.goto('http://auxiliary.test/auxiliary.htm');const cards=page.locator('.sws-aux-grid>.b1');assert.equal(await cards.count(),4);
+ // 同一组设备数据分别运行原始和当前页面，排除空白及布局分隔符后文字必须一致
+ const texts=await page.evaluate(({before,after})=>{const normalize=s=>s.replace(/[\s@:]/g,'');const values=html=>[...new DOMParser().parseFromString(html,'text/html').querySelectorAll('.b1')].map(e=>({text:normalize(e.textContent),controls:[...e.querySelectorAll('button,input')].map(c=>Object.fromEntries(['id','type','min','max','value','onchange','onpointerdown'].map(a=>[a,c.getAttribute(a)])))}));return {before:values(before),after:values(after)};},{before:original.body,after:preview.body});
+ assert.deepEqual(texts.after,texts.before,'文字、按钮、初始读数、取值范围和请求参数与原始页面一致');
  assert.equal(await cards.nth(0).locator('button').count(),2);assert.equal(await cards.nth(0).locator('input').count(),0);
  assert.equal(await cards.nth(1).locator('button').count(),0);assert.equal(await cards.nth(1).locator('input[type=range]').count(),1);
  assert.equal(await cards.nth(2).locator('button').count(),2);assert.equal(await cards.nth(2).locator('input[type=range]').count(),2);
