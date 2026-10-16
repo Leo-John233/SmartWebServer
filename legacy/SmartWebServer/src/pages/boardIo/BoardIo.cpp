@@ -7,6 +7,8 @@ static const char *brakeMessage() {
     case BrakeState::Starting: return L_IO_BRAKE_STARTING;
     case BrakeState::Disabled: return L_IO_BRAKE_DISABLED;
     case BrakeState::Waiting: return L_IO_BRAKE_WAITING;
+    case BrakeState::Stopping: return L_IO_BRAKE_STOPPING;
+    case BrakeState::StopFailed: return L_IO_BRAKE_STOP_FAILED;
     case BrakeState::Fault: return L_IO_BRAKE_FAULT;
     case BrakeState::Stale: return L_IO_BRAKE_STALE;
     case BrakeState::Released: return L_IO_BRAKE_RELEASED;

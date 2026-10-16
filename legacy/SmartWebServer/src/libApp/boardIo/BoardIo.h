@@ -22,7 +22,7 @@ public:
 private:
   BoardIoPolicy policy_;
   bool started_ = false;
-  bool stopping_ = false, stopIssued_ = false;
+  bool stopping_ = false;
   int ledLevel_ = -1, brakeLevel_ = -1;
 };
 

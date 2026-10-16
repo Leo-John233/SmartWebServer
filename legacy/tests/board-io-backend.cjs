@@ -105,96 +105,105 @@ int main(){
   std::cout<<"PASS: config OFF hides brake controls and status, refuses API changes, skips driver queries and holds IO5 LOW with legacy NV and healthy feedback\\n";
 }`:`
 void advance(uint32_t time){now=time;boardIo.tick();}
+void healthy(){now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");now+=500;boardIo.driverFeedback(true,"ST,,,,,,,");}
 int main(){
   boardIo.initPins();assert(pins[5]==LOW&&pinEvents[0]==50);
-  advance(5000);assert(pins[5]==LOW); // 配置未加载时绝不释放。
-  boardIo.begin();assert(tasks.added==2&&pins[5]==LOW);
+  advance(5000);assert(pins[5]==LOW); // 初始化及未启动时保留低电平。
+  boardIo.begin();assert(tasks.added==2&&pins[5]==HIGH);
   assert(boardIo.ownsPin(2)&&boardIo.ownsPin(5)&&!boardIo.ownsPin(-1)&&!boardIo.ownsPin(4));
   assert(boardIo.brakeState()==BrakeState::Waiting);
   status.onStepFound=true;status.mountFound=SD_TRUE;
-  now=5010;boardIo.pollDriver();assert(pins[5]==LOW);
-  const int calls=onStep.calls;boardIo.pollDriver();assert(onStep.calls==calls); // 不重复查询。
-  advance(5260);assert(pins[5]==LOW);
-  advance(5510);assert(pins[5]==LOW); // 单帧正常反馈不能仅靠延时触发释放。
-  boardIo.pollDriver();assert(pins[5]==HIGH);
-  // 手动 STOP 只发运动停止命令；单独 ST 不会改变已松闸状态。
+  now=5010;boardIo.pollDriver();assert(pins[5]==HIGH);
+  const int calls=onStep.calls;boardIo.pollDriver();assert(onStep.calls==calls);
+  advance(5510);assert(pins[5]==HIGH);boardIo.pollDriver();assert(boardIo.brakeState()==BrakeState::Released);
   char manualResponse[80]="";
-  onStep.processCommand(":Q#",manualResponse,200);assert(pins[5]==HIGH);
-  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH&&!boardIo.policy().driverFault());
-  // STOP 分发中模拟其他任务刷新 GPIO，仍必须等 STOP 调用完成再拉低 IO5。
-  onStep.stopHook=[](){boardIo.tick();swsNetworkActivity();assert(pins[5]==HIGH);};
-  for(const char*bad:{"0","?","OK","",",,,,,,",",,,,,,,,,","XX,,,,,,,", "ST,OA,OB,GA,GB,OT,PW,GF",",OA,,,,,,",",,OB,,,,,",",,,GA,,,,",",,,,GB,,,",",,,,,OT,,",",,,,,,PW,",",,,,,,,GF","ST,OA,,,,,,","ST,,OB,,,,,","ST,,,GA,,,,","ST,,,,GB,,,","ST,,,,,OT,,","ST,,,,,,PW,","ST,,,,,,,GF"}){
-    const int stops=onStep.stops;const size_t eventStart=pinEvents.size();
-    now+=10;boardIo.driverFeedback(true,bad);assert(pins[5]==LOW);
-    const bool fault=boardIo.policy().driverFault();
-    assert(onStep.stops==stops+(fault?1:0));
-    if(fault){
-      size_t stopEvent=eventStart;while(stopEvent<pinEvents.size()&&pinEvents[stopEvent]!=900){assert(pinEvents[stopEvent]!=50);stopEvent++;}
-      assert(stopEvent<pinEvents.size()&&pinEvents.back()==50);
-      // 持续异常、短暂正常或无效反馈均不能让同一故障连续发送 STOP。
-      onStep.stopHook=nullptr;
-      now+=10;boardIo.driverFeedback(true,bad);
-      now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");now+=100;boardIo.driverFeedback(true,bad);
-      boardIo.driverFeedback(false,"");boardIo.driverFeedback(true,bad);assert(onStep.stops==stops+1);
-      onStep.stopHook=[](){boardIo.tick();swsNetworkActivity();assert(pins[5]==HIGH);};
-    }
-    now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");
-    now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");
-    now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
+  onStep.processCommand(":Q#",manualResponse,200);healthy();assert(pins[5]==HIGH&&!boardIo.policy().driverFault());
+  for(const char*bad:{"0","?","OK","",",,,,,,",",,,,,,,,,","XX,,,,,,,","ST,OA,,,,,,bad","ST,OA,OB,GA,GB,OT,PW,GF","ST,OA,OB,GA,GB,OT,PW,"}){
+    const int stops=onStep.stops;now+=10;boardIo.driverFeedback(true,bad);
+    assert(pins[5]==HIGH&&onStep.stops==stops&&boardIo.brakeState()==BrakeState::Waiting);
+    healthy();assert(pins[5]==HIGH);
   }
-  // STOP 发送失败仍立即抱闸，不等待回应或无限重试。
-  onStep.stopSuccess=false;const int failedStop=onStep.stops;
-  boardIo.driverFeedback(true,",,,,,,,GF");assert(pins[5]==LOW&&onStep.stops==failedStop+1);
-  boardIo.driverFeedback(true,",,,,,,,GF");assert(onStep.stops==failedStop+1);
-  onStep.stopHook=nullptr;onStep.stopSuccess=true;
-  // 故障已抱闸时再按手动 STOP，既不松闸，也不重新触发自动 STOP。
-  const int beforeManual=onStep.stops;onStep.processCommand(":Q#",manualResponse,200);
-  assert(pins[5]==LOW&&onStep.stops==beforeManual+1);
-  boardIo.driverFeedback(true,",,,,,,,GF");assert(pins[5]==LOW&&onStep.stops==beforeManual+1);
-  now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");now+=500;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
-  boardIo.driverFeedback(false,"");assert(pins[5]==LOW);
-  now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");now+=500;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
-  advance(now+1001);assert(pins[5]==LOW&&boardIo.brakeState()==BrakeState::Stale);
-  boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW); // 过期后重新等待稳定反馈。
-  status.onStepFound=false;boardIo.tick();assert(pins[5]==LOW);
-  status.onStepFound=true;now+=10;boardIo.driverFeedback(true,"ST,,,,,,,");now+=500;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
-  assert(boardIo.save(true,false));assert(pins[5]==LOW&&boardIo.brakeState()==BrakeState::Disabled);
-  assert(nv().store.stored==1); // 关闭保护立即抱闸，设置写入 NV。
-  const int disabledCalls=onStep.calls,disabledStops=onStep.stops;
-  now+=1500;boardIo.pollDriver();boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW&&onStep.calls==disabledCalls);
-  boardIo.driverFeedback(true,"ST,OA,OB,GA,GB,OT,PW,GF");assert(pins[5]==LOW&&onStep.stops==disabledStops);
-  BoardIo disabledReboot;disabledReboot.initPins();disabledReboot.begin();assert(!disabledReboot.policy().protectionEnabled()&&pins[5]==LOW);
-  disabledReboot.driverFeedback(true,"ST,,,,,,,");now+=500;disabledReboot.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW);
-  assert(boardIo.save(false,true));assert(pins[5]==LOW&&nv().store.stored==2);
-  now+=500;boardIo.tick();assert(pins[5]==LOW); // 重新开启不能沿用关闭前的就绪结果。
-  boardIo.driverFeedback(true,"ST,,,,,,,");now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW);
+  for(const char*fault:{",OA,,,,,,",",,OB,,,,,",",,,GA,,,,",",,,,GB,,,",",,,,,OT,,",",,,,,,PW,",",,,,,,,GF","ST,OA,,,,,,","ST,,OB,,,,,","ST,,,GA,,,,","ST,,,,GB,,,","ST,,,,,OT,,","ST,,,,,,PW,","ST,,,,,,,GF"}){
+    const int stops=onStep.stops;const size_t eventStart=pinEvents.size();
+    onStep.stopHook=[](){boardIo.tick();swsNetworkActivity();assert(pins[5]==HIGH);};
+    now+=10;boardIo.driverFeedback(true,fault);
+    assert(pins[5]==HIGH&&onStep.stops==stops+1&&boardIo.brakeState()==BrakeState::Stopping);
+    for(size_t i=eventStart;i<pinEvents.size();i++)assert(pinEvents[i]!=50); // 故障帧本身有 ST 也不直接抱闸。
+    onStep.stopHook=nullptr;
+    std::string stoppedReply=fault[0]==','?std::string("ST")+fault:fault;
+    now+=100;boardIo.driverFeedback(true,stoppedReply.c_str());assert(pins[5]==HIGH);
+    boardIo.driverFeedback(true,stoppedReply.c_str());assert(pins[5]==HIGH); // 同时刻的重复帧不能冒充持续静止。
+    now+=250;boardIo.driverFeedback(true,stoppedReply.c_str());assert(pins[5]==LOW&&boardIo.brakeState()==BrakeState::Fault);
+    assert(onStep.stops==stops+1);
+    onStep.processCommand(":Q#",manualResponse,200);assert(pins[5]==LOW); // 手动 STOP 不改变抱闸。
+    for(int i=0;i<4;i++){now+=250;boardIo.driverFeedback(true,stoppedReply.c_str());assert(pins[5]==LOW);}
+    assert(onStep.stops==stops+2); // 只有上面的手动 STOP，没有自动重复发送。
+    // 已抱闸后反馈失效也按本次要求松闸，旧的停稳结果不能复用。
+    boardIo.driverFeedback(false,"");assert(pins[5]==HIGH);
+    now+=10;boardIo.driverFeedback(true,fault);assert(pins[5]==HIGH&&onStep.stops==stops+3);
+    now+=250;boardIo.driverFeedback(true,stoppedReply.c_str());assert(pins[5]==HIGH);
+    now+=250;boardIo.driverFeedback(true,stoppedReply.c_str());assert(pins[5]==LOW);
+    healthy();assert(pins[5]==HIGH&&boardIo.brakeState()==BrakeState::Released);
+  }
+  // STOP 后始终没有 ST，就持续松闸；不能用固定延时替代静止反馈。
+  boardIo.driverFeedback(true,",,,,,,,GF");const int movingStops=onStep.stops;
+  for(int i=0;i<10;i++){now+=250;boardIo.driverFeedback(true,",,,,,,,GF");assert(pins[5]==HIGH);}
+  assert(onStep.stops==movingStops);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==LOW);
+  const int staleStops=onStep.stops;advance(now+1001);assert(pins[5]==HIGH&&boardIo.brakeState()==BrakeState::Stale&&onStep.stops==staleStops);
+  boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH&&onStep.stops==staleStops+1);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==LOW);
+  // 每种无效反馈都验证从已抱闸切换到高电平，驱动全置位通信故障也不能继续抱闸。
+  for(const char*missing:{"0","?","",",,,,,,","ST,OA,,,,,,bad","ST,OA,OB,GA,GB,OT,PW,GF"}){
+    const int stops=onStep.stops;boardIo.driverFeedback(true,missing);assert(pins[5]==HIGH&&onStep.stops==stops);
+    now+=10;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH);
+    now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH);
+    now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==LOW);
+  }
+  status.onStepFound=false;boardIo.tick();assert(pins[5]==HIGH);
+  status.onStepFound=true;status.mountFound=0;boardIo.tick();assert(pins[5]==HIGH);
+  status.mountFound=SD_TRUE;healthy();assert(pins[5]==HIGH);
+  // 停止命令发送失败，ST 也不能让未完成的停止流程直接抱闸。
+  onStep.stopSuccess=false;const int failedStops=onStep.stops;
+  boardIo.driverFeedback(true,"ST,,,,,,,GF");assert(pins[5]==HIGH&&boardIo.brakeState()==BrakeState::StopFailed);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");now+=250;boardIo.driverFeedback(true,"ST,,,,,,,GF");
+  assert(pins[5]==HIGH&&onStep.stops==failedStops+1);onStep.stopSuccess=true;healthy();assert(pins[5]==HIGH);
+  // 静止前恢复正常反馈，也要先完成停止确认；随后正常反馈再持续 500ms 才恢复正常状态。
+  boardIo.driverFeedback(true,",,,,,,,GF");
   now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
-  boardIo.driverFeedback(false,"");assert(pins[5]==LOW);
-  nv().store.fail=true;assert(!boardIo.save(true,false));assert(pins[5]==LOW&&boardIo.policy().protectionEnabled());nv().store.fail=false;
-  BoardIo rebooted;rebooted.initPins();rebooted.begin();assert(!rebooted.policy().activityEnabled()&&rebooted.policy().protectionEnabled()&&pins[5]==LOW);
-  // 网络活动既覆盖网页入口，也覆盖资源发送；空闲时没有持续脉冲。
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==LOW);
+  now+=250;boardIo.driverFeedback(true,"ST,,,,,,,");assert(pins[5]==HIGH);
+  assert(boardIo.save(true,false));assert(pins[5]==LOW&&boardIo.brakeState()==BrakeState::Disabled&&nv().store.stored==1);
+  const int disabledStops=onStep.stops,disabledCalls=onStep.calls;
+  now+=1500;boardIo.pollDriver();boardIo.driverFeedback(true,"ST,OA,OB,GA,GB,OT,PW,GF");assert(pins[5]==LOW&&onStep.stops==disabledStops&&onStep.calls==disabledCalls);
+  BoardIo disabledReboot;disabledReboot.initPins();disabledReboot.begin();assert(!disabledReboot.policy().protectionEnabled()&&pins[5]==LOW);
+  assert(boardIo.save(false,true));assert(pins[5]==HIGH&&nv().store.stored==2); // 开启后无反馈同样保持高电平。
+  nv().store.fail=true;assert(!boardIo.save(true,false));assert(pins[5]==HIGH&&boardIo.policy().protectionEnabled());nv().store.fail=false;
+  BoardIo rebooted;rebooted.initPins();rebooted.begin();assert(!rebooted.policy().activityEnabled()&&rebooted.policy().protectionEnabled()&&pins[5]==HIGH);
   assert(boardIo.save(true,true));status.onStepFound=true;now=1200;
   registerPageHandler("/test",[](){assert(pins[2]==LOW);});www.handler();assert(pins[2]==LOW);
   advance(1320);assert(pins[2]==HIGH);advance(1440);assert(pins[2]==HIGH);
   for(uint32_t time=1500;time<2000;time+=20){now=time;swsNetworkActivity();assert(pins[2]==(boardIo.policy().ledLit(true,false,now)?LOW:HIGH));}
   assert(boardIo.save(false,true));advance(2400);assert(pins[2]==HIGH);
-  status.onStepFound=false;advance(2400);assert(pins[2]==LOW);advance(2800);assert(pins[2]==HIGH); // 关闭活动功能仍保留掉线闪烁。
-  // 接口使用明确的 0/1，只在持久化成功后更新状态。
+  status.onStepFound=false;advance(2400);assert(pins[2]==LOW&&pins[5]==HIGH);advance(2800);assert(pins[2]==HIGH);
   www.methodValue=HTTP_POST;www.args={{"setting","protection"},{"enabled","0"}};handleBoardIo();assert(www.code==200&&pins[5]==LOW);
   assert(www.output.find("\\"protection\\":false")!=std::string::npos);
   www.args["enabled"]="bad";handleBoardIo();assert(www.code==400&&pins[5]==LOW);
   www.args["enabled"]="1";nv().store.fail=true;handleBoardIo();assert(www.code==500&&pins[5]==LOW);nv().store.fail=false;
-  handleBoardIo();assert(www.code==200&&pins[5]==LOW);
-  www.methodValue=HTTP_GET;handleBoardIo();assert(www.code==200);
-  www.methodValue=2;handleBoardIo();assert(www.code==405);
-  // uint32_t 时钟回绕不应绕过反馈稳定时间或过期判断。
-  BoardIoPolicy rollover;rollover.configure(true,true,0xfffffe00u);rollover.driverFeedback(true,"ST,,,,,,,",0xfffffe00u);
-  rollover.driverFeedback(true,"ST,,,,,,,",0xffffff00u);assert(!rollover.releaseBrake(true,0xffffff00u));
-  rollover.driverFeedback(true,"ST,,,,,,,",100);assert(rollover.releaseBrake(true,100));assert(!rollover.releaseBrake(true,1200));
+  handleBoardIo();assert(www.code==200&&pins[5]==HIGH);
+  www.methodValue=HTTP_GET;handleBoardIo();assert(www.code==200);www.methodValue=2;handleBoardIo();assert(www.code==405);
+  BoardIoPolicy rollover;rollover.configure(true,true,0xfffffe00u);rollover.driverFeedback(true,"ST,,,,,,,GF",0xfffffe00u);
+  assert(rollover.stopRequired());rollover.stopResult(true);
+  rollover.driverFeedback(true,"ST,,,,,,,GF",0xffffff00u);assert(rollover.releaseBrake(true,0xffffff00u));
+  rollover.driverFeedback(true,"ST,,,,,,,GF",100);assert(!rollover.releaseBrake(true,100));
+  assert(rollover.releaseBrake(true,1200));rollover.checkFeedback(true,1200);
+  rollover.driverFeedback(true,"ST,,,,,,,GF",1210);assert(rollover.stopRequired()&&rollover.releaseBrake(true,1210));
   String data;boardIoTile(data);assert(data.find("sws-io-activity")!=std::string::npos&&data.find("sws-io-protection")!=std::string::npos);
   data.clear();boardIoTileAjax(data);assert(data.find("sws-io-brake-state|")!=std::string::npos);
   tasks.fail=true;BoardIo failed;failed.initPins();failed.begin();assert(pins[5]==LOW&&failed.brakeState()==BrakeState::Starting);assert(!failed.save(true,false));
-  std::cout<<"PASS: STOP before brake for seven faults including standstill, manual STOP isolation, no repeated STOP, task reentry order, failed STOP fallback, startup/disabled locks, recovery, NV, HTTP, LED and clock rollover\\n";
+  std::cout<<"PASS: STOP then fresh stable ST before brake, all seven faults, no-ST wait, feedback loss/invalid/stale stays HIGH, recovery, failed STOP, manual STOP isolation, config/runtime OFF, NV, API, LED and rollover\\n";
 }`;
   const file=path.join(work,'test.cpp'),exe=path.join(work,'test.exe');fs.writeFileSync(file,code);
   cp.execFileSync(process.env.CXX||'g++',['-std=c++11','-Wall','-Wextra',file,'-o',exe],{stdio:['pipe','pipe','pipe']});

@@ -21,7 +21,7 @@ const html=render(card,3),hiddenHtml=render(hiddenCard,2);
     if(request.method()==='POST'){
      const values=Object.fromEntries(new URLSearchParams(request.postData()));posts.push(values);
      if(fail)return route.fulfill({status:500,body:'{}',contentType:'application/json'});
-     state[values.setting]=values.enabled==='1';state.message=state.protection?'等待驱动，已抱闸':'保护关闭，已抱闸';
+     state[values.setting]=values.enabled==='1';state.message=state.protection?'等待有效反馈，保持松闸':'保护关闭，已抱闸';
     }
     return route.fulfill({body:JSON.stringify(state),contentType:'application/json'});
    }
@@ -52,7 +52,7 @@ const html=render(card,3),hiddenHtml=render(hiddenCard,2);
   confirmation=true;await brake.click();await page.waitForFunction(()=>document.getElementById('sws-io-protection').getAttribute('aria-checked')==='false');
   assert.equal(await page.locator('#sws-io-brake-state').innerText(),'保护关闭，已抱闸');assert.equal(dialogs,2);
   await brake.click();await page.waitForFunction(()=>document.getElementById('sws-io-protection').getAttribute('aria-checked')==='true');
-  assert.equal(await page.locator('#sws-io-brake-state').innerText(),'等待驱动，已抱闸');
+  assert.equal(await page.locator('#sws-io-brake-state').innerText(),'等待有效反馈，保持松闸');
   fail=true;await led.click();await page.locator('[role=alert]').filter({hasText:'保存'}).waitFor();
   assert.equal(await led.getAttribute('aria-checked'),'false','保存失败不虚假切换');
   assert.equal(await led.isEnabled(),true);assert.equal(await brake.isEnabled(),true);

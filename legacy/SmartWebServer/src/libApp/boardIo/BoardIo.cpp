@@ -39,9 +39,8 @@ void BoardIo::tick() {
   if (!started_) return;
   const uint32_t now = millis();
   const bool connected = status.onStepFound && status.mountFound == SD_TRUE;
+  policy_.checkFeedback(connected, now);
   const bool released = policy_.releaseBrake(connected, now);
-  // 故障持续期间不重复停止，重新开启或稳定恢复后允许处理下一次故障。
-  if (!stopping_ && (!policy_.protectionEnabled() || released)) stopIssued_ = false;
   #if SWS_ACTIVITY_LED_PIN != OFF
     const bool lit = policy_.ledLit(status.onStepFound, LED_STATUS_ON_STATE == LOW, now);
     const int level = lit ? LOW : HIGH;
@@ -82,12 +81,12 @@ void BoardIo::pollDriver() {
 void BoardIo::driverFeedback(bool received, const char *reply) {
   if (!started_ || !brakeAvailable()) return;
   policy_.driverFeedback(received, reply, millis());
-  if (policy_.protectionEnabled() && policy_.driverFault() && !stopIssued_) {
-    stopIssued_ = true;
+  if (!stopping_ && policy_.stopRequired()) {
     stopping_ = true;
     char response[80] = "";
-    // 与网页 STOP 相同的命令，不等待停稳；发送失败也继续抱闸。
-    onStep.processCommand(":Q#", response, 200);
+    // 这里只发送 STOP；后续有效静止反馈由策略确认，不能发完立即抱闸。
+    const bool sent = onStep.processCommand(":Q#", response, 200);
+    policy_.stopResult(sent);
     stopping_ = false;
   }
   tick();
