@@ -11,6 +11,7 @@ extern void handleNotFound();
 void processFocuserGet();
 
 void handleFocuser() {
+  if (status.focuserFound == SD_TRUE && servePageShell(PAGE_FOCUSER)) return;
   char temp[240] = "";
 
   state.updateFocuser(true);
@@ -20,9 +21,6 @@ void handleFocuser() {
   onStep.serialRecvFlush();
 
   processFocuserGet();
-
-  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
-  if (servePageShell(PAGE_FOCUSER)) return;
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");

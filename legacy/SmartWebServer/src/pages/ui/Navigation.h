@@ -112,6 +112,7 @@ const char html_shell_script[] PROGMEM = R"UI(
     // 正在按住运动按钮时先松开并等待停止请求发送，再销毁旧内容页
     try {
       const child = frame.contentWindow;
+      if (child.swsPausePolling) child.swsPausePolling();
       if (child.document.body) child.document.body.inert = true;
       const stops = (child.swsMotionStops || []).map((stop) => stop()).filter(Boolean);
       if (stops.length) await Promise.all(stops);

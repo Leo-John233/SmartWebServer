@@ -20,13 +20,20 @@ const motion=constant(scripts,'html_script_motion_controls_1')+constant(scripts,
 // 编译实际轴渲染函数，其他控件直接展开真实模板与中文宏
 const templates=require('../tests/page-templates.cjs')(root),cp=require('node:child_process');
 shared=templates['Appearance.h'].html_shared_appearance;shellScript=templates['Appearance.h'].html_shell_script;
+// 与固件相同，公共样式和控件脚本按版本缓存；内容仍来自真实模板。
+const resources = {
+  css: templates['ui/Styles.h'].html_shared_styles.slice(8,-9) + templates['ui/Editors.h'].html_editor_styles.slice(8,-9),
+  js: templates['ui/Controls.h'].html_page_controls.slice(9,-10) + templates['ui/Editors.h'].html_settings_editors.slice(9,-10),
+};
+const resourceVersion = require('node:crypto').createHash('sha256').update(resources.css+resources.js).digest('hex').slice(0,12);
+shared = '<link rel="stylesheet" href="/sws-ui.css?v='+resourceVersion+'"><script src="/sws-ui.js?v='+resourceVersion+'"></script>';
 const axisPath=path.join(out,'axis.html');cp.execFileSync(process.execPath,[path.join(__dirname,'../tests/axis-page.cjs'),axisPath],{stdio:'pipe'});
 const {controller,mount,optional,auxiliary}=require('../tests/full-page-preview.cjs')({templates,defs,tile,h,motion,axis:fs.readFileSync(axisPath,'utf8')});
 const manifest=require('../tests/page-feature-manifest.cjs');for(const [file,names] of Object.entries(manifest)){const source=read('src/pages/'+file);for(const name of names)assert(source.includes(name+'('),file+' 缺少 '+name);}
 const netBody=require('../tests/network-page.cjs')({fragment:true});
 let loggedIn=true;const polls={},commands=[],documents=[];
 const state={sta:{enabled:true,ssid:'Redmi_Hotel',open:false,dhcp:true,ip:'192.168.31.229',gw:'192.168.31.1',sn:'255.255.255.0'},ap:{enabled:true,ssid:'ONSTEPX',channel:7,ip:'192.168.0.1',gw:'192.168.0.1',sn:'255.255.255.0'},connected:true,connecting:false,pending:false,failed:false,apActive:true,ssid:'Redmi_Hotel',ip:'192.168.31.229',rssi:-74,apIp:'192.168.0.1',apSsid:'ONSTEPX',message:''};
-function doc(url,embedded){if(!embedded)return head+'</head><body>'+shared+title+'<p id="sws-load" role="status"></p><iframe id="sws-frame" title="标签内容"></iframe>'+shellScript;const body=url==='/net.htm'?(loggedIn?netBody:'<form method="post" action="/net.htm"><label>管理密码 <input name="login" type="password"></label><button>登录</button></form>'):url==='/mount.htm'?mount:optional[url]||controller;return head+(url==='/net.htm'?templates['network/NetworkWifi.h'].html_network_css:'')+'</head><body>'+shared+title+'<div class="b">'+(url==='/mount.htm'?constant(scripts,'html_script_ajax_date_time_return')+'<script>'+templates['htmlScripts.h'].html_script_ajax.match(/function pad[\s\S]*?(?=var auto1Tick)/)[0]+'</script>':url==='/focuser.htm'||url==='/rotator.htm'?motion:'')+body+'</div>'+constant(scripts,'html_script_collapsible')+'<script>setInterval(()=>fetch("/preview-poll?page='+url+'"),200)</script></body></html>';}
+function doc(url,embedded){if(!embedded)return head+'</head><body>'+shared+title+'<p id="sws-load" role="status"></p><iframe id="sws-frame" title="标签内容"></iframe>'+shellScript;const body=url==='/net.htm'?(loggedIn?netBody:'<form method="post" action="/net.htm"><label>管理密码 <input name="login" type="password"></label><button>登录</button></form>'):url==='/mount.htm'?mount:optional[url]||controller;return head+(url==='/net.htm'?templates['network/NetworkWifi.h'].html_network_css:'')+'</head><body>'+shared+title+'<div class="b">'+(url==='/mount.htm'?constant(scripts,'html_script_ajax_date_time_return')+'<script>'+templates['htmlScripts.h'].html_script_ajax.match(/function pad[\s\S]*?(?=var autoTimer)/)[0]+'</script>':url==='/focuser.htm'||url==='/rotator.htm'?motion:'')+body+'</div>'+constant(scripts,'html_script_collapsible')+'</body></html>';}
 
 // 演示复用固件样式和控件，所有交互由本地模拟服务接管
-module.exports={doc,state,head,shared,templates,auxiliary};
+module.exports={doc,state,head,shared,templates,auxiliary,resources};

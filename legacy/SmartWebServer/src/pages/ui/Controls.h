@@ -3,6 +3,12 @@
 // 页面增强只代理已有控件；设备参数与命令仍由原页面处理。
 const char html_page_controls[] PROGMEM = R"UI(
 <script>
+// 普通命令未返回时暂缓状态刷新；不重发命令，也不改变操作顺序。
+window.swsWatchCommand = (request) => {
+  window.swsPendingCommands = (window.swsPendingCommands || 0) + 1;
+  request.timeout = 5000;
+  request.addEventListener('loadend', () => window.swsPendingCommands--, { once: true });
+};
 // 坐标由单次请求提交，保留错误反馈且不在连接中断时自动重发运动指令
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('sws-coordinate-form');

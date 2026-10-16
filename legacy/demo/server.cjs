@@ -1,6 +1,6 @@
 // 仅在本机提供模拟设备，不连接串口或真实硬件
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
-const {doc,state,head,shared,templates,auxiliary}=require('./render.cjs');
+const {doc,state,head,shared,templates,auxiliary,resources}=require('./render.cjs');
 const auxiliaryDevice=require('./auxiliary.cjs')(auxiliary);
 const client=fs.readFileSync(path.join(__dirname,'simulation.js'),'utf8');
 const pages=['/index.htm','/mount.htm','/net.htm','/focuser.htm','/rotator.htm','/auxiliary.htm','/enc.htm'];
@@ -11,6 +11,10 @@ const server=http.createServer(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   const url=new URL(req.url,'http://127.0.0.1');let body='';for await(const chunk of req){body+=chunk;if(body.length>65536){res.writeHead(413);res.end();return;}}
   const args=new URLSearchParams(body),send=(data,type='text/html; charset=utf-8')=>{res.setHeader('Content-Type',type);res.end(data);};
+  if(url.pathname==='/sws-ui.css'||url.pathname==='/sws-ui.js'){
+    res.setHeader('Cache-Control','public, max-age=31536000, immutable');
+    return url.pathname.endsWith('.css')?send(resources.css,'text/css; charset=utf-8'):send(resources.js,'application/javascript; charset=utf-8');
+  }
   if(url.pathname==='/demo.js')return send(client,'text/javascript; charset=utf-8');
   if(url.pathname==='/net-wifi'){
     const action=url.searchParams.get('action');

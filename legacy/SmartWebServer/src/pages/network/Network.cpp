@@ -30,6 +30,7 @@ bool loginRequired = true;
 #endif
 
 void handleNetwork() {
+  if (servePageShell(PAGE_NETWORK)) return;
   char temp[420]  = "";
   char temp1[140] = "";
 
@@ -37,9 +38,6 @@ void handleNetwork() {
   onStep.serialRecvFlush();
   
   processNetworkGet();
-
-  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
-  if (servePageShell(PAGE_NETWORK)) return;
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");

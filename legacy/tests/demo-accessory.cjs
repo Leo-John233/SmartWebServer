@@ -1,7 +1,7 @@
 // 检查演示中的角分解析、停止与速度读数，避免预览和真实页面含义不同
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const elements=new Map(),timers=new Map();let timerId=0;
-const get=id=>{if(!elements.has(id))elements.set(id,{textContent:'',style:{}});return elements.get(id);};
+const get=id=>{if(!elements.has(id))elements.set(id,{textContent:'',style:{},dataset:{}});return elements.get(id);};
 const context={location:{pathname:'/rotator.htm'},localStorage:{getItem:()=>null},document:{getElementById:get,addEventListener:()=>{}},addEventListener:()=>{},clearInterval:id=>timers.delete(id),setInterval:cb=>{timers.set(++timerId,cb);return timerId;},URL,window:{}};
 vm.createContext(context);vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../demo/simulation.js'),'utf8'),context);
 const command=(page,key,value)=>context.demoAccessory(new URL('http://demo/'+page+'-ajax-get.txt?'+key+'='+encodeURIComponent(value)));

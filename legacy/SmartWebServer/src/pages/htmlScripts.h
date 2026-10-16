@@ -6,9 +6,10 @@
 const char html_script_ajax_get[] PROGMEM =
 "<script>\n"
 "function s(key,v1) {"
-  "var xhttp = new XMLHttpRequest();"
-  "xhttp.open('GET','%s?'+key+'='+encodeURIComponent(v1)+'&x='+new Date().getTime(), true);"
-  "xhttp.send();"
+  "var x=new XMLHttpRequest();"
+  "if(window.swsWatchCommand)swsWatchCommand(x);"
+  "x.open('GET','%s?'+key+'='+encodeURIComponent(v1)+'&x='+Date.now(),true);"
+  "x.send();"
 "}</script>\n";
 
 const char html_script_ajax_shortcuts[] PROGMEM =
@@ -25,7 +26,7 @@ const char html_script_motion_controls_1[] PROGMEM =
 "function motionControls(o){"
 "var m={},q=[],b=0,g=0;"
 "function send(v){q.push(v);run();}"
-"function run(){if(b||!q.length)return;b=1;var v=q.shift(),x=new XMLHttpRequest(),d=0;function f(){if(d)return;d=1;b=0;run();}x.onreadystatechange=function(){if(x.readyState==4)f();};x.onerror=x.ontimeout=f;x.timeout=1000;x.open('GET',o.p+'?'+o.k+'='+encodeURIComponent(v)+'&x='+new Date().getTime(),true);x.send();}"
+"function run(){if(b||!q.length)return;b=1;window.swsPendingCommands=(window.swsPendingCommands||0)+1;var v=q.shift(),x=new XMLHttpRequest(),d=0;function f(){if(d)return;d=1;window.swsPendingCommands--;b=0;run();}x.onreadystatechange=function(){if(x.readyState==4)f();};x.onerror=x.ontimeout=f;x.timeout=1000;x.open('GET',o.p+'?'+o.k+'='+encodeURIComponent(v)+'&x='+new Date().getTime(),true);x.send();}"
 "function active(){for(var k in m)if(m[k])return true;return false;}"
 "function stopValue(a){return typeof o.s=='function'?o.s(a):o.s;}"
 "function allStopValue(){return typeof o.a=='function'?o.a():o.a;}"
@@ -93,57 +94,91 @@ const char html_script_ajax[] PROGMEM =
 "function pad(num, size) { var s = '000000000' + num; return s.substr(s.length-size); }\n"
 "function update_date_time() {\n"
   "var now = new Date();\n"
-  "document.getElementById('datetime').innerHTML = \n"
+  "var element=document.getElementById('datetime'); if (!element) return;\n"
+  "var value = \n"
   "(now.getUTCMonth()+1)+'/'+pad(now.getUTCDate().toString(),2)+'/'+pad(now.getUTCFullYear().toString().substr(-2),2)+' '+\n"
   "pad(now.getUTCHours().toString(),2)+':'+pad(now.getUTCMinutes().toString(),2)+':'+pad(now.getUTCSeconds().toString(),2);\n"
+  "if (element.textContent!==value) element.textContent=value;\n"
 "}\n"
-"var auto1Tick=-1;\n"
-"var auto2Tick=0;\n"
-"var auto2Rate=" STR(AJAX_PAGE_UPDATE_RATE_MS) "/10;\n"
-"var auto1=setInterval(autoRun,10);\n"
-"function autoFastRun() {\n"
-  "auto2Rate=" STR(AJAX_PAGE_UPDATE_RATE_FAST_MS) "/10\n"
-  "auto2Tick=" STR(AJAX_PAGE_UPDATE_FAST_SHED_MS) "/10;\n"
-"}\n"
-"function autoRun() {\n"
-  "auto1Tick++;\n"
-  "var i;\n"
-  "if (auto2Tick>=0) auto2Tick--;\n"
-  "if (auto2Tick==0) auto2Rate=" STR(AJAX_PAGE_UPDATE_RATE_MS) "/10;\n"
-  "if (auto1Tick%auto2Rate==0) {\n"
-    "nocache='?nocache='+Math.random()*1000000;\n"
-    "var request = new XMLHttpRequest();\n"
-    "request.onreadystatechange = pageReady(ajaxPage);\n"
-    "request.open('GET',ajaxPage.toLowerCase()+nocache,true); request.send(null);\n"
-  "}\n"
-"}\n"
-"function pageReady(aPage) {\n"
-  "return function() {\n"
-    "if ((this.readyState==4)&&(this.status==200)) {\n"
-      "lines=this.responseText.split('\\n');\n"
-      "for (var i=0; i<lines.length; i++) {\n"
-        "var j=lines[i].indexOf('|');\n"
-        "var m=0;\n"
-        "if (j==-1) {j=lines[i].indexOf('&');m=1;}\n"
-        "var v=lines[i].slice(j+1);\n"
-        "var k=lines[i].slice(0,j);\n"
-        "if (k=='call' && v=='update_date_time') {\n"
-          "update_date_time();\n"
-        "} else {\n"
-          "if (k!='') {"
-            "var e=document.getElementById(k);\n"
-            "if (e!=null) {\n"
-              "if (m==1) e.value=v; else\n"
-              "if (v=='selected') { e.dataset.selected='true'; } else\n"
-              "if (v=='unselected') { e.dataset.selected='false'; } else\n"
-              "if (v=='disabled') e.disabled=true; else\n"
-              "if (v=='enabled') e.disabled=false; else\n"
-              "e.innerHTML=v;\n"
-            "}\n"
-          "}\n"
-        "}\n"
-      "}\n"
-    "}\n"
-  "}\n"
-"}\n"
-"</script>\n";
+R"JS(
+// 按请求完成时间安排下一次刷新，慢连接只保留一个状态请求。
+var autoTimer=null, autoRequest=null, autoFastUntil=0, autoFailures=0, autoStopped=false;
+var autoHtmlValues=new WeakMap();
+function autoRate() {
+  return Date.now()<autoFastUntil ? )JS" STR(AJAX_PAGE_UPDATE_RATE_FAST_MS) R"JS( : )JS" STR(AJAX_PAGE_UPDATE_RATE_MS) R"JS(;
+}
+function autoSchedule(delay) {
+  clearTimeout(autoTimer);
+  if (!autoStopped && !document.hidden) autoTimer=setTimeout(autoRun,delay);
+}
+function autoFastRun() {
+  autoFastUntil=Date.now()+)JS" STR(AJAX_PAGE_UPDATE_FAST_SHED_MS) R"JS(;
+  if (!autoRequest) autoSchedule(autoRate());
+}
+function autoPause() {
+  clearTimeout(autoTimer);
+  if (autoRequest) {
+    var request=autoRequest;
+    autoRequest=null;
+    request.abort();
+  }
+}
+window.swsPausePolling=function() { autoStopped=true; autoPause(); };
+function autoRun() {
+  if (autoStopped || document.hidden || autoRequest) return;
+  // 命令正在发送时让出下一次刷新机会，不改变命令的参数或发送顺序。
+  if (window.swsPendingCommands) { autoSchedule(autoRate()); return; }
+  var request=new XMLHttpRequest();
+  autoRequest=request;
+  function finish() {
+    if (autoRequest!==request) return;
+    autoRequest=null;
+    if (request.status===200) {
+      autoFailures=0;
+      pageReady(ajaxPage).call(request);
+    } else autoFailures=Math.min(autoFailures+1,6);
+    autoSchedule(autoFailures ? Math.min(30000,autoRate()*Math.pow(2,autoFailures)) : autoRate());
+  }
+  request.onreadystatechange=function() { if (request.readyState===4) finish(); };
+  request.onerror=request.ontimeout=finish;
+  request.timeout=5000;
+  request.open('GET',ajaxPage.toLowerCase()+'?nocache='+Date.now(),true);
+  request.send(null);
+}
+function pageReady(aPage) {
+  return function() {
+    if (this.readyState!==4 || this.status!==200) return;
+    var lines=this.responseText.split('\n');
+    for (var i=0;i<lines.length;i++) {
+      var j=lines[i].indexOf('|'), valueMode=false;
+      if (j===-1) { j=lines[i].indexOf('&'); valueMode=true; }
+      if (j<1) continue;
+      var key=lines[i].slice(0,j), value=lines[i].slice(j+1);
+      if (key==='call' && value==='update_date_time') { update_date_time(); continue; }
+      var element=document.getElementById(key);
+      if (!element) continue;
+      // 状态没有变化时不触发重排、重绘和控件观察器。
+      if (valueMode) {
+        if (element.value!==value) element.value=value;
+      } else if (value==='selected' || value==='unselected') {
+        var selected=String(value==='selected');
+        if (element.dataset.selected!==selected) element.dataset.selected=selected;
+      } else if (value==='disabled' || value==='enabled') {
+        var disabled=value==='disabled';
+        if (element.disabled!==disabled) element.disabled=disabled;
+      } else if (autoHtmlValues.get(element)!==value) {
+        if (element.innerHTML!==value) element.innerHTML=value;
+        autoHtmlValues.set(element,value);
+      }
+    }
+  };
+}
+// 页面完全加载后再轮询，避免状态请求堵在尚未传完的页面后面。
+window.addEventListener('load',autoRun);
+document.addEventListener('visibilitychange',function() {
+  if (document.hidden) autoPause();
+  else { autoFailures=0; autoRun(); }
+});
+window.addEventListener('pagehide',window.swsPausePolling);
+window.addEventListener('pageshow',function() { autoStopped=false; autoRun(); });
+)JS" "</script>\n";

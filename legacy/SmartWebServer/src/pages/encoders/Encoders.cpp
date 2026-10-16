@@ -12,6 +12,7 @@ void processEncodersGet();
 
 void handleEncoders()
 {
+  if (servePageShell(PAGE_ENCODERS)) return;
   char temp[400] = "";
 
   state.updateMount(true);
@@ -20,9 +21,6 @@ void handleEncoders()
   onStep.serialRecvFlush();
 
   processEncodersGet();
-
-  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
-  if (servePageShell(PAGE_ENCODERS)) return;
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");

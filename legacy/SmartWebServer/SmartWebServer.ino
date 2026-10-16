@@ -285,6 +285,7 @@ Again:
   // ----------------------------------------------------------------------------------------
 
   VLF("MSG: Set webpage handlers"); // 设置网页路由处理程序
+  registerPageResources();
   www.on("/index.htm", handleRoot);
   www.on("/index-ajax-get.txt", indexAjaxGet);
   www.on("/index.txt", indexAjax);

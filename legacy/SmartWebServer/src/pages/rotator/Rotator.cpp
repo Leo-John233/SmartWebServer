@@ -11,6 +11,7 @@ extern void handleNotFound();
 void processRotatorGet();
 
 void handleRotator() {
+  if (status.rotatorFound == SD_TRUE && servePageShell(PAGE_ROTATOR)) return;
   char temp[240] = "";
 
   state.updateRotator(true);
@@ -20,9 +21,6 @@ void handleRotator() {
   onStep.serialRecvFlush();
 
   processRotatorGet();
-
-  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
-  if (servePageShell(PAGE_ROTATOR)) return;
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");

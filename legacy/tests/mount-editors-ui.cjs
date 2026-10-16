@@ -8,7 +8,7 @@ const body = layout.html_layout_mount_begin + cards.Guide + layout.html_layout_m
   layout.html_layout_mount_location + cards.Site + cards.Limits + layout.html_layout_mount_target + cards.Goto +
   layout.html_layout_mount_home + cards.HomePark + layout.html_layout_mount_library + cards.Library +
   layout.html_layout_mount_advanced + cards.Align + cards.Pec + layout.html_layout_mount_end;
-const clock = scripts.html_script_ajax_date_time_return + '<script>' + scripts.html_script_ajax.match(/function pad[\s\S]*?(?=var auto1Tick)/)[0] + '</script>';
+const clock = scripts.html_script_ajax_date_time_return + '<script>' + scripts.html_script_ajax.match(/function pad[\s\S]*?(?=var autoTimer)/)[0] + '</script>';
 const html = '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
   templates['Appearance.h'].html_shared_appearance +
   '<script>window.commands=[];function s(k,v){commands.push([k,v])}function g(v){s("dr",v)}function autoFastRun(){}</script>' +

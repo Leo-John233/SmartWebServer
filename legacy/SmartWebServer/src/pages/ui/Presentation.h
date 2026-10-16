@@ -4,3 +4,4 @@
 void pageAppearance();
 bool servePageShell(int selected);
 void sendPageResource(const char *content);
+void registerPageResources();

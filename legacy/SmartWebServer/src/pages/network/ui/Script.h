@@ -174,7 +174,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   $('nw-close').onclick = $('nw-cancel').onclick = () => dialog.close();
   // 轮询只更新设备状态，不覆盖弹窗中正在编辑的内容
   async function status() {
-    if (statusBusy) return;
+    if (statusBusy || document.hidden || document.body.inert) return;
     statusBusy = true;
     try {
       const s = await api('status');

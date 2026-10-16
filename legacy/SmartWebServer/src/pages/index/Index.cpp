@@ -10,6 +10,8 @@ void processIndexGet();
 
 void handleRoot()
 {
+  // 导航外壳使用已发现的设备信息，实际内容页才读取完整状态。
+  if (servePageShell(PAGE_CONTROLLER)) return;
   char temp[240] = "";
 
   state.updateController(true);
@@ -18,9 +20,6 @@ void handleRoot()
   onStep.serialRecvFlush();
 
   processIndexGet();
-
-  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
-  if (servePageShell(PAGE_CONTROLLER)) return;
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");

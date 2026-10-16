@@ -1,7 +1,7 @@
 #pragma once
 
 // 位置、限位卡片的显示与编辑状态；表单仍提交原来的参数。
-const char html_settings_editors[] PROGMEM = R"UI(
+const char html_editor_styles[] PROGMEM = R"UI(
 <style>
 .sws-control-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-areas:'tracking guide'; }
 .sws-mount > .sws-target { grid-area:auto; }
@@ -74,6 +74,9 @@ const char html_settings_editors[] PROGMEM = R"UI(
   .sws-editor .sws-clock-action button { white-space:nowrap; }
 }
 </style>
+)UI";
+
+const char html_settings_editors[] PROGMEM = R"UI(
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // 有符号原值保留在原输入框，方向选择只提供更直观的显示。

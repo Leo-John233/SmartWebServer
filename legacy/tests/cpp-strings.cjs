@@ -13,7 +13,8 @@ module.exports = (source) => {
           marker = ')' + delimiter + '"',
           end = source.indexOf(marker, begin);
         if (begin < 0 || end < 0) break;
-        value += source.slice(begin + 1, end);
+        // C++ 翻译阶段会把源文件 CRLF 归一为 LF，原始字符串也一样。
+        value += source.slice(begin + 1, end).replace(/\r\n/g, '\n');
         cursor = end + marker.length;
       } else if (source[cursor] === '"') {
         const token = /^"(?:\\.|[^"\\])*"/.exec(source.slice(cursor));

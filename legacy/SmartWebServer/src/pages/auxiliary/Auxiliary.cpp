@@ -46,6 +46,7 @@ void auxiliarySliderRow(String &data, int channel, int field, const char *label,
 }
 
 void handleAux() {
+  if (status.auxiliaryFound == SD_TRUE && servePageShell(PAGE_AUXILIARY)) return;
   char temp[240] = "";
   char temp1[80] = "";
 
@@ -56,9 +57,6 @@ void handleAux() {
   onStep.serialRecvFlush();
 
   processAuxGet();
-
-  // 完成设备状态读取后输出导航，保留可用标签和原有表单处理
-  if (servePageShell(PAGE_AUXILIARY)) return;
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
