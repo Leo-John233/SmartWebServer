@@ -1270,6 +1270,8 @@ h2.sws-section-title {
 
 /* 四个方向保持原来的按住移动语义，中间停止与定位区同步分别保留 */
 .sws-guide .sws-pad {
+  touch-action: none;
+  -webkit-touch-callout: none;
   position: relative;
   display: block;
   width: 272px;

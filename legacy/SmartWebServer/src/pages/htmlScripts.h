@@ -35,18 +35,21 @@ const char html_script_motion_controls_1[] PROGMEM =
 "function stop(a){if(!m[a])return;m[a]=0;var h=++g,v=stopValue(a);send(v);setTimeout(function(){if(repeat(a,h))send(v)},150);setTimeout(function(){if(repeat(a,h))send(v)},500);}"
 "function clearActive(){var r=0;for(var k in m){if(m[k])r=1;m[k]=0;}return r;}";
 
+// Pointer Events 统一处理触摸与鼠标；旧浏览器保留 Touch 回退。
 const char html_script_motion_controls_2[] PROGMEM =
 "function repeatSend(v){send(v);setTimeout(function(){send(v)},150);setTimeout(function(){send(v)},500);}"
 "function stopAll(){var v=allStopValue();if(v){if(clearActive()){g++;repeatSend(v);}return;}for(var k in m)stop(k);}"
 "function halt(){clearActive();g++;repeatSend(haltValue());}"
-"function down(e,v,a){if(e&&e.preventDefault)e.preventDefault();a=a||v;m[a]=1;g++;send(v);}"
-"function up(e,a){if(e&&e.preventDefault)e.preventDefault();stop(a);}"
-"function pointerDown(e,v,a){if(e.pointerType=='touch')return;down(e,v,a);}"
-"function pointerUp(e,a){if(e.pointerType=='touch')return;up(e,a);}"
-"function windowUp(e){if(e&&e.pointerType=='touch')return;stopAll();}"
+"function legacyTouch(e){return e&&e.type&&e.type.indexOf('touch')===0&&window.PointerEvent;}"
+"function down(e,v,a){if(legacyTouch(e))return;if(e&&e.preventDefault)e.preventDefault();a=a||v;if(m[a])return;m[a]=1;g++;send(v);}"
+"function up(e,a){if(legacyTouch(e))return;if(e&&e.preventDefault)e.preventDefault();stop(a);}"
+"function pointerDown(e,v,a){if(e.button!==undefined&&e.button!==0)return;down(e,v,a);if(e.currentTarget&&e.currentTarget.setPointerCapture&&e.pointerId!==undefined){try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}}"
+"function pointerUp(e,a){up(e,a);}"
+"function windowUp(e){stopAll();}"
 "function cancel(e){if(e&&e.preventDefault)e.preventDefault();return false;}"
 "window.addEventListener('pointerup',windowUp);"
 "window.addEventListener('pointercancel',windowUp);"
+"window.addEventListener('lostpointercapture',windowUp);"
 "window.addEventListener('touchend',stopAll);"
 "window.addEventListener('touchcancel',stopAll);"
 "window.addEventListener('blur',stopAll);"
