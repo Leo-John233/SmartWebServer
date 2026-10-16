@@ -11,7 +11,9 @@ void pecTile(String &data)
   char temp[240] = "";
 
   snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_PAGE_PEC);
+  // 卡片标记用于响应式布局，不改变设备功能判断
   data.concat(temp);
+  data.concat(F("<div class='sws-card-marker' data-card='pec'></div>"));
   data.concat(F("<br /><hr>"));
 
   if (status.pecEnabled) {

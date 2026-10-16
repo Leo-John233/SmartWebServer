@@ -8,11 +8,13 @@
 // create the related webpage tile
 void limitsTile(String &data)
 {
-  char temp[240] = "";
+  char temp[640] = "";
   char reply[120] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", "Backlash and Limits");
+  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", L_BACKLASH " / " L_LIMITS_TITLE);
+  // 卡片标记用于响应式布局，不改变设备功能判断
   data.concat(temp);
+  data.concat(F("<div class='sws-card-marker' data-card='limits'></div>"));
 
   data.concat(F("<br /><hr>"));
 
@@ -37,21 +39,23 @@ void limitsTile(String &data)
   int degPastMerW = (int)strtol(&reply[0], NULL, 10);
   degPastMerW = round((degPastMerW * 15.0) / 60.0);
 
+  // 状态值与设置项使用相同的语言资源，数值单独对齐
+  data.concat(F("<div class='sws-limit-values'>"));
   // show values
-  snprintf(temp, sizeof(temp), "Backlash, Axis1 <span id='limBl1' class='c'>%d</span> arc-sec<br />", backlashAxis1);
+  snprintf(temp, sizeof(temp), "<div><span>" L_BACKLASH_RANGE_AXIS1 "</span><strong id='limBl1' class='c'>%d</strong></div>", backlashAxis1);
   data.concat(temp);
-  snprintf(temp, sizeof(temp), "Backlash, Axis2 <span id='limBl2' class='c'>%d</span> arc-sec<br /><br />", backlashAxis2);
+  snprintf(temp, sizeof(temp), "<div><span>" L_BACKLASH_RANGE_AXIS2 "</span><strong id='limBl2' class='c'>%d</strong></div>", backlashAxis2);
   data.concat(temp);
-  snprintf(temp, sizeof(temp), "Limit Horizon, min altitude <span id='limAltMin' class='c'>%d</span>&deg;<br />", minAlt);
+  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_HORIZON "</span><strong id='limAltMin' class='c'>%d</strong></div>", minAlt);
   data.concat(temp);
-  snprintf(temp, sizeof(temp), "Limit Overhead, max altitude <span id='limAltMax' class='c'>%d</span>&deg;<br />", maxAlt);
+  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_OVERHEAD "</span><strong id='limAltMax' class='c'>%d</strong></div>", maxAlt);
   data.concat(temp);
-  snprintf(temp, sizeof(temp), "Limit past Meridian, East <span id='limMerE' class='c'>%d</span>&deg;<br />", degPastMerE);
+  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_MERIDIAN_E "</span><strong id='limMerE' class='c'>%d</strong></div>", degPastMerE);
   data.concat(temp);
-  snprintf(temp, sizeof(temp), "Limit past Meridian, West <span id='limMerW' class='c'>%d</span>&deg;<br />", degPastMerW);
+  snprintf(temp, sizeof(temp), "<div><span>" L_LIMITS_RANGE_MERIDIAN_W "</span><strong id='limMerW' class='c'>%d</strong></div>", degPastMerW);
   data.concat(temp);
 
-  data.concat(F("<hr>"));
+  data.concat(F("</div><hr>"));
 
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
   data.concat(temp);
@@ -60,7 +64,7 @@ void limitsTile(String &data)
   data.concat(temp);
 
   // Backlash
-  data.concat(F("Backlash:<br />"));
+  data.concat(F(L_BACKLASH "<br />"));
 
   snprintf_P(temp, sizeof(temp), html_configBlAxis1, backlashAxis1);
   data.concat(temp);
@@ -69,7 +73,7 @@ void limitsTile(String &data)
   snprintf_P(temp, sizeof(temp), html_configBlAxis2, backlashAxis2);
   data.concat(temp);
 
-  data.concat(F("<br />Limits:<br />"));
+  data.concat(F("<br />" L_LIMITS_TITLE "<br />"));
 
   // Overhead and Horizon Limits
   snprintf_P(temp, sizeof(temp), html_configMinAlt, minAlt);

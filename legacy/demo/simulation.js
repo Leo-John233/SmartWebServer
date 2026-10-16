@@ -5,9 +5,13 @@ function demoNotice(message){let e=document.getElementById('demo-toast');if(!e){
 function demoText(id,value){const e=document.getElementById(id);if(e)e.textContent=value;}
 function s(key,value){
   if(key==='dr'&&(value==='T1'||value==='T0')){document.getElementById('trk_on').style.background=value==='T1'?'#994b57':'#823b46';document.getElementById('trk_off').style.background=value==='T0'?'#994b57':'#823b46';}
+  if(key==='lib_index'){demoText('lib_message',value==='0'?'未选择星表':'星表 '+value);['cat_prev','cat_next','cat_select','cat_download'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=value==='0';});}
+  if(key==='cat_upload'){demoSaved.catalog=value.replace(/_/g,' ');demoText('lib_message','模拟星表已上传');document.getElementById('cat_upload').disabled=false;document.getElementById('cat_download').disabled=false;}
+  if(key==='lib'&&value==='clear'){demoSaved.catalog='';const area=document.getElementById('cat_data');if(area)area.value='';demoText('lib_message','模拟星表已清除');}
   demoSaved[key]=value;localStorage.setItem(demoKey,JSON.stringify(demoSaved));
   const labels={T1:'已开启追踪',T0:'已关闭追踪',Ts:'已选择恒星速',Tl:'已选择月球速',Th:'已选择太阳速',Tk:'已选择大气折射修正速',go:'正在前往目标',stop:'已停止',cat_prev:'M31 仙女座星系',cat_next:'M42 猎户座星云',cat_select:'已设为目标',cat_download:'星表已载入',clear:'星表已清除'};
-  if(key==='lib'){demoText('cat_message',labels[value]||'已更新');const area=document.getElementById('cat_data');if(area&&value==='cat_download')area.value='$Messier\nM31,SG,00:42:44,+41*16:09\nM42,DN,05:35:17,-05*23:28';}
+  if(key==='lib'){demoText('cat_message',labels[value]||'已更新');const area=document.getElementById('cat_data');if(area&&value==='cat_download')area.value=demoSaved.catalog||'$Messier\nM31,SG,00:42:44,+41*16:09\nM42,DN,05:35:17,-05*23:28';}
+  if(key==='lib'&&value==='cat_download'){document.getElementById('cat_download').disabled=false;document.getElementById('cat_upload').disabled=false;demoText('lib_message','模拟星表已下载');}
   if(key==='fs'||key==='rs')demoNotice('模拟位置已设为 '+value);else demoNotice(labels[value]||'模拟设置已更新');
   if(value==='go')setTimeout(()=>{demoText('gto_i1','05h35m17s');demoText('gto_i2','-05°23′28″');demoNotice('已到达模拟目标');},1500);
 }

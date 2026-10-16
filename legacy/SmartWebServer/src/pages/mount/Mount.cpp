@@ -75,10 +75,10 @@ void handleMount()
   trackingTile(data);
   data.concat(F("</section></div><section class='sws-home'>"));
   homeParkTile(data);
-  data.concat(F("</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_LOCATION_TITLE " / " L_PAGE_LIBRARY "</h2><p></p></div><div class='sws-settings-grid'>"));
+  data.concat(F("</section><section><div class='sws-section-head'><h2 class='sws-section-title'>" L_LOCATION_TITLE " / " L_PAGE_LIBRARY "</h2><p></p></div><div class='sws-settings-grid sws-site-library'>"));
   siteTile(data);
   libraryTile(data);
-  data.concat(F("</div></section><details class='sws-more' open><summary>" L_HOME_PARK_TITLE " / " L_ALIGN " / " L_LIMITS_TITLE "</summary><div class='sws-settings-grid'>"));
+  data.concat(F("</div></section><details class='sws-more' open><summary>" L_ALIGN " / " L_LIMITS_TITLE " / " L_PAGE_PEC "</summary><div class='sws-settings-grid sws-advanced-grid'>"));
   alignTile(data);
   limitsTile(data);
   if (status.pecEnabled) pecTile(data);

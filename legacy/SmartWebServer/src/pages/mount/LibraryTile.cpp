@@ -32,7 +32,9 @@ void libraryTile(String &data)
   data.concat(FPSTR(html_script_ajax_library));
 
   snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_PAGE_LIBRARY);
+  // 卡片标记用于响应式布局，不改变设备功能判断
   data.concat(temp);
+  data.concat(F("<div class='sws-card-marker' data-card='library'></div>"));
   data.concat(F("<div style='float: right; text-align: right;' id='lib_free' class='c'>"));
   data.concat(onStep.commandString(":L?#"));
   data.concat(" ");
@@ -57,12 +59,14 @@ void libraryTile(String &data)
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
+  // 数据框先于操作按钮，上传内容与动作在同一区域
+  data.concat(FPSTR(html_libEditCatalog));
+  data.concat(F("<div class='sws-actions'>"));
   data.concat(FPSTR(html_libUploadCatalog));
   data.concat(FPSTR(html_libDownloadCatalog));
   data.concat(FPSTR(html_libClearCatalog));
-  data.concat(F("<br /><br />"));
+  data.concat(F("</div>"));
   www.sendContentAndClear(data);
-  data.concat(FPSTR(html_libEditCatalog));
   data.concat(FPSTR(html_libCatalogHelp));
 
   data.concat(FPSTR(html_collapsable_end));

@@ -10,11 +10,13 @@ const char *getHomeParkStateStr();
 // create the related webpage tile
 void homeParkTile(String &data)
 {
-  char temp[240] = "";
+  char temp[640] = "";
   char reply[120] = "";
 
   snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_HOME_PARK_TITLE);
+  // 卡片标记用于响应式布局，不改变设备功能判断
   data.concat(temp);
+  data.concat(F("<div class='sws-card-marker' data-card='homepark'></div>"));
   data.concat(F("<div style='float: right; text-align: right;' id='hp_sta' class='c'>"));
   data.concat(getHomeParkStateStr());
   data.concat(F("</div><br /><hr>"));
@@ -32,17 +34,20 @@ void homeParkTile(String &data)
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
-  data.concat(F(L_SET_PARK_CURRENT_COORDS ":<br />"));
+  data.concat(F("<div class='sws-option-grid'><div class='sws-option-row'>" L_SET_PARK_CURRENT_COORDS ":<br />"));
 
   data.concat(FPSTR(html_setpark));
+  data.concat(F("</div>"));
   www.sendContentAndClear(data);
 
   // home options when home sense is available
   if (status.getVersionMajor()*100 + status.getVersionMinor() >= 1020) {
-    data.concat(F("<br />" L_HOME_AUTO "<br />"));
+    data.concat(F("<div class='sws-option-row'>" L_HOME_AUTO "<br />"));
     data.concat(FPSTR(html_homeAuto));
+    data.concat(F("</div>"));
     www.sendContentAndClear(data);
 
+    data.concat(F("</div>"));
     if (onStep.command(":h?#", reply)) {
       status.hasHomeSense = false;
       int hasHomeSense = 0;
@@ -82,6 +87,7 @@ void homeParkTile(String &data)
     }
   }
 
+  if (status.getVersionMajor()*100 + status.getVersionMinor() < 1020) data.concat(F("</div>"));
   data.concat(FPSTR(html_collapsable_end));
 
   data.concat(FPSTR(html_tile_end));

@@ -31,6 +31,15 @@ await page.goto('http://sws.test/index.htm');const frame=()=>page.frames().find(
 const topNavigations=[];page.on('request',req=>{if(req.isNavigationRequest()&&req.frame()===page.mainFrame())topNavigations.push(req.url());});
 await page.frameLocator('#sws-frame').locator('.sws-axis-grid .collapsible').first().click();await page.screenshot({path:path.join(out,'controller-pc.png')});await page.frameLocator('#sws-frame').locator('.sws-axis-grid .b1').first().screenshot({path:path.join(out,'axis-full-pc.png')});await page.locator('.t a[href="/mount.htm"]').click();await page.frameLocator('#sws-frame').getByText('导星:',{exact:true}).waitFor();await page.waitForTimeout(350);const stopped=polls['/index.htm'];await page.waitForTimeout(450);assert.equal(polls['/index.htm'],stopped,'离开页面后旧轮询停止');
 await page.screenshot({path:path.join(out,'mount-pc.png')});
+// 展开实际生成的表单，检查曾在预览中缺失的输入项与提交动作
+await frame().evaluate(()=>document.querySelectorAll('.sws-mount .collapsible').forEach(e=>e.click()));
+for(const name of ['t1','t2','t3','g1','g2','g3','u1','u2','hc1','hc2','hl','ol','b1','b2','el','wl','spwr']){const input=page.frameLocator('#sws-frame').locator('[name="'+name+'"]');assert.equal(await input.count(),1,name+' 输入项完整');assert(await input.isVisible(),name+' 输入项可见');assert(await input.evaluate(e=>e.form&&e.form.querySelector('button[type=submit]')),name+' 有可提交表单');}
+const editor=page.frameLocator('#sws-frame').locator('#cat_data');assert(await editor.isVisible(),'星表数据框可编辑');await editor.fill('M31,SG,00:42:44,+41*16:09');assert(await page.frameLocator('#sws-frame').locator('#cat_upload').isEnabled(),'填写星表后可上传');
+for(const cls of ['sws-site','sws-library','sws-homepark','sws-align','sws-limits','sws-pec'])await page.frameLocator('#sws-frame').locator('.'+cls).screenshot({path:path.join(out,cls+'-pc.png')});
+await page.frameLocator('#sws-frame').locator('.sws-target').screenshot({path:path.join(out,'goto-settings-pc.png')});
+for(const width of [390,320]){await page.setViewportSize({width,height:900});const overflow=await frame().evaluate(()=>[...document.querySelectorAll('.sws-mount .b1')].filter(e=>e.scrollWidth>e.clientWidth+1).map(e=>({class:e.className,width:e.clientWidth,scroll:e.scrollWidth,children:[...e.querySelectorAll('*')].filter(x=>x.getBoundingClientRect().right>e.getBoundingClientRect().right).map(x=>x.outerHTML.slice(0,160))})));assert.deepEqual(overflow,[],'展开后的卡片在手机内无横向溢出 '+width);if(width===390)for(const cls of ['sws-site','sws-library','sws-homepark'])await page.frameLocator('#sws-frame').locator('.'+cls).screenshot({path:path.join(out,cls+'-mobile.png')});}
+await page.setViewportSize({width:1440,height:1000});
+
 // 检查新控件代理原有命令，并响应后台状态变化
 await frame().evaluate(()=>{window.s=(key,value)=>fetch('/mount-ajax-get.txt?'+key+'='+encodeURIComponent(value));window.g=value=>s('dr',value);});
 await page.frameLocator('#sws-frame').getByRole('switch').click();await page.waitForTimeout(100);assert(commands.includes('T1'),'跟踪开关发送原有开启命令');

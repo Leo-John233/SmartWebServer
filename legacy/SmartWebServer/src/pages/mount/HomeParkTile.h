@@ -1,3 +1,4 @@
+// 控件按用途分组，保留原有参数名称和中文语言资源
 // -----------------------------------------------------------------------------------
 // Home/Park tile
 #pragma once
@@ -31,9 +32,9 @@ const char html_homeAuto[] PROGMEM =
 
 // Home offset
 const char html_homeOffsetAxis1[] PROGMEM =
-  "<input style='width:6em;' value='%ld' type='number' name='hc1' min='-" STR(HOME_OFFSET_RANGE_AXIS1) "' max='" STR(HOME_OFFSET_RANGE_AXIS1) "'>&nbsp;" L_HOME_OFFSET_RANGE_AXIS1 "<br />\n";
+  "<label class='sws-number-field'><span>" L_HOME_OFFSET_RANGE_AXIS1 "</span><input style='width:6em;' value='%ld' type='number' name='hc1' min='-" STR(HOME_OFFSET_RANGE_AXIS1) "' max='" STR(HOME_OFFSET_RANGE_AXIS1) "'></label>\n";
 const char html_homeOffsetAxis2[] PROGMEM =
-  "<input style='width:6em;' value='%ld' type='number' name='hc2' min='-" STR(HOME_OFFSET_RANGE_AXIS2) "' max='" STR(HOME_OFFSET_RANGE_AXIS2) "'>&nbsp;" L_HOME_OFFSET_RANGE_AXIS2 "<br /><br />\n";
+  "<label class='sws-number-field'><span>" L_HOME_OFFSET_RANGE_AXIS2 "</span><input style='width:6em;' value='%ld' type='number' name='hc2' min='-" STR(HOME_OFFSET_RANGE_AXIS2) "' max='" STR(HOME_OFFSET_RANGE_AXIS2) "'></label>\n";
 
 #ifdef HOME_SWITCH_DIRECTION_CONTROL
   const char html_homeReverse[] PROGMEM =

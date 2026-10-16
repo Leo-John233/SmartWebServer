@@ -15,11 +15,13 @@ int get_temp_second;
 // create the related webpage tile
 void siteTile(String &data)
 {
-  char temp[240] = "";
+  char temp[640] = "";
   char reply[80] = "";
 
   snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", L_LOCATION_TITLE);
+  // 卡片标记用于响应式布局，不改变设备功能判断
   data.concat(temp);
+  data.concat(F("<div class='sws-card-marker' data-card='site'></div>"));
   data.concat(F("<br/><hr>"));
 
   data.concat(FPSTR(html_browserTime));
@@ -60,7 +62,7 @@ void siteTile(String &data)
     snprintf_P(temp, sizeof(temp), html_ninput, "t3", &reply[7], "0", "60", "\"");
     data.concat(temp);
   }
-  data.concat(F("<br />"));
+  data.concat(F("</div></fieldset>"));
   www.sendContentAndClear(data);
 
   // Longitude
@@ -81,7 +83,7 @@ void siteTile(String &data)
     snprintf_P(temp, sizeof(temp), html_ninput, "g3", &reply[8], "0", "60", "\"");
     data.concat(temp);
   }
-  data.concat(F("<br />"));
+  data.concat(F("</div></fieldset>"));
   www.sendContentAndClear(data);
 
   // UTC Offset

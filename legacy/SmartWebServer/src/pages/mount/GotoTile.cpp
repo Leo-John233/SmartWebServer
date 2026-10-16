@@ -37,7 +37,7 @@ const char *goto_key[18] =
 // create the related webpage tile
 void gotoTile(String &data)
 {
-  char temp[400] = "";
+  char temp[640] = "";
 
   snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", "Goto");
   data.concat(temp);
@@ -70,10 +70,13 @@ void gotoTile(String &data)
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
 
+  // 定位选项采用独立分组，长文字在窄屏自然换行
+  data.concat(F("<div class='sws-option-grid'><div class='sws-option-row'>"));
   // Slew speed
   snprintf_P(temp, sizeof(temp), html_slewSpeed, state.slewSpeedStr);
   data.concat(temp);
   data.concat(FPSTR(html_slewSpeedSelect));
+  data.concat(F("</div>"));
 
   // Goto Buzzer
   data.concat(FPSTR(html_gotoBuzzer));
@@ -116,6 +119,7 @@ void gotoTile(String &data)
     data.concat(FPSTR(html_gotoPreferredPierSide2));
   }
 
+  data.concat(F("</div>"));
   data.concat(FPSTR(html_collapsable_end));
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);

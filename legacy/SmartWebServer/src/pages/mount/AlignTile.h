@@ -1,3 +1,4 @@
+// 控件按用途分组，保留原有参数名称和中文语言资源
 // -----------------------------------------------------------------------------------
 // Align tile
 #pragma once
@@ -20,6 +21,6 @@ const char html_alignAccept[] PROGMEM =
   "&nbsp;&nbsp;&nbsp;<button id='alga' class='bbh' onpointerdown=\"s('al','n')\" type='button' disabled>" L_ACCEPT "</button>";
 
 const char html_alignRefine[] PROGMEM =
-  L_REFINE_MESSAGE1 L_REFINE_MESSAGE2 "<br /><br />" L_REFINE_MESSAGE3 "<br /><br />"
+  "<p class='sws-help'>" L_REFINE_MESSAGE1 "</p><p class='sws-help'>" L_REFINE_MESSAGE2 "</p><p class='sws-help'>" L_REFINE_MESSAGE3 "</p>"
   "<button id='rpa' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('rp','a')\" type='button'>" L_REFINE_PA "</button>"
   "<br />";

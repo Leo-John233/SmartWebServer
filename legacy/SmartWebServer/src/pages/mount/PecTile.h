@@ -1,3 +1,4 @@
+// 控件按用途分组，保留原有参数名称和中文语言资源
 // -----------------------------------------------------------------------------------
 // PEC tile
 #pragma once
@@ -23,10 +24,10 @@ const char html_pecControls2[] PROGMEM =
 "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('pec','rec')\" type='submit'>" L_PEC_REC "</button><br />";
 
 const char html_pecControls3[] PROGMEM =
-L_PEC_CLEAR_MESSAGE "<br />";
+"<p class='sws-help'>" L_PEC_CLEAR_MESSAGE "</p>";
 
 const char html_pecControls4[] PROGMEM =
-"<br /><button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('pec','wrt')\" type='submit'>" L_PEC_EEWRITE "</button><br />" L_PEC_EEWRITE_MESSAGE "<br />";
+"<div class='sws-pec-write'><button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('pec','wrt')\" type='submit'>" L_PEC_EEWRITE "</button><p class='sws-help'>" L_PEC_EEWRITE_MESSAGE "</p></div>";
 
 const char html_configAxisSpwr[] PROGMEM =
 L_PEC_STEPS_PER_WORM_ROTATION ":<br />"

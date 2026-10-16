@@ -1,3 +1,4 @@
+// 控件按用途分组，保留原有参数名称和中文语言资源
 // -----------------------------------------------------------------------------------
 // Library tile
 #pragma once
@@ -11,7 +12,7 @@ extern void libraryTileAjax(String &data);
 extern void libraryTileGet();
 
 const char html_libCatalogSelect[] PROGMEM =
-L_CATALOG " <select name='selBox' onchange=\"busy(); s('lib_index',this.value);\">"
+"<label class='sws-catalog-select'>" L_CATALOG " <select name='selBox' onchange=\"busy(); s('lib_index',this.value);\">"
 "<option value='0' selected>-</option>"
 "<option value='1' >1</option>"
 "<option value='2' >2</option>"
@@ -28,7 +29,7 @@ L_CATALOG " <select name='selBox' onchange=\"busy(); s('lib_index',this.value);\
 "<option value='13' >13</option>"
 "<option value='14' >14</option>"
 "<option value='15' >15</option>"
-"</select>&nbsp;\n";
+"</select></label>\n";
 
 const char html_libShowMessage[] PROGMEM =
 "<div id='lib_message' style='margin: 0 auto; width: 14em; margin-top: 0.5em; margin-bottom: 1em; background-color: " COLOR_LIGHT_BACKGROUND "; color: " COLOR_LIGHT_FOREGROUND "; border: 1px solid " COLOR_BORDER "; padding: 2px;'>" L_CAT_NO_CAT "</div>\n";
@@ -55,8 +56,8 @@ const char html_libClearCatalog[] PROGMEM =
 "&nbsp;<button id='lib_clear' type='button' onclick=\"busy(); if (confirm('" L_ARE_YOU_SURE "?')) s('lib','clear')\">" L_CAT_CLEAR_LIB "</button>\n";
 
 const char html_libEditCatalog[] PROGMEM =
-L_CAT_DATA "<br />"
-"<textarea id='cat_data' style='background-color: " COLOR_LIGHT_BACKGROUND "; color: #ffffff; border: 1px solid " COLOR_BORDER ";' "
+"<label for='cat_data' class='sws-editor-label'>" L_CAT_DATA "</label>"
+"<textarea spellcheck='false' id='cat_data' style='background-color: " COLOR_LIGHT_BACKGROUND "; color: #ffffff; border: 1px solid " COLOR_BORDER ";' "
 "rows='10' cols='40' oninput=\"document.getElementById('cat_upload').disabled=false;\"></textarea><br /><br />\n";
 
 const char html_libCatalogHelp[] PROGMEM =

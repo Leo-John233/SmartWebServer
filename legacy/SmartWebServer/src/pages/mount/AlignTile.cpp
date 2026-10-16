@@ -8,16 +8,19 @@
 // create the related webpage tile
 void alignTile(String &data)
 {
-  char temp[240] = "";
+  char temp[640] = "";
 
   snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_ALIGN);
+  // 卡片标记用于响应式布局，不改变设备功能判断
   data.concat(temp);
+  data.concat(F("<div class='sws-card-marker' data-card='align'></div>"));
 
   data.concat(F("<div style='float: right; text-align: right;' id='align_progress' class='c'>"));
   data.concat(state.alignProgress);
   data.concat(F("</div><br /><hr>"));
 
-  char poleName[8] = L_ZENITH;
+  // 中文天极名称按 UTF-8 字节预留空间，避免越界破坏相邻数据
+  char poleName[32] = L_ZENITH;
   if (status.mountType != MT_ALTAZM) { if (state.latitude < 0) strcpy(poleName, L_SCP); else strcpy(poleName, L_NCP); }
 
   snprintf_P(temp, sizeof(temp), html_alignCorrection, state.alignLrStr, state.alignUdStr, poleName);
@@ -59,16 +62,17 @@ void alignTile(String &data)
     sc[1] = 3;
     sc[2] = 9;
   }
+  data.concat(F("<div class='sws-actions'>"));
   data.concat(FPSTR(html_alignAccept));
   for (int i = 0; i < n; i++)
   {
-    char temp2[120] = "";
+    char temp2[240] = "";
     sprintf_P(temp2, html_alignStart, i + 1, sc[i], sc[i], SIDEREAL_CH);
     data.concat(temp2);
   }
   www.sendContentAndClear(data);
 
-  data.concat(F("<hr>"));
+  data.concat(F("</div><hr>"));
 
   if (status.mountType != MT_ALTAZM)
   {

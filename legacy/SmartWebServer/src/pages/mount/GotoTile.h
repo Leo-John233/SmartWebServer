@@ -1,3 +1,4 @@
+// 控件按用途分组，保留原有参数名称和中文语言资源
 // -----------------------------------------------------------------------------------
 // Goto tile
 #pragma once
@@ -66,37 +67,48 @@ const char html_slewSpeedSelect[] PROGMEM =
   "<br /><br />\n";
 
 const char html_gotoBuzzer[] PROGMEM = 
+  "<div class='sws-option-row'>"
   L_BUZZER ": <br />"
   "<button id='gto_bzr_on' class='btns_right' onpointerdown=\"s('goto','bzr_on')\"  type='button'>" L_ON "</button>"
   "<button id='gto_bzr_off' class='btns_left' onpointerdown=\"s('goto','bzr_off')\" type='button'>" L_OFF "</button>"
-  "<br /><br />\n";
+  "<br /><br />\n"
+  "</div>";
 
 const char html_gotoMfAuto[] PROGMEM =
+  "<div class='sws-option-row'>"
   L_MERIDIAN_FLIP_AUTO ":<br />"
   "<button id='gto_mfa_on' class='btns_right' onpointerdown=\"s('goto','af_on')\"  type='button'>" L_ON "</button>"
   "<button id='gto_mfa_off' class='btns_left' onpointerdown=\"s('goto','af_off')\" type='button'>" L_OFF "</button>&nbsp;&nbsp;"
   "<button onpointerdown=\"s('goto','af_now')\" type='button'>" L_MERIDIAN_FLIP_NOW "</button>"
-  "<br /><br />\n";
+  "<br /><br />\n"
+  "</div>";
 
 const char html_gotoMfNow[] PROGMEM =
+  "<div class='sws-option-row'>"
   L_ORIENTATION_AUTO ":<br />"
   "<button onpointerdown=\"s('goto','af_now')\" type='button'>" L_MERIDIAN_FLIP_NOW "</button>"
-  "<br /><br />\n";
+  "<br /><br />\n"
+  "</div>";
 
 const char html_gotoMfPause[] PROGMEM =
+  "<div class='sws-option-row'>"
   "%s: <br />"
   "<button id='gto_mfp_on' class='btns_right' onpointerdown=\"s('goto','mp_on')\"  type='button'>" L_ON "</button>"
   "<button id='gto_mfp_off' class='btns_left' onpointerdown=\"s('goto','mp_off')\" type='button'>" L_OFF "</button>"
-  "<br />\n";
+  "<br />\n"
+  "</div>";
 
 const char html_gotoMfHome[] PROGMEM =
+  "<div class='sws-option-row'>"
   L_MERIDIAN_FLIP_HOMING ": <br />"
   "<button id='gto_mfh_off' class='btns_right' onpointerdown=\"s('goto','mh_off')\" type='button'>" L_OFF "</button>"
   "<button id='gto_mfh_visit' class='btns_mid' onpointerdown=\"s('goto','mh_visit')\" type='button'>" L_VISIT "</button>"
   "<button id='gto_mfh_pause' class='btns_left' onpointerdown=\"s('goto','mh_pause')\" type='button'>" L_PAUSE "</button>"
-  "<br />\n";
+  "<br />\n"
+  "</div>";
 
 const char html_gotoPreferredPierSide1[] PROGMEM =
+  "<div class='sws-option-row'>"
   "%s: <br />"
   "<button id='gto_pps_east' class='btns_right' onpointerdown=\"s('goto','pps_e')\"  type='button'>%s</button>"
   "<button id='gto_pps_west' class='btns_mid' onpointerdown=\"s('goto','pps_w')\" type='button'>%s</button>";
@@ -104,4 +116,5 @@ const char html_gotoPreferredPierSide1[] PROGMEM =
 const char html_gotoPreferredPierSide2[] PROGMEM =
   "<button id='gto_pps_best' class='btns_mid' onpointerdown=\"s('goto','pps_b')\" type='button'>" L_BEST "</button>"
   "<button id='gto_pps_auto' class='btns_left' onpointerdown=\"s('goto','pps_a')\" type='button'>" L_AUTO "</button>"
-  "<br />\n";
+  "<br />\n"
+  "</div>";
