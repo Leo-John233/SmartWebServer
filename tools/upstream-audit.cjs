@@ -57,11 +57,7 @@ try {
   const added = lines(git('ls-files', '--others', '--exclude-standard'));
   const custom = [...new Set([...local, ...added])].sort();
   const localFiles = new Set(custom);
-  console.log(`已集成基线：${baseline.slice(0, 12)}\n待合并上游：${target.slice(0, 12)}`);
-  const common = cp.spawnSync('git', ['merge-base', 'HEAD', baseline], {cwd: root, encoding: 'utf8'});
-  if (common.status === 1) console.log('提示：开发分支尚未记录上游祖先，合并前需按扩展说明建立基线');
-  else if (common.status !== 0) throw Error(common.stderr || '无法检查开发分支祖先');
-  else if (common.stdout.trim() !== baseline) console.log('提示：开发分支尚未包含完整基线提交');
+  console.log(`已集成原版：${baseline.slice(0, 12)}\n待检查原版：${target.slice(0, 12)}`);
   report('上游新增或修改', upstream);
   report('双方均有改动，需重点核对', upstream.filter(file => localFiles.has(file)));
   report('原版文件中的扩展接入点', custom.filter(file => hooks.has(file)));

@@ -17,7 +17,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 独立扩展统一位于 `src/extensions/`，按界面、网络、抱闸、状态与坐标功能分组。目录职责、原版接入点、已集成的上游基线和后续合并步骤见 [扩展维护说明](src/extensions/README.md)。
 
-后续原版分支更新后，先运行 `node tools/upstream-audit.cjs origin/SmartWebServer-Original`，查看双方改动交集，再进行正常三方合并。配置、翻译、卡片布局及原模块修复仍需逐段核对。
+后续原版更新通过 GitHub 的 Pull Request 审查和合并，开发分支保留本地提交历史。可运行 `node tools/upstream-audit.cjs origin/SmartWebServer-Original` 只读检查双方改动交集。配置、翻译、卡片布局及原模块修复仍需逐段核对。
 
 ## 网页配网
 
