@@ -13,6 +13,7 @@ static const char *brakeMessage() {
     case BrakeState::Fault: return L_IO_BRAKE_FAULT;
     case BrakeState::Stale: return L_IO_BRAKE_STALE;
     case BrakeState::Released: return L_IO_BRAKE_RELEASED;
+    case BrakeState::Manual: return L_IO_BRAKE_MANUAL_STATE;
   }
   return L_UNKNOWN;
 }
@@ -76,10 +77,11 @@ void handleBoardIo() {
   if (www.method() == HTTP_POST) {
     const String action = www.arg("action");
     if (action != "") {
-      if (!boardIo.brakeAvailable() || (action != "reset" && action != "retry-stop")) {
+      if (!boardIo.brakeAvailable() || (action != "reset" && action != "retry-stop" && action != "manual-unlock")) {
         www.send(400, "application/json", "{}"); return;
       }
-      const bool accepted = action == "reset" ? boardIo.resetFault() : boardIo.retryStop();
+      const bool accepted = action == "manual-unlock" ? boardIo.unlockManually() :
+                            action == "reset" ? boardIo.resetFault() : boardIo.retryStop();
       if (!accepted) { www.send(409, "application/json", "{}"); return; }
     } else {
       const String setting = www.arg("setting"), value = www.arg("enabled");
@@ -106,6 +108,7 @@ void handleBoardIo() {
   result.concat(boardIo.policy().activityEnabled() ? "true" : "false");
   result.concat(",\"protection\":");
   result.concat(boardIo.policy().protectionEnabled() ? "true" : "false");
+  result.concat(",\"manualUnlocked\":"); result.concat(boardIo.policy().manuallyUnlocked() ? "true" : "false");
   result.concat(",\"locked\":");
   result.concat(boardIo.policy().faultReason() != BrakeFault::None ? "true" : "false");
   result.concat(",\"showUnlock\":"); result.concat(boardIo.policy().releaseBrake() ? "false" : "true");

@@ -14,6 +14,7 @@ public:
   void pollDriver();
   bool setProtectionPort(ProtectionPort &port);
   bool resetFault();
+  bool unlockManually();
   bool retryStop();
   bool motionAllowed();
   bool save(bool activity, bool protection);

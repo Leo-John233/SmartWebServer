@@ -16,6 +16,7 @@ void BoardIoPolicy::latch(BrakeFault reason) {
 void BoardIoPolicy::invalidate() { healthy_ = ready_ = standstillSeen_ = false; }
 
 void BoardIoPolicy::configure(bool activity, bool protection, uint32_t now) {
+  if (manual_ && protection) { manual_ = false; running_ = false; }
   if (configured_ && protection_ && !protection) latch(BrakeFault::ProtectionOff);
   if (!configured_ || protection_ != protection) { invalidate(); healthyAt_ = now; }
   configured_ = true;
@@ -32,6 +33,12 @@ bool BoardIoPolicy::fresh(uint32_t now) const {
 void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
   // 相同或更早的采样不能算作另一帧确认；时间差计算兼容时钟回绕
   if (feedbackSeen_ && int32_t(value.sampledAt - feedback_.sampledAt) <= 0) return;
+  if (manual_) {
+    feedback_ = value;
+    feedbackAt_ = now;
+    feedbackSeen_ = true;
+    return;
+  }
   if (!fresh(now)) {
     if (released_) latch(BrakeFault::Stale);
     invalidate();
@@ -62,6 +69,7 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
 }
 
 void BoardIoPolicy::checkFeedback(bool connected, uint32_t now) {
+  if (manual_) return;
   if (!connected || !fresh(now)) {
     invalidate();
     if (released_) latch(!connected ? BrakeFault::Disconnected : BrakeFault::Stale);
@@ -71,6 +79,16 @@ void BoardIoPolicy::checkFeedback(bool connected, uint32_t now) {
 
 void BoardIoPolicy::advanceRelease(uint32_t now) {
   if (!protection_ || reason_ != BrakeFault::None || !fresh(now) || !ready_) return;
+  released_ = running_ = true;
+}
+
+void BoardIoPolicy::unlockManually() {
+  // 手动解锁立即松闸，暂停本次运行的自动逻辑并清除旧停止记录
+  manual_ = true;
+  protection_ = false;
+  reason_ = BrakeFault::None;
+  clearStop();
+  invalidate();
   released_ = running_ = true;
 }
 
@@ -111,6 +129,7 @@ bool BoardIoPolicy::ledLit(bool connected, bool originalIdleLit, uint32_t now) c
 
 BrakeState BoardIoPolicy::brakeState(bool connected, uint32_t now) const {
   if (!configured_) return BrakeState::Starting;
+  if (manual_) return BrakeState::Manual;
   if (reason_ != BrakeFault::None && !released_) return BrakeState::Fault;
   if (!connected || (feedbackSeen_ && !fresh(now))) return BrakeState::Stale;
   if (reason_ != BrakeFault::None) return stopAttempted_ && !stopResult_.complete() ? BrakeState::StopFailed : BrakeState::Stopping;

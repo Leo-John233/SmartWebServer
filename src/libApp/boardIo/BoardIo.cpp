@@ -134,6 +134,13 @@ bool BoardIo::retryStop() {
   return true;
 }
 
+bool BoardIo::unlockManually() {
+  if (!started_ || servicing_ || !brakeAvailable()) return false;
+  policy_.unlockManually();
+  tick();
+  return true;
+}
+
 bool BoardIo::save(bool activity, bool protection) {
   if (!started_ || servicing_) return false;
   protection = brakeAvailable() && protection;
