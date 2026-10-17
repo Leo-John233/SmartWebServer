@@ -205,6 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
       demoText('sws-io-fault',settings.fault||'');
       const actions=document.getElementById('sws-io-actions');
       if(actions)actions.dataset.selected=String(settings.locked);
+      const unlock=document.getElementById('sws-io-reset'),retry=document.getElementById('sws-io-retry-stop');
+      if(unlock)unlock.dataset.selected=String(settings.showUnlock);
+      if(retry)retry.dataset.selected=String(settings.showStopRetry);
     }).catch(()=>{});
   for (const [id, value] of Object.entries({
     last_err: '无',

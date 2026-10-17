@@ -743,7 +743,7 @@
 #define L_GUIDING_RATE "Guide rate"
 #define L_TRACKING_SETTINGS "Tracking settings"
 #define L_IO_BRAKE_RESET "Unlock"
-#define L_IO_BRAKE_RETRY "Stop again"
+#define L_IO_BRAKE_RETRY "Retry stop"
 #define L_IO_ACTION_REJECTED "Conditions unmet; check protection switch and fresh normal ST feedback"
 #define L_IO_FAULT_DRIVER "Latched: driver fault"
 #define L_IO_FAULT_FEEDBACK "Latched: invalid feedback"

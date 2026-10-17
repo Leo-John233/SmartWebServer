@@ -12,7 +12,7 @@ const html=render(card,3),hiddenHtml=render(hiddenCard,2);
  const browser=await chromium.launch({channel:'msedge',headless:true});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],posts=[];
-  let state={activity:true,protection:true,locked:false,message:'状态正常，已松闸'},fail=false,confirmation=true,dialogs=0,rejectAction=false;
+  let state={activity:true,protection:true,locked:false,showUnlock:false,showStopRetry:false,message:'状态正常，已松闸'},fail=false,confirmation=true,dialogs=0,rejectAction=false;
   page.on('pageerror',e=>errors.push(e.message));
   page.on('dialog',async dialog=>{dialogs++;assert(dialog.message().includes('确认停止后抱闸'));if(confirmation)await dialog.accept();else await dialog.dismiss();});
   await page.route('http://board.test/**',async route=>{
@@ -21,7 +21,7 @@ const html=render(card,3),hiddenHtml=render(hiddenCard,2);
     if(request.method()==='POST'){
      const values=Object.fromEntries(new URLSearchParams(request.postData()));posts.push(values);
      if(fail)return route.fulfill({status:500,body:'{}',contentType:'application/json'});
-     if(values.action){if(rejectAction)return route.fulfill({status:409,body:'{}',contentType:'application/json'});state.message=values.action==='reset'?'状态正常，已松闸':'正在停止，等待确认';if(values.action==='reset')state.locked=false;}else{state[values.setting]=values.enabled==='1';if(values.setting==='protection')state.locked=true;state.message=state.protection?'已抱闸，请手动解除锁定':'正在停止，等待确认';}
+     if(values.action){if(rejectAction)return route.fulfill({status:409,body:'{}',contentType:'application/json'});state.message=values.action==='reset'?'状态正常，已松闸':'已抱闸，请手动解除锁定';state.showStopRetry=false;state.showUnlock=values.action!=='reset';if(values.action==='reset')state.locked=false;}else{state[values.setting]=values.enabled==='1';if(values.setting==='protection')state.locked=true;state.message=state.protection?'已抱闸，请手动解除锁定':'正在停止，等待确认';state.showUnlock=state.locked&&state.protection;state.showStopRetry=state.locked&&!state.protection;}
     }
     return route.fulfill({body:JSON.stringify(state),contentType:'application/json'});
    }
@@ -52,10 +52,15 @@ const html=render(card,3),hiddenHtml=render(hiddenCard,2);
   confirmation=false;await brake.click();assert.equal(posts.length,1,'取消关闭保护时不发送请求');
   confirmation=true;await brake.click();await page.waitForFunction(()=>document.getElementById('sws-io-protection').getAttribute('aria-checked')==='false');
   assert.equal(await page.locator('#sws-io-brake-state').innerText(),'正在停止，等待确认');assert.equal(dialogs,2);
+  assert.equal(await page.getByRole('button',{name:'重试停止',exact:true}).isVisible(),true);
+  assert.equal(await page.getByRole('button',{name:'解除锁定',exact:true}).isVisible(),false);
   await brake.click();await page.waitForFunction(()=>document.getElementById('sws-io-protection').getAttribute('aria-checked')==='true');
   assert.equal(await page.locator('#sws-io-brake-state').innerText(),'已抱闸，请手动解除锁定');
   assert.equal(await page.getByRole('button',{name:'解除锁定',exact:true}).isVisible(),true);
-  assert.equal(await page.getByRole('button',{name:'再次停止',exact:true}).isVisible(),true);
+  assert.equal(await page.getByRole('button',{name:'重试停止',exact:true}).isVisible(),false);
+  const buttonStyle=await page.locator('[data-action=reset]').evaluate(e=>{const s=getComputedStyle(e);return{height:s.minHeight,padding:s.padding,font:s.fontSize,color:s.backgroundColor,image:s.backgroundImage,shadow:s.boxShadow};});
+  const settingStyle=await page.locator('.sws-mount-type button').first().evaluate(e=>{const s=getComputedStyle(e);return{height:s.minHeight,padding:s.padding,font:s.fontSize,color:s.backgroundColor,image:s.backgroundImage,shadow:s.boxShadow};});
+  assert.deepEqual(buttonStyle,settingStyle,'保护按钮复用原有设置按钮的尺寸、间距、字体和配色');
   await brake.locator('..').screenshot({path:path.join(output,'board-io-locked.png')});
   fail=true;await led.click();await page.locator('[role=alert]').filter({hasText:'保存'}).waitFor();
   assert.equal(await led.getAttribute('aria-checked'),'false','保存失败不虚假切换');
@@ -66,7 +71,9 @@ const html=render(card,3),hiddenHtml=render(hiddenCard,2);
   fail=false;await led.click();await page.waitForFunction(()=>document.getElementById('sws-io-activity').getAttribute('aria-checked')==='true');
   rejectAction=true;await page.locator('[data-action=reset]').click();await page.locator('[role=alert]').filter({hasText:'暂时无法操作'}).waitFor();
   assert.deepEqual(posts.at(-1),{action:'reset'});
-  rejectAction=false;await page.locator('[data-action=retry-stop]').click();await page.waitForFunction(()=>document.getElementById('sws-io-brake-state').textContent==='正在停止，等待确认');assert.deepEqual(posts.at(-1),{action:'retry-stop'});
+  rejectAction=false;state.showUnlock=false;state.showStopRetry=true;
+  await page.evaluate(()=>{document.getElementById('sws-io-reset').dataset.selected='false';document.getElementById('sws-io-retry-stop').dataset.selected='true';});
+  await page.locator('[data-action=retry-stop]').click();await page.waitForFunction(()=>document.getElementById('sws-io-brake-state').textContent==='已抱闸，请手动解除锁定'&&!document.getElementById('sws-io-retry-stop').offsetWidth);assert.deepEqual(posts.at(-1),{action:'retry-stop'});
   await page.locator('[data-action=reset]').click();await page.waitForFunction(()=>document.getElementById('sws-io-brake-state').textContent==='状态正常，已松闸');
   assert.deepEqual(posts.at(-1),{action:'reset'});
   assert.equal(await page.locator('[data-action=reset]').isVisible(),false,'解除锁定后隐藏故障操作');

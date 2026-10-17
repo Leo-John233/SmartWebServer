@@ -746,7 +746,7 @@
 #define L_GUIDING_RATE "导星速率"
 #define L_TRACKING_SETTINGS "跟踪设置"
 #define L_IO_BRAKE_RESET "解除锁定"
-#define L_IO_BRAKE_RETRY "再次停止"
+#define L_IO_BRAKE_RETRY "重试停止"
 #define L_IO_ACTION_REJECTED "暂时无法操作，请开启保护并等待状态恢复"
 #define L_IO_FAULT_DRIVER "锁定原因：驱动故障"
 #define L_IO_FAULT_FEEDBACK "锁定原因：反馈无效"

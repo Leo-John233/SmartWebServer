@@ -18,10 +18,9 @@ const char html_board_io_styles[] PROGMEM = R"IO(
 .sws-io-control button.sws-switch[aria-checked='true']::after { transform:translateX(18px); }
 .sws-io-status { grid-column:1 / -1; padding-top:10px; border-top:1px solid var(--border); color:var(--text); font-size:14px; font-weight:400; line-height:1.6; }
 .sws-io-actions, .sws-io-fault { grid-column:1 / -1; }
-.sws-io-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.sws-controller .sws-io-actions button { min-height:36px; margin:0; padding:6px 14px; font-size:14px; }
 .sws-io-fault { color:var(--alert,#d6b786); font-size:14px; line-height:1.6; }
 .sws-io-fault:empty, .sws-io-actions[data-selected='false'] { display:none; }
+.sws-io-actions [data-selected='false'] { display:none; }
 .sws-io-error { grid-column:1 / -1; order:1; margin:0; color:var(--alert,#d6b786); font-size:14px; }
 .sws-io-error:empty { display:none; }
 .sws-mount-type { display:flex; flex-direction:column; gap:12px; }
@@ -72,6 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fault) fault.textContent = state.fault || '';
         const actions = document.getElementById('sws-io-actions');
         if (actions) actions.dataset.selected = String(state.locked);
+        buttons.filter(b => b.dataset.action).forEach((b) => {
+          b.parentElement.dataset.selected = String(b.dataset.action === 'reset' ? state.showUnlock : state.showStopRetry);
+        });
       } catch (e) {
         error.textContent = e.message === controls.dataset.notReady ? e.message : controls.dataset.error;
       } finally {
@@ -96,6 +98,6 @@ const char html_board_io_brake[] PROGMEM =
   "<div class='sws-io-control'><h3>" L_IO_BRAKE_TITLE "</h3>"
   "<button type='button' id='sws-io-protection' class='sws-switch' role='switch' aria-label=\"" L_IO_BRAKE_TITLE "\" aria-checked='%s' data-selected='%s' data-setting='protection'></button>"
   "<p>" L_IO_BRAKE_HELP "</p><div id='sws-io-brake-state' class='sws-io-status' role='status'>%s</div>"
-  "<div id='sws-io-fault' class='sws-io-fault'>%s</div><div id='sws-io-actions' class='sws-io-actions' data-selected='%s'>"
-  "<button type='button' data-action='reset'>" L_IO_BRAKE_RESET "</button>"
-  "<button type='button' data-action='retry-stop'>" L_IO_BRAKE_RETRY "</button></div></div>";
+  "<div id='sws-io-fault' class='sws-io-fault'>%s</div><div id='sws-io-actions' class='sws-io-actions sws-setting-actions' data-selected='%s'>"
+  "<span id='sws-io-reset' data-selected='%s'><button type='button' data-action='reset'>" L_IO_BRAKE_RESET "</button></span>"
+  "<span id='sws-io-retry-stop' data-selected='%s'><button type='button' data-action='retry-stop'>" L_IO_BRAKE_RETRY "</button></span></div></div>";

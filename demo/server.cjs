@@ -34,7 +34,7 @@ const server=http.createServer(async(req,res)=>{
       }
     }
     // 演示服务模拟完成停止，不连接硬件，也不会因重开开关自动解锁
-    return send(JSON.stringify({...boardIoState,message:boardIoState.locked?'已抱闸，请手动解除锁定':boardIoState.protection?'状态正常，已松闸':'保护关闭，已抱闸',fault:boardIoState.locked?'锁定原因：关闭保护':''}),'application/json; charset=utf-8');
+    return send(JSON.stringify({...boardIoState,showUnlock:boardIoState.locked,showStopRetry:false,message:boardIoState.locked?'已抱闸，请手动解除锁定':boardIoState.protection?'状态正常，已松闸':'保护关闭，已抱闸',fault:boardIoState.locked?'锁定原因：关闭保护':''}),'application/json; charset=utf-8');
   }
   if(url.pathname==='/net-wifi'){
     const action=url.searchParams.get('action');
