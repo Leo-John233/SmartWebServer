@@ -186,8 +186,15 @@ function busy() {
 }
 function autoFastRun() {}
 document.addEventListener('DOMContentLoaded', () => {
+  // 顶层窗口误开内部内容地址时回到完整入口，内嵌内容页仍保留 view 参数
+  const entry = new URL(location.href);
+  if (parent === window && entry.searchParams.has('view')) {
+    entry.searchParams.delete('view');
+    location.replace(entry.pathname + entry.search + entry.hash);
+    return;
+  }
   // 用固定标记区分演示与实机，导航和原有功能描述保持不变
-  if (!location.search.includes('view')) {
+  if (!entry.searchParams.has('view')) {
     const e = document.createElement('div');
     e.textContent = '模拟演示';
     e.style.cssText =
