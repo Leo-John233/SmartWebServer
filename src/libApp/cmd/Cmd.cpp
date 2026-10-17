@@ -3,7 +3,7 @@
 
 #include "Cmd.h"
 #include "../../locales/Locale.h"
-#include "../boardIo/CommandGate.h"
+#include "../../extensions/boardIo/CommandGate.h"
 
 int webTimeout = TIMEOUT_WEB;
 int cmdTimeout = TIMEOUT_COMMAND;

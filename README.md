@@ -13,6 +13,12 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 固件源码位于根目录和 `src/`；原版项目说明保存在 `README.upstream.md`，许可证为 `LICENSE`
 
+## 扩展维护与上游合并
+
+独立扩展统一位于 `src/extensions/`，按界面、网络、抱闸、状态与坐标功能分组。目录职责、原版接入点、已集成的上游基线和后续合并步骤见 [扩展维护说明](src/extensions/README.md)。
+
+后续原版分支更新后，先运行 `node tools/upstream-audit.cjs origin/SmartWebServer-Original`，查看双方改动交集，再进行正常三方合并。配置、翻译、卡片布局及原模块修复仍需逐段核对。
+
 ## 网页配网
 
 - 连接设备热点，进入网络页面并输入管理密码
@@ -41,7 +47,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 ## 网络负载保护
 
 - `Config.h` 中 `NETWORK_LOAD_GUARD` 默认 `ON`，`OFF` 可关闭本次新增的网络负载保护
-- ESP8266 的独立适配层位于 `src/lib/wifi/webServer/GuardedServer.h`，共用限制位于 `src/lib/wifi/NetworkBudget.h`，页面及 OnStep 命令处理函数保持独立
+- ESP8266 的独立适配层位于 `src/extensions/network/GuardedServer.h`，共用限制位于 `src/extensions/network/NetworkBudget.h`，页面及 OnStep 命令处理函数保持独立
 - 热点和局域网共用同一个网页服务，按请求依次处理，响应发送完成后主动关闭连接，不再占用服务等待浏览器断开
 - 未发送请求的连接等待最多 1 秒，读取请求头设为 1 秒超时，单次写入设为 1.5 秒超时，响应开始输出 15 秒后不再继续发送后续分段
 - 剩余堆低于 10000 字节时，新的网页请求返回 HTTP 503 和 `Retry-After: 2`，新的 TCP 命令连接关闭，本次请求不执行设备操作
@@ -128,19 +134,19 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 | 修改内容 | 维护位置，相对于 src |
 | --- | --- |
-| 暗红、灰黑配色 | `pages/ui/Palette.h` |
-| 公共布局与手机适配 | `pages/ui/Styles.h` |
-| 页面分区 HTML | `pages/ui/Layouts.h` |
-| 跟踪开关、倍率下拉框、坐标表单增强 | `pages/ui/Controls.h` |
-| 位置与限位编辑卡片、方向与时区选择、单一停放入口 | `pages/ui/Editors.h` |
-| 侧栏、手机导航与标签切换 | `pages/ui/Navigation.h` |
-| 界面资源分段输出 | `pages/ui/Presentation.cpp` |
-| Wi-Fi 样式、HTML、浏览器脚本与渲染入口 | `pages/network/ui/` |
-| Wi-Fi 配网处理与状态 | `pages/network/NetworkWifi.cpp` |
+| 暗红、灰黑配色 | `extensions/ui/Palette.h` |
+| 公共布局与手机适配 | `extensions/ui/Styles.h` |
+| 页面分区 HTML | `extensions/ui/Layouts.h` |
+| 跟踪开关、倍率下拉框、坐标表单增强 | `extensions/ui/Controls.h` |
+| 位置与限位编辑卡片、方向与时区选择、单一停放入口 | `extensions/ui/Editors.h` |
+| 侧栏、手机导航与标签切换 | `extensions/ui/Navigation.h` |
+| 界面资源分段输出 | `extensions/ui/Presentation.cpp` |
+| Wi-Fi 样式、HTML、浏览器脚本与渲染入口 | `extensions/network/ui/` |
+| Wi-Fi 配网处理与状态 | `extensions/network/NetworkWifi.cpp` |
 | 界面文字 | `locales/Strings_*.h` |
 | 各卡片内容、动态数据和设备条件 | 原来的 `pages/*/*Tile.h` 与 `*Tile.cpp` |
 
-`Appearance.h` 保留为公共界面的包含入口；原来的页面处理函数只调用界面入口或分区模板，继续读取设备状态并处理参数。选中状态使用 `data-selected`，不再根据按钮的 RGB 颜色判断。配色保留 SWS 原有的 `COLOR_*` 配置覆盖方式。
+`extensions/ui/Appearance.h` 是公共界面的包含入口；原来的页面处理函数只调用界面入口或分区模板，继续读取设备状态并处理参数。选中状态使用 `data-selected`，不再根据按钮的 RGB 颜色判断。配色保留 SWS 原有的 `COLOR_*` 配置覆盖方式。
 
 确认按钮通过 `Text.h` 将文案放在 HTML 属性中，事件从属性读取，避免语言中的单引号破坏脚本。直接嵌入脚本的语言宏使用 `SWS_JS_TEXT` 在编译时转义，不增加语言字典、运行时查询或额外接口。
 
@@ -233,12 +239,12 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 | 模块 | 职责 |
 | --- | --- |
-| src/libApp/boardIo/Policy.* | 独立状态机，只处理状态、时间、电平和人工操作，不依赖 Arduino、网页、存储或协议 |
-| src/libApp/boardIo/ProtectionPort.h | 采样和停止的抽象接口，可替换适配器，不能提交停止前的缓存作为新帧 |
-| src/libApp/boardIo/OnStepProtection.* | 解析原驱动反馈，发送 Q 和 Td，分别记录结果 |
-| src/libApp/boardIo/BoardIo.* | GPIO、任务启动、采样调度、开关设置和模块组合 |
-| src/libApp/boardIo/CommandGate.h | 串口出口统一拦截、TCP 旧连接失效通知，不依赖 GPIO 或网页 |
-| src/pages/boardIo/ | 自动锁定、手动解锁、重试停止、原因显示及独立接口 |
+| src/extensions/boardIo/Policy.* | 独立状态机，只处理状态、时间、电平和人工操作，不依赖 Arduino、网页、存储或协议 |
+| src/extensions/boardIo/ProtectionPort.h | 采样和停止的抽象接口，可替换适配器，不能提交停止前的缓存作为新帧 |
+| src/extensions/boardIo/OnStepProtection.* | 解析原驱动反馈，发送 Q 和 Td，分别记录结果 |
+| src/extensions/boardIo/BoardIo.* | GPIO、任务启动、采样调度、开关设置和模块组合 |
+| src/extensions/boardIo/CommandGate.h | 串口出口统一拦截、TCP 旧连接失效通知，不依赖 GPIO 或网页 |
+| src/extensions/boardIo/Page.*、View.h | 自动锁定、手动解锁、重试停止、原因显示及独立接口 |
 
 验证命令：
 

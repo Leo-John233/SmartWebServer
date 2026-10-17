@@ -10,7 +10,7 @@
   #if defined(ESP32)
     #include <WebServer.h>
   #elif defined(ESP8266)
-    #include "GuardedServer.h"
+    #include "../../../extensions/network/GuardedServer.h"
   #else
     #error "Configuration (Config.h): No Wifi support is present for this device"
   #endif

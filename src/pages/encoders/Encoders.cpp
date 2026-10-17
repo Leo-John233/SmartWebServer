@@ -3,7 +3,7 @@
 #include "Encoders.h"
 
 #include "../Page.h"
-#include "../ui/Layouts.h"
+#include "../../extensions/ui/Layouts.h"
 #include "../Pages.common.h"
 
 #if ENCODERS == ON

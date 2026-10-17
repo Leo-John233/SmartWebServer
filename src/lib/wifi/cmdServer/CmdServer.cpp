@@ -5,9 +5,9 @@
 
   #include "../../tasks/OnTask.h"
   #include "../../../libApp/cmd/Cmd.h"
-  #include "../../../libApp/boardIo/CommandGate.h"
-  #include "../../../libApp/boardIo/Activity.h"
-  #include "../NetworkBudget.h"
+  #include "../../../extensions/boardIo/CommandGate.h"
+  #include "../../../extensions/boardIo/Activity.h"
+  #include "../../../extensions/network/NetworkBudget.h"
 
   CmdServer::CmdServer(uint32_t port, long clientTimeoutMs, bool persist) {
     cmdSvr = nullptr;

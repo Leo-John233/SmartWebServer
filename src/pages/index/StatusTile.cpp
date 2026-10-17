@@ -6,8 +6,8 @@
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 #include "../../lib/tasks/OnTask.h"
-#include "../boardIo/BoardIo.h"
-#include "../../libApp/boardIo/BoardIo.h"
+#include "../../extensions/boardIo/Page.h"
+#include "../../extensions/boardIo/BoardIo.h"
 
 // create the related webpage tile
 void statusTile(String &data)

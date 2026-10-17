@@ -5,9 +5,9 @@
 #include "../Constants.h"
 #include "../../Config.h"
 #include "../../Extended.config.h"
-#include "ui/Presentation.h"
-#include "Request.h"
-#include "boardIo/BoardIo.h"
+#include "../extensions/ui/Presentation.h"
+#include "../extensions/web/Request.h"
+#include "../extensions/boardIo/Page.h"
 
 void handleRoot();
 void indexAjaxGet();

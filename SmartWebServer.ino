@@ -57,7 +57,7 @@ bool otaEnabled = false;
 #include "src/libApp/bleGamepad/BleGamepad.h"
 #include "src/libApp/encoders/Encoders.h"
 #include "src/libApp/status/Status.h"
-#include "src/libApp/boardIo/BoardIo.h"
+#include "src/extensions/boardIo/BoardIo.h"
 
 #include "src/pages/Pages.h"
 

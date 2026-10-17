@@ -13,7 +13,7 @@
 #define PAGE_ENCODERS 5
 #define PAGE_NETWORK 6
 
-#include "ui/Presentation.h"
+#include "../extensions/ui/Presentation.h"
 void pageHeader(int selected);
 
 const char html_onstep_header_begin[] PROGMEM = "<div class='t'><table width='100%%'><tr><td><b><font size='5'>";

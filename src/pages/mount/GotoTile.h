@@ -125,5 +125,3 @@ const char html_coordinateInput[] PROGMEM =
 "<label class='sws-coordinate-unit'><input name='dec_m' type='number' min='0' max='59' step='1' inputmode='numeric' required aria-label='" L_COORD_M "'><span aria-hidden='true'>&#8242;</span></label>"
 "<label class='sws-coordinate-unit'><input name='dec_s' type='number' min='0' max='59' step='1' inputmode='numeric' required aria-label='" L_COORD_S "'><span aria-hidden='true'>&#8243;</span></label>"
 "</div></fieldset></div><p role='status' class='sws-coordinate-message'></p></form>";
-
-extern void gotoCoordinatesGet();

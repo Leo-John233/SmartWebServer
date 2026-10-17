@@ -1,8 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Setup Network
 #include "Network.h"
-#include "NetworkWifi.h"
-#include "ui/Styles.h"
+#include "../../extensions/network/NetworkWifi.h"
+#include "../../extensions/network/ui/Styles.h"
 #include <Arduino.h>
 
 #include "../../lib/nv/Nv.h"
@@ -10,7 +10,7 @@
 #include "../../lib/wifi/WifiManager.h"
 
 #include "../Page.h"
-#include "../ui/Layouts.h"
+#include "../../extensions/ui/Layouts.h"
 #include "../Pages.common.h"
 
 extern int webTimeout;

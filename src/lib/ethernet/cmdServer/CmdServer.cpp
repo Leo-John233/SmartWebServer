@@ -5,7 +5,7 @@
 
   #include "../../tasks/OnTask.h"
   #include "../../../libApp/cmd/Cmd.h"
-  #include "../../../libApp/boardIo/CommandGate.h"
+  #include "../../../extensions/boardIo/CommandGate.h"
 
   CmdServer::CmdServer(uint32_t port, long clientTimeoutMs, bool persist) {
     cmdBuffer[0] = 0;

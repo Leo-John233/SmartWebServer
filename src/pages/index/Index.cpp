@@ -3,10 +3,10 @@
 #include "Index.h"
 
 #include "../Page.h"
-#include "../ui/Layouts.h"
+#include "../../extensions/ui/Layouts.h"
 #include "../Pages.common.h"
-#include "../boardIo/BoardIo.h"
-#include "../../libApp/boardIo/BoardIo.h"
+#include "../../extensions/boardIo/Page.h"
+#include "../../extensions/boardIo/BoardIo.h"
 
 void processIndexGet();
 

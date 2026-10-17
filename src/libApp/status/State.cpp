@@ -3,7 +3,7 @@
 
 #include "../../lib/tasks/OnTask.h"
 #include "../../libApp/cmd/Cmd.h"
-#include "../boardIo/BoardIo.h"
+#include "../../extensions/boardIo/BoardIo.h"
 
 void pollState() { state.poll(); }
 void pollStateSlow() { state.pollSlow(); }

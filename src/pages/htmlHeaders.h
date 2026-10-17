@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Pages.common.h"
-#include "ui/Palette.h"
-#include "ui/Text.h"
+#include "../extensions/ui/Palette.h"
+#include "../extensions/ui/Text.h"
 
 const char html_head_begin[] PROGMEM = "<!DOCTYPE HTML>\n"
                                   "<html>\n"
