@@ -17,6 +17,14 @@ static bool readBoardSetting(const char *key, uint8_t &value) {
   return nv().kv().put(key, value) == KvPartition::Status::Ok;
 }
 
+static bool writeBoardFault(uint8_t fault) {
+  if (nv().kv().put("RA_BRAKE_FAULT", fault) != KvPartition::Status::Ok) return false;
+  // 故障记录不能等待后台延迟写入，提交成功并读回一致才算保存完成
+  if (nv().active().commit() != NvDevice::IoStatus::Ok || !nv().active().commitDone()) return false;
+  uint8_t stored = 0;
+  return nv().kv().get("RA_BRAKE_FAULT", stored) == KvPartition::Status::Ok && stored == fault;
+}
+
 void BoardIo::initPins() {
   SwsCommandGate::permit() = boardMotionAllowed;
   if (brakeAvailable()) SwsCommandGate::setLocked(true);
@@ -38,10 +46,13 @@ void BoardIo::begin() {
   policy_.configure(settings & 1, brakeAvailable() && (settings & 2), millis());
   if (brakeAvailable()) {
     uint8_t fault = 0;
-    const bool faultOk = readBoardSetting("RA_BRAKE_FAULT", fault) && fault <= uint8_t(BrakeFault::Storage);
+    // 缺失或损坏的记录一律锁定，不能用无故障默认值覆盖
+    const bool faultOk = nv().kv().get("RA_BRAKE_FAULT", fault) == KvPartition::Status::Ok &&
+                         fault <= uint8_t(BrakeFault::Storage);
+    const bool committed = nv().active().commit() == NvDevice::IoStatus::Ok && nv().active().commitDone();
     savedFault_ = fault;
-    policy_.restoreFault(settingsOk && faultOk ? BrakeFault(fault) : BrakeFault::Storage);
-    faultSaved_ = settingsOk && faultOk;
+    faultSaved_ = settingsOk && faultOk && committed;
+    policy_.restoreFault(faultSaved_ ? BrakeFault(fault) : BrakeFault::Storage);
   }
   #if SWS_ACTIVITY_LED_PIN != OFF
     digitalWrite(SWS_ACTIVITY_LED_PIN, HIGH);
@@ -72,7 +83,7 @@ void BoardIo::tick() {
       // 每次事件只保存一次；存储失败最多每秒重试，不重复发送停止命令
       if (faultSaved_ || uint32_t(now - saveAttemptAt_) >= 1000) {
         saveAttemptAt_ = now;
-        faultSaved_ = nv().kv().put("RA_BRAKE_FAULT", fault) == KvPartition::Status::Ok;
+        faultSaved_ = writeBoardFault(fault);
         if (faultSaved_) savedFault_ = fault;
       }
     }
@@ -138,10 +149,16 @@ bool BoardIo::resetFault() {
   tick();
   if (!policy_.resetEligible(millis())) return false;
   servicing_ = true;
-  const bool saved = nv().kv().put("RA_BRAKE_FAULT", uint8_t(0)) == KvPartition::Status::Ok;
+  const bool saved = writeBoardFault(0);
   const bool reset = saved && status.onStepFound && status.mountFound == SD_TRUE && policy_.resetFault(millis());
   if (reset) { savedFault_ = 0; faultSaved_ = true; }
-  else if (saved) { faultSaved_ = false; } // 写入期间条件失效，需要重新保存故障
+  else {
+    // 提交失败或写入期间条件失效时立即恢复故障，避免后台保存清除值
+    saveAttemptAt_ = millis();
+    const uint8_t fault = uint8_t(policy_.faultReason());
+    faultSaved_ = writeBoardFault(fault);
+    if (faultSaved_) savedFault_ = fault;
+  }
   servicing_ = false;
   tick();
   return reset;
@@ -161,6 +178,7 @@ bool BoardIo::save(bool activity, bool protection) {
     policy_.configure(policy_.activityEnabled(), false, millis());
     tick();
   }
+  if (brakeAvailable() && !protection && !faultSaved_) return false;
   const uint8_t settings = (activity ? 1 : 0) | (protection ? 2 : 0);
   if (nv().kv().put("BOARD_IO_SETTINGS", settings) != KvPartition::Status::Ok) return false;
   policy_.configure(activity, protection, millis());
