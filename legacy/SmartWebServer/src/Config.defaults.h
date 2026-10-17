@@ -8,7 +8,7 @@
 // MDNS_NAME              the name mDNS (Multicast DNS) clients see for IP address resolution
 // AP_SSID                the SSID WiFi clients see when the ESP WiFi Soft Access Point is enabled
 #ifndef HOST_NAME
-#define HOST_NAME                      "OnStep-SWS"
+#define HOST_NAME                    "OnStep-SWS"
 #endif
 
 #ifndef OPERATIONAL_MODE
