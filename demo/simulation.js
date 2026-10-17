@@ -210,11 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       demoText('sws-io-brake-state',settings.message);
       demoText('sws-io-fault',settings.fault||'');
-      const actions=document.getElementById('sws-io-actions');
-      if(actions)actions.dataset.selected=String(settings.locked);
-      const unlock=document.getElementById('sws-io-reset'),retry=document.getElementById('sws-io-retry-stop');
-      if(unlock)unlock.dataset.selected=String(settings.showUnlock);
-      if(retry)retry.dataset.selected=String(settings.showStopRetry);
+      const retry=document.getElementById('sws-io-retry-stop');
+      if(retry)retry.dataset.selected=String(settings.locked&&settings.showStopRetry);
     }).catch(()=>{});
   for (const [id, value] of Object.entries({
     last_err: '无',

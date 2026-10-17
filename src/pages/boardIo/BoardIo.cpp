@@ -41,10 +41,10 @@ void boardIoTile(String &data) {
   }
   if (boardIo.brakeAvailable()) {
     const char *enabled = boardIo.policy().protectionEnabled() ? "true" : "false";
-    const char *locked = boardIo.policy().faultReason() != BrakeFault::None ? "true" : "false";
+    const bool locked = boardIo.policy().faultReason() != BrakeFault::None;
     const bool released = boardIo.policy().releaseBrake();
-    snprintf_P(buffer, sizeof(buffer), html_board_io_brake, enabled, enabled, brakeMessage(), faultMessage(), locked,
-               released ? "false" : "true", released ? "true" : "false");
+    snprintf_P(buffer, sizeof(buffer), html_board_io_brake, enabled, enabled, brakeMessage(), faultMessage(),
+               locked && released ? "true" : "false");
     data.concat(buffer);
   }
   data.concat(F("<p class='sws-io-error' role='alert'></p></section>"));
@@ -62,12 +62,8 @@ void boardIoTileAjax(String &data) {
     data.concat(brakeMessage());
     data.concat("\n");
     data.concat(F("sws-io-fault|")); data.concat(faultMessage()); data.concat("\n");
-    data.concat(F("sws-io-actions|"));
-    data.concat(boardIo.policy().faultReason() != BrakeFault::None ? "selected\n" : "unselected\n");
-    data.concat(F("sws-io-reset|"));
-    data.concat(boardIo.policy().releaseBrake() ? "unselected\n" : "selected\n");
     data.concat(F("sws-io-retry-stop|"));
-    data.concat(boardIo.policy().releaseBrake() ? "selected\n" : "unselected\n");
+    data.concat(boardIo.policy().faultReason() != BrakeFault::None && boardIo.policy().releaseBrake() ? "selected\n" : "unselected\n");
   }
 }
 

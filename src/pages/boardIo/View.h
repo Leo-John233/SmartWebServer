@@ -21,6 +21,11 @@ const char html_board_io_styles[] PROGMEM = R"IO(
 .sws-io-fault { color:var(--alert,#d6b786); font-size:14px; line-height:1.6; }
 .sws-io-fault:empty, .sws-io-actions[data-selected='false'] { display:none; }
 .sws-io-actions [data-selected='false'] { display:none; }
+.sws-io-auto { display:flex; align-items:center; justify-self:end; gap:10px; white-space:nowrap; font-size:14px; }
+.sws-io-control .sws-io-auto button.sws-switch { min-height:26px; padding:3px; }
+.sws-io-status-row { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:12px; border-top:1px solid var(--border); }
+.sws-io-status-row .sws-io-status { min-width:0; padding:0; border:0; overflow-wrap:anywhere; }
+.sws-io-status-row .sws-setting-actions { flex-shrink:0; margin:0; }
 .sws-io-error { grid-column:1 / -1; order:1; margin:0; color:var(--alert,#d6b786); font-size:14px; }
 .sws-io-error:empty { display:none; }
 .sws-mount-type { display:flex; flex-direction:column; gap:12px; }
@@ -29,6 +34,7 @@ const char html_board_io_styles[] PROGMEM = R"IO(
 .sws-controller .sws-setting-actions button { min-height:36px; margin:0; padding:6px 14px; font-size:14px; }
 .sws-setting-actions button[name='revert'] { background:#333; }
 @media(max-width:800px) { .sws-controller-settings { grid-template-columns:minmax(0,1fr); gap:10px; } .sws-io-control, .sws-mount-type { padding:16px; } }
+@media(max-width:380px) { .sws-io-control { column-gap:10px; } .sws-io-auto { gap:6px; font-size:13px; } }
 </style>
 )IO";
 
@@ -69,11 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (status) status.textContent = state.message;
         const fault = document.getElementById('sws-io-fault');
         if (fault) fault.textContent = state.fault || '';
-        const actions = document.getElementById('sws-io-actions');
-        if (actions) actions.dataset.selected = String(state.locked);
-        buttons.filter(b => b.dataset.action).forEach((b) => {
-          b.parentElement.dataset.selected = String(b.dataset.action === 'reset' ? state.showUnlock : state.showStopRetry);
-        });
+        const retry = document.getElementById('sws-io-retry-stop');
+        if (retry) retry.dataset.selected = String(state.locked && state.showStopRetry);
       } catch (e) {
         error.textContent = e.message === controls.dataset.notReady ? e.message : controls.dataset.error;
       } finally {
@@ -96,8 +99,10 @@ const char html_board_io_activity[] PROGMEM =
   "<p>" L_IO_ACTIVITY_HELP "</p></div>";
 const char html_board_io_brake[] PROGMEM =
   "<div class='sws-io-control'><h3>" L_IO_BRAKE_TITLE "</h3>"
-  "<button type='button' id='sws-io-protection' class='sws-switch' role='switch' aria-label=\"" L_IO_BRAKE_TITLE "\" aria-checked='%s' data-selected='%s' data-setting='protection'></button>"
-  "<p>" L_IO_BRAKE_HELP "</p><div id='sws-io-brake-state' class='sws-io-status' role='status'>%s</div>"
-  "<div id='sws-io-fault' class='sws-io-fault'>%s</div><div id='sws-io-actions' class='sws-io-actions sws-setting-actions' data-selected='%s'>"
-  "<span id='sws-io-reset' data-selected='%s'><button type='button' data-action='reset'>" L_IO_BRAKE_RESET "</button></span>"
-  "<span id='sws-io-retry-stop' data-selected='%s'><button type='button' data-action='retry-stop'>" L_IO_BRAKE_RETRY "</button></span></div></div>";
+  "<label class='sws-io-auto'><span>" L_IO_BRAKE_AUTO "</span>"
+  "<button type='button' id='sws-io-protection' class='sws-switch' role='switch' aria-label=\"" L_IO_BRAKE_AUTO "\" aria-checked='%s' data-selected='%s' data-setting='protection'></button></label>"
+  "<p>" L_IO_BRAKE_HELP "</p><div class='sws-io-status-row'>"
+  "<div id='sws-io-brake-state' class='sws-io-status' role='status'>%s</div>"
+  "<div class='sws-setting-actions'><button type='button' data-action='manual-unlock'>" L_IO_BRAKE_MANUAL "</button></div></div>"
+  "<div id='sws-io-fault' class='sws-io-fault'>%s</div>"
+  "<div id='sws-io-retry-stop' class='sws-io-actions sws-setting-actions' data-selected='%s'><button type='button' data-action='retry-stop'>" L_IO_BRAKE_RETRY "</button></div></div>";
