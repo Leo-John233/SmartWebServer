@@ -110,6 +110,8 @@ class WifiManager {
     // 保留网页配网的状态，避免上游重连任务同时修改连接
     bool networkBusy = false;
     bool webManaged = false;
+    // 保留上电时的 STA 意图，即使启动失败后临时切回热点也能恢复已保存网络。
+    bool stationEnabledAtBoot = false;
 
     WifiSettings settings = {
       PASSWORD_DEFAULT,

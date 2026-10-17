@@ -200,6 +200,8 @@ void WifiManager::readSettings() {
     }
   #endif
 
+  stationEnabledAtBoot = settings.stationEnabled;
+
   #if DEBUG != OFF
     IPAddress ap_ip = IPAddress(settings.ap.ip);
     IPAddress ap_gw = IPAddress(settings.ap.gw);

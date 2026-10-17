@@ -59,6 +59,14 @@ const html='<meta charset="utf-8">'+t['network/NetworkWifi.h'].html_network_css+
   await page.evaluate(()=>{sim.statusError=false;sim.state.connecting=false;dispatchEvent(new Event('online'));});await page.clock.runFor(50);
   assert.equal(await page.locator('#nw-manual').isEnabled(),true);
   assert(await page.evaluate(()=>sim.calls.every(x=>x==='status'||x==='scan')),'所有恢复操作都没有重发连接命令');
+  // 后台重连不锁住配网入口，用户操作可发出；手动连接仍防止重复提交。
+  await page.evaluate(()=>{sim.state.connecting=true;sim.state.background=true;swsResumePolling();});await page.clock.runFor(50);
+  assert.equal(await page.locator('#nw-manual').isEnabled(),true);
+  assert.equal(await page.locator('#nw-scan').isEnabled(),true);
+  await page.locator('#nw-scan').click();await page.clock.runFor(100);
+  assert.equal(await page.evaluate(()=>sim.calls.at(-1)),'status');
+  await page.evaluate(()=>{sim.state.background=false;swsResumePolling();});await page.clock.runFor(50);
+  assert.equal(await page.locator('#nw-manual').isDisabled(),true);
   assert.deepEqual(errors,[]);
   console.log('PASS: slow scan deadline, single read, duplicate clicks, hidden/navigation pause, reconnect and unlock after status failure');
  }finally{await browser.close();}

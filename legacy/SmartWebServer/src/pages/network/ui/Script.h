@@ -28,6 +28,24 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     listKey = '',
     enableDraft = false;
   const reads = new Set();
+  // 只在本页面内保留最近提交的输入，避免失败后重填，不写入浏览器持久存储。
+  const passwordDrafts = new Map();
+  function rememberDraft(ssid, password) {
+    passwordDrafts.delete(ssid);
+    if (password) passwordDrafts.set(ssid, password);
+    if (passwordDrafts.size > 4) passwordDrafts.delete(passwordDrafts.keys().next().value);
+  }
+  function passwordState(restore = false) {
+    const input = $('nw-password'), ssid = sta.elements.ssid.value, open = sta.elements.open.checked;
+    const saved = current && ssid === current.sta.ssid && !current.sta.open && current.sta.remembered !== false;
+    const draft = open ? '' : passwordDrafts.get(ssid) || '';
+    if (restore) input.value = draft;
+    input.required = !open && !saved;
+    input.placeholder = saved ? )NET" SWS_JS_TEXT(L_UI_SAVED_PASSWORD) R"NET( : )NET" SWS_JS_TEXT(L_UI_PASSWORD_PROMPT) R"NET(;
+    const note = $('nw-password-note');
+    note.textContent = draft && input.value === draft ? )NET" SWS_JS_TEXT(L_UI_PASSWORD_RETRY) R"NET( : saved ? )NET" SWS_JS_TEXT(L_UI_PASSWORD_REMEMBERED) R"NET( : '';
+    note.hidden = open || !note.textContent;
+  }
   function scheduleStatus(delay = 2500) {
     clearTimeout(statusTimer);
     if (!paused && !document.hidden) statusTimer = setTimeout(status, delay);
@@ -157,7 +175,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       .filter((n) => !current.connected || n.ssid !== current.ssid)
       .forEach((n) => $('nw-results').appendChild(row(n, false)));
   }
-  // 弹窗按所选网络初始化，取消不会改变连接，密码也不会留到下次打开
+  // 已保存密码由设备复用；提交失败的输入可在本页面再次打开同一网络时恢复。
   function openNetwork(n, manual) {
     if (!loaded || working || scanning) return;
     fields(sta, current.sta);
@@ -176,10 +194,8 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       : manual
         ? )NET" SWS_JS_TEXT(L_UI_MANUAL_NOTE) R"NET(
         : n.rssi + ' dBm';
-    $('nw-password').value = '';
     $('nw-password').type = 'password';
-    $('nw-password').placeholder = same ? )NET" SWS_JS_TEXT(L_UI_SAVED_PASSWORD) R"NET( : )NET" SWS_JS_TEXT(L_UI_PASSWORD_PROMPT) R"NET(;
-    $('nw-password').required = !(same && !current.sta.open) && !sta.elements.open.checked;
+    passwordState(true);
     $('nw-password').minLength = 8;
     $('nw-show').textContent = )NET" SWS_JS_TEXT(L_UI_SHOW) R"NET(;
     $('nw-show').setAttribute('aria-pressed', 'false');
@@ -206,6 +222,8 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       const s = await api('status');
       if (ticket !== revision || paused) return;
       current = s;
+      if (s.sta.enabled) enableDraft = false;
+      if (s.connected && !s.connecting && !s.pending) passwordDrafts.delete(s.ssid);
       if (!loaded) {
         fields(ap, s.ap);
         loaded = true;
@@ -237,7 +255,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
            (s.message || '').startsWith()NET" SWS_JS_TEXT(L_UI_CONNECTED_ADDRESS) R"NET());
         message(connectionShown ? '' : (s.message || ''), s.failed, s.messageTarget === 'ap' ? 'ap' : 'sta');
       }
-      lock(s.connecting || s.pending);
+      lock((s.connecting && !s.background) || s.pending);
       if (!autoScanned && s.sta.enabled && !working) {
         autoScanned = true;
         startScan();
@@ -300,10 +318,11 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   $('nw-manual').onclick = () => openNetwork(null, true);
   $('nw-security').onchange = () => {
     sta.elements.open.checked = $('nw-security').value === 'open';
-    $('nw-password').required = !sta.elements.open.checked;
     $('nw-password').value = '';
+    passwordState();
     sync();
   };
+  sta.elements.ssid.addEventListener('input', () => passwordState());
   sta.addEventListener('change', sync);
   $('nw-show').onclick = () => {
     const show = $('nw-password').type === 'password';
@@ -311,18 +330,18 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     $('nw-show').textContent = show ? )NET" SWS_JS_TEXT(L_UI_HIDE) R"NET( : )NET" SWS_JS_TEXT(L_UI_SHOW) R"NET(;
     $('nw-show').setAttribute('aria-pressed', String(show));
   };
-  // 关闭连接要确认，开启时先展示列表，选好网络后才发送连接请求
+  // 关闭连接要确认；重新开启时复用已验证的网络，没有已知网络才等待选择。
   $('nw-enabled').onchange = async () => {
     enableDraft = $('nw-enabled').checked;
-    if (enableDraft) {
+    if (enableDraft && !current.sta.known) {
       startScan();
       return;
     }
-    if (!current.sta.enabled) {
+    if (!enableDraft && !current.sta.enabled) {
       sync();
       return;
     }
-    if (!confirm()NET" SWS_JS_TEXT(L_UI_DISCONNECT_CONFIRM) R"NET()) {
+    if (!enableDraft && !confirm()NET" SWS_JS_TEXT(L_UI_DISCONNECT_CONFIRM) R"NET()) {
       $('nw-enabled').checked = true;
       return;
     }
@@ -331,7 +350,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     try {
       const p = {
         ...current.sta,
-        enabled: '0',
+        enabled: enableDraft ? '1' : '0',
         open: current.sta.open ? '1' : '0',
         dhcp: current.sta.dhcp ? '1' : '0',
         password: '',
@@ -339,7 +358,8 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       const r = await api('connect', p);
       message(r.message);
     } catch (e) {
-      $('nw-enabled').checked = true;
+      enableDraft = false;
+      $('nw-enabled').checked = current.sta.enabled;
       message(e.message, true);
     } finally {
       submitting = false;
@@ -358,6 +378,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       ['enabled', 'dhcp', 'open'].forEach((k) => {
         if (form.elements[k]) p[k] = form.elements[k].checked ? '1' : '0';
       });
+      if (action === 'connect' && p.open !== '1' && p.password) rememberDraft(p.ssid, p.password);
       submitting = true;
       lock(true);
       $('nw-dialog-error').textContent = '';
@@ -395,7 +416,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) window.swsPausePolling(); else window.swsResumePolling();
   });
-  window.addEventListener('pagehide', window.swsPausePolling);
+  window.addEventListener('pagehide', () => { passwordDrafts.clear(); window.swsPausePolling(); });
   window.addEventListener('pageshow', () => { if (!paused) return; window.swsResumePolling(); });
   window.addEventListener('online', () => { if (!paused) status(); });
   sync(); status();

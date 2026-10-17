@@ -68,7 +68,7 @@ state.rssi=-55;networks.splice(originalCount);
 // 刷新使用真实扫描流程，预览截图去除用于安全测试的特殊名称
 includeHostile=false;const scansBefore=scans;await page.locator('#nw-scan').click();await page.waitForFunction(()=>document.querySelectorAll('#nw-results button').length===2);assert(scans>scansBefore);
 await page.screenshot({path:path.join(output,'network-desktop.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list.png')});await account.screenshot({path:path.join(output,'network-account-desktop.png')});
-await page.locator('#nw-current button').click();assert.equal(await page.locator('#nw-sta-ip').innerText(),'192.168.1.55');assert.equal(await page.locator('#nw-connect').innerText(),'保存设置');await page.locator('#nw-cancel').click();assert.equal(submissions,0);
+await page.locator('#nw-current button').click();assert.equal(await page.locator('#nw-sta-ip').innerText(),'192.168.1.55');assert.equal(await page.locator('#nw-connect').innerText(),'保存设置');assert.equal(await page.locator('#nw-password').getAttribute('maxlength'),'63');assert.equal(await page.locator('#nw-password').evaluate(e=>e.required),false,'已保存网络可留空复用密码');assert((await page.locator('#nw-password-note').innerText()).includes('记住'),'明确提示设备已记住密码');await page.locator('#nw-cancel').click();assert.equal(submissions,0);
 // 点选只打开密码窗口，取消后保持原连接且清除密码
 await page.getByRole('button',{name:/Observatory/}).click();assert.equal(await page.locator('#nw-dialog').isVisible(),true);assert.equal(await page.locator('#nw-ssid').inputValue(),'Observatory');assert.equal(submissions,0);
 await page.locator('#nw-password').fill('test-only-pass');await page.locator('#nw-show').click();assert.equal(await page.locator('#nw-password').getAttribute('type'),'text');await page.locator('#nw-show').click();assert.equal(await page.locator('#nw-password').getAttribute('type'),'password');
@@ -85,7 +85,7 @@ state.connecting=false;state.failed=true;state.message='没有连上 Wi-Fi，请
 await page.waitForFunction(()=>!document.querySelector('#nw-enabled').disabled&&document.querySelector('#nw-message').classList.contains('nw-error'));
 assert.equal(await page.locator('#nw-ap-ip').innerText(),'192.168.0.1','失败后保留热点访问入口');
 assert.equal(await page.locator('#nw-manual').isEnabled(),true,'异步失败后允许重新输入');
-delayedConnect=false;await page.getByRole('button',{name:/^Home Wi-Fi /}).click();await page.locator('#nw-password').fill('correct-password');await page.locator('#nw-connect').click();
+delayedConnect=false;await page.getByRole('button',{name:/^Home Wi-Fi /}).click();assert.equal(await page.locator('#nw-password').inputValue(),'wrong-password','异步失败后重新选择同一网络，恢复上次提交的输入');assert((await page.locator('#nw-password-note').innerText()).includes('保留'));assert.equal(await page.locator('#nw-password').getAttribute('type'),'password');await page.locator('#nw-password').fill('correct-password');await page.locator('#nw-connect').click();
 await page.waitForFunction(()=>!document.querySelector('#nw-dialog').open&&document.querySelector('#nw-current').textContent.includes('Home Wi-Fi'));
 assert.equal(submitted.get('password'),'correct-password');
 // 开放网络直接显示确认提示，不出现密码框或容易误解的复选框
@@ -99,6 +99,12 @@ page.once('dialog',d=>d.dismiss());await page.locator('#nw-enabled').click();ass
 page.once('dialog',d=>d.accept());await page.locator('#nw-enabled').uncheck();await page.waitForFunction(()=>!document.querySelector('#nw-enabled').disabled&&!document.querySelector('#nw-enabled').checked);assert.equal(submitted.get('enabled'),'0');assert.equal(await page.locator('#nw-access').isVisible(),false);
 const beforeEnable=scans;await page.locator('#nw-enabled').check();await page.waitForFunction(()=>!document.querySelector('#nw-scan').disabled);assert(scans>beforeEnable,'打开开关自动搜索');await page.waitForTimeout(2800);assert.equal(await page.locator('#nw-enabled').isChecked(),true);
 scanFailure=true;await page.locator('#nw-scan').click();await page.waitForFunction(()=>document.querySelector('#nw-scan-state').textContent.includes('搜索失败'));assert.equal(await page.locator('#nw-scan').isDisabled(),false);scanFailure=false;await page.locator('#nw-scan').click();await page.waitForFunction(()=>!document.querySelector('#nw-scan').disabled);
+// 已知网络关闭后重新打开，直接复用设备密码，不再要求重新输入。
+state.sta.known=true;
+await page.waitForTimeout(2800);
+page.once('dialog',d=>d.accept());await page.locator('#nw-enabled').uncheck();await page.waitForFunction(()=>!document.querySelector('#nw-enabled').disabled&&!document.querySelector('#nw-enabled').checked);
+const beforeKnownEnable=submissions;await page.locator('#nw-enabled').check();await page.waitForFunction(()=>!document.querySelector('#nw-enabled').disabled);
+assert.equal(submissions,beforeKnownEnable+1);assert.equal(submitted.get('enabled'),'1');assert.equal(submitted.get('password'),'');assert.equal(await page.locator('#nw-dialog').isVisible(),false);
 // 使用已连接状态生成手机预览，弹窗单独截图
 state.connected=true;state.sta.enabled=true;state.sta.ssid=state.ssid='Home Wi-Fi';state.sta.open=false;state.message='';await page.waitForFunction(()=>document.querySelector('#nw-current').textContent.includes('Home Wi-Fi'));
 await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(output,'network-mobile.png'),fullPage:true});await page.locator('#nw-sta-card').screenshot({path:path.join(output,'network-list-mobile.png')});await account.screenshot({path:path.join(output,'network-account-mobile.png')});

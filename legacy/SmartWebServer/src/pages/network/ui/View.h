@@ -46,9 +46,9 @@ const char html_network_wifi[] PROGMEM = R"NET(
  R"NET(</option></select></div>
 <div id="nw-password-fields"><label for="nw-password">)NET"
  L_UI_PASSWORD
- R"NET(</label><div class="nw-password-line"><input id="nw-password" name="password" type="password" maxlength="31" autocomplete="new-password"><button type="button" id="nw-show" aria-pressed="false">)NET"
+ R"NET(</label><div class="nw-password-line"><input id="nw-password" name="password" type="password" maxlength="63" autocomplete="current-password" aria-describedby="nw-password-note"><button type="button" id="nw-show" aria-pressed="false">)NET"
  L_UI_SHOW
- R"NET(</button></div></div>
+ R"NET(</button></div><p id="nw-password-note" class="nw-note" hidden></p></div>
 <p id="nw-open-note" class="nw-note" hidden>)NET"
  L_UI_OPEN_NOTE
  R"NET(</p>
