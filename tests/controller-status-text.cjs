@@ -1,6 +1,6 @@
 const output = require('./test-output.cjs');
 const fs = require('node:fs'), path = require('node:path'), cp = require('node:child_process');
-const root = path.join(__dirname, '../SmartWebServer/src');
+const root = path.join(__dirname, '../src');
 const original = fs.readFileSync(path.join(root, 'libApp/status/StateController.cpp'), 'utf8');
 const work = fs.mkdtempSync(path.join(output, 'controller-text-'));
 const begin = original.indexOf('static void appendControllerText(');

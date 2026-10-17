@@ -3,7 +3,7 @@ const fs = require('node:fs'),
   path = require('node:path'),
   cp = require('node:child_process'),
   assert = require('node:assert/strict');
-const root = path.join(__dirname, '../SmartWebServer'),
+const root = path.join(__dirname, '..'),
   ref = '193a81809f5b19b3afa2a8c58f18291c2f0b0475',
   read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const git = (p) =>

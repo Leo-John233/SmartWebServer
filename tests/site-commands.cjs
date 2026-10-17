@@ -1,6 +1,6 @@
 const output = require('./test-output.cjs');
 const fs = require('node:fs'), path = require('node:path'), cp = require('node:child_process');
-const read = file => fs.readFileSync(path.join(__dirname, '../SmartWebServer/src/pages/mount', file), 'utf8');
+const read = file => fs.readFileSync(path.join(__dirname, '../src/pages/mount', file), 'utf8');
 const site = read('SiteTile.cpp'), limits = read('LimitsTile.cpp');
 const code = `
 #include <string>

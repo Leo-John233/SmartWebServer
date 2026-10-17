@@ -1,7 +1,7 @@
 const output=require('./test-output.cjs');
 const path=require('node:path'),assert=require('node:assert/strict');
-const {chromium}=require('../../webui/node_modules/playwright');
-const root=path.join(__dirname,'../SmartWebServer');
+const {chromium}=require('playwright');
+const root=path.join(__dirname,'..');
 const templates=require('./page-templates.cjs')(root);
 const card=require('./board-io-backend.cjs')({preview:true});
 const hiddenCard=require('./board-io-backend.cjs')({preview:true,brakeEnabled:false});

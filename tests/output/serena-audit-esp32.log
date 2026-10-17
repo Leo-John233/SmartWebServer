@@ -1,9 +1,0 @@
-C:\Users\Leo\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14-cn\cores\esp32\esp32-hal-uart.c: In function 'uartSetPins':
-C:\Users\Leo\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14-cn\cores\esp32\esp32-hal-uart.c:153:9: warning: 'return' with no value, in function returning non-void
-         return;
-         ^~~~~~
-C:\Users\Leo\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14-cn\cores\esp32\esp32-hal-uart.c:149:6: note: declared here
- bool uartSetPins(uint8_t uart_num, int8_t rxPin, int8_t txPin, int8_t ctsPin, int8_t rtsPin)
-      ^~~~~~~~~~~
-Sketch uses 1224165 bytes (93%) of program storage space. Maximum is 1310720 bytes.
-Global variables use 53044 bytes (16%) of dynamic memory, leaving 274636 bytes for local variables. Maximum is 327680 bytes.

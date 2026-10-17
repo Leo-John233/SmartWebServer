@@ -1,7 +1,7 @@
 const output = require('./test-output.cjs');
 const fs = require('node:fs'), path = require('node:path'), cp = require('node:child_process');
 const assert = require('node:assert/strict');
-const root = path.join(__dirname,'../SmartWebServer');
+const root = path.join(__dirname,'..');
 const clean = (file) => fs.readFileSync(path.join(root,'src',file),'utf8').replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
 
 // 编译实际策略、GPIO 适配器和设置接口；只替换串口、引脚、时钟和存储。

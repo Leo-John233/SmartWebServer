@@ -1,6 +1,6 @@
 const output=require('./test-output.cjs');
 const fs=require('fs'),path=require('path'),cp=require('child_process');
-const root=path.join(__dirname,'../SmartWebServer/src');
+const root=path.join(__dirname,'../src');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const command=read('libApp/cmd/Cmd.cpp');
 const mount=read('pages/mount/Mount.cpp');

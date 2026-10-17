@@ -4,9 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const cp = require('node:child_process');
 const assert = require('node:assert/strict');
-const {chromium} = require('../../webui/node_modules/playwright');
+const {chromium} = require('playwright');
 
-const root = path.join(__dirname, '../SmartWebServer/src');
+const root = path.join(__dirname, '../src');
 const folder = path.join(root, 'locales');
 const files = fs.readdirSync(folder).filter(file => /^Strings_\w+\.h$/.test(file));
 const source = file => fs.readFileSync(path.join(folder, file), 'utf8');

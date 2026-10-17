@@ -1,7 +1,7 @@
 const testOutput = require('./test-output.cjs');
 // 验证真实辅助页的四类通道、原有接口、滑块转换和窄屏布局
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const {chromium}=require('../../webui/node_modules/playwright');
+const {chromium}=require('playwright');
 const preview=require('./auxiliary-page.cjs')(),device=require('../demo/auxiliary.cjs')(preview);
 const original=require('./auxiliary-page.cjs')({sourceRef:'193a81809f5b19b3afa2a8c58f18291c2f0b0475'});
 const entries=text=>Object.fromEntries(text.trim().split('\n').map(line=>{const split=line.indexOf('|');return [line.slice(0,split),line.slice(split+1).trim()];}));
@@ -13,7 +13,7 @@ assert(command({x4v3:'9'})===false,'拍摄间隔范围限制');
 assert(command({x2v1:'256'})===false,'输出范围限制');
 assert(command({x1v1:'0',x2v1:'255',x3v2:'4',x3v3:'8',x4v2:'86',x4v3:'26',x4v4:'20'}));
 let state=entries(device.poll());assert.equal(state.sw1_off,'selected');assert.equal(state.x2v1,'100');assert.equal(state.x3v2,'2.0');assert.equal(state.x3v3,'4.0');assert.equal(state.x4v2,'30');assert.equal(state.x4v3,'5.00');assert.equal(state.x4v4,'20');
-const appearance=require('./page-templates.cjs')(path.join(__dirname,'../SmartWebServer'))['Appearance.h'].html_shared_appearance;
+const appearance=require('./page-templates.cjs')(path.join(__dirname,'..'))['Appearance.h'].html_shared_appearance;
 const out=process.argv[2]||testOutput;fs.mkdirSync(out,{recursive:true});
 (async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
  const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[],requests=[];page.on('pageerror',e=>errors.push(e.stack));

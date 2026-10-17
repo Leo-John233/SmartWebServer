@@ -2,7 +2,7 @@ const testOutput = require('./test-output.cjs');
 // 运行真实设备卡片，避免模拟页面跳过状态读数和设备条件
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 module.exports=({kind='focuser',version=10,count=2,derotator=true}={})=>{
-  const root=path.join(__dirname,'../SmartWebServer/src'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+  const root=path.join(__dirname,'../src'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
   const clean=s=>s.replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
   const focus=kind==='focuser',tiles=focus?['Select','Slewing','Home','BacklashTcf']:['Slewing','Home','Backlash','DeRotator'];
   let code=`#include <string>

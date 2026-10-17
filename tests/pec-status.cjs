@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const cp = require('node:child_process');
 const source = fs.readFileSync(
-  path.join(__dirname, '../SmartWebServer/src/pages/mount/PecTile.cpp'),
+  path.join(__dirname, '../src/pages/mount/PecTile.cpp'),
   'utf8',
 );
 const begin = source.indexOf('void pecTileAjax(String &data)');

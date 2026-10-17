@@ -1,7 +1,7 @@
 const output=require('./test-output.cjs');
 const path=require('path'),assert=require('assert/strict');
-const {chromium}=require('../../webui/node_modules/playwright');
-const t=require('./page-templates.cjs')(path.join(__dirname,'../SmartWebServer'));
+const {chromium}=require('playwright');
+const t=require('./page-templates.cjs')(path.join(__dirname,'..'));
 const shell='<!doctype html><meta charset="utf-8"><div class="t"><table><tr><td>OnStep</td><td>test</td></tr></table><a href="/index.htm">控制器</a><a href="/mount.htm">赤道仪</a><a href="/net.htm">网络</a></div><span id="sws-sidebar-label">test</span><p id="sws-load"></p><iframe id="sws-frame"></iframe>'+t['Appearance.h'].html_shell_script;
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true});

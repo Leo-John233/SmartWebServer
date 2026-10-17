@@ -1,7 +1,7 @@
 const testOutput = require('./test-output.cjs');
 // 使用实际轴页面代码和语言资源，验证完整参数与第九轴提交
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
-const root=path.join(__dirname,'../SmartWebServer'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const clean=s=>s.replace(/^#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
 const temp=fs.mkdtempSync(path.join(testOutput,'sws-axis-'));
 const program=fs.readFileSync(path.join(__dirname,'axis-page-stubs.h'),'utf8')+'\n'+require('./locale-source.cjs')()+'\n'+require('./page-support.cjs')()+'\n'+clean(read('src/pages/htmlHeaders.h'))+'\n'+clean(read('src/pages/index/AxisTile.h'))+'\n'+clean(read('src/pages/index/AxisTile.cpp'))+'\n'+fs.readFileSync(path.join(__dirname,'axis-page-cases.h'),'utf8');

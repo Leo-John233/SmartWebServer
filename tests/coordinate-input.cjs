@@ -1,7 +1,7 @@
 const testOutput = require('./test-output.cjs');
 // 验证真实坐标处理代码，错误输入或设备拒绝时不得触发移动
 const fs=require('fs'),path=require('path'),cp=require('child_process');
-const root=path.join(__dirname,'../SmartWebServer/src/pages/mount');
+const root=path.join(__dirname,'../src/pages/mount');
 const handler=fs.readFileSync(path.join(root,'GotoTile.cpp'),'utf8').split('void gotoCoordinatesGet()')[1];
 const stub=`#include <string>
 #include <map>

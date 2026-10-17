@@ -8,7 +8,7 @@ const defaults=[
  {name:'Aux4',purpose:4,values:[0,30,5,10]},
 ];
 module.exports=({features=defaults,sourceRef}={})=>{
- const root=path.join(__dirname,'../SmartWebServer/src'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+ const root=path.join(__dirname,'../src'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
  const clean=s=>s.replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
  const fixture=Array.from({length:8},(_,i)=>({name:'Aux'+(i+1),purpose:0,values:[0,0,0,0],...features[i]}));
  const scalar=n=>Number.isFinite(n)?String(n):'NAN';

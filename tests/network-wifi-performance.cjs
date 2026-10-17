@@ -1,7 +1,7 @@
 require('./test-output.cjs');
 const path=require('path'),assert=require('assert/strict');
-const {chromium}=require('../../webui/node_modules/playwright');
-const t=require('./page-templates.cjs')(path.join(__dirname,'../SmartWebServer'));
+const {chromium}=require('playwright');
+const t=require('./page-templates.cjs')(path.join(__dirname,'..'));
 const html='<meta charset="utf-8">'+t['network/NetworkWifi.h'].html_network_css+t['Appearance.h'].html_shared_appearance+'<div class="b">'+require('./network-page.cjs')({fragment:true})+'</div>';
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true});

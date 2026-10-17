@@ -1,17 +1,17 @@
 # 原版 SWS 固件
 
-Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
+Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 本目录保留原版网页与控制协议实现，不包含 Vue 静态资源或 Vue API 适配层
 这里的“原版”指原网页实现，保留仓库已经完成的协议修复，并非回退到历史上游版本
 
-- 配置文件：`SmartWebServer/Config.h` 和 `SmartWebServer/Extended.config.h`
+- 配置文件：`Config.h` 和 `Extended.config.h`
 - 网页首页：设备地址 `/`
 - 直接用 Arduino IDE 打开本目录的工程即可编译，不需要 Node 或 Vue
-- 也可在仓库根目录运行 `node scripts/build-firmware.mjs legacy`，生成 `build/legacy/SmartWebServer`
-- 使用 Arduino CLI：`node scripts/build-firmware.mjs legacy --compile --fqbn <开发板标识>`
+- 使用 Arduino CLI：`arduino-cli compile --warnings all --fqbn esp8266:esp8266:nodemcuv2 .`（ESP8266），或 `arduino-cli compile --warnings all --fqbn esp32:esp32:esp32 .`（ESP32）
+- 安装独立浏览器测试依赖：`npm ci --prefix tests --ignore-scripts`；预览服务：`node demo/server.cjs`
 
-共用的控制协议由此目录维护，Vue 构建按需复制到自己的输出目录，构建过程不改写本目录
+固件源码位于根目录和 `src/`；原版项目说明保存在 `README.upstream.md`，许可证为 `LICENSE`
 
 ## 网页配网
 
@@ -48,20 +48,20 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - Wi-Fi TCP 命令入口每轮最多读取 64 字节、处理 1 条完整指令，保留半帧与未读数据，标准端口已收到的批量指令不会因分轮处理而被一秒连接期限截断
 - 原命令任务周期仍为 5 毫秒，实际响应还受串口等待和其他任务影响；已对照原版回放连续坐标查询、坐标设置与 GOTO、脉冲导星和跟踪命令，NINA/ASCOM 实机并发及导星延迟仍需刷入验证
 - 状态轮询失败后由原有逻辑退避重试，控制指令不因保护机制自动重放，页面加载失败可重新点击标签
-- `node legacy/tests/network-load-guard.cjs` 使用已安装的 ESP8266 2.4.2 内核状态机进行本地模拟，验证多客户端排队、低内存恢复、慢连接、批量及半帧命令和开关关闭行为，可用 `SWS_ESP8266_CORE` 指定内核目录
+- `node tests/network-load-guard.cjs` 使用已安装的 ESP8266 2.4.2 内核状态机进行本地模拟，验证多客户端排队、低内存恢复、慢连接、批量及半帧命令和开关关闭行为，可用 `SWS_ESP8266_CORE` 指定内核目录
 - 本地模拟与固件编译不能替代实机压力测试，刷入后仍需验证手机和电脑同时访问、热点和局域网同时访问、慢客户端断线后的恢复
 
 ## 配网验证
 
-- `node legacy/tests/network-wifi-backend.cjs` 编译并执行配网处理测试，需要本机安装 g++
-- `node legacy/tests/network-wifi-ui.cjs <输出目录>` 验证扫描与连接交互，并生成桌面和手机预览，需要 webui 的 Playwright 依赖和 Edge 浏览器
+- `node tests/network-wifi-backend.cjs` 编译并执行配网处理测试，需要本机安装 g++
+- `node tests/network-wifi-ui.cjs <输出目录>` 验证扫描与连接交互，并生成桌面和手机预览，需要先安装 tests 中的 Playwright 依赖，并安装 Edge 浏览器
 - 支持 ESP8266 和 ESP32 编译验证，浏览器测试中的无线数据来自模拟接口
 - 刷入设备后还需验证真实网络扫描、密码错误恢复、DHCP 地址、路由器掉线和热点信道切换
 
 ## 原版更新记录
 
 - 已合并 `origin/SmartWebServer-Original` 的 `193a818`，固件版本更新到 2.10h
-- 原版根目录代码映射到 `legacy/SmartWebServer`，保留开发分支的配网页面、设备参数和编译产物忽略规则
+- 固件工程直接位于仓库根目录，保留开发分支的配网页面、设备参数和编译产物忽略规则
 - 配网接口已适配上游新版键值存储，路由器参数和密码分开保存
 - 新版首次挂载旧版存储失败时会重新初始化，刷写前请记下设备中保存的 Wi-Fi 和其他设置，刷写后检查并重新设置
 - 合并前的本地版本保存在 `codex/backup-before-original-update` 分支
@@ -74,13 +74,13 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - PC 使用左侧导航，手机使用底部导航与更多菜单，切换时仅加载当前标签内容，支持浏览器前进后退
 - 内容页使用独立文档，离开时清理原有轮询和事件，按住运动按钮时先发送停止请求并等待队列处理
 - 登录、表单和设备控制接口沿用原有处理逻辑，真实硬件仍需验证网络延迟下的切换与停止行为
-- `node legacy/tests/shared-pages-ui.cjs <输出目录>` 使用模拟数据验证共用主题、导航、登录、数字框、宽度适配和运动停止时序，控件预览从真实模板及中文语言宏展开，设备条件与数值由测试模拟，不等同于实机完整页面
+- `node tests/shared-pages-ui.cjs <输出目录>` 使用模拟数据验证共用主题、导航、登录、数字框、宽度适配和运动停止时序，控件预览从真实模板及中文语言宏展开，设备条件与数值由测试模拟，不等同于实机完整页面
 - 控制器按状态、驱动器与高级设置分区，赤道仪优先显示方向控制、目标位置与跟踪
 - 调焦器、旋转器、编码器、辅助控制采用各自的操作分组，帮助、通信异常与 404 页面同步更新样式
 
 - 现有描述直接使用语言资源宏，不在预览中改写为简化名称
 - 新增加的高级设置分区默认展开，原有控件内的设置折叠保持可操作
-- `node legacy/tests/axis-page.cjs <HTML输出路径>` 编译实际轴页面代码，检查 26 项参数及上传、恢复默认值，并验证第九轴参数提交
+- `node tests/axis-page.cjs <HTML输出路径>` 编译实际轴页面代码，检查 26 项参数及上传、恢复默认值，并验证第九轴参数提交
 - 页面功能清单覆盖原有显示、状态刷新和命令处理入口，实际可用功能仍由设备和编译配置决定
 
 ## 导航图标
@@ -119,14 +119,14 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - 原有目标 GOTO、目标同步、停止和继续入口保留，零位与停放分为两个操作区，设置停放位移到常用操作，解除停放仍可用
 - 按钮移除装饰 emoji，新增文字集中在 locales 的语言文件中，各语言条目与 Strings_cn.h 对齐
 - 星表、地点、校准、限位与 PEC 的间距同步收紧，手机表单仍保留足够的操作空间
-- `node legacy/tests/coordinate-input.cjs` 检查坐标边界、负零赤纬、非法输入、命令顺序和设备拒绝时不启动运动
+- `node tests/coordinate-input.cjs` 检查坐标边界、负零赤纬、非法输入、命令顺序和设备拒绝时不启动运动
 - 坐标接口沿用项目现有 Sr、Sd、MS 和 CS 命令，协议参考 [OnStep 命令实现](https://github.com/hjd1964/OnStep/blob/release-4.24/Command.ino)
 
 ## 界面与原始逻辑分离
 
 界面保持固件内置，不需要单独部署前端，也不增加运行时语言切换。多语言继续使用原始的 `Config.h: DISPLAY_LANGUAGE → src/locales/Locale.h → Strings_xx.h`；`L_us` 仍使用英文与英制单位。原始辅助页面直接写出的 DP、sec、x 等文字保留原样。
 
-| 修改内容 | 维护位置，相对于 SmartWebServer/src |
+| 修改内容 | 维护位置，相对于 src |
 | --- | --- |
 | 暗红、灰黑配色 | `pages/ui/Palette.h` |
 | 公共布局与手机适配 | `pages/ui/Styles.h` |
@@ -155,15 +155,15 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 
 以下检查使用真实语言宏、页面生成函数及后台处理代码；模拟设备数据不能替代实机验证。
 
-测试源码、生成的程序、浏览器配置和默认截图都集中在仓库内的 `legacy/tests/output/`，该目录不提交到 Git。测试入口通过 `tests/test-output.cjs` 设置临时目录，避免在系统临时目录运行测试程序；显式指定截图或构建输出位置时，也应使用此目录下的子目录。
+测试源码位于 `tests/`；生成的程序、浏览器配置和默认截图集中在仓库内的 `tests/output/`，该目录不提交到 Git。测试入口通过 `tests/test-output.cjs` 设置临时目录，避免在系统临时目录运行测试程序；显式指定截图或构建输出位置时，也应使用此目录下的子目录。
 
-- `node legacy/tests/page-interfaces.cjs`：与已合并上游 `193a818` 对照原始路由、请求处理入口、设备通信及键值编码。后续更新基准时须核对测试中的版本号与已审查的差异。
-- `node legacy/tests/pages-languages.cjs <输出目录>`：检查全部 10 种语言选择的控件、提交参数、事件脚本以及桌面和 320/390 像素布局。
-- `node legacy/tests/firmware-languages.cjs <compile_commands.json> <输出目录>`：使用真实 Arduino 工具链检查 10 种语言下的全部网页源文件；清单由 Arduino CLI 的 `compile --only-compilation-database` 生成。只修改隔离副本中的语言配置，不改写工程 Config.h。
-- `node legacy/tests/locales.cjs`：检查 9 个语言文件的宏、格式占位符、特殊符号分支和坐标表单。
-- `node legacy/tests/encoders-page.cjs`：执行真实编码器页面与参数处理，检查第二轴默认值不误用第一轴配置。
-- `node legacy/tests/accessory-commands.cjs` 与 `node legacy/tests/coordinate-input.cjs`：检查附件控制、输入边界、坐标命令顺序与设备拒绝。
-- `node legacy/tests/network-page.cjs`：执行真实网络页及资源分段发送，模拟空分块结束 HTTP 响应，检查 Wi-Fi 后的 OTA、通信超时及账号设置不被截断；覆盖登录和 OTA 功能条件。
+- `node tests/page-interfaces.cjs`：与已合并上游 `193a818` 对照原始路由、请求处理入口、设备通信及键值编码。后续更新基准时须核对测试中的版本号与已审查的差异。
+- `node tests/pages-languages.cjs <输出目录>`：检查全部 10 种语言选择的控件、提交参数、事件脚本以及桌面和 320/390 像素布局。
+- `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>`：使用真实 Arduino 工具链检查 10 种语言下的全部网页源文件；清单由 Arduino CLI 的 `compile --only-compilation-database` 生成。只修改隔离副本中的语言配置，不改写工程 Config.h。
+- `node tests/locales.cjs`：检查 9 个语言文件的宏、格式占位符、特殊符号分支和坐标表单。
+- `node tests/encoders-page.cjs`：执行真实编码器页面与参数处理，检查第二轴默认值不误用第一轴配置。
+- `node tests/accessory-commands.cjs` 与 `node tests/coordinate-input.cjs`：检查附件控制、输入边界、坐标命令顺序与设备拒绝。
+- `node tests/network-page.cjs`：执行真实网络页及资源分段发送，模拟空分块结束 HTTP 响应，检查 Wi-Fi 后的 OTA、通信超时及账号设置不被截断；覆盖登录和 OTA 功能条件。
 - 另运行上述配网、公共界面和辅助设备浏览器检查，并分别编译 ESP8266 与 ESP32 固件。
 
 本次将新增导航、配网和错误提示统一接入语言文件；扩充轴参数标签缓冲区，防止长文案截断输入控件。辅助页回归按真实请求完成时机等待，保留原固件的延迟提交行为。
@@ -174,15 +174,15 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - 按钮保留原有暗红或灰黑底色；悬停、按下和后台选中时叠加不同透明度的灰色遮罩，保留后台 AJAX 状态作为依据。
 - 桌面导航采用图标在上、文字在下的卡片，当前项使用灰底白色图文；手机导航保留底部排列。
 - 编码器同步按钮与自动同步分区，两轴各自显示编码器、OnStep 与差值读数，设置按标签和输入框对齐；沿用原有请求参数与绝对编码器条件。
-- `node legacy/tests/encoder-layout-ui.cjs <输出目录>` 检查真实编码器请求、选中反馈、长坐标、两轴表单和 1440/390/320 像素布局。
+- `node tests/encoder-layout-ui.cjs <输出目录>` 检查真实编码器请求、选中反馈、长坐标、两轴表单和 1440/390/320 像素布局。
 
 - 调焦器与旋转器的“移动到目标”沿用原有目标位置接口；中文校准标题和极轴说明移除重复的英文解释。
 - 位置与限位在桌面并排，位于“按坐标 GOTO”之前；右上角进入编辑，取消恢复原值，保存仍提交原始表单。度分秒使用方向选择，时区显示常见 UTC 偏移，转换为 SWS 原来的西向正值；保留负零坐标及半小时、45 分钟时区。
 - 回差保留在限位卡片的折叠区；中天限位仍是原来的 ±270°，不采用参考图中的 ±90°。精调极轴仍分为三步。
 - 停放和解除停放按原有 AJAX 状态在同一按钮位置切换；零位与停放区保持每组两个常用入口。中天翻转选项明确区分直接翻转、经零位翻转和在零位暂停。
-- `node legacy/tests/mount-editors-ui.cjs` 检查实际卡片布局、编辑取消、原参数提交、时间同步、停放和翻转操作；`node legacy/tests/site-commands.cjs` 检查真实位置与限位处理函数，包含负零及 UTC+13/+14 的时区边界修正。
+- `node tests/mount-editors-ui.cjs` 检查实际卡片布局、编辑取消、原参数提交、时间同步、停放和翻转操作；`node tests/site-commands.cjs` 检查真实位置与限位处理函数，包含负零及 UTC+13/+14 的时区边界修正。
 - 时间与地点使用更大的读数和统一输入框；桌面侧栏收窄，品牌名称和底部说明居中。
-- PEC 的初始占位和状态读取失败使用本语言的“未知”，不再显示问号；`node legacy/tests/pec-status.cjs` 验证真实状态映射与读取失败分支。
+- PEC 的初始占位和状态读取失败使用本语言的“未知”，不再显示问号；`node tests/pec-status.cjs` 验证真实状态映射与读取失败分支。
 - 模拟器的跟踪、方位控制及网络页面执行固件生成函数，避免手工拼接模板遗漏状态节点或掩盖传输截断。跟踪和方位状态、标题倍率节点仍供原始 AJAX 更新，简洁布局隐藏其重复显示。
 - Wi-Fi 图标按实际 RSSI 显示亮弧：不低于 -55 dBm 为三条，-70 dBm 为两条，-85 dBm 为一条，更弱时只亮圆点；无有效读数时全部变暗。已连接网络与扫描列表共用规则，状态轮询同步更新。
 
@@ -194,7 +194,7 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - 状态刷新使用单次定时器，每次响应完成后按原配置安排下一次刷新；同一页面最多一个状态请求，避免慢连接不断堆积。页面完全加载后才开始刷新，隐藏标签和切换页面时暂停，回到前台立即更新。
 - 普通命令和按住移动的命令正在发送时，下一次状态刷新暂缓；命令参数、顺序和停止操作不变。请求失败后逐步延长状态刷新间隔，成功后恢复，不自动重发操作命令。
 - 只有数据变化时才改写读数、选中状态和禁用状态，避免反复触发页面重排及控件观察器。网络页在隐藏或离开时也停止发起状态请求。
-- `node legacy/tests/page-performance.cjs` 检查实际资源字节数、浏览器缓存和版本地址、七个页面的导航分派、原命令脚本缓冲区、慢请求去重、重复状态不改写页面、命令优先、隐藏暂停和失败退避。测试产物仍位于 `legacy/tests/output/`。
+- `node tests/page-performance.cjs` 检查实际资源字节数、浏览器缓存和版本地址、七个页面的导航分派、原命令脚本缓冲区、慢请求去重、重复状态不改写页面、命令优先、隐藏暂停和失败退避。测试产物仍位于 `tests/output/`。
 
 这些检查验证传输量及调度行为；实机加载和操作耗时还受 Wi-Fi、串口和主控响应影响，需刷入新固件后确认。
 
@@ -205,17 +205,17 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 | 引脚 | 映射及输出 | 行为 |
 | --- | --- | --- |
 | IO2 | 原 `LED_STATUS_PIN`；低电平亮灯 | 开启活动指示时显示网页及 TCP 控制连接的业务数据收发，连续活动仍保留闪烁间隙；关闭后恢复原连接指示。未连接主控时保留闪烁。 |
-| IO5 | 新增 `RA_BRAKE_PIN`；低电平锁定，高电平释放 | 启动第一步即输出低电平。开启保护时按 RA 驱动反馈自动控制；关闭保护时保持低电平抱闸，并在页面中确认、显示已抱闸。 |
+| IO5 | 新增 `RA_BRAKE_PIN`；低电平锁定，高电平释放 | Config 为 OFF 时从引脚初始化起输出高电平松闸；Config 为 ON 时启动先输出低电平，模块启动后按反馈与网页保护开关控制。网页保护开关关闭时保持低电平抱闸。 |
 
-在 `SmartWebServer/Config.h` 中设置 `RA_BRAKE_PROTECTION`：`ON` 启用自动保护并显示网页开关，`OFF` 隐藏此项并保持 IO5 低电平抱闸，不再单独采样抱闸反馈。未提供此配置时同样按 `OFF` 处理。关闭编译配置后，原先保存的开启状态不会使抱闸释放，`/board-io` 也会拒绝修改保护设置；重新改为 `ON` 需要重新编译和烧录。网页开关关闭时也不会松闸，重新开启后根据新反馈判断，不沿用旧的停止或静止确认。
+在 `Config.h` 中设置 `RA_BRAKE_PROTECTION`：`ON` 启用自动保护并显示网页开关，`OFF` 隐藏此项并从引脚初始化起保持 IO5 高电平松闸，不再单独采样抱闸反馈。未提供此配置时同样按 `OFF` 处理。关闭编译配置后，原先保存的保护状态不会使 IO5 拉低抱闸，`/board-io` 也会拒绝修改保护设置；重新改为 `ON` 需要重新编译和烧录。网页开关关闭时也不会松闸，重新开启后根据新反馈判断，不沿用旧的停止或静止确认。
 
 `Pins.Esp8266.h` 的 `AXIS2_ENCODER_A_PIN` 已改为 `OFF`，IO5 不再兼任第二轴编码器 A。虚拟 GPIO 也会避开本模块占用的引脚。ESP8266 原有串口配置不变；其他板型默认不启用这两个板载功能。
 
-保护使用原有 `:GXU1#` 反馈，后台每 250 毫秒检查一次；已有控制器采样也会更新同一反馈，避免刚收到数据就重复查询。独立采样等待响应最多 200 毫秒。自动保护开启运行后，首次等待反馈、无效响应、掉线或反馈超过 1 秒未更新时，IO5 均保持高电平松闸，并清除旧的停止与静止确认结果。上电初始化到模块启动前、输出监控任务启动失败、Config 设为 `OFF` 或网页开关关闭时，仍保持低电平抱闸。关闭网页后后台保护继续运行。
+保护使用原有 `:GXU1#` 反馈，后台每 250 毫秒检查一次；已有控制器采样也会更新同一反馈，避免刚收到数据就重复查询。独立采样等待响应最多 200 毫秒。自动保护开启运行后，首次等待反馈、无效响应、掉线或反馈超过 1 秒未更新时，IO5 均保持高电平松闸，并清除旧的停止与静止确认结果。编译启用保护时，上电初始化到模块启动前、输出监控任务启动失败或网页开关关闭时，保持低电平抱闸；Config 设为 `OFF` 时从初始化起保持高电平松闸。关闭网页后后台保护继续运行。
 
 收到格式正确的 `OA`、`OB`、`GA`、`GB`、`OT`、`PW`、`GF` 任一标志时，先通过原命令通道发送网页 STOP 按钮使用的 `:Q#`（停止 GOTO/回转），保持高电平等待后续静止反馈。STOP 发送后的新反馈必须至少两帧带有 `ST`、间隔达到一个采样周期 250 毫秒，才将 IO5 拉低抱闸；故障帧自身已有 `ST` 不算停止后的确认。没有 `ST`、STOP 发送失败、反馈中断或无效时保持高电平，不用固定延时替代静止反馈，也不使用中断前的旧确认直接抱闸。连续有效故障期间不重复 STOP，失联后重新收到故障会重新执行该流程。
 
-确认静止并抱闸后，后续正常反馈持续 500 毫秒才恢复松闸。单独 `ST` 不触发故障流程，`ST` 同时伴随开路也按故障处理。编译配置或网页保护开关关闭时，自动 STOP 一并停用，IO5 保持低电平。
+确认静止并抱闸后，后续正常反馈持续 500 毫秒才恢复松闸。单独 `ST` 不触发故障流程，`ST` 同时伴随开路也按故障处理。编译配置或网页保护开关关闭时，自动 STOP 一并停用；编译配置为 `OFF` 时 IO5 保持高电平松闸，网页保护开关关闭时保持低电平抱闸。
 
 手动 STOP 保留原入口，不直接操作抱闸输出或保护开关。手动停止后仅有 `ST` 时仍保持正常松闸；已经因故障抱闸时再次按 STOP 也不会松闸。手动 STOP 和自动保护同时触发时可能各发送一条相同命令，自动保护只对本次故障去重。
 
@@ -227,5 +227,5 @@ Arduino 工程入口：`SmartWebServer/SmartWebServer.ino`
 - `src/libApp/boardIo/BoardIo.*`、`Config.h`：故障 STOP 与抱闸顺序、GPIO、后台采样、NV 与占用检查。
 - `src/pages/boardIo/`：卡片、开关交互、状态文字及设置接口。
 - `src/pages/Request.*`：网页活动报告；TCP 控制服务器仅增加收发活动报告，保留原传输及运动命令处理。
-- `node legacy/tests/board-io-backend.cjs`：模拟引脚执行真实适配器、策略及接口，覆盖七类故障先 STOP 再等待新 ST 确认、无 ST 不抱闸、无反馈保持高电平、旧确认失效、发送失败、持续故障去重、手动 STOP，以及初始化、关闭、恢复、存储、重启和时钟回绕等情况。
-- `node legacy/tests/board-io-ui.cjs`：执行真实卡片与开关脚本，检查提交、确认取消、保存失败恢复和桌面、手机布局。所有测试产物仍保存在仓库内。
+- `node tests/board-io-backend.cjs`：模拟引脚执行真实适配器、策略及接口，覆盖七类故障先 STOP 再等待新 ST 确认、无 ST 不抱闸、无反馈保持高电平、旧确认失效、发送失败、持续故障去重、手动 STOP，以及初始化、关闭、恢复、存储、重启和时钟回绕等情况。
+- `node tests/board-io-ui.cjs`：执行真实卡片与开关脚本，检查提交、确认取消、保存失败恢复和桌面、手机布局。所有测试产物仍保存在仓库内。

@@ -1,6 +1,6 @@
 # SWS 可点击模拟网页
 
-在仓库根目录运行 `node legacy/demo/server.cjs`，浏览器打开 http://127.0.0.1:8765
+在仓库根目录运行 `node demo/server.cjs`，浏览器打开 http://127.0.0.1:8765
 
 - 需要 Node.js 和 PATH 中的 g++，也可用 CXX 指定编译器
 - 可用 SWS_DEMO_PORT 设置其他端口，默认只监听本机
@@ -16,4 +16,4 @@
 
 停止前台服务时按 Ctrl+C
 
-辅助页检查：`node legacy/tests/auxiliary-page.cjs`；交互与桌面、手机截图：`node legacy/tests/auxiliary-ui.cjs <输出目录>`
+辅助页检查：`node tests/auxiliary-page.cjs`；交互与桌面、手机截图：`node tests/auxiliary-ui.cjs <输出目录>`

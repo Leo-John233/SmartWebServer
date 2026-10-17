@@ -1,8 +1,0 @@
-
-*.json
-esp32.svd
-debug.cfg
-debug.svd
-
-# 忽略本目录下的固件编译产物
-/build/

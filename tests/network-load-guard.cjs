@@ -1,6 +1,6 @@
 const output=require('./test-output.cjs');
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
-const root=path.join(__dirname,'../SmartWebServer/src');
+const root=path.join(__dirname,'../src');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const clean=s=>s.replace(/^\s*#include[^\n]*$/gm,'').replace(/^#pragma once.*$/gm,'');
 // 使用本机固件实际依赖的 2.4.2 内核调度代码，检查适配层与原有状态机的组合。

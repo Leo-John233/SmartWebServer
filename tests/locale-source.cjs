@@ -4,7 +4,7 @@ const fs = require('node:fs'),
 module.exports = (language = process.env.SWS_TEST_LANGUAGE || 'cn') => {
   if (!['ca', 'cn', 'de', 'en', 'es', 'fr', 'it', 'jp', 'us', 'ro'].includes(language))
     throw Error('Unknown DISPLAY_LANGUAGE: ' + language);
-  const root = path.join(__dirname, '../SmartWebServer/src');
+  const root = path.join(__dirname, '../src');
   const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
   let locale = read('locales/Locale.h').replace(
     /^\s*#include\s+"(?:\.\.\/Constants.h|\.\.\/\.\.\/Config.h|Locales.h)".*$/gm,

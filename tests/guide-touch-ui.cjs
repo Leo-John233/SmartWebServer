@@ -1,7 +1,7 @@
 const output=require('./test-output.cjs');
 const path=require('path'),assert=require('assert/strict');
-const {chromium}=require('../../webui/node_modules/playwright');
-const t=require('./page-templates.cjs')(path.join(__dirname,'../SmartWebServer'));
+const {chromium}=require('playwright');
+const t=require('./page-templates.cjs')(path.join(__dirname,'..'));
 const scripts=t['htmlScripts.h'];
 const html='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+t['Appearance.h'].html_shared_appearance+
   scripts.html_script_ajax_get.replace('%s','mount-ajax-get.txt')+

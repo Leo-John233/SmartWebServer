@@ -4,7 +4,7 @@ const fs = require('node:fs'),
   path = require('node:path'),
   cp = require('node:child_process');
 module.exports = ({ absolute = false } = {}) => {
-  const root = path.join(__dirname, '../SmartWebServer/src'),
+  const root = path.join(__dirname, '../src'),
     read = (p) => fs.readFileSync(path.join(root, p), 'utf8'),
     clean = (s) => s.replace(/^\s*#include.*$/gm, '').replace(/^#pragma once.*$/gm, '');
   let code = `#include <string>

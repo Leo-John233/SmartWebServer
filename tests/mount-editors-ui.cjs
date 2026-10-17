@@ -1,7 +1,7 @@
 const output = require('./test-output.cjs');
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
-const { chromium } = require('../../webui/node_modules/playwright');
-const templates = require('./page-templates.cjs')(path.join(__dirname, '../SmartWebServer'));
+const { chromium } = require('playwright');
+const templates = require('./page-templates.cjs')(path.join(__dirname, '..'));
 const cards = require('./mount-page.cjs')(), layout = templates['ui/Layouts.h'];
 const scripts = templates['htmlScripts.h'];
 const body = layout.html_layout_mount_begin + cards.Guide + layout.html_layout_mount_tracking + cards.Tracking +

@@ -1,6 +1,6 @@
 const output=require('./test-output.cjs');
 const fs=require('fs'),path=require('path'),cp=require('child_process');
-const root=path.join(__dirname,'../SmartWebServer');
+const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'src/lib/wifi/webServer/GuardedServer.h'),'utf8');
 const klass=source.replace(/^#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
 const budget=fs.readFileSync(path.join(root,'src/lib/wifi/NetworkBudget.h'),'utf8').replace(/^#pragma once.*$/gm,'');

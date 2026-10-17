@@ -1,12 +1,12 @@
 const testOutput = require('./test-output.cjs');
-// 运行方式 node legacy/tests/network-wifi-ui.cjs 输出目录
-// 使用仓库 webui 已安装的 Playwright 验证真实页面脚本与手机布局
+// 运行方式 node tests/network-wifi-ui.cjs 输出目录
+// 使用独立测试依赖 Playwright 验证真实页面脚本与手机布局
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('../../webui/node_modules/playwright');
+const { chromium } = require('playwright');
 const output = path.resolve(process.argv[2] || testOutput);
-const templates = require('./page-templates.cjs')(path.join(__dirname, '../SmartWebServer'));
+const templates = require('./page-templates.cjs')(path.join(__dirname, '..'));
 const shared = templates['Appearance.h'].html_shared_appearance;
 const css = templates['network/NetworkWifi.h'].html_network_css;
 const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${css}${shared}</head><body><div class="b">${require('./network-page.cjs')({fragment:true})}</div></body></html>`;

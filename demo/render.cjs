@@ -2,7 +2,7 @@ const testOutput = require('../tests/test-output.cjs');
 // 从固件模板渲染页面，模拟设备数据并验证导航与运动停止时序
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 
-const root=path.join(__dirname,'../SmartWebServer'),out=fs.mkdtempSync(path.join(testOutput,'sws-demo-'));fs.mkdirSync(out,{recursive:true});
+const root=path.join(__dirname,'..'),out=fs.mkdtempSync(path.join(testOutput,'sws-demo-'));fs.mkdirSync(out,{recursive:true});
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 
 let shared,shellScript;

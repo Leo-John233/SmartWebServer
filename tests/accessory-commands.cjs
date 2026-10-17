@@ -1,7 +1,7 @@
 const testOutput = require('./test-output.cjs');
 // 编译真实请求处理函数，检查网页参数到设备命令的映射与目标边界
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
-const root=path.join(__dirname,'../SmartWebServer/src/pages');
+const root=path.join(__dirname,'../src/pages');
 const files=['focuser/SlewingTile.cpp','focuser/HomeTile.cpp','focuser/SelectTile.cpp','focuser/BacklashTcfTile.cpp','rotator/SlewingTile.cpp','rotator/HomeTile.cpp','rotator/BacklashTile.cpp','rotator/DeRotatorTile.cpp'];
 const handlers=files.map(file=>fs.readFileSync(path.join(root,file),'utf8').split('// pass related data back to OnStep')[1]).join('\n');
 const code=`#include <string>

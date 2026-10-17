@@ -4,8 +4,8 @@ const fs = require('node:fs'),
   path = require('node:path'),
   cp = require('node:child_process'),
   assert = require('node:assert/strict');
-const { chromium } = require('../../webui/node_modules/playwright');
-const root = path.join(__dirname, '../SmartWebServer'),
+const { chromium } = require('playwright');
+const root = path.join(__dirname, '..'),
   read = (p) => fs.readFileSync(path.join(root, p), 'utf8'),
   out = process.argv[2] || testOutput;
 fs.mkdirSync(out, { recursive: true });

@@ -2,7 +2,7 @@ const testOutput = require('./test-output.cjs');
 // 编译实际赤道仪卡片生成函数，模拟设备响应而不重新拼接表单
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 module.exports=()=>{
- const root=path.join(__dirname,'../SmartWebServer'),read=p=>fs.readFileSync(path.join(root,p),'utf8'),clean=s=>s.replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
+ const root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8'),clean=s=>s.replace(/^\s*#include.*$/gm,'').replace(/^#pragma once.*$/gm,'');
  const files=['Site','Library','HomePark','Align','Limits','Pec','Goto','Guide','Tracking'];
  let code=`#include <string>
 #include <cstring>

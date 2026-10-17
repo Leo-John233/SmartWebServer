@@ -6,7 +6,7 @@ const cp = require('node:child_process');
 const assert = require('node:assert/strict');
 
 module.exports = ({ ota = true, reset = false, loggedIn = true, fragment = false } = {}) => {
-  const root = path.join(__dirname, '../SmartWebServer/src/pages');
+  const root = path.join(__dirname, '../src/pages');
   const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
   const clean = (source) => source.replace(/^\s*#include.*$/gm, '').replace(/^#pragma once.*$/gm, '');
   let code = `
