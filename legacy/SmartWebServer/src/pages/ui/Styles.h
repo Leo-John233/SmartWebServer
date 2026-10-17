@@ -16,6 +16,7 @@ const char html_shared_styles[] PROGMEM = R"UI(
   --text: )UI" SWS_COLOR_TEXT R"UI(;
   --muted: )UI" SWS_COLOR_MUTED R"UI(;
   --readout: )UI" SWS_COLOR_READOUT R"UI(;
+  --sws-dropdown-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='%23b5b5b5' d='M1 1h10L6 9z'/%3E%3C/svg%3E");
 }
 
 * {
@@ -151,7 +152,7 @@ select:not([multiple])[size='1'] {
   appearance: none;
   -webkit-appearance: none;
   padding-right: var(--sws-select-arrow-space, 32px) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='%23b5b5b5' d='M1 1h10L6 9z'/%3E%3C/svg%3E");
+  background-image: var(--sws-dropdown-arrow);
   background-size: 12px 10px;
   background-position: right var(--sws-select-arrow-inset, 12px) center;
   background-repeat: no-repeat;
@@ -228,13 +229,34 @@ a:visited {
   border-radius: 10px;
 }
 .collapsible {
+  position: relative;
   width: 100%;
   text-align: left;
   background: #252525;
   border: 1px solid var(--border);
   border-radius: 9px;
   padding: 10px;
+  padding-right: 40px !important;
   color: #b5b5b5;
+}
+/* 折叠栏与下拉框共用箭头，展开时朝上，右侧预留空间避免压住标题 */
+.collapsible::after,
+.sws-disclosure-arrow {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 10px;
+  flex-shrink: 0;
+  background: var(--sws-dropdown-arrow) center / 12px 10px no-repeat;
+}
+.collapsible::after {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.collapsible.active::after {
+  transform: translateY(-50%) rotate(180deg);
 }
 .active,
 .collapsible:hover {
@@ -1515,13 +1537,6 @@ h2.sws-section-title {
   background: #202020;
   border-color: #3a3a3a;
   min-height: 48px;
-}
-.sws-mount .collapsible::after {
-  content: '+';
-  float: right;
-}
-.sws-mount .collapsible.active::after {
-  content: '−';
 }
 .sws-mount .b1 > hr {
   margin: 18px 0;
@@ -2922,13 +2937,6 @@ h2.sws-section-title {
   border-radius: 8px;
   font-size: 13px;
   color: var(--text);
-}
-.sws-accessory-parameter-card .collapsible::after {
-  content: '+';
-  color: var(--muted);
-}
-.sws-accessory-parameter-card .collapsible.active::after {
-  content: '−';
 }
 .sws-accessory-parameter-card .collapsible:hover {
   background-image: linear-gradient(rgb(185 185 185 / 8%), rgb(185 185 185 / 8%));

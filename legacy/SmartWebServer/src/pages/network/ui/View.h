@@ -25,7 +25,7 @@ const char html_network_wifi[] PROGMEM = R"NET(
  L_UI_OTHER_NETWORK
  R"NET(<span class="nw-network-meta">)NET"
  L_UI_HIDDEN_NETWORK
- R"NET(</span></span><span aria-hidden="true">＋</span></button></div></div>
+ R"NET(</span></span><span class="sws-disclosure-arrow" aria-hidden="true"></span></button></div></div>
 <dialog id="nw-dialog" class="nw-card" aria-labelledby="nw-dialog-title">
 <div class="nw-dialog-head"><h2 id="nw-dialog-title">)NET"
  L_UI_WIFI_CONNECT
