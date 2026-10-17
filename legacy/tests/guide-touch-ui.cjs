@@ -40,6 +40,39 @@ const html='<meta charset="utf-8"><meta name="viewport" content="width=device-wi
    e.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:42}));
   });
   await page.waitForTimeout(650);assert.equal(sent.filter(v=>v==='n1').length,1);assert(sent.includes('n0'));
+  // 上次松手的延迟停止不能打断随后开始的反向长按。
+  sent.length=0;await page.evaluate(()=>{gmc.t(null,'n1','n');gmc.u(null,'n');gmc.t(null,'s1','s');});
+  await page.waitForTimeout(650);
+  assert(!sent.slice(sent.indexOf('s1')+1).some(v=>v==='n0'||v==='q'),'旧停止重试不能打断新的反向长按');
+  await page.evaluate(()=>gmc.stopAll());await page.waitForTimeout(650);
+  // 真正按住超过主控常见的 5 秒时限，网页期间不能自行发停止或重发启动。
+  for (const kind of ['mouse','touch']) {
+   sent.length=0;
+   const x=b.x+b.width/2,y=b.y+b.height*.15;
+   if(kind==='mouse'){await page.mouse.move(x,y);await page.mouse.down();}
+   else await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+   await page.waitForTimeout(6000);assert.deepEqual(sent,['n1'],kind+' 按住 6 秒无自动停止');
+   if(kind==='touch')await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+4,y:y+3}]});
+   await page.waitForTimeout(6000);assert.deepEqual(sent,['n1'],kind+' 按住 12 秒及轻微移动无自动停止');
+   if(kind==='mouse')await page.mouse.up();
+   else await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   await page.waitForTimeout(650);assert(sent.includes('n0'),kind+' 松手后停止');
+  }
+  // 无关指针的抬起或失去捕获不能打断正在按住的方向。
+  sent.length=0;
+  await page.locator('.sws-pad button').first().evaluate(e=>{
+   e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'touch',pointerId:71}));
+   window.dispatchEvent(new PointerEvent('pointerup',{pointerType:'touch',pointerId:99}));
+   window.dispatchEvent(new PointerEvent('lostpointercapture',{pointerType:'mouse',pointerId:98}));
+   window.dispatchEvent(new Event('touchend'));
+  });
+  await page.waitForTimeout(650);assert.deepEqual(sent,['n1']);
+  await page.locator('.sws-pad button').first().evaluate(e=>e.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerType:'touch',pointerId:71})));
+  await page.waitForTimeout(650);assert(sent.includes('n0'));
+  sent.length=0;await page.evaluate(()=>{gmc.t(null,'n1','n');gmc.stopAll();gmc.t(null,'s1','s');});
+  await page.waitForTimeout(650);
+  assert(!sent.slice(sent.indexOf('s1')+1).includes('q'),'旧全局停止重试不能打断新长按');
+  await page.evaluate(()=>gmc.stopAll());await page.waitForTimeout(650);
   // 无 Pointer Events 的旧浏览器保留原来的 Touch 路径。
   sent.length=0;await page.evaluate(()=>{window.PointerEvent=undefined;const e=document.querySelector('.sws-pad button');e.dispatchEvent(new Event('touchstart',{bubbles:true,cancelable:true}));e.dispatchEvent(new Event('touchend',{bubbles:true,cancelable:true}));});
   await page.waitForTimeout(650);assert.equal(sent.filter(v=>v==='n1').length,1);assert(sent.includes('n0'));

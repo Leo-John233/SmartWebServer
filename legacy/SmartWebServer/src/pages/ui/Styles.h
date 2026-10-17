@@ -1272,6 +1272,8 @@ h2.sws-section-title {
 .sws-guide .sws-pad {
   touch-action: none;
   -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   position: relative;
   display: block;
   width: 272px;

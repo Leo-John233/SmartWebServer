@@ -24,34 +24,34 @@ const char html_script_ajax_shortcuts[] PROGMEM =
 const char html_script_motion_controls_1[] PROGMEM =
 "<script>"
 "function motionControls(o){"
-"var m={},q=[],b=0,g=0;"
+"var m={},p={},q=[],b=0,g=0;"
 "function send(v){q.push(v);run();}"
 "function run(){if(b||!q.length)return;b=1;window.swsPendingCommands=(window.swsPendingCommands||0)+1;var v=q.shift(),x=new XMLHttpRequest(),d=0;function f(){if(d)return;d=1;window.swsPendingCommands--;b=0;run();}x.onreadystatechange=function(){if(x.readyState==4)f();};x.onerror=x.ontimeout=f;x.timeout=1000;x.open('GET',o.p+'?'+o.k+'='+encodeURIComponent(v)+'&x='+new Date().getTime(),true);x.send();}"
 "function active(){for(var k in m)if(m[k])return true;return false;}"
 "function stopValue(a){return typeof o.s=='function'?o.s(a):o.s;}"
 "function allStopValue(){return typeof o.a=='function'?o.a():o.a;}"
 "function haltValue(){return typeof o.h=='function'?o.h():o.h||allStopValue()||stopValue('');}"
-"function repeat(a,h){return o.g?h==g&&!active():!m[a];}"
+"function repeat(a,h){return h==g&&(o.g?!active():!m[a]);}"
 "function stop(a){if(!m[a])return;m[a]=0;var h=++g,v=stopValue(a);send(v);setTimeout(function(){if(repeat(a,h))send(v)},150);setTimeout(function(){if(repeat(a,h))send(v)},500);}"
-"function clearActive(){var r=0;for(var k in m){if(m[k])r=1;m[k]=0;}return r;}";
+"function clearActive(){var r=0;for(var k in m){if(m[k])r=1;m[k]=0;}p={};return r;}";
 
 // Pointer Events 统一处理触摸与鼠标；旧浏览器保留 Touch 回退。
 const char html_script_motion_controls_2[] PROGMEM =
-"function repeatSend(v){send(v);setTimeout(function(){send(v)},150);setTimeout(function(){send(v)},500);}"
+"function repeatSend(v){var h=g;send(v);setTimeout(function(){if(h==g&&!active())send(v)},150);setTimeout(function(){if(h==g&&!active())send(v)},500);}"
 "function stopAll(){var v=allStopValue();if(v){if(clearActive()){g++;repeatSend(v);}return;}for(var k in m)stop(k);}"
 "function halt(){clearActive();g++;repeatSend(haltValue());}"
 "function legacyTouch(e){return e&&e.type&&e.type.indexOf('touch')===0&&window.PointerEvent;}"
 "function down(e,v,a){if(legacyTouch(e))return;if(e&&e.preventDefault)e.preventDefault();a=a||v;if(m[a])return;m[a]=1;g++;send(v);}"
 "function up(e,a){if(legacyTouch(e))return;if(e&&e.preventDefault)e.preventDefault();stop(a);}"
-"function pointerDown(e,v,a){if(e.button!==undefined&&e.button!==0)return;down(e,v,a);if(e.currentTarget&&e.currentTarget.setPointerCapture&&e.pointerId!==undefined){try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}}"
-"function pointerUp(e,a){up(e,a);}"
-"function windowUp(e){stopAll();}"
+"function pointerDown(e,v,a){if(e.button!==undefined&&e.button!==0)return;a=a||v;if(e.pointerId!==undefined)p[e.pointerId]=a;down(e,v,a);if(e.currentTarget&&e.currentTarget.setPointerCapture&&e.pointerId!==undefined){try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}}}"
+"function pointerUp(e,a){if(e.pointerId!==undefined){a=p[e.pointerId];if(!a)return;delete p[e.pointerId];for(var id in p)if(p[id]===a)return;}up(e,a);}"
+"function windowUp(e){if(e&&e.pointerId!==undefined){pointerUp(e);return;}if(legacyTouch(e))return;stopAll();}"
 "function cancel(e){if(e&&e.preventDefault)e.preventDefault();return false;}"
 "window.addEventListener('pointerup',windowUp);"
 "window.addEventListener('pointercancel',windowUp);"
 "window.addEventListener('lostpointercapture',windowUp);"
-"window.addEventListener('touchend',stopAll);"
-"window.addEventListener('touchcancel',stopAll);"
+"window.addEventListener('touchend',windowUp);"
+"window.addEventListener('touchcancel',windowUp);"
 "window.addEventListener('blur',stopAll);"
 // 标签切换前通知运动控制释放按键，等待停止请求发送
 "window.swsMotionStops=window.swsMotionStops||[];window.swsMotionStops.push(function(){var moving=active()||b||q.length>0;stopAll();if(!moving)return null;return new Promise(function(resolve){setTimeout(function wait(){if(b||q.length){setTimeout(wait,50);return;}resolve();},650);});});"
