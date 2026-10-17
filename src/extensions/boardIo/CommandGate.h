@@ -21,6 +21,15 @@ public:
     // 锁定时只放行诊断查询、停止和通信速率设置；未知扩展及校验帧拒绝转发
     const char *baudCommands[] = {":SB0#", ":SB1#", ":SB2#", ":SB3#", ":SB4#", ":SB5#", ":SBA#", ":SBB#"};
     for (const char *baud : baudCommands) if (!strcmp(command, baud)) return true;
+    // 状态发现依赖校准和附件查询，锁定时也必须可读，避免被误判为串口失联
+    // 使用完整命令匹配，不能放行同前缀的校准、选设备或运动设置
+    const char *readOnlyCommands[] = {
+      ":A?#", ":FA#", ":Fa#", ":fA#",
+      ":F1a#", ":F2a#", ":F3a#", ":F4a#", ":F5a#", ":F6a#",
+      ":Ft#", ":Fb#", ":Fd#", ":Fc#", ":FC#", ":FW#", ":FT#",
+      ":rT#", ":rG#", ":rW#", ":rb#"
+    };
+    for (const char *query : readOnlyCommands) if (!strcmp(command, query)) return true;
     if (command[0] != ':' || command[1] != 'G') return false;
     const size_t length = std::strlen(command);
     if (length < 4 || command[length - 1] != '#') return false;

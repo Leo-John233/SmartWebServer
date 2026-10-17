@@ -262,9 +262,10 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
         message(connectionShown ? '' : (s.message || ''), s.failed, s.messageTarget === 'ap' ? 'ap' : 'sta');
       }
       lock((s.connecting && !s.background) || s.pending);
-      if (!autoScanned && s.sta.enabled && !working) {
+      // 自动扫描等待连接结束，手动刷新仍可优先于后台重连
+      if (!autoScanned && s.sta.enabled && !s.connecting && !working) {
         autoScanned = true;
-        startScan();
+        startScan(true);
       }
     } catch (e) {
       if (paused || ticket !== revision) return;
@@ -277,13 +278,13 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       scheduleStatus(statusFailures ? Math.min(30000, 2500 * Math.pow(2, statusFailures)) : 2500);
     }
   }
-  async function scan() {
+  async function scan(start = false, automatic = false) {
     clearTimeout(scanTimer);
     if (scanBusy || paused || document.hidden) return;
     scanBusy = true;
     try {
       if (Date.now() - scanStarted >= 30000) throw Error()NET" SWS_JS_TEXT(L_UI_SCAN_TIMEOUT) R"NET();
-      const r = await api('scan', {});
+      const r = await api('scan', { start: start ? '1' : '0', automatic: automatic ? '1' : '0' });
       if (paused) return;
       if (r.running) {
         return;
@@ -312,16 +313,16 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     }
   }
   // 进入已开启 Wi-Fi 的页面和打开开关时自动搜索，也保留手动刷新入口
-  function startScan() {
+  function startScan(automatic = false) {
     if (scanning || working || !loaded) return;
     scanning = true;
     scanStarted = Date.now();
     clearTimeout(statusTimer);
     $('nw-scan-state').textContent = )NET" SWS_JS_TEXT(L_UI_SEARCHING) R"NET(;
     sync();
-    scan();
+    scan(true, automatic);
   }
-  $('nw-scan').onclick = startScan;
+  $('nw-scan').onclick = () => startScan();
   $('nw-manual').onclick = () => openNetwork(null, true);
   $('nw-security').onchange = () => {
     sta.elements.open.checked = $('nw-security').value === 'open';

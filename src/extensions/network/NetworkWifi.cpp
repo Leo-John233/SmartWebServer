@@ -86,7 +86,7 @@ bool startAp() {
 void endScan() {
   WiFi.scanDelete();
   scanning = false;
-  if (scanAddedSta) WiFi.enableSTA(false);
+  if (scanAddedSta && !wifiManager.settings.stationEnabled) WiFi.enableSTA(false);
   scanAddedSta = false;
   wifiManager.networkBusy = false;
 }
@@ -121,8 +121,7 @@ void connectionFailed(const String &reason, bool retryable = true) {
   wifiManager.networkBusy = false;
   WiFi.setAutoReconnect(false);
   WiFi.disconnect();
-  // 结束失败的 STA 尝试，保留 AP，停止错误凭据引起的后台扫描和重连
-  WiFi.enableSTA(false);
+  // 只结束本次连接，退避期间保留 STA 接口，避免反复切换无线模式干扰热点
   // 回滚未验证的凭据，后续保存热点等设置时也不能把错误密码一并写入
   if (stationCandidate) {
     stationCandidate = false;
@@ -168,7 +167,14 @@ void handleWifiNetwork() {
   String action = www.arg("action");
   if (action == "status") { reply(200, configJson()); return; }
   if (www.method() != HTTP_POST) { error(405, L_UI_POST_REQUIRED); return; }
-  if (backgroundConnecting && (action == "scan" || action == "connect" || action == "ap")) {
+  const bool scanPoll = action == "scan" && www.arg("start") == "0";
+  // 过期轮询不能启动新扫描，也不能打断另一个页面或后台发起的连接
+  if (scanPoll && !scanning) { error(409, L_UI_SCAN_FAILED); return; }
+  // 状态读取后可能刚好开始重连，自动扫描仍需在设备端再次判断
+  if (action == "scan" && www.arg("automatic") == "1" && (connecting || pending)) {
+    error(409, L_UI_BUSY); return;
+  }
+  if (backgroundConnecting && ((action == "scan" && !scanPoll) || action == "connect" || action == "ap")) {
     // 用户操作优先，取消后台尝试后再处理；旧凭据和热点均保留
     WiFi.disconnect();
     connecting = backgroundConnecting = false;
@@ -302,8 +308,8 @@ void pollWifiNetwork() {
     }
     wasConnected = linked;
   }
-  // 浏览器关闭后也会释放扫描缓存，并恢复原来的无线模式
-  if (scanning && now - scanStarted >= 30000) endScan();
+  // scanDelete 只删除结果，不能取消 SDK 扫描，等待扫描结束后再回收和恢复模式
+  if (scanning && now - scanStarted >= 30000 && WiFi.scanComplete() != -1) endScan();
   if (pending && now - scheduledAt >= 1000) {
     uint8_t operation = pending; pending = 0;
     // 延迟应用期间若路由器掉线，取消关闭热点，保留可用入口

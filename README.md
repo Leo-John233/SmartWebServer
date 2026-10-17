@@ -263,3 +263,15 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 - node tests/locales.cjs：全部语言宏、格式与实际表单文本
 
 测试产物保存在 tests/output，代码注释使用中文且不加句号。
+
+## Wi-Fi 扫描与后台重连
+
+网络页面自动扫描会等待当前连接结束；用户手动刷新仍可中断后台尝试。设备端也检查自动扫描请求，避免状态查询与实际操作之间刚好开始重连的竞争。
+
+`/net-wifi` 的 POST `action=scan` 使用 `start=1` 启动扫描，后续轮询使用 `start=0`。自动启动额外传入 `automatic=1`。无扫描任务时的过期轮询返回 409，不会再启动扫描或断开 STA。为兼容旧调用，未提供 `start` 时仍按启动请求处理。
+
+连接失败只断开本次尝试并按原策略退避，不再反复关闭、开启 STA 接口；用户明确关闭 Wi-Fi 开关时才关闭接口。ESP8266 内核 2.4.2 的 `scanDelete()` 只释放结果，不取消正在进行的扫描，因此无人读取结果时，在 30 秒之后等待 SDK 扫描完成再回收结果和恢复原模式。等待过程不阻塞主循环；SDK 未结束扫描期间不接受新的配网操作。
+
+本地验证使用 `node tests/network-wifi-recovery.cjs`、`node tests/network-wifi-backend.cjs` 和 `node tests/network-wifi-performance.cjs`，覆盖过期轮询、自动扫描竞争、退避模式保持、扫描清理和页面操作。测试、工具和编译产物继续由 Git 忽略。
+
+抱闸锁定期间，命令入口也放行完整匹配的校准状态、附件发现和附件读数查询。原来的 `Status::update()` 依赖 `:A?#` 判断连接是否正常，拦截这条只读查询会直接触发“与 OnStep 的串口通信已断开”页面，并阻止保护模块继续获取正常状态。校准操作、设备选择、运动设置、拼接命令和校验帧仍按原锁定规则拒绝。`node tests/tracking-transport.cjs` 将真实状态发现与串口命令处理组合测试，覆盖锁定期间 OnStepX 和旧版 OnStep 的发现、持续在线及运动命令拒绝。
