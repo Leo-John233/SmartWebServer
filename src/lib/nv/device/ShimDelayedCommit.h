@@ -70,12 +70,19 @@ public:
 
   bool hasCommit() const override { return backend.hasCommit(); }
 
-  // Explicit commit barrier: commit immediately and clear any pending schedule.
+  // 立即提交，失败时保留待提交状态并在一秒后重试
   IoStatus commit() override {
+    const IoStatus result = backend.commit();
+    if (result != IoStatus::Ok) {
+      commitScheduled = true;
+      commitDueMs = millis() + 1000;
+      commitHardDueMs = commitDueMs;
+      return result;
+    }
     commitScheduled = false;
     commitDueMs = 0;
     commitHardDueMs = 0;
-    return backend.commit();
+    return result;
   }
 
   // Unified "done" concept: no scheduled commit pending AND backend reports done.
@@ -97,10 +104,7 @@ public:
     const bool hardExpired  = (maxLatencyMs != 0) && ((int32_t)(now - commitHardDueMs) >= 0);
 
     if (quietExpired || hardExpired) {
-      (void)backend.commit();
-      commitScheduled = false;
-      commitDueMs = 0;
-      commitHardDueMs = 0;
+      commit();
     }
   }
 

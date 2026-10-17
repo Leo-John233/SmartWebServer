@@ -141,9 +141,18 @@ public:
     return IoStatus::Ok;
   }
 
-  // Commit API is irrelevant when wrapping EEPROM/FRAM-like devices; keep consistent.
+  // 显式提交必须把缓存中的待写数据送到底层，失败时保留未完成的数据
   bool hasCommit() const override { return false; }
-  IoStatus commit() override { return IoStatus::Ok; }
+  IoStatus commit() override {
+    if (!backend.isWritable()) return IoStatus::ReadOnly;
+    for (uint32_t i = 0; i < capacityBytes && pendingWriteCount != 0; i++) {
+      if (!bitGet_(dirtyWriteBits, i)) continue;
+      const uint32_t pending = pendingWriteCount;
+      flushOneWriteFast_(i);
+      if (pendingWriteCount == pending) return IoStatus::IoError;
+    }
+    return backend.commit();
+  }
 
   // "Done" for this wrapper: no dirty bytes waiting to be written back.
   // (We keep an incremental counter; if you ever need "old exact recount", add a debug validator.)
