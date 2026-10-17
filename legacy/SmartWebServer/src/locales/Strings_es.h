@@ -437,8 +437,16 @@
 #define L_NETWORK_CHA "Canal"
 #define L_NETWORK_EN_AP_MODE "Habilitar modo de punto de acceso"
 
-#define L_NETWORK_OTA_TITLE "Actualización de firmware OTA SWS"
-#define L_NETWORK_EN_OTA "Activar modo OTA"
+#define L_NETWORK_OTA_TITLE "Actualización inalámbrica de SWS"
+#define L_NETWORK_EN_OTA "Entrar en modo de actualización al reiniciar"
+#define L_NETWORK_OTA_HELP "Cargue el firmware SWS desde Arduino IDE en el ordenador"
+#define L_NETWORK_OTA_PASSWORD "Contraseña de actualización"
+#define L_NETWORK_OTA_PASSWORD_HELP "Mínimo 8 caracteres, deje en blanco para conservar la contraseña"
+#define L_NETWORK_OTA_STEPS "Pasos de actualización"
+#define L_NETWORK_OTA_STEP_RESTART "Active el modo de actualización, guarde y reinicie SWS manualmente"
+#define L_NETWORK_OTA_STEP_PORT "En Arduino IDE, seleccione el puerto de red con <span class='sws-ota-port'>-OTA</span> en el nombre"
+#define L_NETWORK_OTA_STEP_UPLOAD "Pulse Subir e introduzca la contraseña de actualización"
+#define L_NETWORK_OTA_NOTE "Solo actualiza SWS, el control externo se pausa en modo de actualización"
 #define L_REBOOT_OTA "Reiniciar en modo OTA"
 
 #define L_NETWORK_CONFIG_SECURITY "Configuración de Seguridad de red"

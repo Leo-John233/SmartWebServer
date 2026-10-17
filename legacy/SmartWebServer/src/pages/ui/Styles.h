@@ -260,6 +260,27 @@ a:visited {
 .sws-network-layout > .b1 {
   width: 100% !important;
 }
+.sws-ota {
+  clear: both;
+  border-top: 1px solid var(--border);
+  margin-top: 18px;
+  padding-top: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.sws-ota-intro { margin: 0 0 20px; color: var(--muted); }
+.sws-ota-form > label:first-child { display: block; margin: 0 0 8px; font-weight: 600; }
+.sws-ota-form > input { width: 100%; min-height: 44px; margin: 0; }
+.sws-ota-help { margin: 8px 0 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.sws-ota-mode { display: flex; align-items: flex-start; gap: 10px; margin: 18px 0; }
+.sws-ota-mode input { flex-shrink: 0; margin: 3px 0 0; }
+.sws-ota-form > button { min-height: 44px; margin: 0; }
+.sws-ota-guide { margin: 22px 0 12px; padding: 16px; border-radius: 10px; background: var(--field); }
+.sws-ota-guide h3 { margin: 0 0 10px; font-size: 15px; }
+.sws-ota-guide ol { margin: 0; padding-left: 22px; }
+.sws-ota-guide li { padding-left: 3px; overflow-wrap: anywhere; }
+.sws-ota-guide li + li { margin-top: 8px; }
+.sws-ota-port { white-space: nowrap; }
 .sws-account {
   grid-column: 1/-1;
   border: 1px solid var(--border);

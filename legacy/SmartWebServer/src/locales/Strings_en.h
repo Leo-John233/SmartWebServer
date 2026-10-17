@@ -439,8 +439,16 @@
 #define L_NETWORK_CHA "Channel"
 #define L_NETWORK_EN_AP_MODE "Enable Access-Point Mode"
 
-#define L_NETWORK_OTA_TITLE "OTA SWS firmware update"
-#define L_NETWORK_EN_OTA "Enable OTA Mode"
+#define L_NETWORK_OTA_TITLE "SWS wireless update"
+#define L_NETWORK_EN_OTA "Enter update mode on next restart"
+#define L_NETWORK_OTA_HELP "Upload SWS firmware using Arduino IDE on your computer"
+#define L_NETWORK_OTA_PASSWORD "Update password"
+#define L_NETWORK_OTA_PASSWORD_HELP "At least 8 characters, leave blank to keep the current password"
+#define L_NETWORK_OTA_STEPS "Update steps"
+#define L_NETWORK_OTA_STEP_RESTART "Enable update mode and save, then manually restart SWS"
+#define L_NETWORK_OTA_STEP_PORT "In Arduino IDE, select the network port with <span class='sws-ota-port'>-OTA</span> in its name"
+#define L_NETWORK_OTA_STEP_UPLOAD "Click Upload and enter the update password"
+#define L_NETWORK_OTA_NOTE "Updates SWS firmware only, third-party control is paused in update mode"
 #define L_REBOOT_OTA "Reboot into OTA mode"
 
 #define L_NETWORK_CONFIG_SECURITY "Network Configuration Security"

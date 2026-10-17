@@ -439,8 +439,16 @@
 #define L_NETWORK_CHA "Canal"
 #define L_NETWORK_EN_AP_MODE "Activare Mod Access-Point"
 
-#define L_NETWORK_OTA_TITLE "Actualizare firmware SWS prin OTA"
-#define L_NETWORK_EN_OTA "Activare Mod OTA"
+#define L_NETWORK_OTA_TITLE "Actualizare wireless SWS"
+#define L_NETWORK_EN_OTA "Intră în modul de actualizare la următoarea repornire"
+#define L_NETWORK_OTA_HELP "Încarcă firmware-ul SWS din Arduino IDE pe calculator"
+#define L_NETWORK_OTA_PASSWORD "Parolă de actualizare"
+#define L_NETWORK_OTA_PASSWORD_HELP "Minimum 8 caractere, lasă gol pentru a păstra parola"
+#define L_NETWORK_OTA_STEPS "Pași de actualizare"
+#define L_NETWORK_OTA_STEP_RESTART "Activează modul de actualizare, salvează și repornește manual SWS"
+#define L_NETWORK_OTA_STEP_PORT "În Arduino IDE, selectează portul de rețea cu <span class='sws-ota-port'>-OTA</span> în nume"
+#define L_NETWORK_OTA_STEP_UPLOAD "Apasă Încarcă și introdu parola de actualizare"
+#define L_NETWORK_OTA_NOTE "Actualizează doar SWS, controlul extern este suspendat în modul de actualizare"
 #define L_REBOOT_OTA "Repornire în mod OTA"
 
 #define L_NETWORK_CONFIG_SECURITY "Securitate Configurare Rețea"

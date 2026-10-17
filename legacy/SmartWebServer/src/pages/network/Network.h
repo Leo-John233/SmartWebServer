@@ -74,16 +74,32 @@ const char htmL_NET_SN[] PROGMEM =
 #endif
 
 #ifdef OTA_PRESENT
-  const char htmL_NETWORKSSID8[] PROGMEM =
-  "<br/><hr><form method='post' action='/net.htm'>"
-  L_NETWORK_PWD ": <input style='width:8em; text-align:left;' name='otapwd' type='password' minlength='8' maxlength='63'> (" L_NETWORK_PWD_MSG ")<br/>"
+  const char html_network_ota_begin[] PROGMEM =
+  "<div class='sws-ota'><p class='sws-ota-intro'>" L_NETWORK_OTA_HELP "</p>"
+  "<form method='post' action='/net.htm' class='sws-ota-form'>"
+  "<label for='sws-ota-password'>" L_NETWORK_OTA_PASSWORD "</label>"
+  "<input id='sws-ota-password' name='otapwd' type='password' minlength='8' maxlength='63' autocomplete='new-password' aria-describedby='sws-ota-password-help'>"
+  "<p id='sws-ota-password-help' class='sws-ota-help'>" L_NETWORK_OTA_PASSWORD_HELP "</p>";
+
   #if DISPLAY_RESET_CONTROLS != OFF
+    const char html_network_ota_action[] PROGMEM =
     "<br/><button " SWS_CONFIRM_ATTRIBUTE " onclick=\"return confirm(this.dataset.confirm)\" type='submit' name='otareboot' value='1'>" L_REBOOT_OTA "</button></form>\n"
+    ;
   #else
-    L_NETWORK_EN_OTA ": <input type='checkbox' name='otaen' value='1' %s><br/>"
-    "<br/><button type='submit'>" L_UPLOAD "</button></form>\n"
+    const char html_network_ota_mode[] PROGMEM =
+    "<label class='sws-ota-mode'><input type='checkbox' name='otaen' value='1' %s><span>" L_NETWORK_EN_OTA "</span></label>";
+    const char html_network_ota_action[] PROGMEM =
+    "<button type='submit'>" L_SAVE_SETTINGS "</button></form>\n";
   #endif
-  ;
+  const char html_network_ota_end[] PROGMEM =
+  "<div class='sws-ota-guide'><h3>" L_NETWORK_OTA_STEPS "</h3><ol><li>"
+  #if DISPLAY_RESET_CONTROLS != OFF
+    L_REBOOT_OTA
+  #else
+    L_NETWORK_OTA_STEP_RESTART
+  #endif
+  "</li><li>" L_NETWORK_OTA_STEP_PORT "</li><li>" L_NETWORK_OTA_STEP_UPLOAD "</li></ol></div>"
+  "<p class='sws-ota-help'>" L_NETWORK_OTA_NOTE "</p></div>";
 #endif
 
 const char html_logout[] PROGMEM =

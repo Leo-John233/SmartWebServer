@@ -445,8 +445,16 @@
 #define L_NETWORK_CHA "信道"
 #define L_NETWORK_EN_AP_MODE "启用热点模式 (AP)"
 
-#define L_NETWORK_OTA_TITLE "OTA SWS 无线固件更新"
-#define L_NETWORK_EN_OTA "启用 OTA 模式"
+#define L_NETWORK_OTA_TITLE "SWS 无线更新"
+#define L_NETWORK_EN_OTA "下次重启进入更新模式"
+#define L_NETWORK_OTA_HELP "使用电脑上的 Arduino IDE 上传 SWS 固件"
+#define L_NETWORK_OTA_PASSWORD "更新密码"
+#define L_NETWORK_OTA_PASSWORD_HELP "至少 8 个字符，留空保留原密码"
+#define L_NETWORK_OTA_STEPS "更新步骤"
+#define L_NETWORK_OTA_STEP_RESTART "勾选更新模式并保存，手动重启 SWS"
+#define L_NETWORK_OTA_STEP_PORT "在 Arduino IDE 的端口中选择名称带 <span class='sws-ota-port'>-OTA</span> 的设备"
+#define L_NETWORK_OTA_STEP_UPLOAD "点击上传并输入更新密码"
+#define L_NETWORK_OTA_NOTE "仅更新 SWS 固件，更新模式下第三方软件控制暂停"
 #define L_REBOOT_OTA "重启进入 OTA 模式"
 
 #define L_NETWORK_CONFIG_SECURITY "网络配置安全"

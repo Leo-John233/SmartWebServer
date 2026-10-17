@@ -119,11 +119,14 @@ void handleNetwork() {
       nv().kv().get("OTA_SETTINGS", otaSettings);
       
       snprintf_P(temp, sizeof(temp), html_tile_text_beg, "33em", "10em", L_NETWORK_OTA_TITLE); data.concat(temp);
-      #if DISPLAY_RESET_CONTROLS != OFF
-        snprintf_P(temp, sizeof(temp), htmL_NETWORKSSID8); data.concat(temp);
-      #else
-        snprintf_P(temp, sizeof(temp), htmL_NETWORKSSID8, otaSettings.enabled ? "checked" : ""); data.concat(temp);
+      data.concat(FPSTR(html_network_ota_begin));
+      www.sendContentAndClear(data);
+      #if DISPLAY_RESET_CONTROLS == OFF
+        snprintf_P(temp, sizeof(temp), html_network_ota_mode, otaSettings.enabled ? "checked" : ""); data.concat(temp);
       #endif
+      data.concat(FPSTR(html_network_ota_action));
+      www.sendContentAndClear(data);
+      data.concat(FPSTR(html_network_ota_end));
       data.concat(FPSTR(html_tile_end));
       www.sendContentAndClear(data);
     #endif
