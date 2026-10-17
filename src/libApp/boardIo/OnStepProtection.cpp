@@ -45,4 +45,3 @@ ProtectionStopResult OnStepProtection::stop() {
   result.trackingOffAccepted = received && !strcmp(reply, "1");
   return result;
 }
-

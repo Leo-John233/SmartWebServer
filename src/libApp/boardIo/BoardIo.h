@@ -28,6 +28,7 @@ private:
   BoardIoPolicy policy_;
   ProtectionPort *port_ = nullptr;
   bool started_ = false;
+  bool startFailed_ = false;
   bool servicing_ = false, faultSaved_ = true;
   uint8_t savedFault_ = 0;
   uint32_t saveAttemptAt_ = 0;

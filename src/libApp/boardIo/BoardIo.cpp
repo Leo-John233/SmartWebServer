@@ -10,6 +10,13 @@ static void pollBoardOutputs() { boardIo.tick(); }
 static void pollBoardDriver() { boardIo.pollDriver(); }
 static bool boardMotionAllowed() { return boardIo.motionAllowed(); }
 
+static bool readBoardSetting(const char *key, uint8_t &value) {
+  const KvPartition::Status result = nv().kv().get(key, value);
+  if (result == KvPartition::Status::Ok) return true;
+  if (result != KvPartition::Status::NotFound) return false;
+  return nv().kv().put(key, value) == KvPartition::Status::Ok;
+}
+
 void BoardIo::initPins() {
   SwsCommandGate::permit() = boardMotionAllowed;
   if (brakeAvailable()) SwsCommandGate::setLocked(true);
@@ -26,12 +33,12 @@ void BoardIo::begin() {
   if (!activityAvailable() && !brakeAvailable()) return;
   if (!port_) port_ = &onStepProtection;
   uint8_t settings = 3; // 默认开启活动指示和自动保护，不持久保存“已就绪”
-  const bool settingsOk = nv().kv().getOrInit("BOARD_IO_SETTINGS", settings) && settings <= 3;
+  const bool settingsOk = readBoardSetting("BOARD_IO_SETTINGS", settings) && settings <= 3;
   if (!settingsOk) settings = 3;
   policy_.configure(settings & 1, brakeAvailable() && (settings & 2), millis());
   if (brakeAvailable()) {
     uint8_t fault = 0;
-    const bool faultOk = nv().kv().getOrInit("RA_BRAKE_FAULT", fault) && fault <= uint8_t(BrakeFault::Storage);
+    const bool faultOk = readBoardSetting("RA_BRAKE_FAULT", fault) && fault <= uint8_t(BrakeFault::Storage);
     savedFault_ = fault;
     policy_.restoreFault(settingsOk && faultOk ? BrakeFault(fault) : BrakeFault::Storage);
     faultSaved_ = settingsOk && faultOk;
@@ -42,9 +49,12 @@ void BoardIo::begin() {
     ledLevel_ = HIGH;
   #endif
   // 无法建立输出监控任务时维持初始化电平；启用保护时仍保持启动抱闸
-  if (!tasks.add(20, 0, true, 1, pollBoardOutputs, "BoardIO")) return;
+  if (!tasks.add(20, 0, true, 1, pollBoardOutputs, "BoardIO")) { startFailed_ = true; return; }
   // 低于命令通道及网页，缺失驱动的查询不能抢占用户操作
-  if (brakeAvailable() && !tasks.add(BoardIoPolicy::PollIntervalMs, 0, true, 4, pollBoardDriver, "RaBrake")) return;
+  if (brakeAvailable() && !tasks.add(BoardIoPolicy::PollIntervalMs, 0, true, 4, pollBoardDriver, "RaBrake")) {
+    startFailed_ = true;
+    return;
+  }
   started_ = true;
   tick();
 }
@@ -163,6 +173,6 @@ bool BoardIo::ownsPin(int pin) const {
 }
 
 BrakeState BoardIo::brakeState() const {
-  if (!started_) return BrakeState::Starting;
+  if (!started_) return startFailed_ ? BrakeState::StartFailed : BrakeState::Starting;
   return policy_.brakeState(status.onStepFound && status.mountFound == SD_TRUE, millis());
 }

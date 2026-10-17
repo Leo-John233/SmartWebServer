@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "ProtectionPort.h"
 
-enum class BrakeState { Starting, Disabled, Waiting, Stopping, StopFailed, Fault, Stale, Released };
+enum class BrakeState { Starting, StartFailed, Disabled, Waiting, Stopping, StopFailed, Fault, Stale, Released };
 enum class BrakeFault : uint8_t { None, Driver, Feedback, Disconnected, Stale, ProtectionOff, Storage };
 
 // 独立保护策略，不依赖串口协议、GPIO、网页或存储
