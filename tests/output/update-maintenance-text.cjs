@@ -1,0 +1,18 @@
+const fs=require('node:fs');
+const keys=['L_RESET_TITLE','L_RESET_MSG1','L_DOWN_MESSAGE1','L_WEB_PASSWORD_TITLE','L_WEB_PASSWORD_HELP','L_WEB_PASSWORD_NEW','L_WEB_PASSWORD_SAVE','L_WEB_LOGOUT','L_WEB_PASSWORD_RULE'];
+const translations={
+cn:['重启与恢复','仅在设备处于零位或已停放时接受重启请求','重启后等待几秒，再确认 Wi-Fi 已连接','管理密码','用于登录网络设置，与 Wi-Fi 连接密码无关','新管理密码','保存密码','退出登录','3–31 个字符，留空不修改'],
+en:['Restart and recovery','Reboot requests are accepted only when the mount is at home or parked','After restarting, wait a few seconds and check the Wi-Fi connection','Admin password','Used to sign in to network settings, separate from the Wi-Fi password','New admin password','Save password','Sign out','3–31 characters; leave blank to keep the current password'],
+ca:['Reinici i recuperació','Només es pot reiniciar amb la muntura a origen o aparcada','Després del reinici, espereu uns segons i comproveu la connexió Wi-Fi','Contrasenya d’administració','Per accedir a la configuració de xarxa, diferent de la contrasenya Wi-Fi','Nova contrasenya','Desa la contrasenya','Tanca la sessió','3–31 caràcters; deixeu en blanc per no canviar-la'],
+de:['Neustart und Wiederherstellung','Ein Neustart wird nur in Ausgangsposition oder Parkstellung akzeptiert','Nach dem Neustart einige Sekunden warten und die WLAN-Verbindung prüfen','Administrationspasswort','Für die Anmeldung an den Netzwerkeinstellungen, unabhängig vom WLAN-Passwort','Neues Administrationspasswort','Passwort speichern','Abmelden','3–31 Zeichen; leer lassen, um das Passwort beizubehalten'],
+es:['Reinicio y recuperación','Solo se acepta reiniciar con la montura en origen o estacionada','Tras reiniciar, espere unos segundos y compruebe la conexión Wi-Fi','Contraseña de administración','Para acceder a los ajustes de red, distinta de la contraseña Wi-Fi','Nueva contraseña','Guardar contraseña','Cerrar sesión','3–31 caracteres; deje vacío para conservar la contraseña'],
+fr:['Redémarrage et restauration','Le redémarrage est accepté uniquement si la monture est à l’origine ou stationnée','Après le redémarrage, attendez quelques secondes puis vérifiez la connexion Wi-Fi','Mot de passe administrateur','Pour accéder aux réglages réseau, distinct du mot de passe Wi-Fi','Nouveau mot de passe','Enregistrer le mot de passe','Se déconnecter','3–31 caractères ; laisser vide pour conserver le mot de passe'],
+it:['Riavvio e ripristino','Il riavvio è accettato solo con la montatura in origine o parcheggiata','Dopo il riavvio, attendere qualche secondo e verificare la connessione Wi-Fi','Password amministratore','Per accedere alle impostazioni di rete, distinta dalla password Wi-Fi','Nuova password','Salva password','Esci','3–31 caratteri; lasciare vuoto per mantenere la password'],
+jp:['再起動と復元','ホーム位置またはパーク状態のときのみ再起動を受け付けます','再起動後は数秒待ち、Wi-Fi 接続を確認してください','管理パスワード','ネットワーク設定へのログイン用で、Wi-Fi 接続用とは別のパスワード','新しい管理パスワード','パスワードを保存','ログアウト','3～31 文字、変更しない場合は空欄'],
+ro:['Repornire și restaurare','Repornirea este acceptată doar cu montura la origine sau parcată','După repornire, așteptați câteva secunde și verificați conexiunea Wi-Fi','Parolă de administrare','Pentru accesul la setările de rețea, diferită de parola Wi-Fi','Parolă nouă','Salvează parola','Deconectare','3–31 de caractere; lăsați gol pentru a păstra parola']
+};
+for(const [language,values]of Object.entries(translations)){
+ const file='legacy/SmartWebServer/src/locales/Strings_'+language+'.h';let source=fs.readFileSync(file,'utf8');
+ keys.forEach((key,i)=>{const pattern=new RegExp('^#define '+key+' .*$', 'm'),line='#define '+key+' '+JSON.stringify(values[i]);source=pattern.test(source)?source.replace(pattern,line):source.trimEnd()+'\n'+line+'\n';});
+ fs.writeFileSync(file,source);
+}
