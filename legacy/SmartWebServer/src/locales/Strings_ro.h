@@ -724,3 +724,8 @@
 #define L_TRACK_REJECTED "Urmărire refuzată; verificați parcarea, originea și driverul"
 #define L_TRACK_TIMEOUT "Răspuns expirat; verificați conexiunea"
 #define L_TRACK_INVALID "Răspuns nevalid; reîncercați"
+
+#define L_TRACKING_RATE "Viteză de urmărire"
+#define L_MOVEMENT_RATE "Viteză de deplasare"
+#define L_GUIDING_RATE "Viteză de ghidare"
+#define L_TRACKING_SETTINGS "Setări de urmărire"

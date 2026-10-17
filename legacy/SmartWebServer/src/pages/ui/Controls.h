@@ -119,12 +119,26 @@ document.addEventListener('DOMContentLoaded', () => {
       attributeFilter: ['data-selected', 'disabled'],
     });
     sync();
-    if (tracking && source.classList.contains('sws-guide-choice')) {
-      let collapse = tracking.querySelector('.collapsible');
-      while (collapse && collapse.parentElement !== tracking) collapse = collapse.parentElement;
-      tracking.insertBefore(label, collapse || null);
-    }
   });
+  if (tracking) {
+    const collapse = tracking.querySelector('.collapsible'), rates = document.createElement('div');
+    rates.className = 'sws-tracking-rates';
+    ['trk_sid','guide_r3','guide_r0'].forEach(id => {
+      const choice = document.getElementById(id)?.closest('.sws-choice');
+      if (choice) rates.appendChild(choice);
+    });
+    let block = collapse;
+    while (block && block.parentElement !== tracking) block = block.parentElement;
+    tracking.insertBefore(rates, block || null);
+    const advanced = document.querySelector('.sws-advanced-grid');
+    if (collapse && advanced) {
+      const card = document.createElement('section'), title = document.createElement('h2');
+      card.className = 'b1 sws-tracking-advanced';
+      title.textContent = )UI" SWS_JS_TEXT(L_TRACKING_SETTINGS) R"UI(;
+      card.append(title,block);
+      advanced.appendChild(card);
+    }
+  }
   const on = document.getElementById('trk_on'),
     off = document.getElementById('trk_off');
   if (on && off) {

@@ -724,3 +724,8 @@
 #define L_TRACK_REJECTED "Inseguimento rifiutato; verificare parcheggio, origine e driver"
 #define L_TRACK_TIMEOUT "Risposta scaduta; verificare la connessione"
 #define L_TRACK_INVALID "Risposta non valida; riprovare"
+
+#define L_TRACKING_RATE "Velocità di inseguimento"
+#define L_MOVEMENT_RATE "Velocità di movimento"
+#define L_GUIDING_RATE "Velocità di guida"
+#define L_TRACKING_SETTINGS "Impostazioni di inseguimento"

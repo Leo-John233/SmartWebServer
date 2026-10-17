@@ -723,3 +723,8 @@
 #define L_TRACK_REJECTED "追尾が拒否されました パーク・原点・ドライバーの状態を確認してください"
 #define L_TRACK_TIMEOUT "応答がタイムアウトしました 接続を確認してください"
 #define L_TRACK_INVALID "応答が不正です 再試行してください"
+
+#define L_TRACKING_RATE "追尾速度"
+#define L_MOVEMENT_RATE "移動速度"
+#define L_GUIDING_RATE "ガイド速度"
+#define L_TRACKING_SETTINGS "追尾設定"

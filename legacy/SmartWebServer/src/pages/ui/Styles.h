@@ -2510,6 +2510,22 @@ h2.sws-section-title {
   font-weight: 600;
   line-height: 28px;
 }
+.sws-tracking .sws-track-switch { margin-bottom: 28px; }
+.sws-tracking-rates { display: grid; gap: 24px; }
+.sws-tracking-rates .sws-choice { margin: 0; gap: 12px; }
+.sws-tracking-rates .sws-choice > span { font-size: 16px; line-height: 1.5; }
+.sws-tracking-rates select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 48px;
+  padding: 10px 44px 10px 16px;
+  font-size: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='%23b5b5b5' d='M1 1h10L6 9z'/%3E%3C/svg%3E");
+  background-size: 12px 10px;
+  background-position: right 16px center;
+  background-repeat: no-repeat;
+}
+.sws-tracking-advanced h2 { font-size: 18px; margin: 0 0 16px; }
 
 /* 隐藏旧页头的名称区域，版本信息由原始服务端数据移至页头右侧 */
 .sws-shell .t td:last-child {

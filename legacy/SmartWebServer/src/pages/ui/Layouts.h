@@ -39,7 +39,7 @@ const char html_layout_mount_library[] PROGMEM =
   "</section><section class='sws-library-section'>";
 
 const char html_layout_mount_advanced[] PROGMEM =
-  "</section><details class='sws-more' open><summary>" L_ALIGN " / " L_PAGE_PEC "</summary><div class='sws-settings-grid sws-advanced-grid'>";
+  "</section><details class='sws-more' open><summary>" L_ALIGN " / " L_PAGE_PEC " / " L_TRACKING_SETTINGS "</summary><div class='sws-settings-grid sws-advanced-grid'>";
 
 const char html_layout_mount_end[] PROGMEM =
   "</div></details></div>";

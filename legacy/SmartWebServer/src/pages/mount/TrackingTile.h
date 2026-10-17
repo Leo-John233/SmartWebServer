@@ -15,7 +15,7 @@ const char html_trackingEnable[] PROGMEM =
 "<button id='trk_off' class='btns_left' onpointerdown=\"s('dr','T0')\" type='button'>" L_OFF "</button>";
 
 const char html_trackingPreset[] PROGMEM =
-"<div class='sws-choice-source' data-label='" L_TRACKING " " L_RATE "'>"
+"<div class='sws-choice-source' data-label='" L_TRACKING_RATE "'>"
 "<br /><button id='trk_sid' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" title='" L_HINT_RATE_SIDEREAL "' type='button'>" SIDEREAL_CH "</button>"
 "<button id='trk_lun' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" title='" L_HINT_RATE_LUNAR "' type='button'>" LUNAR_CH "</button>"
 "<button id='trk_sol' class='bbh' style='width: 2em' onpointerdown=\"g('Th')\" title='" L_HINT_RATE_SOLAR "' type='button'>" SOLAR_CH "</button>"

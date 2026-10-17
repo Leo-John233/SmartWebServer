@@ -732,3 +732,8 @@
 #define L_TRACK_REJECTED "Nachführung abgelehnt; Park-, Referenz- und Treiberstatus prüfen"
 #define L_TRACK_TIMEOUT "Antwortzeit überschritten; Verbindung prüfen"
 #define L_TRACK_INVALID "Ungültige Antwort; erneut versuchen"
+
+#define L_TRACKING_RATE "Nachführgeschwindigkeit"
+#define L_MOVEMENT_RATE "Schwenkgeschwindigkeit"
+#define L_GUIDING_RATE "Guidinggeschwindigkeit"
+#define L_TRACKING_SETTINGS "Nachführeinstellungen"

@@ -722,3 +722,8 @@
 #define L_TRACK_REJECTED "Seguiment rebutjat; comproveu aparcament, origen i controlador"
 #define L_TRACK_TIMEOUT "Temps d’espera esgotat; comproveu la connexió"
 #define L_TRACK_INVALID "Resposta no vàlida; torneu-ho a provar"
+
+#define L_TRACKING_RATE "Velocitat de seguiment"
+#define L_MOVEMENT_RATE "Velocitat de moviment"
+#define L_GUIDING_RATE "Velocitat de guiatge"
+#define L_TRACKING_SETTINGS "Configuració de seguiment"

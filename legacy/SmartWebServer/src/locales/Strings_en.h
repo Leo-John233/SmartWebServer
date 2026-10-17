@@ -724,3 +724,8 @@
 #define L_TRACK_REJECTED "Controller rejected tracking; check park, home and driver status"
 #define L_TRACK_TIMEOUT "Controller response timed out; check connection"
 #define L_TRACK_INVALID "Invalid controller response; retry"
+
+#define L_TRACKING_RATE "Tracking rate"
+#define L_MOVEMENT_RATE "Slew rate"
+#define L_GUIDING_RATE "Guide rate"
+#define L_TRACKING_SETTINGS "Tracking settings"

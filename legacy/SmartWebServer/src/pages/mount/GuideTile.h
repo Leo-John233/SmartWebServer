@@ -27,19 +27,19 @@ const char html_guidePad[] PROGMEM =
 "<button class='gb' ontouchstart=\"gt(event,'s1')\" ontouchend=\"gu(event,'s0')\" ontouchcancel=\"gu(event,'s0')\" ontouchmove=\"return gc(event)\" onpointerdown=\"gp(event,'s1')\" onpointerup=\"gs(event,'s0')\" onpointercancel=\"gs(event,'s0')\" oncontextmenu=\"return gc(event)\" type='button'>" BUTTON_S "</button></div>";
 
 const char html_guidePulseRates[] PROGMEM =
-"<div class='sws-choice-source sws-guide-choice' data-label='" L_GUIDE " " L_RATE "'>"
-"<button id='guide_r0' class='btns_right' onpointerdown=\"g('R0')\" type='button'>0.25</button>"
-"<button id='guide_r1' class='btns_mid' onpointerdown=\"g('R1')\" type='button'>0.5</button>"
-"<button id='guide_r2' class='btns_left' onpointerdown=\"g('R2')\" type='button'>1x</button>"
+"<div class='sws-choice-source sws-guide-choice' data-label='" L_GUIDING_RATE "'>"
+"<button id='guide_r0' class='btns_right' onpointerdown=\"g('R0')\" type='button'>0.25X</button>"
+"<button id='guide_r1' class='btns_mid' onpointerdown=\"g('R1')\" type='button'>0.5X</button>"
+"<button id='guide_r2' class='btns_left' onpointerdown=\"g('R2')\" type='button'>1X</button>"
 "</div>";
 
 const char html_guideRates[] PROGMEM =
-"<div class='sws-choice-source sws-guide-choice' data-label='" L_CONTROLS " " L_RATE "'>"
-"<button id='guide_r3' class='btns_right' onpointerdown=\"g('R3')\" type='button'>2x</button>"
-"<button id='guide_r4' class='btns_mid' onpointerdown=\"g('R4')\" type='button'>4x</button>"
-"<button id='guide_r5' class='btns_mid' onpointerdown=\"g('R5')\" type='button'>8x</button>"
-"<button id='guide_r6' class='btns_mid' onpointerdown=\"g('R6')\" type='button'>20x</button>"
-"<button id='guide_r7' class='btns_mid' onpointerdown=\"g('R7')\" type='button'>48x</button>"
-"<button id='guide_r8' class='btns_mid' onpointerdown=\"g('R8')\" type='button'>VF</button>"
-"<button id='guide_r9' class='btns_left' onpointerdown=\"g('R9')\" type='button'>VVF</button>"
+"<div class='sws-choice-source sws-guide-choice' data-label='" L_MOVEMENT_RATE "'>"
+"<button id='guide_r3' class='btns_right' onpointerdown=\"g('R3')\" type='button'>2X</button>"
+"<button id='guide_r4' class='btns_mid' onpointerdown=\"g('R4')\" type='button'>4X</button>"
+"<button id='guide_r5' class='btns_mid' onpointerdown=\"g('R5')\" type='button'>8X</button>"
+"<button id='guide_r6' class='btns_mid' onpointerdown=\"g('R6')\" type='button'>20X</button>"
+"<button id='guide_r7' class='btns_mid' onpointerdown=\"g('R7')\" type='button'>48X</button>"
+"<button id='guide_r8' class='btns_mid' onpointerdown=\"g('R8')\" type='button'>MAX / 2</button>"
+"<button id='guide_r9' class='btns_left' onpointerdown=\"g('R9')\" type='button'>MAX</button>"
 "</div>";

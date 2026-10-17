@@ -724,3 +724,8 @@
 #define L_TRACK_REJECTED "Suivi refusé ; vérifiez stationnement, origine et pilote"
 #define L_TRACK_TIMEOUT "Délai de réponse dépassé ; vérifiez la connexion"
 #define L_TRACK_INVALID "Réponse invalide ; réessayez"
+
+#define L_TRACKING_RATE "Vitesse de suivi"
+#define L_MOVEMENT_RATE "Vitesse de déplacement"
+#define L_GUIDING_RATE "Vitesse de guidage"
+#define L_TRACKING_SETTINGS "Réglages du suivi"
