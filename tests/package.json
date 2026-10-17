@@ -1,8 +1,0 @@
-{
-  "name": "smartwebserver-tests",
-  "private": true,
-  "description": "Native firmware regression and browser test dependencies",
-  "devDependencies": {
-    "playwright": "1.62.1"
-  }
-}
