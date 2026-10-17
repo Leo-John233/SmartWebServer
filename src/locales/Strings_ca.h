@@ -748,5 +748,4 @@
 #define L_IO_FAULT_DISCONNECTED "Bloqueig: controlador desconnectat"
 #define L_IO_FAULT_STALE "Bloqueig: resposta caducada"
 #define L_IO_FAULT_OFF "Bloqueig: protecció desactivada"
-#define L_IO_FAULT_STORAGE "Error en desar la fallada, manté el bloqueig"
 #define L_IO_BRAKE_START_FAILED "Error en iniciar la protecció, fre activat"

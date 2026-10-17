@@ -3,14 +3,13 @@
 #include "ProtectionPort.h"
 
 enum class BrakeState { Starting, StartFailed, Disabled, Waiting, Stopping, StopFailed, Fault, Stale, Released };
-enum class BrakeFault : uint8_t { None, Driver, Feedback, Disconnected, Stale, ProtectionOff, Storage };
+enum class BrakeFault : uint8_t { None, Driver, Feedback, Disconnected, Stale, ProtectionOff };
 
 // 独立保护策略，不依赖串口协议、GPIO、网页或存储
 class BoardIoPolicy {
 public:
   enum : uint32_t { PollIntervalMs = 250, FeedbackStaleMs = 1000, ReadyMs = 500 };
   void configure(bool activity, bool protection, uint32_t now);
-  void restoreFault(BrakeFault reason);
   void traffic(uint32_t now);
   void feedback(const ProtectionFeedback &feedback, uint32_t now);
   void checkFeedback(bool connected, uint32_t now);

@@ -750,5 +750,4 @@
 #define L_IO_FAULT_DISCONNECTED "Blocare: controler deconectat"
 #define L_IO_FAULT_STALE "Blocare: răspuns expirat"
 #define L_IO_FAULT_OFF "Blocare: protecție dezactivată"
-#define L_IO_FAULT_STORAGE "Eroare la salvarea defectului, rămâne blocat"
 #define L_IO_BRAKE_START_FAILED "Pornirea protecției a eșuat, frână cuplată"

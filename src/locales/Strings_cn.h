@@ -753,5 +753,4 @@
 #define L_IO_FAULT_DISCONNECTED "锁定原因：主控失联"
 #define L_IO_FAULT_STALE "锁定原因：反馈超时"
 #define L_IO_FAULT_OFF "锁定原因：关闭保护"
-#define L_IO_FAULT_STORAGE "故障存储异常，保持锁定"
 #define L_IO_BRAKE_START_FAILED "保护启动失败，保持抱闸"

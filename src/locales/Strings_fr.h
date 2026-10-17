@@ -750,5 +750,4 @@
 #define L_IO_FAULT_DISCONNECTED "Verrouillage : contrôleur déconnecté"
 #define L_IO_FAULT_STALE "Verrouillage : retour expiré"
 #define L_IO_FAULT_OFF "Verrouillage : protection désactivée"
-#define L_IO_FAULT_STORAGE "Erreur de stockage du défaut, verrouillage maintenu"
 #define L_IO_BRAKE_START_FAILED "Échec du démarrage de la protection, frein serré"

@@ -748,5 +748,4 @@
 #define L_IO_FAULT_DISCONNECTED "Bloqueo: controlador desconectado"
 #define L_IO_FAULT_STALE "Bloqueo: respuesta caducada"
 #define L_IO_FAULT_OFF "Bloqueo: protección desactivada"
-#define L_IO_FAULT_STORAGE "Error al guardar el fallo, permanece bloqueado"
 #define L_IO_BRAKE_START_FAILED "Error al iniciar protección, freno aplicado"

@@ -750,5 +750,4 @@
 #define L_IO_FAULT_DISCONNECTED "Latched: controller disconnected"
 #define L_IO_FAULT_STALE "Latched: feedback timeout"
 #define L_IO_FAULT_OFF "Latched: protection disabled"
-#define L_IO_FAULT_STORAGE "Fault storage error, remaining locked"
 #define L_IO_BRAKE_START_FAILED "Protection startup failed, brake engaged"

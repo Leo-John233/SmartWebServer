@@ -16,7 +16,6 @@ public:
   bool resetFault();
   bool retryStop();
   bool motionAllowed();
-  bool faultSaved() const { return faultSaved_; }
   bool save(bool activity, bool protection);
   bool ownsPin(int pin) const;
   bool activityAvailable() const { return SWS_ACTIVITY_LED_PIN != OFF; }
@@ -29,9 +28,7 @@ private:
   ProtectionPort *port_ = nullptr;
   bool started_ = false;
   bool startFailed_ = false;
-  bool servicing_ = false, faultSaved_ = true;
-  uint8_t savedFault_ = 0;
-  uint32_t saveAttemptAt_ = 0;
+  bool servicing_ = false;
   int ledLevel_ = -1, brakeLevel_ = -1;
 };
 

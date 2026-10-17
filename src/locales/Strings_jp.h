@@ -749,5 +749,4 @@
 #define L_IO_FAULT_DISCONNECTED "ロック理由：主制御との通信断"
 #define L_IO_FAULT_STALE "ロック理由：応答期限切れ"
 #define L_IO_FAULT_OFF "ロック理由：保護オフ"
-#define L_IO_FAULT_STORAGE "故障保存エラー、ロックを維持"
 #define L_IO_BRAKE_START_FAILED "保護の起動失敗、制動を維持"

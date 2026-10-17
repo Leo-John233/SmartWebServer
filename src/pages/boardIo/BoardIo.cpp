@@ -18,7 +18,6 @@ static const char *brakeMessage() {
 }
 
 static const char *faultMessage() {
-  if (!boardIo.faultSaved()) return L_IO_FAULT_STORAGE;
   switch (boardIo.policy().faultReason()) {
     case BrakeFault::None: return "";
     case BrakeFault::Driver: return L_IO_FAULT_DRIVER;
@@ -26,7 +25,6 @@ static const char *faultMessage() {
     case BrakeFault::Disconnected: return L_IO_FAULT_DISCONNECTED;
     case BrakeFault::Stale: return L_IO_FAULT_STALE;
     case BrakeFault::ProtectionOff: return L_IO_FAULT_OFF;
-    case BrakeFault::Storage: return L_IO_FAULT_STORAGE;
   }
   return L_UNKNOWN;
 }

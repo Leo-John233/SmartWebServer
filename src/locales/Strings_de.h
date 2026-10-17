@@ -758,5 +758,4 @@
 #define L_IO_FAULT_DISCONNECTED "Verriegelt: Steuerung getrennt"
 #define L_IO_FAULT_STALE "Verriegelt: Rückmeldung abgelaufen"
 #define L_IO_FAULT_OFF "Verriegelt: Schutz abgeschaltet"
-#define L_IO_FAULT_STORAGE "Fehlerspeicherung gestört, bleibt verriegelt"
 #define L_IO_BRAKE_START_FAILED "Schutzstart fehlgeschlagen, Bremse angezogen"

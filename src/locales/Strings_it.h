@@ -750,5 +750,4 @@
 #define L_IO_FAULT_DISCONNECTED "Blocco: controller scollegato"
 #define L_IO_FAULT_STALE "Blocco: riscontro scaduto"
 #define L_IO_FAULT_OFF "Blocco: protezione disattivata"
-#define L_IO_FAULT_STORAGE "Errore memoria guasti, blocco mantenuto"
 #define L_IO_BRAKE_START_FAILED "Avvio protezione fallito, freno inserito"

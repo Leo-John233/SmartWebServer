@@ -13,12 +13,6 @@ void BoardIoPolicy::latch(BrakeFault reason) {
   clearStop();
 }
 
-void BoardIoPolicy::restoreFault(BrakeFault reason) {
-  reason_ = reason;
-  // 上电已经输出 LOW，恢复已保存的锁定时不重复启动停止流程
-  stopAttempted_ = reason != BrakeFault::None;
-}
-
 void BoardIoPolicy::invalidate() { healthy_ = ready_ = standstillSeen_ = false; }
 
 void BoardIoPolicy::configure(bool activity, bool protection, uint32_t now) {
