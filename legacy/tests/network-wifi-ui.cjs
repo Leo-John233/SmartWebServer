@@ -40,10 +40,14 @@ assert.equal(await page.locator('#nw-sta-badge').innerText(),'已连接','保留
 assert.equal(await page.locator('#nw-enabled').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(118, 27, 27)','Wi-Fi 开关使用主题暗红');
 state.message='连接成功，局域网访问地址：http://192.168.1.55';
 await page.waitForTimeout(2800);assert.equal(await page.locator('#nw-message').isVisible(),false,'不重复成功消息中的访问地址');
-state.message='热点设置已保存';await page.waitForFunction(()=>document.querySelector('#nw-message').textContent==='热点设置已保存');
-assert.equal(await page.locator('#nw-message').isVisible(),true,'热点操作反馈仍显示');
-state.failed=true;state.message='连接失败，请重试';await page.waitForFunction(()=>document.querySelector('#nw-message').classList.contains('nw-error'));
+state.message='热点设置已保存';state.messageTarget='ap';await page.waitForFunction(()=>document.querySelector('#nw-ap-message').textContent==='热点设置已保存');
+assert.equal(await page.locator('#nw-ap #nw-ap-message').isVisible(),true,'热点操作反馈显示在热点表单内');
+assert.equal(await page.locator('#nw-message').isVisible(),false,'热点反馈不出现在 STA 卡片');
+state.failed=true;state.message='连接失败，请重试';state.messageTarget='sta';await page.waitForFunction(()=>document.querySelector('#nw-message').classList.contains('nw-error'));
 assert.equal(await page.locator('#nw-message').innerText(),state.message,'连接错误仍显示');
+assert.equal(await page.locator('#nw-sta-card #nw-message').isVisible(),true,'连接反馈显示在 STA 卡片内');
+assert.equal(await page.locator('#nw-ap-message').isVisible(),false);
+assert.equal(await page.locator('.sws-network-layout > [role=status]').count(),0,'卡片之间不再有独立提示');
 state.failed=false;state.message='';await page.waitForFunction(()=>document.querySelector('#nw-message').hidden);
 assert(scans>=2,'进入页面自动搜索并等待扫描完成');assert.equal(await page.locator('#nw-results img').count(),0,'SSID must be rendered as text');
 assert.equal(await page.locator('#nw-current .nw-selected').innerText(),'✓');assert.equal(await page.locator('#nw-current .nw-network-meta').innerText(),'-55 dBm');assert.equal(await page.locator('#nw-results .nw-selected').count(),0);

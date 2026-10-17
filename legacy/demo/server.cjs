@@ -30,12 +30,13 @@ const server=http.createServer(async(req,res)=>{
     const action=url.searchParams.get('action');
     if(action==='scan'){if(!scanAt)scanAt=Date.now()+1000;const running=Date.now()<scanAt;if(!running)scanAt=0;return send(JSON.stringify({running,networks:running?[]:networks}),'application/json');}
     if(action==='connect'){
+      state.messageTarget='sta';
       if(args.get('enabled')==='1'&&!args.get('ssid')){res.statusCode=400;return send(JSON.stringify({message:'请输入 Wi-Fi 名称'}),'application/json');}
       for(const k of ['ssid','ip','gw','sn'])if(args.has(k))state.sta[k]=args.get(k);
       for(const k of ['enabled','open','dhcp'])state.sta[k]=args.get(k)==='1';
       fail=args.get('password')==='wrongpass';state.connected=false;state.connecting=state.sta.enabled;state.failed=false;connectAt=Date.now()+2200;state.message=state.sta.enabled?'正在连接':'已关闭路由器连接';
     }
-    if(action==='ap'){for(const k of ['ssid','ip','gw','sn'])if(args.has(k))state.ap[k]=args.get(k);state.ap.enabled=args.get('enabled')==='1';state.ap.channel=Number(args.get('channel')||7);state.apActive=state.ap.enabled;state.apIp=state.ap.ip;state.apSsid=state.ap.ssid;state.message='热点设置已保存';}
+    if(action==='ap'){state.messageTarget='ap';for(const k of ['ssid','ip','gw','sn'])if(args.has(k))state.ap[k]=args.get(k);state.ap.enabled=args.get('enabled')==='1';state.ap.channel=Number(args.get('channel')||7);state.apActive=state.ap.enabled;state.apIp=state.ap.ip;state.apSsid=state.ap.ssid;state.message='热点设置已保存';}
     if(state.connecting&&Date.now()>=connectAt){state.connecting=false;state.connected=!fail;state.failed=fail;state.ssid=state.sta.ssid;state.ip=state.sta.dhcp?'192.168.31.229':state.sta.ip;state.message=fail?'密码错误，请重新输入':'已连接';}
     return send(JSON.stringify(state),'application/json');
   }

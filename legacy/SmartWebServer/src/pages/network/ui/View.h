@@ -12,7 +12,7 @@ const char html_network_wifi[] PROGMEM = R"NET(
  R"NET(</label><input id="nw-enabled" class="nw-switch" type="checkbox" role="switch"></div>
 <div id="nw-sta-state" aria-live="polite"><span id="nw-sta-badge" class="nw-note">)NET"
  L_UI_LOADING
- R"NET(</span><div id="nw-current" class="nw-networks"></div><dl id="nw-access" class="nw-access" hidden><dt>)NET"
+ R"NET(</span><p id="nw-message" class="nw-feedback" role="status" aria-live="polite" hidden></p><div id="nw-current" class="nw-networks"></div><dl id="nw-access" class="nw-access" hidden><dt>)NET"
  L_UI_ACCESS_ADDRESS
  R"NET(</dt><dd id="nw-access-ip">—</dd></dl></div>
 <div id="nw-available"><div class="nw-list-heading"><strong>)NET"
@@ -124,6 +124,6 @@ const char html_network_wifi[] PROGMEM = R"NET(
  R"NET(</p>
 <div class="nw-actions"><button type="submit">)NET"
  L_UI_AP_SAVE
- R"NET(</button></div></form></section>
-</div><p id="nw-message" role="status" aria-live="polite" hidden></p>
+ R"NET(</button></div><p id="nw-ap-message" class="nw-feedback" role="status" aria-live="polite" hidden></p></form></section>
+</div>
 )NET";

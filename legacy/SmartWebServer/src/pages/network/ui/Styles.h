@@ -408,13 +408,20 @@ const char html_network_css[] PROGMEM = R"NET(
   display: none !important;
 }
 
-#nw-message {
-  min-height: 1.7em;
+.nw-feedback {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid #777;
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text);
+  font-size: 13px;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
-.nw-error {
-  color: #c1c1c1;
+.nw-feedback.nw-error {
+  border-left-color: var(--accent);
 }
 
 @media (max-width: 650px) {

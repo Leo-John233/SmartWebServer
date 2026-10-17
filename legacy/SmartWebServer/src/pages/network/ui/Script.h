@@ -20,6 +20,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     scanTimer = null,
     revision = 0,
     lastNotice = '',
+    messageTarget = 'sta',
     statusBusy = false,
     current = null,
     networks = [],
@@ -31,10 +32,15 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     clearTimeout(statusTimer);
     if (!paused && !document.hidden) statusTimer = setTimeout(status, delay);
   }
-  function message(text, error = false) {
-    $('nw-message').textContent = text;
-    $('nw-message').className = error ? 'nw-error' : '';
-    $('nw-message').hidden = !text;
+  function message(text, error = false, target = 'sta') {
+    messageTarget = target;
+    const active = $(target === 'ap' ? 'nw-ap-message' : 'nw-message');
+    ['nw-message','nw-ap-message'].forEach(id => {
+      const node = $(id), value = node === active ? text : '';
+      if (node.textContent !== value) node.textContent = value;
+      node.className = 'nw-feedback' + (node === active && error ? ' nw-error' : '');
+      node.hidden = !value;
+    });
   }
   function sync() {
     $('nw-static').hidden = sta.elements.dhcp.checked;
@@ -223,13 +229,13 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       $('nw-ap-ip').textContent = s.apActive ? s.apIp : '—';
       renderNetworks();
       // 已连接及访问地址已在网络卡片内显示，不在卡片外重复提示。
-      const noticeKey = JSON.stringify([s.message, s.failed, s.connected, s.connecting, s.pending]);
+      const noticeKey = JSON.stringify([s.message, s.messageTarget, s.failed, s.connected, s.connecting, s.pending]);
       if (noticeKey !== lastNotice) {
         lastNotice = noticeKey;
         const connectionShown = s.connected && !s.failed && !s.connecting && !s.pending &&
           (s.message === )NET" SWS_JS_TEXT(L_UI_CONNECTED) R"NET( ||
            (s.message || '').startsWith()NET" SWS_JS_TEXT(L_UI_CONNECTED_ADDRESS) R"NET());
-        message(connectionShown ? '' : (s.message || ''), s.failed);
+        message(connectionShown ? '' : (s.message || ''), s.failed, s.messageTarget === 'ap' ? 'ap' : 'sta');
       }
       lock(s.connecting || s.pending);
       if (!autoScanned && s.sta.enabled && !working) {
@@ -239,7 +245,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     } catch (e) {
       if (paused || ticket !== revision) return;
       lastNotice = '';
-      message()NET" SWS_JS_TEXT(L_UI_CONNECTION_LOST) R"NET(, true);
+      message()NET" SWS_JS_TEXT(L_UI_CONNECTION_LOST) R"NET(, true, messageTarget);
       lock(false);
     } finally {
       statusBusy = false;
@@ -357,7 +363,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       $('nw-dialog-error').textContent = '';
       try {
         const r = await api(action, p);
-        message(r.message);
+        message(r.message, false, action === 'ap' ? 'ap' : 'sta');
         form.elements.password.value = '';
         if (action === 'connect') {
           enableDraft = false;
@@ -365,7 +371,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
         }
       } catch (err) {
         if (action === 'connect') $('nw-dialog-error').textContent = err.message;
-        else message(err.message, true);
+        else message(err.message, true, 'ap');
       } finally {
         submitting = false;
         lock(false);

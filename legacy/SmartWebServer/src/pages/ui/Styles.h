@@ -243,10 +243,6 @@ a:visited {
 .sws-network-layout > .b1 {
   width: 100% !important;
 }
-.sws-network-layout > #nw-message {
-  grid-column: 1/-1;
-  margin: 0;
-}
 .sws-account {
   grid-column: 1/-1;
   border: 1px solid var(--border);

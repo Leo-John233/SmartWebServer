@@ -18,6 +18,7 @@ StationSettings previousStation;
 StationPassword previousPassword;
 bool stationCandidate = false;
 String notice;
+const char *noticeTarget = "sta";
 
 // 转义网络名称中的引号和控制字符，保证扫描结果始终是合法 JSON
 String quote(const String &value) {
@@ -98,6 +99,7 @@ bool configureStation() {
   wifiManager.networkBusy = true;
   failed = false;
   notice = L_UI_CONNECTING_NOTE;
+  noticeTarget = "sta";
   return true;
 }
 void connectionFailed(const String &reason) {
@@ -117,6 +119,7 @@ void connectionFailed(const String &reason) {
   }
   bool available = apActive() || startAp();
   notice = reason + (available ? L_UI_AP_AVAILABLE : L_UI_AP_FAILED);
+  noticeTarget = "sta";
   lastRetry = millis();
 }
 // 页面只读取配置和运行状态，不返回任何保存的密码
@@ -138,7 +141,7 @@ String configJson() {
   json += ",\"apActive\":"; json += apActive() ? "true" : "false";
   json += ",\"ssid\":" + quote(WiFi.SSID()) + ",\"ip\":" + quote(WiFi.localIP().toString());
   json += ",\"rssi\":" + String(WiFi.RSSI()) + ",\"apIp\":" + quote(WiFi.softAPIP().toString());
-  json += ",\"apSsid\":" + quote(a.ssid) + ",\"message\":" + quote(notice) + "}";
+  json += ",\"apSsid\":" + quote(a.ssid) + ",\"messageTarget\":\"" + String(noticeTarget) + "\",\"message\":" + quote(notice) + "}";
   return json;
 }
 }
@@ -233,6 +236,7 @@ void handleWifiNetwork() {
     pending = 2;
   }
   scheduledAt = millis(); failed = false;
+  noticeTarget = pending == 2 ? "ap" : "sta";
   notice = L_UI_APPLYING;
   reply(202, "{\"message\":" + quote(notice) + "}");
 }

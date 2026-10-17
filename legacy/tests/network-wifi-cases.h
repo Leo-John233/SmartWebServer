@@ -1,10 +1,10 @@
 void request(const char *action){www.args["action"]=action;www.code=0;handleWifiNetwork();}
-void reset(){pending=0;connecting=false;scanning=false;failed=false;scanAddedSta=false;stationRetryBlocked=false;stationCandidate=false;notice="";lastRetry=clockMs=0;wifiManager.settings=WifiSettings();wifiManager.station[0]=StationSettings();wifiManager.stationPassword[0]=StationPassword();wifiManager.setStation(1);wifiManager.writes=0;wifiManager.networkBusy=wifiManager.webManaged=false;WiFi=WifiFake();www=WebFake();loginRequired=false;}
+void reset(){pending=0;connecting=false;scanning=false;failed=false;scanAddedSta=false;stationRetryBlocked=false;stationCandidate=false;notice="";noticeTarget="sta";lastRetry=clockMs=0;wifiManager.settings=WifiSettings();wifiManager.station[0]=StationSettings();wifiManager.stationPassword[0]=StationPassword();wifiManager.setStation(1);wifiManager.writes=0;wifiManager.networkBusy=wifiManager.webManaged=false;WiFi=WifiFake();www=WebFake();loginRequired=false;}
 void station(){www.args={{"ssid","New Home"},{"password","new-pass-123"},{"enabled","1"},{"dhcp","1"}};}
 void apRequest(){www.args={{"ssid","ONSTEPX"},{"password",""},{"enabled","1"},{"channel","7"},{"ip","192.168.0.1"},{"gw","192.168.0.1"},{"sn","255.255.255.0"}};}
 int main(){
 reset();loginRequired=true;request("scan");assert(www.code==403&&WiFi.mode==2);loginRequired=false;www.verb=0;request("connect");assert(www.code==405);
-reset();request("status");assert(www.code==200&&www.body.find("password")==std::string::npos);
+reset();request("status");assert(www.code==200&&www.body.find("password")==std::string::npos&&www.body.find("\"messageTarget\":\"sta\"")!=std::string::npos);
 reset();request("scan");assert(scanning&&WiFi.mode==3&&wifiManager.networkBusy&&WiFi.disconnects==0);WiFi.scan=2;request("scan");assert(www.code==200&&!scanning&&WiFi.mode==2&&!wifiManager.networkBusy);assert(www.body.find("\\\"")!=std::string::npos);
 reset();WiFi.mode=3;WiFi.connection=3;request("scan");WiFi.scan=0;request("scan");assert(WiFi.mode==3&&WiFi.connection==3&&WiFi.disconnects==0);
 reset();request("scan");clockMs=30000;pollWifiNetwork();assert(!scanning&&WiFi.mode==2&&!wifiManager.networkBusy);
@@ -34,7 +34,7 @@ for(int status:{WL_CONNECT_FAILED,WL_NO_SSID_AVAIL}){
  WiFi.connection=WL_CONNECTED;pollWifiNetwork();assert(!connecting&&wifiManager.writes==1);
 }
 reset();station();request("connect");clockMs=1001;pollWifiNetwork();WiFi.local[2]=0;WiFi.connection=3;pollWifiNetwork();assert(failed&&WiFi.connection==0&&apActive());
-reset();apRequest();www.args["enabled"]="0";request("ap");assert(www.code==400);WiFi.connection=3;wifiManager.settings.stationEnabled=true;request("ap");assert(www.code==202);clockMs=1001;pollWifiNetwork();assert(!apActive()&&wifiManager.writes==1);
+reset();apRequest();www.args["enabled"]="0";request("ap");assert(www.code==400);WiFi.connection=3;wifiManager.settings.stationEnabled=true;request("ap");assert(www.code==202);clockMs=1001;pollWifiNetwork();assert(!apActive()&&wifiManager.writes==1&&std::string(noticeTarget)=="ap");request("status");assert(www.body.find("\"messageTarget\":\"ap\"")!=std::string::npos);
 reset();wifiManager.settings.accessPointEnabled=false;station();www.args["enabled"]="0";request("connect");assert(www.code==400);
 reset();apRequest();WiFi.connection=3;WiFi.local[2]=0;request("ap");assert(www.code==400);
 // 提交关闭热点后突然掉线时，取消操作并保留原配置
