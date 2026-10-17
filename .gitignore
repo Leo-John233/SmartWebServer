@@ -14,3 +14,4 @@ debug.svd
 **/node_modules/
 /.serena/cache/
 /.serena/project.local.yml
+/tests/
