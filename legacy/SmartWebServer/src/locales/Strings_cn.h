@@ -376,7 +376,7 @@
 #define L_AXPN_LIMIT_UM_MIN "最小限位，微米"     // "$5"
 #define L_AXPN_LIMIT_UM_MAX "最大限位，微米"     // "$6"
 #define L_AXPN_REVERSE "反向"                    // "$7" (first motor parameter)
-#define L_AXPN_MICROSTEPS "跟踪细分 (Microsteps)" // "$8"
+#define L_AXPN_MICROSTEPS "跟踪细分" // "$8"
 #define L_AXPN_MICROSTEPS_GOTO "GOTO 细分"       // "$9"
 #define L_AXPN_DECAY_MODE "跟踪 衰减模式"             // "$10"
 #define L_AXPN_DECAY_MODE_GOTO "GOTO 衰减模式"   // "$11"
