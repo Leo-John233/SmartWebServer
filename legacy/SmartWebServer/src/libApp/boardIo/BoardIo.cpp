@@ -41,13 +41,13 @@ void BoardIo::tick() {
   const uint32_t now = millis();
   const bool connected = status.onStepFound && status.mountFound == SD_TRUE;
   policy_.checkFeedback(connected, now);
-  const bool released = policy_.releaseBrake(connected, now);
   #if SWS_ACTIVITY_LED_PIN != OFF
     const bool lit = policy_.ledLit(status.onStepFound, LED_STATUS_ON_STATE == LOW, now);
     const int level = lit ? LOW : HIGH;
     if (level != ledLevel_) { digitalWrite(SWS_ACTIVITY_LED_PIN, level); ledLevel_ = level; }
   #endif
   #if SWS_RA_BRAKE_PIN != OFF
+    const bool released = policy_.releaseBrake(connected, now);
     // 发送 STOP 期间即使其他任务调用 tick，也不能抢先改变抱闸输出。
     if (!stopping_) {
       const int brake = !brakeAvailable() || released ? HIGH : LOW;

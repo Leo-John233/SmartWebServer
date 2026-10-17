@@ -49,7 +49,8 @@ for (const special of [0, 1]) {
     const translated = file === 'Strings_cn.h' ? chinese : preprocess(file, special);
     for (const key of baseline) {
       const value = translated.values.get(key);
-      assert(value.trim(), file + ':' + key + ' 不能为空');
+      // 网络说明的 3–6 段拼成同一段，允许译文不使用末尾片段。
+      assert(value.trim() || key === 'L_NETWORK_ADVICE6', file + ':' + key + ' 不能为空');
       assert(!value.includes('\uFFFD'), file + ':' + key + ' 不含损坏字符');
       assert.deepEqual(tokens(value), tokens(chinese.values.get(key)), file + ':' + key + ' 保留格式标记和 HTML');
     }

@@ -32,7 +32,6 @@ bool loginRequired = true;
 void handleNetwork() {
   if (servePageShell(PAGE_NETWORK)) return;
   char temp[420]  = "";
-  char temp1[140] = "";
 
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
@@ -90,7 +89,7 @@ void handleNetwork() {
       snprintf_P(temp, sizeof(temp), html_tile_text_beg, "33em", "19em", "Ethernet"); data.concat(temp);
       data.concat(FPSTR(htmL_NETWORK_ETH_BEG));
 
-      temp1[0] = 0;
+      char temp1[140] = "";
       for (int i = 0; i < 6; i++) {
         char temp2[200];
         snprintf(temp2, sizeof(temp2), "%s%02x:", temp1, ethernetManager.settings.mac[i]);

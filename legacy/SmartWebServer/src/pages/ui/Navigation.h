@@ -14,7 +14,7 @@ const char html_shell_script[] PROGMEM = R"UI(
     hint = document.getElementById('sws-load'),
     links = [...document.querySelectorAll('.t a')];
   let sequence = 0,
-    timer, waiting = false, timedOut = false;
+    timer, requestedPath = '', waiting = false, timedOut = false;
   function recover(ticket) {
     if(ticket !== sequence)return;
     clearTimeout(timer);
@@ -149,6 +149,7 @@ const char html_shell_script[] PROGMEM = R"UI(
     document.getElementById('sws-page-description').textContent = '';
     frame.title = document.getElementById('sws-page-title').textContent;
     frame.style.visibility='hidden';
+    requestedPath = path;
     frame.contentWindow.location.replace(path + '?view=1');
     resize();
     timer = setTimeout(() => {
@@ -163,8 +164,9 @@ const char html_shell_script[] PROGMEM = R"UI(
     // 公共资源失败时不把缺少样式和交互的旧布局当成已加载完成。
     try {
       const child=frame.contentWindow, doc=child.document;
-      if((doc.querySelector('link[href*="/sws-ui.css"]')&&!child.getComputedStyle(doc.documentElement).getPropertyValue('--bg').trim()) ||
-         (doc.querySelector('script[src*="/sws-ui.js"]')&&typeof child.swsWatchCommand!=='function')) {
+      if(child.location.pathname!==requestedPath)return;
+      if(!doc.querySelector('.b') || !child.getComputedStyle(doc.documentElement).getPropertyValue('--bg').trim() ||
+         typeof child.swsWatchCommand!=='function') {
         recover(sequence); return;
       }
     } catch(e) { recover(sequence); return; }

@@ -11,7 +11,7 @@ bool decodeParameter(char* s, double *value, long *min, long *max, int *type, ch
 bool axisTile(int axis, String &data)
 {
   bool success = false;
-  char temp[256] = "";
+  char temp[320] = ""; // 完整容纳数值边界、长译文标签及新增的 label/span 标记。
   char temp1[80] = "";
   double value;
   long min, max;

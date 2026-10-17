@@ -459,12 +459,12 @@
 
 #define L_NETWORK_TITLE "Entrez le mot de passe pour modifier la configuration:"
 
-#define L_NETWORK_ADVICE1 "Configuration:<br/><br/>"
-#define L_NETWORK_ADVICE2 "Activez soit le mode Station <b>OU</b> le mode Point d'acces, activer les deux peut provoquer des problemes de performance.<br/><br/>"
+#define L_NETWORK_ADVICE1 "Configuration:"
+#define L_NETWORK_ADVICE2 "Activez soit le mode Station OU le mode Point d'acces, activer les deux peut provoquer des problemes de performance."
 #define L_NETWORK_ADVICE3 "Si vous voulez qu'OnStep se connecte a votre reseau WiFi domestique, activez seulement le mode Station et "
 #define L_NETWORK_ADVICE4 "désactivez le mode point d'accès ; si OnStep ne peut pas se connecter au réseau WiFi domestique, il "
 #define L_NETWORK_ADVICE5 "réactivera automatiquement le mode point d'accès ; cela est utile sur un site sombre éloigné et "
-#define L_NETWORK_ADVICE6 "pour éviter de perdre l'accès à la monture<br/><br/>"
+#define L_NETWORK_ADVICE6 "pour éviter de perdre l'accès à la monture"
 #define L_NETWORK_ADVICE7 "Si vous etes bloque hors du WiFi, vous pouvez utiliser l'IDE Arduino pour reinitialiser la memoire flash ESP (et "
 #define L_NETWORK_ADVICE8 "ainsi revenir aux valeurs par defaut.) Dans le menu Outils d'Arduino, changez Erase Flash 'Only Sketch' "
 #define L_NETWORK_ADVICE9 "en Erase Flash 'All Flash Contents' et televersez a nouveau le sketch WiFi-Bluetooth."

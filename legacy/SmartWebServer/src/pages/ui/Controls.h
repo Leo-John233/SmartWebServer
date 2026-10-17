@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     values.set('coord_action', event.submitter?.value || 'go');
     pending = true;
+    window.swsPendingCommands = (window.swsPendingCommands || 0) + 1;
     const buttons = [...form.querySelectorAll('button')];
     buttons.forEach((b) => (b.disabled = true));
     result.textContent = form.dataset.send;
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       clearTimeout(timer);
       pending = false;
+      window.swsPendingCommands--;
       buttons.forEach((b) => (b.disabled = false));
     }
   });

@@ -45,18 +45,19 @@ struct AccessPointSettings{char ssid[32]="ONSTEPX",pwd[32]="password";unsigned c
 struct StationSettings{char host[32]{},ssid[33]="Home";bool dhcpEnabled=true;uint8_t target[4]{},ip[4]={192,168,1,55},gw[4]={192,168,1,1},sn[4]={255,255,255,0};};
 struct StationPassword{char password[64]="password";};
 struct WifiSettings{char masterPassword[32]="password";bool accessPointEnabled=true;AccessPointSettings ap;bool stationEnabled=false,stationApFallback=true;};
-struct Manager {WifiSettings settings;StationSettings station[3];StationPassword stationPassword[3];int stationNumber=1,writes=0;StationSettings *sta=&station[0];StationPassword *staPwd=&stationPassword[0];bool networkBusy=false,webManaged=false,stationEnabledAtBoot=false;void setStation(int n){sta=&station[n-1];staPwd=&stationPassword[n-1];}void writeSettings(){writes++;}} wifiManager;
+struct Manager {WifiSettings settings;StationSettings station[3];StationPassword stationPassword[3];int stationNumber=1,writes=0;std::string storedPassword;StationSettings *sta=&station[0];StationPassword *staPwd=&stationPassword[0];bool networkBusy=false,webManaged=false,stationEnabledAtBoot=false;void setStation(int n){sta=&station[n-1];staPwd=&stationPassword[n-1];}void writeSettings(){writes++;storedPassword=staPwd->password;}} wifiManager;
 struct WifiFake {
-  int mode=2,connection=0,scan=-1,begins=0,disconnects=0;bool configOk=true,autoReconnect=true,wrongPassword=false;uint8_t local[4]={192,168,1,55},mask[4]={255,255,255,0};
+  std::string startedSsid,startedPassword;
+  int mode=2,connection=0,scan=-1,begins=0,disconnects=0,apFailures=0;unsigned long operationDelayMs=0;bool configOk=true,autoReconnect=true,wrongPassword=false,apCloseOk=true;uint8_t local[4]={192,168,1,55},mask[4]={255,255,255,0};
   int getMode(){return mode;}int status(){return connection;}int RSSI(int i=0){return -45-i;}
   String SSID(int i=-1){return i<0?"Home":"<img>\"\\\n";}
   IPAddress localIP(){return IPAddress(local);}IPAddress subnetMask(){return IPAddress(mask);}IPAddress softAPIP(){return IPAddress(wifiManager.settings.ap.ip);}
-  bool softAP(const char*,const char*,int){mode|=2;return true;}bool softAPConfig(IPAddress,IPAddress,IPAddress){return true;}
-  void softAPdisconnect(bool){mode&=~2;}bool enableSTA(bool v){if(v)mode|=1;else mode&=~1;return true;}
-  void disconnect(){connection=0;disconnects++;}void persistent(bool){}
+  bool softAP(const char*,const char*,int){if(apFailures){apFailures--;return false;}mode|=2;return true;}bool softAPConfig(IPAddress,IPAddress,IPAddress){return true;}
+  bool softAPdisconnect(bool){if(!apCloseOk)return false;mode&=~2;return true;}bool enableSTA(bool v){clockMs+=operationDelayMs;if(v)mode|=1;else mode&=~1;return true;}
+  void disconnect(){clockMs+=operationDelayMs;connection=0;disconnects++;}void persistent(bool){}
   void setAutoReconnect(bool value){autoReconnect=value;}
   bool config(IPAddress,IPAddress,IPAddress,IPAddress=IPAddress()){return configOk;}
-  void begin(const char*,const char*){begins++;}void scanDelete(){}int scanNetworks(bool,bool){return -1;}int scanComplete(){return scan;}int encryptionType(int){return 0;}
+  void begin(const char*ssid,const char*password){begins++;startedSsid=ssid;startedPassword=password;}void scanDelete(){}int scanNetworks(bool,bool){return -1;}int scanComplete(){return scan;}int encryptionType(int){return 0;}
 } WiFi;
 int wifi_station_get_connect_status(){return WiFi.wrongPassword ? STATION_WRONG_PASSWORD : 0;}
 struct WebFake {

@@ -22,6 +22,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     lastNotice = '',
     messageTarget = 'sta',
     statusBusy = false,
+    statusFailures = 0,
     current = null,
     networks = [],
     autoScanned = false,
@@ -85,8 +86,12 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       timeout = action === 'scan' ? Math.max(1, Math.min(8000, 30000 - (Date.now() - scanStarted))) : 8000,
       timer = setTimeout(() => controller.abort(), timeout);
     const read = action === 'status' || action === 'scan';
+    // 手动操作开始前取消旧状态读取，避免读请求占住设备连接。
+    if (params) {
+      revision++;
+      reads.forEach(request => request.abort());
+    }
     if (read) reads.add(controller);
-    if (params) revision++;
     try {
       const options = { cache: 'no-store', signal: controller.signal };
       if (params) {
@@ -222,6 +227,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       const s = await api('status');
       if (ticket !== revision || paused) return;
       current = s;
+      statusFailures = 0;
       if (s.sta.enabled) enableDraft = false;
       if (s.connected && !s.connecting && !s.pending) passwordDrafts.delete(s.ssid);
       if (!loaded) {
@@ -262,12 +268,13 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       }
     } catch (e) {
       if (paused || ticket !== revision) return;
+      statusFailures = Math.min(statusFailures + 1, 4);
       lastNotice = '';
       message()NET" SWS_JS_TEXT(L_UI_CONNECTION_LOST) R"NET(, true, messageTarget);
       lock(false);
     } finally {
       statusBusy = false;
-      scheduleStatus();
+      scheduleStatus(statusFailures ? Math.min(30000, 2500 * Math.pow(2, statusFailures)) : 2500);
     }
   }
   async function scan() {
@@ -410,6 +417,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   };
   window.swsResumePolling = () => {
     paused = false;
+    statusFailures = 0;
     if (resume) resume();
     if (scanning) scan(); else status();
   };
@@ -418,7 +426,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
   });
   window.addEventListener('pagehide', () => { passwordDrafts.clear(); window.swsPausePolling(); });
   window.addEventListener('pageshow', () => { if (!paused) return; window.swsResumePolling(); });
-  window.addEventListener('online', () => { if (!paused) status(); });
+  window.addEventListener('online', () => { if (!paused) { statusFailures = 0; status(); } });
   sync(); status();
 })();
 </script>

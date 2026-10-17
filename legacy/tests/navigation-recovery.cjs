@@ -6,12 +6,13 @@ const shell='<!doctype html><meta charset="utf-8"><div class="t"><table><tr><td>
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true});
  try {
-  const page=await browser.newPage();let broken=false,hang=false,held=[];
+  const page=await browser.newPage();let broken=false,hang=false,busy=false,held=[];
   await page.route('http://recovery.test/**',async route=>{
    const u=new URL(route.request().url());
    if(u.pathname==='/sws-ui.css')return broken==='css'?route.abort():route.fulfill({contentType:'text/css',body:':root{--bg:#111}'});
    if(u.pathname==='/sws-ui.js')return broken==='js'?route.abort():route.fulfill({contentType:'application/javascript',body:'window.swsWatchCommand=function(){}'});
    if(!u.searchParams.has('view'))return route.fulfill({contentType:'text/html',body:shell});
+   if(busy)return route.fulfill({status:503,contentType:'text/plain',body:'Device busy, retry shortly'});
    if(hang){held.push(route);return;}
    return route.fulfill({contentType:'text/html',body:'<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/sws-ui.css"><script src="/sws-ui.js"></script><div class="b">'+u.pathname+'</div><script>window.swsPausePolling=()=>window.paused=true;window.swsResumePolling=()=>window.paused=false;</script>'});
   });
@@ -39,6 +40,11 @@ const shell='<!doctype html><meta charset="utf-8"><div class="t"><table><tr><td>
    assert.equal(await page.locator('#sws-frame').evaluate(e=>e.style.visibility),'hidden');
    broken=false;await page.evaluate(()=>swsNavigate('/net.htm',true));await loaded('/net.htm');
   }
-  console.log('PASS: one-hour idle, stalled stop queue, stalled document, missing CSS/JS and manual navigation recovery');
+  // 低内存保护返回的 503 及截断页面不能被当作正常页面展示。
+  busy=true;await page.evaluate(()=>swsNavigate('/net.htm',true));
+  await page.waitForFunction(()=>document.getElementById('sws-load').textContent.includes('重试'));
+  assert.equal(await page.locator('#sws-frame').evaluate(e=>e.style.visibility),'hidden');
+  busy=false;await page.evaluate(()=>swsNavigate('/net.htm',true));await loaded('/net.htm');
+  console.log('PASS: one-hour idle, stalled stop queue/document, missing CSS/JS, busy response and manual navigation recovery');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

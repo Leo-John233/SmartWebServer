@@ -1,5 +1,8 @@
 // 逐项检查设备返回的参数没有被预览或新布局省略
 int main() {
+  char field[320];const std::string longName(79,'x'),longValue(23,'9');
+  const int fieldLength=snprintf_P(field,sizeof(field),html_configAxisFloat,longValue.c_str(),2147483647,2147483647,(-2147483647L-1),2147483647L,longName.c_str());
+  assert(fieldLength>256&&fieldLength<int(sizeof(field))&&std::string(field).find("</span></label>\n")!=std::string::npos);
   String data;
   assert(axisTile(0,data));
   for(int p=1;p<=26;p++) {

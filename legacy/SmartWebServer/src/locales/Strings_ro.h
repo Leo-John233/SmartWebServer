@@ -459,12 +459,12 @@
 
 #define L_NETWORK_TITLE "Introduceți parola pentru a modifica configurația:"
 
-#define L_NETWORK_ADVICE1 "Configurarea rețelei:<br/><br/>"
-#define L_NETWORK_ADVICE2 "Activați doar modul Stație <b>SAU</b> Access Point, activarea ambelor poate cauza probleme de performanță.<br/><br/>"
+#define L_NETWORK_ADVICE1 "Configurarea rețelei:"
+#define L_NETWORK_ADVICE2 "Activați doar modul Stație SAU Access Point, activarea ambelor poate cauza probleme de performanță."
 #define L_NETWORK_ADVICE3 "Dacă vreți ca OnStep să se conecteze la rețeaua WiFi de acasă, activați doar modul Stație și "
 #define L_NETWORK_ADVICE4 "dezactivați modul punct de acces; dacă OnStep nu se poate conecta la rețeaua WiFi de acasă, va "
 #define L_NETWORK_ADVICE5 "reactiva automat modul punct de acces; util în locuri de observație izolate și "
-#define L_NETWORK_ADVICE6 "pentru a evita pierderea accesului la dispozitiv<br/><br/>"
+#define L_NETWORK_ADVICE6 "pentru a evita pierderea accesului la dispozitiv"
 #define L_NETWORK_ADVICE7 "Dacă sunteți blocat de WiFi, puteți folosi Arduino IDE pentru a reseta memoria flash ESP (și "
 #define L_NETWORK_ADVICE8 "astfel revine la valorile implicite). Din meniul Arduino Tools, schimbați Erase Flash 'Only Sketch' "
 #define L_NETWORK_ADVICE9 "în Erase Flash 'All Flash Contents' și încărcați sketch-ul WiFi-Bluetooth din nou."

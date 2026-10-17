@@ -458,12 +458,12 @@
 
 #define L_NETWORK_TITLE "設定を変更するにはパスワードを入力してください:"
 
-#define L_NETWORK_ADVICE1 "セットアップ:<br/><br/>"
-#define L_NETWORK_ADVICE2 "ステーションモード <b>または</b> アクセスポイントモードのいずれかを有効にしてください。両方を有効にするとパフォーマンスの問題が発生する可能性があります。<br/><br/>"
+#define L_NETWORK_ADVICE1 "セットアップ:"
+#define L_NETWORK_ADVICE2 "ステーションモード または アクセスポイントモードのいずれかを有効にしてください。両方を有効にするとパフォーマンスの問題が発生する可能性があります。"
 #define L_NETWORK_ADVICE3 "OnStepを自宅のWiFiネットワークに接続させたい場合は、ステーションモードのみを有効にし、"
 #define L_NETWORK_ADVICE4 "アクセスポイントモードを無効にしてください、自宅のWiFiに接続できない場合は、"
 #define L_NETWORK_ADVICE5 "自動的にアクセスポイントモードを再び有効にします、遠征先での観測や、"
-#define L_NETWORK_ADVICE6 "機器に接続できなくなる状況を防ぐのに役立ちます<br/><br/>"
+#define L_NETWORK_ADVICE6 "機器に接続できなくなる状況を防ぐのに役立ちます"
 #define L_NETWORK_ADVICE7 "WiFiから締め出された場合は、Arduino IDEを使用してESPのフラッシュメモリをリセット（つまり"
 #define L_NETWORK_ADVICE8 "デフォルトに戻す）できます。Arduinoのツールメニューから、Erase Flashを 'Only Sketch' "
 #define L_NETWORK_ADVICE9 "から 'All Flash Contents' に変更し、WiFi-Bluetoothスケッチを再度アップロードしてください。"

@@ -54,6 +54,13 @@ const html='<meta charset="utf-8">'+t['network/NetworkWifi.h'].html_network_css+
   // 连接中途状态接口断开也不能一直锁住编辑入口。
   await page.evaluate(()=>{sim.state.connecting=true;swsResumePolling();});await page.clock.runFor(50);
   assert.equal(await page.locator('#nw-manual').isDisabled(),true);
+  // 持续离线时逐步降低状态查询频率，重新联网立即读取且不重放配置。
+  await page.evaluate(()=>{sim.statusError=true;sim.calls=[];swsResumePolling();});await page.clock.runFor(120000);
+  assert(await page.evaluate(()=>sim.calls.length<=8),'离线两分钟不能继续按固定频率查询');
+  const beforeOnline=await page.evaluate(()=>sim.calls.length);
+  await page.evaluate(()=>{sim.statusError=false;sim.state.connecting=false;sim.state.background=false;dispatchEvent(new Event('online'));});await page.clock.runFor(50);
+  assert.equal(await page.evaluate(()=>sim.calls.length),beforeOnline+1);
+  assert.equal(await page.locator('#nw-manual').isEnabled(),true);
   await page.evaluate(()=>{sim.statusError=true;});await page.clock.runFor(2600);
   assert.equal(await page.locator('#nw-manual').isEnabled(),true);
   await page.evaluate(()=>{sim.statusError=false;sim.state.connecting=false;dispatchEvent(new Event('online'));});await page.clock.runFor(50);
@@ -67,6 +74,11 @@ const html='<meta charset="utf-8">'+t['network/NetworkWifi.h'].html_network_css+
   assert.equal(await page.evaluate(()=>sim.calls.at(-1)),'status');
   await page.evaluate(()=>{sim.state.background=false;swsResumePolling();});await page.clock.runFor(50);
   assert.equal(await page.locator('#nw-manual').isDisabled(),true);
+  await page.evaluate(()=>{sim.state.connecting=false;swsResumePolling();});await page.clock.runFor(50);
+  await page.evaluate(()=>{sim.delay=1000;sim.maxActive=0;sim.calls=[];swsResumePolling();});await page.clock.runFor(10);
+  await page.locator('#nw-scan').click();await page.clock.runFor(50);
+  assert.equal(await page.evaluate(()=>sim.maxActive),1,'用户扫描前取消旧状态请求，避免并发叠加');
+  await page.clock.runFor(2100);
   assert.deepEqual(errors,[]);
   console.log('PASS: slow scan deadline, single read, duplicate clicks, hidden/navigation pause, reconnect and unlock after status failure');
  }finally{await browser.close();}

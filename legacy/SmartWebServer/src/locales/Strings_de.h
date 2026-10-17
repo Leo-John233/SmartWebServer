@@ -467,12 +467,12 @@
 
 #define L_NETWORK_TITLE "Geben Sie das Passwort ein um die Konfiguration zu &auml;ndern:"
 
-#define L_NETWORK_ADVICE1 "Netzwerkeinrichtung:<br/><br/>"
-#define L_NETWORK_ADVICE2 "Aktivieren Sie nur den Stationsmodus <b>ODER</b> den Access-Point-Modus; beide gleichzeitig können die Leistung beeinträchtigen<br/><br/>"
+#define L_NETWORK_ADVICE1 "Netzwerkeinrichtung:"
+#define L_NETWORK_ADVICE2 "Aktivieren Sie nur den Stationsmodus ODER den Access-Point-Modus; beide gleichzeitig können die Leistung beeinträchtigen"
 #define L_NETWORK_ADVICE3 "Wenn die Steuerung eine Verbindung zu Ihrem Heim-WLAN herstellen soll, aktivieren Sie nur den Stationsmodus und "
 #define L_NETWORK_ADVICE4 "deaktivieren Sie den Access-Point-Modus; wenn OnStep keine Verbindung zum Heim-WLAN herstellen kann, wird es "
 #define L_NETWORK_ADVICE5 "den Access-Point-Modus automatisch wieder aktivieren; dies hilft an abgelegenen Beobachtungsorten und "
-#define L_NETWORK_ADVICE6 "schützt vor dem Verlust des Gerätezugangs<br/><br/>"
+#define L_NETWORK_ADVICE6 "schützt vor dem Verlust des Gerätezugangs"
 #define L_NETWORK_ADVICE7 "Wenn Sie vom WLAN ausgeschlossen sind, m&uuml;ssen Sie die Arduino IDE verwenden, um den ESP Flash-Speicher zur&uuml;ckzusetzen (und somit zu den Standardeinstellungen zur&uuml;ckzukehren)."
 #define L_NETWORK_ADVICE8 "&Auml;ndern Sie im Men&uuml; Arduino Tools die Option Erase Flash 'Only Sketch' auf Erase Flash 'All Flash Contents' "
 #define L_NETWORK_ADVICE9 "und laden Sie die WiFi-Bluetooth Firmware erneut hoch."

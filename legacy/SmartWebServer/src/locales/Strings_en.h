@@ -459,12 +459,12 @@
 
 #define L_NETWORK_TITLE "Enter password to change configuration:"
 
-#define L_NETWORK_ADVICE1 "Setup:<br/><br/>"
-#define L_NETWORK_ADVICE2 "Enable either Station <b>OR</b> Access Point mode, enabling both can cause performance issues.<br/><br/>"
+#define L_NETWORK_ADVICE1 "Setup:"
+#define L_NETWORK_ADVICE2 "Enable either Station OR Access Point mode, enabling both can cause performance issues."
 #define L_NETWORK_ADVICE3 "If you want OnStep to connect to your home WiFi network, enable only Station mode and "
 #define L_NETWORK_ADVICE4 "disable Access Point mode; if OnStep cannot connect to your home WiFi network, it will "
 #define L_NETWORK_ADVICE5 "automatically re-enable Access Point mode; this is useful at a remote dark-sky site and "
-#define L_NETWORK_ADVICE6 "to prevent losing access to the device<br/><br/>"
+#define L_NETWORK_ADVICE6 "to prevent losing access to the device"
 #define L_NETWORK_ADVICE7 "If locked out of WiFi you can use the Arduino IDE to reset the ESP flash memory (and "
 #define L_NETWORK_ADVICE8 "hence go back to defaults.) From the Arduino Tools menu, change Erase Flash 'Only Sketch' "
 #define L_NETWORK_ADVICE9 "to Erase Flash 'All Flash Contents' and upload the WiFi-Bluetooth sketch again."

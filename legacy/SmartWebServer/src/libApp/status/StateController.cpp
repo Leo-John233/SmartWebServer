@@ -11,6 +11,12 @@
   #include "../../lib/wifi/WifiManager.h"
 #endif
 
+// 多个故障同时出现时，译文拼接也必须限制在固定缓冲区内。
+static void appendControllerText(char *destination, size_t capacity, const char *text) {
+  const size_t used = strlen(destination);
+  if (used < capacity) snprintf(destination + used, capacity - used, "%s", text);
+}
+
 void State::updateController(bool now)
 {
   if (!now && millis() - lastControllerPageLoadTime > 2000) return;
@@ -35,28 +41,28 @@ void State::updateController(bool now)
   for (int axis = 0; axis < numAxes; axis++) {
     if (driver[axis].valid) {
       strcpy(temp1, "");
-      if (driver[axis].communicationFailure) strcat(temp1, L_COMMS_FAILURE ", ");
+      if (driver[axis].communicationFailure) appendControllerText(temp1, sizeof(temp1), L_COMMS_FAILURE ", ");
       if (!driver[axis].communicationFailure) {
-        if (driver[axis].standstill) strcat(temp1, L_STANDSTILL ", "); else {
+        if (driver[axis].standstill) appendControllerText(temp1, sizeof(temp1), L_STANDSTILL ", "); else {
           if (driver[axis].outputA.openLoad || driver[axis].outputB.openLoad) {
-            strcat(temp1, L_OPEN_LOAD " ");
-            if (driver[axis].outputA.openLoad) strcat(temp1,"A");
-            if (driver[axis].outputB.openLoad) strcat(temp1,"B");
-            strcat(temp1,", ");
+            appendControllerText(temp1, sizeof(temp1), L_OPEN_LOAD " ");
+            if (driver[axis].outputA.openLoad) appendControllerText(temp1, sizeof(temp1), "A");
+            if (driver[axis].outputB.openLoad) appendControllerText(temp1, sizeof(temp1), "B");
+            appendControllerText(temp1, sizeof(temp1), ", ");
           }
         }
         if (driver[axis].outputA.shortToGround || driver[axis].outputB.shortToGround) {
-          strcat(temp1, L_SHORT_GND " ");
-          if (driver[axis].outputA.shortToGround) strcat(temp1,"A");
-          if (driver[axis].outputB.shortToGround) strcat(temp1,"B");
-          strcat(temp1,", ");
+          appendControllerText(temp1, sizeof(temp1), L_SHORT_GND " ");
+          if (driver[axis].outputA.shortToGround) appendControllerText(temp1, sizeof(temp1), "A");
+          if (driver[axis].outputB.shortToGround) appendControllerText(temp1, sizeof(temp1), "B");
+          appendControllerText(temp1, sizeof(temp1), ", ");
         }
-        if (driver[axis].overTemperature) strcat(temp1, L_SHUTDOWN_OVER " 150C, ");
-        if (driver[axis].overTemperaturePreWarning) strcat(temp1, L_PRE_WARNING " &gt;120C, ");
+        if (driver[axis].overTemperature) appendControllerText(temp1, sizeof(temp1), L_SHUTDOWN_OVER " 150C, ");
+        if (driver[axis].overTemperaturePreWarning) appendControllerText(temp1, sizeof(temp1), L_PRE_WARNING " &gt;120C, ");
       }
       if (strlen(temp1) > 2) temp1[strlen(temp1) - 2] = 0;
 
-      if (driver[axis].fault) strcat(temp1, " (" L_DRIVER_FAULT ")");
+      if (driver[axis].fault) appendControllerText(temp1, sizeof(temp1), " (" L_DRIVER_FAULT ")");
       if (strlen(temp1) == 0) strcpy(temp1, "Ok");
 
       char *thisDriverStatusStr = driverStatusStr[axis];
@@ -72,10 +78,10 @@ void State::updateController(bool now)
 
   // General Error
   strcpy(temp, "");
-  if (status.lastError != ERR_NONE) strcat(temp, "<font class=\"y\">"); 
+  if (status.lastError != ERR_NONE) appendControllerText(temp, sizeof(temp), "<font class=\"y\">");
   status.getLastErrorMessage(temp1, sizeof(temp1));
-  if (!status.onStepFound) strcat(temp, "?"); else strcat(temp, temp1);
-  if (status.lastError != ERR_NONE) strcat(temp, "</font>"); 
+  if (!status.onStepFound) appendControllerText(temp, sizeof(temp), "?"); else appendControllerText(temp, sizeof(temp), temp1);
+  if (status.lastError != ERR_NONE) appendControllerText(temp, sizeof(temp), "</font>");
   strncpy(lastErrorStr, temp, 80); lastErrorStr[79] = 0; Y;
 
   // Loop time
