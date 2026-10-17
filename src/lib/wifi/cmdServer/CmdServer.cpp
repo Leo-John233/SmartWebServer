@@ -5,6 +5,7 @@
 
   #include "../../tasks/OnTask.h"
   #include "../../../libApp/cmd/Cmd.h"
+  #include "../../../libApp/boardIo/CommandGate.h"
   #include "../../../libApp/boardIo/Activity.h"
   #include "../NetworkBudget.h"
 
@@ -26,11 +27,19 @@
 
   void CmdServer::handleClient() {
     const unsigned long now = millis();
+    #if defined(RA_BRAKE_PROTECTION) && RA_BRAKE_PROTECTION == ON
+      // 锁定或复位时断开旧连接，丢弃未执行命令及半帧，防止复位后继续旧运动
+      if (protectionEpoch_ != SwsCommandGate::epoch()) {
+        protectionEpoch_ = SwsCommandGate::epoch();
+        cmdSvrClient.stop(); cmdBuffer[0] = 0; cmdBufferPos = 0;
+        return;
+      }
+    #endif
 
     // drop stale client socket (disconnected or timed out/hung)
     bool timedOut = (long)(clientEndTimeMs - now) < 0;
     #if NETWORK_LOAD_GUARD == ON
-      // 分轮处理不能把标准端口已收到的批量命令按空闲超时丢弃。
+      // 分轮处理不能把标准端口已收到的批量命令按空闲超时丢弃
       if (cmdSvrClient.available() > 0) timedOut = false;
     #endif
     if (cmdSvrClient &&
@@ -60,7 +69,7 @@
     #endif
     while (cmdSvrClient && cmdSvrClient.connected() && cmdSvrClient.available() > 0) {
       #if NETWORK_LOAD_GUARD == ON
-        // 保留半帧和未读数据至下一轮，连续指令不能独占调度器。
+        // 保留半帧和未读数据至下一轮，连续指令不能独占调度器
         if (bytes >= swsNetwork::commandBytesPerTurn || commands >= swsNetwork::commandsPerTurn) break;
       #endif
       // still active? push back disconnect

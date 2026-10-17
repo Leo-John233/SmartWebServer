@@ -3,6 +3,7 @@
 
 #include "Cmd.h"
 #include "../../locales/Locale.h"
+#include "../boardIo/CommandGate.h"
 
 int webTimeout = TIMEOUT_WEB;
 int cmdTimeout = TIMEOUT_COMMAND;
@@ -90,15 +91,32 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
     xSemaphoreTake(xMutex, portMAX_DELAY);
   #endif
 
+  #if defined(RA_BRAKE_PROTECTION) && RA_BRAKE_PROTECTION == ON
+    if (!SwsCommandGate::allows(cmd)) {
+      // MS 的 0 表示成功，拦截 GOTO 时必须返回非零拒绝码
+      strcpy(response, cmd && cmd[0] == ':' && cmd[1] == 'M' && cmd[2] == 'S' ? "5" : "0");
+      #ifdef ESP32
+        xSemaphoreGive(xMutex);
+      #endif
+      return false;
+    }
+  #endif
+
   SERIAL_ONSTEP.setTimeout(timeOutMs);
   
   // clear the read/write buffers
   serialRecvFlush();
 
   // send the command
-  SERIAL_ONSTEP.print(cmd);
-
   response[0] = 0;
+  const size_t written = SERIAL_ONSTEP.print(cmd);
+  if (written != strlen(cmd)) {
+    #ifdef ESP32
+      xSemaphoreGive(xMutex);
+    #endif
+    return false;
+  }
+
   bool noResponse = false;
   bool shortResponse = false;
   if (cmd[0] == (char)6 && cmd[1] == 0) shortResponse = true;

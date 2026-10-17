@@ -5,7 +5,7 @@
 enum class BrakeState { Starting, Disabled, Waiting, Stopping, StopFailed, Fault, Stale, Released };
 enum class BrakeFault : uint8_t { None, Driver, Feedback, Disconnected, Stale, ProtectionOff, Storage };
 
-// 独立保护策略，不依赖串口协议、GPIO、网页或存储。
+// 独立保护策略，不依赖串口协议、GPIO、网页或存储
 class BoardIoPolicy {
 public:
   enum : uint32_t { PollIntervalMs = 250, FeedbackStaleMs = 1000, ReadyMs = 500 };

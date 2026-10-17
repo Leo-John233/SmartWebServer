@@ -15,7 +15,7 @@ void BoardIoPolicy::latch(BrakeFault reason) {
 
 void BoardIoPolicy::restoreFault(BrakeFault reason) {
   reason_ = reason;
-  // 上电已经输出 LOW，恢复已保存的锁定时不重复启动停止流程。
+  // 上电已经输出 LOW，恢复已保存的锁定时不重复启动停止流程
   stopAttempted_ = reason != BrakeFault::None;
 }
 
@@ -36,7 +36,7 @@ bool BoardIoPolicy::fresh(uint32_t now) const {
 }
 
 void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
-  // 相同或更早的采样不能算作另一帧确认；时间差计算兼容时钟回绕。
+  // 相同或更早的采样不能算作另一帧确认；时间差计算兼容时钟回绕
   if (feedbackSeen_ && int32_t(value.sampledAt - feedback_.sampledAt) <= 0) return;
   if (!fresh(now)) {
     if (released_) latch(BrakeFault::Stale);
@@ -56,8 +56,8 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
   healthy_ = healthy;
   if (healthy && uint32_t(now - healthyAt_) >= ReadyMs) ready_ = true;
 
-  // 正常运行时单独 ST 不触发抱闸。停止命令完成后才统计新鲜 ST；
-  // 无效或运动反馈会清除未完成的确认，不能把命令发送成功当成停稳。
+  // 正常运行时单独 ST 不触发抱闸停止命令完成后才统计新鲜 ST；
+  // 无效或运动反馈会清除未完成的确认，不能把命令发送成功当成停稳
   if (reason_ != BrakeFault::None && released_ && stopAttempted_ && stopResult_.complete() &&
       int32_t(value.sampledAt - stopAt_) > 0 && value.standstill) {
     if (!standstillSeen_) { standstillSeen_ = true; standstillAt_ = value.sampledAt; }
@@ -72,7 +72,7 @@ void BoardIoPolicy::checkFeedback(bool connected, uint32_t now) {
     invalidate();
     if (released_) latch(!connected ? BrakeFault::Disconnected : BrakeFault::Stale);
   }
-  // 失联不修改 released_，保持当前 GPIO 电平。
+  // 失联不修改 released_，保持当前 GPIO 电平
 }
 
 void BoardIoPolicy::advanceRelease(uint32_t now) {

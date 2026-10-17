@@ -18,6 +18,7 @@
 
       char cmdBuffer[40];
       int cmdBufferPos;
+      uint32_t protectionEpoch_ = 0;
 
       unsigned long clientTimeoutMs;
       unsigned long clientEndTimeMs;

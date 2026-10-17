@@ -65,7 +65,7 @@ void handleMount()
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
 
-  // 移动控制之后显示位置与限位，再显示坐标 GOTO 和其余设置。
+  // 移动控制之后显示位置与限位，再显示坐标 GOTO 和其余设置
   data.concat(FPSTR(html_layout_mount_begin));
   guideTile(data);
   data.concat(FPSTR(html_layout_mount_tracking));
@@ -103,10 +103,10 @@ void mountAjaxGet()
 
   // 坐标操作返回本次结果，避免与其他控制参数混合执行
   if (www.arg("dr").equals("T1") || www.arg("dr").equals("T0")) {
-    // 跟踪开关必须返回主控的实际应答，不能用 HTTP 200 代替设备成功。
+    // 跟踪开关必须返回主控的实际应答，不能用 HTTP 200 代替设备成功
     char reply[80] = "";
     const bool received = onStep.command(www.arg("dr").equals("T1") ? ":Te#" : ":Td#", reply);
-    www.sendContent(!received ? "timeout" : !strcmp(reply, "1") ? "ok" : !strcmp(reply, "0") ? "rejected" : "invalid");
+    www.sendContent(!strcmp(reply, "0") ? "rejected" : !received ? "timeout" : !strcmp(reply, "1") ? "ok" : "invalid");
   }
   else if (!www.arg("coord_action").equals(EmptyStr)) gotoCoordinatesGet();
   else processMountGet();

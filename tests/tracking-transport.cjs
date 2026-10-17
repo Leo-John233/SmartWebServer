@@ -18,6 +18,9 @@ const code=`
 #define DLF(x)
 #define CONTENT_LENGTH_UNKNOWN -1
 #define ON 1
+#define RA_BRAKE_PROTECTION ON
+${read('libApp/boardIo/CommandGate.h').replace(/^#pragma once.*$/gm,'')}
+bool permitMotion=true;
 #define NETWORK_LOAD_GUARD 1
 ${read('lib/wifi/NetworkBudget.h').replace(/^#pragma once.*$/gm,'')}
 struct Esp{unsigned getFreeHeap(){return 24000;}}ESP;
@@ -26,11 +29,11 @@ unsigned long millis(){return clockMs;}
 void delay(int){clockMs++;}
 long webTimeout=200,cmdTimeout=200;
 struct Serial {
- std::string incoming;std::map<std::string,std::string>responses;std::vector<std::string>sent;
+ std::string incoming;std::map<std::string,std::string>responses;std::vector<std::string>sent;bool writeFails=false;
  void setTimeout(long){} int available(){return incoming.size();}
  int read(){int c=incoming[0];incoming.erase(0,1);return c;}
  int readBytes(char*out,int count){int i=0;while(i<count&&available())out[i++]=read();return i;}
- void print(const char*s){sent.push_back(s);incoming+=responses[s];}
+ size_t print(const char*s){if(writeFails)return 0;sent.push_back(s);incoming+=responses[s];return strlen(s);}
 } serial;
 #define SERIAL_ONSTEP serial
 struct OnStepCmd {
@@ -58,12 +61,13 @@ struct Server{bool hasClient(){return false;}Client available(){return Client();
 struct Tasks{void yield(){clockMs++;}}tasks;
 void swsNetworkActivity(){}
 struct CmdServer{Server*cmdSvr=&server;Client cmdSvrClient;unsigned long clientEndTimeMs=1000000,clientTimeoutMs=10000;
- bool persist=true;char cmdBuffer[41]={};int cmdBufferPos=0;void handleClient();};
+ bool persist=true;char cmdBuffer[41]={};int cmdBufferPos=0;uint32_t protectionEpoch_=0;void handleClient();};
 ${wifi.slice(wifi.indexOf('  void CmdServer::handleClient()'),wifi.lastIndexOf('#endif'))}
 struct OriginalCmdServer:CmdServer{void handleClient();};
 ${originalWifi.slice(originalWifi.indexOf('  void CmdServer::handleClient()'),originalWifi.lastIndexOf('#endif')).replace('CmdServer::handleClient','OriginalCmdServer::handleClient')}
 int main(){
- // 同一组输入重放给原版和当前真实转发函数，逐字比较命令和回复。
+ SwsCommandGate::permit()=[](){return permitMotion;};
+ // 同一组输入重放给原版和当前真实转发函数，逐字比较命令和回复
  serial.responses[":Te#"]="1";serial.responses[":Td#"]="0";
  serial.responses[":GR#"]="12:34:56#";serial.responses[std::string(1,char(6))]="P";
  serial.responses[":GD#"]="+45*00:00#";serial.responses[":GU#"]="nNpEW190#";
@@ -84,21 +88,36 @@ int main(){
   for(const auto &action:std::vector<std::pair<std::string,std::string>>{{"T1",":Te#"},{"T0",":Td#"}}){
    serial.responses[action.second]=test.first;serial.sent.clear();www.args["dr"]=action.first.c_str();mountAjaxGet();
    assert(www.result==test.second&&serial.sent==std::vector<std::string>{action.second});
-   assert(genericCalls==0); // 不得经通用入口再次发送同一跟踪命令。
+   assert(genericCalls==0); // 不得经通用入口再次发送同一跟踪命令
    CmdServer tcp;tcp.cmdSvrClient.input=action.second;tcp.handleClient();assert(tcp.cmdSvrClient.output==test.first);
   }
  }
- // 缺失驱动的单字符 0 和全置位状态不能改变下一条 Te 的应答。
+ // 缺失驱动的单字符 0 和全置位状态不能改变下一条 Te 的应答
  for(const char*driver:{"0","0#","ST,OA,OB,GA,GB,OT,PW,GF#",""}){
   char response[80];serial.responses[":GXU1#"]=driver;onStep.command(":GXU1#",response);
   serial.responses[":Te#"]="1";assert(onStep.commandBool(":Te#"));
   CmdServer tcp;tcp.cmdSvrClient.input=":Te#";tcp.handleClient();assert(tcp.cmdSvrClient.output=="1");
  }
- // 长应答经真实 TCP 转发函数完整返回，不覆盖调用栈。
+ // 长应答经真实 TCP 转发函数完整返回，不覆盖调用栈
  std::string longReply(70,'x');longReply+='#';serial.responses[":GVP#"]=longReply;
  CmdServer tcp;tcp.cmdSvrClient.input=":GVP#";tcp.handleClient();assert(tcp.cmdSvrClient.output==longReply);
  char response[80];serial.responses[":GXU1#"]="ST,,,,,,,";assert(!onStep.command(":GXU1#",response));
- std::cout<<"PASS: original/current TCP replay matches for fragmented/batched queries, coordinate setters/GOTO, pulse guiding, tracking 1/0/timeout, ACK and STOP with 5ms scheduling; actual endpoint, absent driver queries, complete-frame check and long replies\\n";
+ // 锁定从实际串口出口统一拦截，网页和 TCP 均不能绕过，查询与停止继续可用
+ permitMotion=false;serial.sent.clear();
+ for(const char*cmd:{":Te#",":MS#",":MA#",":Mn#",":Mgn1000#",":hC#",":hP#",":SX99,1#",";MS00#",":GR#:Te#"}){
+   assert(!onStep.processCommand(cmd,response,200));assert(serial.sent.empty());
+   if(!strcmp(cmd,":MS#"))assert(!strcmp(response,"5"));
+ }
+ www.args["dr"]="T1";mountAjaxGet();assert(www.result=="rejected"&&serial.sent.empty());
+ CmdServer blocked;blocked.cmdSvrClient.input=":Te#:MS#";blocked.handleClient();clockMs+=5;blocked.handleClient();assert(serial.sent.empty());
+ assert(onStep.processCommand(":GXU1#",response,200)==false); // 此时模拟的驱动应答没有完整帧
+ assert(onStep.processCommand(":Td#",response,200));assert(onStep.processCommand(":Q#",response,200));
+ serial.writeFails=true;assert(!onStep.processCommand(":Q#",response,200));assert(!onStep.processCommand(":Td#",response,200));serial.writeFails=false;
+ // 锁定和复位均清除旧连接的半帧，旧连接中的命令不能在解锁后执行
+ CmdServer queued;queued.cmdBufferPos=2;strcpy(queued.cmdBuffer,":M");queued.cmdSvrClient.input="S#";
+ SwsCommandGate::setLocked(false);queued.handleClient();assert(queued.cmdBufferPos==0);
+ SwsCommandGate::setLocked(true);queued.cmdBufferPos=2;queued.handleClient();assert(queued.cmdBufferPos==0);
+ std::cout<<"PASS: original TCP replay, tracking replies, locked web/TCP dispatch, GOTO rejection, diagnostics, stop and queued frame cancellation\\n";
 }`;
 const folder=fs.mkdtempSync(path.join(output,'tracking-transport-')),source=path.join(folder,'test.cpp'),exe=path.join(folder,'test.exe');
 fs.writeFileSync(source,code);

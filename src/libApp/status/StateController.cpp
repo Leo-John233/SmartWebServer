@@ -6,12 +6,11 @@
 #include "../../libApp/cmd/Cmd.h"
 #include "../../libApp/misc/Misc.h"
 #include "../../locales/Locale.h"
-#include "../boardIo/BoardIo.h"
 #if OPERATIONAL_MODE == WIFI
   #include "../../lib/wifi/WifiManager.h"
 #endif
 
-// 多个故障同时出现时，译文拼接也必须限制在固定缓冲区内。
+// 多个故障同时出现时，译文拼接也必须限制在固定缓冲区内
 static void appendControllerText(char *destination, size_t capacity, const char *text) {
   const size_t used = strlen(destination);
   if (used < capacity) snprintf(destination + used, capacity - used, "%s", text);
@@ -115,7 +114,6 @@ void State::axisStatusUpdate() {
       char reply[80]; // 命令通道最多写入 79 字节及结束符，异常长反馈也不能越界
       snprintf(cmd, sizeof(cmd), ":GXU%d#", axis + 1);
       const bool received = onStep.command(cmd, reply);
-      if (axis == 0) boardIo.driverFeedback(received, reply);
       if (received && reply[0] != '0') {
         driverStatusFailedAttempts[axis] = 0;
         driver[axis].valid = true;
