@@ -19,7 +19,7 @@ const char html_editor_styles[] PROGMEM = R"UI(
 .sws-editor .sws-unit-inputs input { flex:1; min-width:0; width:0 !important; margin:0; }
 .sws-editor .sws-unit-inputs select { margin:0; min-width:0; width:64px; }
 .sws-editor input, .sws-editor select { height:44px; font-size:17px; color:var(--text); font-weight:500; }
-.sws-editor input[readonly], .sws-editor select:disabled { opacity:1; cursor:default; color:var(--text); background:var(--field); -webkit-text-fill-color:var(--text); }
+.sws-editor input[readonly], .sws-editor select:disabled { opacity:1; cursor:default; color:var(--text); background-color:var(--field); -webkit-text-fill-color:var(--text); }
 .sws-editor .sws-unit-inputs > .sws-signed-input { flex:1; min-width:0; }
 .sws-site-unit { position:relative; display:block; flex:1; min-width:0; }
 .sws-editor .sws-site-unit input:not([hidden]) { width:100% !important; padding:8px 18px 8px 6px; margin:0; appearance:textfield; -moz-appearance:textfield; }
