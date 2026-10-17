@@ -7,7 +7,7 @@
 | `ui/` | 公共主题、布局、导航、编辑器和静态资源输出 |
 | `network/` | 配网处理、连接与重连时序、网络负载限制、ESP8266 网页服务适配 |
 | `network/ui/` | 配网页面样式、模板和浏览器脚本 |
-| `boardIo/` | 网络活动灯、抱闸策略、GPIO、命令拦截和保护采样适配 |
+| `boardIo/` | 网络活动灯、抱闸策略、GPIO 和保护采样适配 |
 | `boardIo/Page.*`、`boardIo/View.h` | 板载功能的页面接口与模板 |
 | `status/` | 驱动反馈解析和有界中文状态文本格式化 |
 | `mount/` | 新增坐标输入的校验和请求处理 |
@@ -28,7 +28,7 @@ Arduino 会自动编译 `src/` 下的 `.cpp`，扩展实现只保留一份，不
 | `pages/index/StatusTile.cpp`、`AxisTile.cpp` | 活动灯与抱闸设置，读取同一次驱动反馈 |
 | `pages/mount/Mount.cpp` | 分派 `coord_action`，坐标校验和命令顺序在扩展中维护 |
 | `libApp/status/State.h`、`State.cpp`、`StateController.cpp` | 保护反馈更新声明及调用，驱动文本格式化入口 |
-| `libApp/cmd/Cmd.cpp`、Wi-Fi 与以太网命令服务 | 网络活动通知、运动命令拦截，协议帧和回复语义保持原有约定 |
+| `libApp/cmd/Cmd.cpp`、Wi-Fi 与以太网命令服务 | 网络活动通知，协议帧和回复语义保持原有约定 |
 | `lib/wifi/webServer/WebServer.*` | ESP8266 使用 `SwsWebServer`，ESP32 继续使用内核提供的服务 |
 
 相对于 `src/` 的路径见上表。本地保留 `tools/upstream-audit.cjs` 时，可用它生成差异清单；该工具不随固件仓库跟踪，实际合并按上表审查即可。

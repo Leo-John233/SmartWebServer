@@ -8,7 +8,6 @@
 BoardIo boardIo;
 static void pollBoardOutputs() { boardIo.tick(); }
 static void pollBoardDriver() { boardIo.pollDriver(); }
-static bool boardMotionAllowed() { return boardIo.motionAllowed(); }
 
 static bool readBoardSetting(const char *key, uint8_t &value) {
   const KvPartition::Status result = nv().kv().get(key, value);
@@ -18,8 +17,6 @@ static bool readBoardSetting(const char *key, uint8_t &value) {
 }
 
 void BoardIo::initPins() {
-  SwsCommandGate::permit() = boardMotionAllowed;
-  if (brakeAvailable()) SwsCommandGate::setLocked(true);
   #if SWS_RA_BRAKE_PIN != OFF
     // 先设置输出锁存值再切换方向；编译关闭保护时从初始化开始松闸
     const int initialLevel = brakeAvailable() ? LOW : HIGH;
@@ -59,7 +56,6 @@ void BoardIo::tick() {
   const bool connected = status.onStepFound && status.mountFound == SD_TRUE;
   if (brakeAvailable()) {
     policy_.checkFeedback(connected, now);
-    if (!policy_.motionAllowed()) SwsCommandGate::setLocked(true);
     if (policy_.stopRequired()) {
       const ProtectionStopResult result = port_->stop();
       policy_.stopResult(result, millis());
@@ -76,7 +72,6 @@ void BoardIo::tick() {
     const int brake = !brakeAvailable() || released ? HIGH : LOW;
     if (brake != brakeLevel_) { digitalWrite(SWS_RA_BRAKE_PIN, brake); brakeLevel_ = brake; }
   #endif
-  if (brakeAvailable()) SwsCommandGate::setLocked(!policy_.motionAllowed());
   servicing_ = false;
 }
 
@@ -107,14 +102,6 @@ bool BoardIo::setProtectionPort(ProtectionPort &port) {
   if (started_) return false;
   port_ = &port;
   return true;
-}
-
-bool BoardIo::motionAllowed() {
-  if (!brakeAvailable()) return true;
-  policy_.checkFeedback(status.onStepFound && status.mountFound == SD_TRUE, millis());
-  const bool allowed = started_ && brakeLevel_ == HIGH && policy_.motionAllowed();
-  SwsCommandGate::setLocked(!allowed);
-  return allowed;
 }
 
 bool BoardIo::resetFault() {

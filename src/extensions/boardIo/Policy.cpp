@@ -13,6 +13,7 @@ void BoardIoPolicy::latch(BrakeFault reason) {
   clearStop();
 }
 
+// 状态未知时只清除反馈确认，保持已有抱闸输出
 void BoardIoPolicy::invalidate() { healthy_ = ready_ = standstillSeen_ = false; }
 
 void BoardIoPolicy::configure(bool activity, bool protection, uint32_t now) {
@@ -74,7 +75,7 @@ void BoardIoPolicy::checkFeedback(bool connected, uint32_t now) {
     invalidate();
     if (released_) latch(!connected ? BrakeFault::Disconnected : BrakeFault::Stale);
   }
-  // 失联不修改 released_，保持当前 GPIO 电平
+  // 失联、超时和无效反馈均不改变原有电平，手动解锁仍可显式松闸
 }
 
 void BoardIoPolicy::advanceRelease(uint32_t now) {

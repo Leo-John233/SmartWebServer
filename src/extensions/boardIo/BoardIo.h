@@ -3,7 +3,6 @@
 #include "Config.h"
 #include "Policy.h"
 #include "Activity.h"
-#include "CommandGate.h"
 
 class BoardIo {
 public:
@@ -16,7 +15,6 @@ public:
   bool resetFault();
   bool unlockManually();
   bool retryStop();
-  bool motionAllowed();
   bool save(bool activity, bool protection);
   bool ownsPin(int pin) const;
   bool activityAvailable() const { return SWS_ACTIVITY_LED_PIN != OFF; }
