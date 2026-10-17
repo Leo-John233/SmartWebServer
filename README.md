@@ -9,15 +9,21 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 - 网页首页：设备地址 `/`
 - 直接用 Arduino IDE 打开本目录的工程即可编译，不需要 Node 或 Vue
 - 使用 Arduino CLI：`arduino-cli compile --warnings all --fqbn esp8266:esp8266:nodemcuv2 .`（ESP8266），或 `arduino-cli compile --warnings all --fqbn esp32:esp32:esp32 .`（ESP32）
-- 安装独立浏览器测试依赖：`npm ci --prefix tests --ignore-scripts`；预览服务：`node demo/server.cjs`
+- 本地保留测试和演示工具时，可安装浏览器测试依赖：`npm ci --prefix tests --ignore-scripts`；预览服务：`node demo/server.cjs`
 
 固件源码位于根目录和 `src/`；原版项目说明保存在 `README.upstream.md`，许可证为 `LICENSE`
+
+## Git 跟踪范围
+
+仓库跟踪固件入口、配置、`src/` 下的固件源文件和各级 README 说明，同时保留 `LICENSE` 与 `.gitignore`。
+
+演示脚本、`tests/`、`tools/`、编辑器缓存、依赖及编译产物只保留在本地，不加入版本控制。README 中的测试、预览和差异检查命令适用于本地已保留相应工具的环境；仅检出仓库的环境可直接使用 Arduino 编译固件。
 
 ## 扩展维护与上游合并
 
 独立扩展统一位于 `src/extensions/`，按界面、网络、抱闸、状态与坐标功能分组。目录职责、原版接入点、已集成的上游基线和后续合并步骤见 [扩展维护说明](src/extensions/README.md)。
 
-后续原版更新通过 GitHub 的 Pull Request 审查和合并，开发分支保留本地提交历史。可运行 `node tools/upstream-audit.cjs origin/SmartWebServer-Original` 只读检查双方改动交集。配置、翻译、卡片布局及原模块修复仍需逐段核对。
+后续原版更新通过 GitHub 的 Pull Request 审查和合并，开发分支保留本地提交历史。本地保留对照工具时，可运行 `node tools/upstream-audit.cjs origin/SmartWebServer-Original` 只读检查双方改动交集。配置、翻译、卡片布局及原模块修复仍需逐段核对，实际合并不依赖本地对照工具。
 
 ## 网页配网
 

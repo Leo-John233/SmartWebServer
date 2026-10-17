@@ -31,7 +31,7 @@ Arduino 会自动编译 `src/` 下的 `.cpp`，扩展实现只保留一份，不
 | `libApp/cmd/Cmd.cpp`、Wi-Fi 与以太网命令服务 | 网络活动通知、运动命令拦截，协议帧和回复语义保持原有约定 |
 | `lib/wifi/webServer/WebServer.*` | ESP8266 使用 `SwsWebServer`，ESP32 继续使用内核提供的服务 |
 
-相对于 `src/` 的路径见上表，完整清单通过仓库根目录的 `tools/upstream-audit.cjs` 生成。
+相对于 `src/` 的路径见上表。本地保留 `tools/upstream-audit.cjs` 时，可用它生成差异清单；该工具不随固件仓库跟踪，实际合并按上表审查即可。
 
 以下修改仍属于原模块，不能只靠搬迁目录消除合并工作：
 
@@ -52,7 +52,7 @@ Arduino 会自动编译 `src/` 下的 `.cpp`，扩展实现只保留一份，不
 
 ## 后续合并步骤
 
-后续更新通过 GitHub 的 Pull Request 审查和合并。原版对照引用更新后，可在本地运行只读检查：
+后续更新通过 GitHub 的 Pull Request 审查和合并。原版对照引用更新后，本地保留对照工具时可运行只读检查：
 
 ```powershell
 node tools/upstream-audit.cjs origin/SmartWebServer-Original
@@ -62,7 +62,7 @@ node tools/upstream-audit.cjs origin/SmartWebServer-Original
 
 准备更新 Pull Request 时保留原作者的协议和业务更新，再按上表接回扩展。审查或处理冲突时重点核对路由、登录限制、设备能力条件、表单名称与 AJAX 标识，不使用批量选择本地版本解决冲突。
 
-在 GitHub 完成更新合并后，将脚本中的默认对照版本和本说明的编号更新到已集成的新原版提交，同时更新本地上游接口回归中的基准。审查中可显式指定其他对照版本：
+在 GitHub 完成更新合并后，将本说明的编号更新到已集成的新原版提交。本地保留对照工具和测试时，同时更新其中的默认对照版本与接口回归基准。使用本地工具时可显式指定其他对照版本：
 
 ```powershell
 node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
@@ -70,7 +70,7 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 
 ## 验证
 
-本地回归仍在已被 Git 忽略的 `tests/`，此次迁移同步调整其源码路径，未恢复跟踪测试目录。新环境缺少这些脚本时，至少执行包含路径检查和两个目标的真实固件编译。
+本地测试、演示和对照脚本不加入版本控制，`tests/` 与 `tools/` 整体忽略，`demo/` 只保留 README 说明。现有本地文件继续保留；新环境缺少这些脚本时，按接入清单核对包含路径，并执行两个目标的真实固件编译。
 
 - `node tools/upstream-audit.cjs` 检查扩展接入及本地包含路径
 - `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>` 检查全部十种语言，范围同时包含 `src/pages/` 与 `src/extensions/`，编译清单缺少任一页面或扩展时必须重新生成
