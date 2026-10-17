@@ -56,7 +56,7 @@ void BoardIo::tick() {
   const bool connected = status.onStepFound && status.mountFound == SD_TRUE;
   if (brakeAvailable()) {
     policy_.checkFeedback(connected, now);
-    if (policy_.stopRequired()) {
+    if (policy_.stopRequired(now)) {
       const ProtectionStopResult result = port_->stop();
       policy_.stopResult(result, millis());
     }

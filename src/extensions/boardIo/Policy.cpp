@@ -1,7 +1,8 @@
 #include "Policy.h"
 
 void BoardIoPolicy::clearStop() {
-  stopAttempted_ = standstillSeen_ = false;
+  stopAttempts_ = 0;
+  standstillSeen_ = false;
   stopResult_ = ProtectionStopResult();
   stopAt_ = standstillAt_ = 0;
 }
@@ -60,7 +61,7 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
 
   // 正常运行时单独 ST 不触发抱闸停止命令完成后才统计新鲜 ST；
   // 无效或运动反馈会清除未完成的确认，不能把命令发送成功当成停稳
-  if (reason_ != BrakeFault::None && released_ && stopAttempted_ && stopResult_.complete() &&
+  if (reason_ != BrakeFault::None && released_ && stopAttempts_ && stopResult_.complete() &&
       int32_t(value.sampledAt - stopAt_) > 0 && value.standstill) {
     if (!standstillSeen_) { standstillSeen_ = true; standstillAt_ = value.sampledAt; }
     else if (uint32_t(value.sampledAt - standstillAt_) >= PollIntervalMs) {
@@ -93,11 +94,17 @@ void BoardIoPolicy::unlockManually() {
   released_ = running_ = true;
 }
 
-bool BoardIoPolicy::stopRequired() const { return reason_ != BrakeFault::None && !stopAttempted_; }
+bool BoardIoPolicy::stopRequired(uint32_t now) const {
+  if (manual_ || reason_ == BrakeFault::None) return false;
+  if (!stopAttempts_) return true;
+  // 每轮包含首次发送最多三次，成功或达到上限后停止自动重试
+  return stopAttempts_ < MaxStopAttempts && !stopResult_.complete() &&
+         uint32_t(now - stopAt_) >= StopRetryMs;
+}
 
 void BoardIoPolicy::stopResult(const ProtectionStopResult &result, uint32_t now) {
   if (reason_ == BrakeFault::None) return;
-  stopAttempted_ = true;
+  if (stopAttempts_ < MaxStopAttempts) ++stopAttempts_;
   stopResult_ = result;
   stopAt_ = now;
   standstillSeen_ = false;
@@ -133,7 +140,7 @@ BrakeState BoardIoPolicy::brakeState(bool connected, uint32_t now) const {
   if (manual_) return BrakeState::Manual;
   if (reason_ != BrakeFault::None && !released_) return BrakeState::Fault;
   if (!connected || (feedbackSeen_ && !fresh(now))) return BrakeState::Stale;
-  if (reason_ != BrakeFault::None) return stopAttempted_ && !stopResult_.complete() ? BrakeState::StopFailed : BrakeState::Stopping;
+  if (reason_ != BrakeFault::None) return stopAttempts_ && !stopResult_.complete() ? BrakeState::StopFailed : BrakeState::Stopping;
   if (!protection_) return BrakeState::Disabled;
   if (!ready_) return BrakeState::Waiting;
   return running_ ? BrakeState::Released : BrakeState::Waiting;

@@ -734,7 +734,7 @@
 #define L_WEB_LOGOUT "退出登录"
 #define L_WEB_PASSWORD_RULE "3–31 个字符，留空不修改"
 #define L_IO_BRAKE_STOPPING "正在停止，等待确认"
-#define L_IO_BRAKE_STOP_FAILED "停止未完成，请再次停止"
+#define L_IO_BRAKE_STOP_FAILED "停止未完成，每轮最多尝试3次"
 
 #define L_SITE_TIME "时间"
 #define L_TRACK_REJECTED "主控拒绝跟踪操作，请检查停放、回零及驱动状态"

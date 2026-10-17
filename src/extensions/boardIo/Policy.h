@@ -8,14 +8,14 @@ enum class BrakeFault : uint8_t { None, Driver, Feedback, Disconnected, Stale, P
 // 独立保护策略，不依赖串口协议、GPIO、网页或存储
 class BoardIoPolicy {
 public:
-  enum : uint32_t { PollIntervalMs = 250, FeedbackStaleMs = 1000, ReadyMs = 500 };
+  enum : uint32_t { PollIntervalMs = 250, FeedbackStaleMs = 1000, ReadyMs = 500, StopRetryMs = 2000, MaxStopAttempts = 3 };
   void configure(bool activity, bool protection, uint32_t now);
   void traffic(uint32_t now);
   void feedback(const ProtectionFeedback &feedback, uint32_t now);
   void checkFeedback(bool connected, uint32_t now);
   void advanceRelease(uint32_t now);
   void unlockManually();
-  bool stopRequired() const;
+  bool stopRequired(uint32_t now) const;
   void stopResult(const ProtectionStopResult &result, uint32_t now);
   bool retryStop();
   bool resetEligible(uint32_t now) const;
@@ -40,7 +40,8 @@ private:
   bool trafficSeen_ = false, feedbackSeen_ = false, healthy_ = false, ready_ = false;
   bool released_ = false, running_ = false;
   bool manual_ = false;
-  bool stopAttempted_ = false, standstillSeen_ = false;
+  uint8_t stopAttempts_ = 0;
+  bool standstillSeen_ = false;
   BrakeFault reason_ = BrakeFault::None;
   ProtectionFeedback feedback_;
   ProtectionStopResult stopResult_;
