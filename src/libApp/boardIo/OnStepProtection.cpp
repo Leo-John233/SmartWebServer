@@ -1,5 +1,4 @@
 #include "OnStepProtection.h"
-#include "BoardIo.h"
 #include "../cmd/Cmd.h"
 
 OnStepProtection onStepProtection;
@@ -28,12 +27,24 @@ bool OnStepProtection::decodeDriver(const char *reply, ProtectionFeedback &feedb
 ProtectionFeedback OnStepProtection::sample() {
   ProtectionFeedback feedback;
   feedback.sampledAt = millis();
-  char reply[80] = "";
-  const bool received = onStep.processCommand(":GXU1#", reply, 200);
-  const size_t length = strlen(reply);
-  if (length && reply[length - 1] == '#') reply[length - 1] = 0;
-  if (received) decodeDriver(reply, feedback);
+  driverValid_ = false;
+  driverReply_[0] = 0;
+  const bool received = onStep.processCommand(":GXU1#", driverReply_, 200);
+  const size_t length = strlen(driverReply_);
+  if (length && driverReply_[length - 1] == '#') driverReply_[length - 1] = 0;
+  if (received) decodeDriver(driverReply_, feedback);
+  sampledAt_ = feedback.sampledAt;
+  driverValid_ = feedback.driverValid;
   return feedback;
+}
+
+bool OnStepProtection::latestDriverReply(char *reply, size_t capacity) const {
+  if (!reply || !capacity) return false;
+  reply[0] = 0;
+  // 页面只使用保护任务的同一份新鲜反馈，采样失败后不能继续显示旧状态
+  if (!driverValid_ || uint32_t(millis() - sampledAt_) > 1000 || strlen(driverReply_) >= capacity) return false;
+  strcpy(reply, driverReply_);
+  return true;
 }
 
 ProtectionStopResult OnStepProtection::stop() {

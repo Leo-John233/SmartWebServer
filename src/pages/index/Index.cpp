@@ -6,6 +6,7 @@
 #include "../ui/Layouts.h"
 #include "../Pages.common.h"
 #include "../boardIo/BoardIo.h"
+#include "../../libApp/boardIo/BoardIo.h"
 
 void processIndexGet();
 
@@ -143,6 +144,7 @@ void indexAjax() {
   www.send(200, "text/plain", String());
   // 本机设置状态在主控掉线时也继续返回。
   boardIoTileAjax(data);
+  if (!status.onStepFound && boardIo.brakeAvailable()) axisTileAjax(0, data);
 
   if (status.onStepFound)
   {

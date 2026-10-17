@@ -33,6 +33,7 @@ class State {
     void pollGpio();
 
     void updateController(bool now = false);
+    void updateBrakeDriverStatus();
     void updateMount(bool now = false);
     void updateRotator(bool now = false);
     void updateFocuser(bool now = false);

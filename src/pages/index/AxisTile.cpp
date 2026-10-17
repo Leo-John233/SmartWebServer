@@ -34,6 +34,7 @@ bool axisTile(int axis, String &data)
   snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "11em", temp1);
   data.concat(temp);
   data.concat(F("<br /><hr>"));
+  if (axis == 0) state.updateBrakeDriverStatus();
   if (state.driverStatusStr[axis][0] == '?') strcpy(temp1, L_UNKNOWN); else strcpy(temp1, state.driverStatusStr[axis]);
   snprintf_P(temp, sizeof(temp), html_indexDriverStatus, axis, temp1);
   data.concat(temp);
@@ -219,6 +220,7 @@ void axisTileAjax(int axis, String &data)
   char temp[80], temp1[80];
 
   snprintf(temp, sizeof(temp), "dvr_stat%d", axis);
+  if (axis == 0) state.updateBrakeDriverStatus();
   if (state.driverStatusStr[axis][0] == '?') strcpy(temp1, L_UNKNOWN); else strcpy(temp1, state.driverStatusStr[axis]);
   data.concat(keyValueString(temp, temp1));
 
