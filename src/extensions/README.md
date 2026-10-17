@@ -73,6 +73,7 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 本地回归仍在已被 Git 忽略的 `tests/`，此次迁移同步调整其源码路径，未恢复跟踪测试目录。新环境缺少这些脚本时，至少执行包含路径检查和两个目标的真实固件编译。
 
 - `node tools/upstream-audit.cjs` 检查扩展接入及本地包含路径
+- `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>` 检查全部十种语言，范围同时包含 `src/pages/` 与 `src/extensions/`，编译清单缺少任一页面或扩展时必须重新生成
 - 抱闸检查使用 `brake-policy`、`board-io-backend`、`brake-reboot`、`controller-status-text`
 - 网络检查使用 `network-wifi-backend`、`network-load-guard`、`network-wifi-performance`、`network-wifi-ui`
 - 页面检查使用 `coordinate-input`、`network-page`、`page-performance`、`shared-pages-ui`、`navigation-recovery`、`demo-entry` 和 `locales`
