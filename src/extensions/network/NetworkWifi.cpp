@@ -90,6 +90,14 @@ void endScan() {
   scanAddedSta = false;
   wifiManager.networkBusy = false;
 }
+// 只在有效的手动操作即将执行时让出后台连接，错误输入不影响正在连接的网络
+void interruptBackgroundConnection() {
+  if (!backgroundConnecting) return;
+  WiFi.disconnect();
+  connecting = backgroundConnecting = false;
+  wifiManager.networkBusy = false;
+  stationReconnect.defer(millis());
+}
 // 发起连接后立即返回，由主循环判断成功或超时
 bool configureStation() {
   stationStarted = authenticationRejected = wasConnected = false;
@@ -174,17 +182,11 @@ void handleWifiNetwork() {
   if (action == "scan" && www.arg("automatic") == "1" && (connecting || pending)) {
     error(409, L_UI_BUSY); return;
   }
-  if (backgroundConnecting && ((action == "scan" && !scanPoll) || action == "connect" || action == "ap")) {
-    // 用户操作优先，取消后台尝试后再处理；旧凭据和热点均保留
-    WiFi.disconnect();
-    connecting = backgroundConnecting = false;
-    wifiManager.networkBusy = false;
-    stationReconnect.defer(millis());
-  }
-  if (pending || connecting) { error(409, L_UI_BUSY); return; }
+  if (pending || (connecting && !backgroundConnecting)) { error(409, L_UI_BUSY); return; }
 
   if (action == "scan") {
     if (!scanning) {
+      interruptBackgroundConnection();
       WiFi.persistent(false);
       scanAddedSta = !(WiFi.getMode() & WIFI_STA);
       WiFi.enableSTA(true); // 保留热点和已有路由器连接，只开启扫描需要的无线接口
@@ -278,8 +280,17 @@ void handleWifiNetwork() {
     if (password.length()) strcpy(a.pwd, password.c_str());
     a.channel = ch;
     proposed.accessPointEnabled = enabled;
+    const AccessPointSettings &saved = wifiManager.settings.ap;
+    // 原样保存不重启热点 DHCP，也不打断正在进行的 STA 重连
+    if (enabled == wifiManager.settings.accessPointEnabled && enabled == apActive() &&
+        !strcmp(a.ssid, saved.ssid) && !strcmp(a.pwd, saved.pwd) && a.channel == saved.channel &&
+        !memcmp(a.ip, saved.ip, 4) && !memcmp(a.gw, saved.gw, 4) && !memcmp(a.sn, saved.sn, 4)) {
+      reply(200, "{\"message\":" + quote(L_UI_AP_SAVED) + "}");
+      return;
+    }
     pending = 2;
   }
+  interruptBackgroundConnection();
   scheduledAt = millis(); failed = false;
   noticeTarget = pending == 2 ? "ap" : "sta";
   notice = L_UI_APPLYING;
@@ -317,6 +328,15 @@ void pollWifiNetwork() {
       failed = true;
       notice = L_UI_ROUTER_LOST;
       return;
+    }
+    // 延迟期间路由器地址可能改变，应用热点前再次检查网段，保留原有可用入口
+    if (operation == 2 && proposed.accessPointEnabled && WiFi.status() == WL_CONNECTED) {
+      IPAddress ip = WiFi.localIP(), mask = WiFi.subnetMask();
+      if (overlap(proposed.ap.ip, proposed.ap.sn, &ip[0], &mask[0])) {
+        failed = true;
+        notice = L_UI_AP_OVERLAP;
+        return;
+      }
     }
     const WifiSettings previousSettings = wifiManager.settings;
     const bool previousApActive = apActive();
