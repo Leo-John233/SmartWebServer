@@ -25,6 +25,8 @@ const char html_board_io_styles[] PROGMEM = R"IO(
 .sws-io-control .sws-io-auto button.sws-switch { min-height:26px; padding:3px; }
 .sws-io-status-row { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:12px; border-top:1px solid var(--border); }
 .sws-io-status-row .sws-io-status { min-width:0; padding:0; border:0; overflow-wrap:anywhere; }
+.sws-io-status-detail { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.sws-io-status-detail .sws-io-fault { font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
 .sws-io-status-row .sws-setting-actions { flex-shrink:0; margin:0; }
 .sws-io-error { grid-column:1 / -1; order:1; margin:0; color:var(--alert,#d6b786); font-size:14px; }
 .sws-io-error:empty { display:none; }
@@ -99,10 +101,11 @@ const char html_board_io_activity[] PROGMEM =
   "<p>" L_IO_ACTIVITY_HELP "</p></div>";
 const char html_board_io_brake[] PROGMEM =
   "<div class='sws-io-control'><h3>" L_IO_BRAKE_TITLE "</h3>"
-  "<label class='sws-io-auto'><span>" L_IO_BRAKE_AUTO "</span>"
+  "<label class='sws-io-auto'>"
   "<button type='button' id='sws-io-protection' class='sws-switch' role='switch' aria-label=\"" L_IO_BRAKE_AUTO "\" aria-checked='%s' data-selected='%s' data-setting='protection'></button></label>"
   "<p>" L_IO_BRAKE_HELP "</p><div class='sws-io-status-row'>"
+  "<div class='sws-io-status-detail'>"
   "<div id='sws-io-brake-state' class='sws-io-status' role='status'>%s</div>"
+  "<div id='sws-io-fault' class='sws-io-fault'>%s</div></div>"
   "<div class='sws-setting-actions'><button type='button' data-action='manual-unlock'>" L_IO_BRAKE_MANUAL "</button></div></div>"
-  "<div id='sws-io-fault' class='sws-io-fault'>%s</div>"
   "<div id='sws-io-retry-stop' class='sws-io-actions sws-setting-actions' data-selected='%s'><button type='button' data-action='retry-stop'>" L_IO_BRAKE_RETRY "</button></div></div>";
