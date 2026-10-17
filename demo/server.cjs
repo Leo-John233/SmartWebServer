@@ -7,7 +7,7 @@ const pages=['/index.htm','/mount.htm','/net.htm','/focuser.htm','/rotator.htm',
 const networks=[{ssid:'Redmi_Hotel',rssi:-48,open:false},{ssid:'Observatory',rssi:-62,open:false},{ssid:'Guest',rssi:-73,open:true},{ssid:'Home Wi-Fi',rssi:-55,open:false}];
 let connectAt=0,scanAt=0,fail=false;
 let encoderAutoSync=false;
-const boardIoState={activity:true,protection:brakeAvailable};
+const boardIoState={activity:true,protection:brakeAvailable,locked:false};
 const server=http.createServer(async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   const url=new URL(req.url,'http://127.0.0.1');let body='';for await(const chunk of req){body+=chunk;if(body.length>65536){res.writeHead(413);res.end();return;}}
@@ -19,12 +19,22 @@ const server=http.createServer(async(req,res)=>{
   if(url.pathname==='/demo.js')return send(client,'text/javascript; charset=utf-8');
   if(url.pathname==='/board-io'){
     if(req.method==='POST'){
-      const setting=args.get('setting'),enabled=args.get('enabled');
-      if(!['activity','protection'].includes(setting)||!['0','1'].includes(enabled)){res.statusCode=400;return send('{}','application/json');}
-      if(setting==='protection'&&!brakeAvailable){res.statusCode=409;return send('{}','application/json');}
-      boardIoState[setting]=enabled==='1';
+      const action=args.get('action');
+      if(action){
+        if(!brakeAvailable||!boardIoState.locked||!['reset','retry-stop'].includes(action)||(action==='reset'&&!boardIoState.protection)){
+          res.statusCode=409;return send('{}','application/json');
+        }
+        if(action==='reset')boardIoState.locked=false;
+      }else{
+        const setting=args.get('setting'),enabled=args.get('enabled');
+        if(!['activity','protection'].includes(setting)||!['0','1'].includes(enabled)){res.statusCode=400;return send('{}','application/json');}
+        if(setting==='protection'&&!brakeAvailable){res.statusCode=409;return send('{}','application/json');}
+        if(setting==='protection'&&boardIoState.protection&&enabled==='0')boardIoState.locked=true;
+        boardIoState[setting]=enabled==='1';
+      }
     }
-    return send(JSON.stringify({...boardIoState,message:boardIoState.protection?'驱动正常，已松闸':'保护关闭，已抱闸'}),'application/json; charset=utf-8');
+    // 演示服务模拟完成停止，不连接硬件，也不会因重开开关自动解锁
+    return send(JSON.stringify({...boardIoState,message:boardIoState.locked?'已抱闸，请手动解除锁定':boardIoState.protection?'状态正常，已松闸':'保护关闭，已抱闸',fault:boardIoState.locked?'锁定原因：关闭保护':''}),'application/json; charset=utf-8');
   }
   if(url.pathname==='/net-wifi'){
     const action=url.searchParams.get('action');
