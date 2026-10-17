@@ -3,6 +3,11 @@
 // 页面增强只代理已有控件；设备参数与命令仍由原页面处理。
 const char html_page_controls[] PROGMEM = R"UI(
 <script>
+// 滚轮经过当前数字框时先退出焦点，阻止原生步进并保留页面滚动。
+document.addEventListener('wheel', (event) => {
+  const field = event.target;
+  if (field instanceof HTMLInputElement && field.type === 'number' && document.activeElement === field) field.blur();
+}, { capture: true, passive: true });
 // 普通命令未返回时暂缓状态刷新；不重发命令，也不改变操作顺序。
 window.swsWatchCommand = (request) => {
   window.swsPendingCommands = (window.swsPendingCommands || 0) + 1;

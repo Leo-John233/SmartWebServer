@@ -2149,7 +2149,7 @@ h2.sws-section-title {
   position: relative;
 }
 .sws-coordinate-unit input {
-  padding: 10px 28px 10px 8px;
+  padding: 10px 32px 10px 8px;
   text-align: center;
   appearance: textfield;
   -moz-appearance: textfield;
@@ -2163,8 +2163,10 @@ h2.sws-section-title {
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: var(--muted);
-  font-size: 12px;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
 }
 .sws-coordinate-units select {
   width: 56px;
@@ -2237,10 +2239,11 @@ h2.sws-section-title {
   }
   .sws-coordinate-unit input {
     padding-left: 4px;
-    padding-right: 22px;
+    padding-right: 24px;
   }
   .sws-coordinate-unit span {
     right: 5px;
+    font-size: 18px;
   }
   .sws-coordinate-units select {
     width: 44px;

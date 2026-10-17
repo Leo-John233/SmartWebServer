@@ -22,10 +22,10 @@ const char html_editor_styles[] PROGMEM = R"UI(
 .sws-editor input[readonly], .sws-editor select:disabled { opacity:1; cursor:default; color:var(--text); background-color:var(--field); -webkit-text-fill-color:var(--text); }
 .sws-editor .sws-unit-inputs > .sws-signed-input { flex:1; min-width:0; }
 .sws-site-unit { position:relative; display:block; flex:1; min-width:0; }
-.sws-editor .sws-site-unit input:not([hidden]) { width:100% !important; padding:8px 18px 8px 6px; margin:0; appearance:textfield; -moz-appearance:textfield; }
+.sws-editor .sws-site-unit input:not([hidden]) { width:100% !important; padding:8px 26px 8px 6px; margin:0; appearance:textfield; -moz-appearance:textfield; }
 .sws-site-unit input::-webkit-inner-spin-button, .sws-site-unit input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
 .sws-editor .sws-unit-inputs > select { padding:0 4px; text-align:center; }
-.sws-site-unit > span { position:absolute; right:7px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px; pointer-events:none; }
+.sws-site-unit > span { position:absolute; right:8px; top:50%; transform:translateY(-50%); color:var(--text); font-size:20px; font-weight:600; line-height:1; pointer-events:none; }
 .sws-signed-input { display:flex; align-items:center; gap:8px; }
 .sws-signed-input > input:not([hidden]) { width:0 !important; flex:1; min-width:0; margin:0; }
 .sws-editor .sws-signed-input > select { width:62px; flex-shrink:0; }
@@ -78,6 +78,8 @@ const char html_editor_styles[] PROGMEM = R"UI(
   .sws-editor .sws-unit-inputs { gap:4px; font-size:12px; }
   .sws-editor .sws-unit-inputs > select { width:48px; }
   .sws-editor .sws-unit-inputs input, .sws-editor select { font-size:16px; }
+  .sws-editor .sws-site-unit input:not([hidden]) { padding-right:20px; padding-left:4px; }
+  .sws-site-unit > span { right:5px; font-size:18px; }
   .sws-clock-value strong { font-size:17px; }
   .sws-clock-controls { align-items:flex-start; }
 }
@@ -117,12 +119,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const site = document.getElementById('sws-site-form');
   if (site) {
-    ['g1','g2','g3','t1','t2','t3'].forEach(name => {
+    ['g1','g2','g3','t1','t2','t3'].forEach((name, index) => {
       const input = site.elements[name];
       if (!input) return;
       const unit = input.nextSibling, label = document.createElement('label'), text = document.createElement('span');
       label.className = 'sws-site-unit';
-      text.textContent = unit?.nodeType === Node.TEXT_NODE ? unit.textContent.trim() : '';
+      text.textContent = ['°', '′', '″'][index % 3];
+      text.setAttribute('aria-hidden', 'true');
       input.before(label); label.append(input, text);
       if (unit?.nodeType === Node.TEXT_NODE) unit.remove();
     });
