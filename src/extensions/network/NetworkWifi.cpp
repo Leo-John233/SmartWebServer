@@ -10,17 +10,15 @@ extern bool loginRequired;
 namespace {
 bool scanning = false, scanAddedSta = false, connecting = false, failed = false;
 bool networkAdopted = false, backgroundConnecting = false, wasConnected = false;
-bool stationStarted = false, authenticationRejected = false;
+bool authenticationRejected = false;
 uint8_t pending = 0; // 1 表示连接路由器，2 表示设置热点，先返回网页响应再切换网络
 unsigned long scheduledAt = 0, scanStarted = 0;
 swsWifi::StationConnection stationConnection;
-swsWifi::StationReconnect stationReconnect, previousReconnect;
+swsWifi::StationReconnect stationReconnect;
 // 上游将路由器参数和密码独立保存，提交时一起暂存并在应用时更新
 WifiSettings proposed;
 StationSettings proposedStation;
 StationPassword proposedPassword;
-StationSettings previousStation;
-StationPassword previousPassword;
 bool stationCandidate = false;
 String notice;
 const char *noticeTarget = "sta";
@@ -100,12 +98,18 @@ void interruptBackgroundConnection() {
 }
 // 发起连接后立即返回，由主循环判断成功或超时
 bool configureStation() {
-  stationStarted = authenticationRejected = wasConnected = false;
+  authenticationRejected = wasConnected = false;
   // 网页连接由本状态机管理，避免 SDK 重连与网页重试同时争用无线接口
   WiFi.setAutoReconnect(false);
   if (!WiFi.enableSTA(true)) return false;
   WiFi.disconnect();
-  // 断开和重新配置分两个主循环阶段，等待 SDK 完成旧连接的清理
+  // 沿用旧版调用顺序，一次完成配置和连接，后续主循环只读取结果
+  StationSettings &s = connectionStation();
+  IPAddress zero((uint32_t)0);
+  const bool configured = s.dhcpEnabled ? WiFi.config(zero, zero, zero) :
+    WiFi.config(IPAddress(s.ip), IPAddress(s.gw), IPAddress(s.sn), IPAddress(s.gw));
+  if (!configured) return false;
+  WiFi.begin(s.ssid, connectionPassword().password);
   stationConnection.begin(millis());
   connecting = true;
   wifiManager.networkBusy = true;
@@ -114,31 +118,18 @@ bool configureStation() {
   noticeTarget = "sta";
   return true;
 }
-void connectionFailed(const String &reason, bool retryable = true) {
-  const bool wasBackground = backgroundConnecting;
-  const bool restoreDifferentConfiguration = stationCandidate &&
-    (strcmp(proposedStation.ssid, previousStation.ssid) ||
-     strcmp(proposedPassword.password, previousPassword.password) ||
-     proposedStation.dhcpEnabled != previousStation.dhcpEnabled ||
-     memcmp(proposedStation.ip, previousStation.ip, 4) ||
-     memcmp(proposedStation.gw, previousStation.gw, 4) ||
-     memcmp(proposedStation.sn, previousStation.sn, 4));
-  connecting = false;
+void connectionFailed(const String &reason) {
+  connecting = backgroundConnecting = false;
   failed = true;
-  backgroundConnecting = false;
   wifiManager.networkBusy = false;
   WiFi.setAutoReconnect(false);
   WiFi.disconnect();
-  // 只结束本次连接，退避期间保留 STA 接口，避免反复切换无线模式干扰热点
-  // 回滚未验证的凭据，后续保存热点等设置时也不能把错误密码一并写入
-  if (stationCandidate) {
-    stationCandidate = false;
-    stationReconnect = previousReconnect;
-  }
-  stationReconnect.failed(millis(), (authenticationRejected || !retryable) && !restoreDifferentConfiguration);
+  // 恢复旧版失败清理，关闭 STA 搜索并保留 AP，等待用户手动重试
+  WiFi.enableSTA(false);
+  stationCandidate = false;
+  stationReconnect.failed();
   bool available = apActive() || startAp();
-  const String feedback = authenticationRejected ? String(L_UI_WIFI_AUTH_FAILED) :
-    wasBackground && retryable ? String(L_UI_RECONNECT_PENDING) : reason;
+  const String feedback = authenticationRejected ? String(L_UI_WIFI_AUTH_FAILED) : reason;
   notice = feedback + (available ? L_UI_AP_AVAILABLE : L_UI_AP_FAILED);
   noticeTarget = "sta";
 }
@@ -343,9 +334,6 @@ void pollWifiNetwork() {
     wifiManager.settings = proposed;
     wifiManager.setStation(wifiManager.stationNumber);
     if (operation == 1) {
-      previousReconnect = stationReconnect;
-      previousStation = *wifiManager.sta;
-      previousPassword = *wifiManager.staPwd;
       stationCandidate = proposed.stationEnabled;
       if (!stationCandidate) {
         *wifiManager.sta = proposedStation;
@@ -359,7 +347,7 @@ void pollWifiNetwork() {
       // 配网期间保留热点，连接失败后仍能通过热点修改设置
       if (wifiManager.settings.stationEnabled) {
         if (!apActive()) startAp();
-        if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED, false);
+        if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED);
       } else {
         WiFi.disconnect(); WiFi.enableSTA(false);
         if (!apActive()) startAp();
@@ -383,7 +371,7 @@ void pollWifiNetwork() {
   }
   if (connecting) {
     const int connection = WiFi.status();
-    if (stationStarted && connection == WL_CONNECT_FAILED) {
+    if (connection == WL_CONNECT_FAILED) {
       #ifdef ESP8266
         authenticationRejected = authenticationRejected || wifi_station_get_connect_status() == STATION_WRONG_PASSWORD;
       #endif
@@ -394,24 +382,10 @@ void pollWifiNetwork() {
     const swsWifi::StationConnection::Action action = stationConnection.poll(connectionNow,
       connection == WL_CONNECTED, connection == WL_CONNECT_FAILED || connection == WL_NO_SSID_AVAIL,
       ipNumber(&ip[0]) != 0 && ipNumber(&mask[0]) != 0);
-    if (action == swsWifi::StationConnection::Start) {
-      StationSettings &s = connectionStation();
-      IPAddress zero((uint32_t)0);
-      const bool configured = s.dhcpEnabled ? WiFi.config(zero, zero, zero) :
-        WiFi.config(IPAddress(s.ip), IPAddress(s.gw), IPAddress(s.sn), IPAddress(s.gw));
-      if (!configured) connectionFailed(L_UI_APPLY_IP_FAILED, false);
-      else { stationStarted = true; WiFi.begin(s.ssid, connectionPassword().password); }
-    } else if (action == swsWifi::StationConnection::Retry) {
-      if (authenticationRejected) connectionFailed(L_UI_WIFI_AUTH_FAILED);
-      else {
-        WiFi.disconnect();
-        stationStarted = false;
-        notice = L_UI_CONNECTION_RETRY;
-      }
-    } else if (action == swsWifi::StationConnection::Success) {
+    if (action == swsWifi::StationConnection::Success) {
       AccessPointSettings &a = wifiManager.settings.ap;
       if (apActive() && overlap(a.ip, a.sn, &ip[0], &mask[0])) {
-        connectionFailed(L_UI_DHCP_OVERLAP, false);
+        connectionFailed(L_UI_DHCP_OVERLAP);
       } else {
         connecting = false; wifiManager.networkBusy = false; failed = false;
         backgroundConnecting = false;
@@ -430,12 +404,12 @@ void pollWifiNetwork() {
     }
   }
   #if STA_AUTO_RECONNECT == true
-    // 已保存网络持续采用退避重试，后台尝试可被手动操作打断
+    // 已保存网络启动失败或掉线后允许一次恢复，明确失败后等待手动重试
     if (stationReconnect.due(now) && wifiManager.settings.stationEnabled && !connecting && !scanning && !pending &&
         WiFi.status() != WL_CONNECTED) {
       backgroundConnecting = true;
       if (!apActive()) startAp();
-      if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED, false);
+      if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED);
     }
   #endif
 }

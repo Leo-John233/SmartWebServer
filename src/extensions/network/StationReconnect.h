@@ -6,22 +6,17 @@
 namespace swsWifi {
 class StationReconnect {
   public:
-    void init(bool saved, uint32_t now) { knownNetwork = saved; blocked = false; failures = 0; next = now + 2000; }
-    void online(uint32_t now) { knownNetwork = true; blocked = false; failures = 0; next = now + 2000; }
-    void lost(uint32_t now) { next = now + 2000; }
-    void defer(uint32_t now) { next = now + 5000; }
-    void failed(uint32_t now, bool permanent) {
-      blocked = blocked || permanent;
-      const uint32_t delay = failures >= 4 ? 60000 : 5000UL << failures;
-      if (failures < 4) failures++;
-      next = now + delay;
-    }
+    void init(bool saved, uint32_t now) { knownNetwork = saved; blocked = false; next = now + 30000; }
+    void online(uint32_t now) { knownNetwork = true; blocked = false; next = now + 30000; }
+    void lost(uint32_t now) { next = now + 30000; }
+    void defer(uint32_t now) { next = now + 30000; }
+    // 沿用旧版失败后等待手动修改的策略，避免持续搜索反复影响热点
+    void failed() { blocked = true; }
     bool due(uint32_t now) const { return knownNetwork && !blocked && int32_t(now - next) >= 0; }
     bool known() const { return knownNetwork; }
 
   private:
     bool knownNetwork = false, blocked = false;
-    uint8_t failures = 0;
     uint32_t next = 0;
 };
 }
