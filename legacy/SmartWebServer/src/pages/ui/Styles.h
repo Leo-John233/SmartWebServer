@@ -793,6 +793,7 @@ h2.sws-section-title {
   width: 100% !important;
   min-width: 0;
   margin: 0 !important;
+  text-align: center;
 }
 .sws-document pre {
   white-space: pre-wrap;
