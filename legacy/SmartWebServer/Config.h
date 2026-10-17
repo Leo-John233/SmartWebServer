@@ -29,6 +29,9 @@
 #define SERIAL_SWAP                  AUTO //   AUTO, 自动检查两者ON 为交换端口 (Swapped)，OFF 为仅使用默认端口             极少改
                                           //         此选项在 ETHERNET (以太网) 模式下被忽略
 
+// 网络负载保护 (NETWORK LOAD GUARD) ----------------------------------------------------------------------------------------------------------
+#define NETWORK_LOAD_GUARD             ON //    OFF, ON 限制网络请求占用并保护 ESP8266 低内存状态                            可选
+
 // 状态指示灯 (STATUS LED) ----------------------------------------------------------------------------------------------------------------------
 #define LED_STATUS                     ON //     ON, 启用 LED，连接过程中闪烁，连接成功后常亮                                极少改
 #define LED_STATUS_ON_STATE          HIGH //   HIGH, LED 点亮时的电平状态 (HIGH 或 LOW)

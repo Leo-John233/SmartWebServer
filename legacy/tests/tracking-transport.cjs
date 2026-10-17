@@ -17,6 +17,10 @@ const code=`
 #define D(x)
 #define DLF(x)
 #define CONTENT_LENGTH_UNKNOWN -1
+#define ON 1
+#define NETWORK_LOAD_GUARD 1
+${read('lib/wifi/NetworkBudget.h').replace(/^#pragma once.*$/gm,'')}
+struct Esp{unsigned getFreeHeap(){return 24000;}}ESP;
 unsigned long clockMs=0;
 unsigned long millis(){return clockMs;}
 void delay(int){clockMs++;}
@@ -48,6 +52,7 @@ ${mount.slice(mount.indexOf('void mountAjaxGet()'),mount.indexOf('void mountAjax
 struct Client {std::string input,output;operator bool()const{return true;}bool connected(){return true;}
  int available(){return input.size();}void stop(){}int read(){int c=input[0];input.erase(0,1);return c;}
  void print(const char*s){output+=s;}
+ void setTimeout(unsigned){}size_t write(const uint8_t*s,size_t n){output.append((const char*)s,n);return n;}
 };
 struct Server{bool hasClient(){return false;}Client available(){return Client();}} server;
 struct Tasks{void yield(){clockMs++;}}tasks;
@@ -61,9 +66,11 @@ int main(){
  // 同一组输入重放给原版和当前真实转发函数，逐字比较命令和回复。
  serial.responses[":Te#"]="1";serial.responses[":Td#"]="0";
  serial.responses[":GR#"]="12:34:56#";serial.responses[std::string(1,char(6))]="P";
- for(const std::string&input:std::vector<std::string>{":Te#",":Td#",":GR#",":Q#",":Te#:GR#:Td#",std::string(1,char(6))}){
+ serial.responses[":GD#"]="+45*00:00#";serial.responses[":GU#"]="nNpEW190#";
+ serial.responses[":Sr12:34:56#"]="1";serial.responses[":Sd+45*00:00#"]="1";serial.responses[":MS#"]="0";
+ for(const std::string&input:std::vector<std::string>{":Te#",":Td#",":GR#",":Q#",":Te#:GR#:Td#",std::string(1,char(6)),":GR#:GD#:GU#",":Sr12:34:56#:Sd+45*00:00#:MS#",":Mgw0020#:Mgn0005#:GU#"}){
    OriginalCmdServer old;CmdServer current;serial.sent.clear();old.cmdSvrClient.input=input;old.handleClient();
-   const auto expected=serial.sent;serial.sent.clear();current.cmdSvrClient.input=input;current.handleClient();
+   const auto expected=serial.sent;serial.sent.clear();current.cmdSvrClient.input=input;while(current.cmdSvrClient.available()){current.handleClient();clockMs+=5;}
    assert(serial.sent==expected&&current.cmdSvrClient.output==old.cmdSvrClient.output);
  }
  OriginalCmdServer fragmentedOld;CmdServer fragmented;
@@ -91,7 +98,7 @@ int main(){
  std::string longReply(70,'x');longReply+='#';serial.responses[":GVP#"]=longReply;
  CmdServer tcp;tcp.cmdSvrClient.input=":GVP#";tcp.handleClient();assert(tcp.cmdSvrClient.output==longReply);
  char response[80];serial.responses[":GXU1#"]="ST,,,,,,,";assert(!onStep.command(":GXU1#",response));
- std::cout<<"PASS: original/current TCP replay matches for fragmented/batched commands, tracking 1/0/timeout, ACK and STOP; actual endpoint, absent driver queries, complete-frame check and long replies\\n";
+ std::cout<<"PASS: original/current TCP replay matches for fragmented/batched queries, coordinate setters/GOTO, pulse guiding, tracking 1/0/timeout, ACK and STOP with 5ms scheduling; actual endpoint, absent driver queries, complete-frame check and long replies\\n";
 }`;
 const folder=fs.mkdtempSync(path.join(output,'tracking-transport-')),source=path.join(folder,'test.cpp'),exe=path.join(folder,'test.exe');
 fs.writeFileSync(source,code);
