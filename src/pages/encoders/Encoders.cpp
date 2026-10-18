@@ -12,7 +12,6 @@ void processEncodersGet();
 
 void handleEncoders()
 {
-  if (servePageShell(PAGE_ENCODERS)) return;
   char temp[400] = "";
 
   state.updateMount(true);

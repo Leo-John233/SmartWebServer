@@ -11,7 +11,6 @@ extern void handleNotFound();
 void processFocuserGet();
 
 void handleFocuser() {
-  if (status.focuserFound == SD_TRUE && servePageShell(PAGE_FOCUSER)) return;
   char temp[240] = "";
 
   state.updateFocuser(true);

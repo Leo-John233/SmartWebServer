@@ -30,7 +30,6 @@ bool loginRequired = true;
 #endif
 
 void handleNetwork() {
-  if (servePageShell(PAGE_NETWORK)) return;
   char temp[420]  = "";
 
   SERIAL_ONSTEP.setTimeout(webTimeout);

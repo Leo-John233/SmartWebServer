@@ -12,8 +12,6 @@ void processIndexGet();
 
 void handleRoot()
 {
-  // 导航外壳使用已发现的设备信息，实际内容页才读取完整状态。
-  if (servePageShell(PAGE_CONTROLLER)) return;
   char temp[240] = "";
 
   state.updateController(true);

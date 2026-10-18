@@ -10,7 +10,7 @@
   #if defined(ESP32)
     #include <WebServer.h>
   #elif defined(ESP8266)
-    #include "../../../extensions/network/GuardedServer.h"
+    #include <ESP8266WebServer.h>
   #else
     #error "Configuration (Config.h): No Wifi support is present for this device"
   #endif
@@ -19,7 +19,7 @@
     extern WebServer www;
     #define sendContentAndClear(x) sendContent(x); x = "";
   #elif defined(ESP8266)
-    extern SwsWebServer www;
+    extern ESP8266WebServer www;
     #define sendContentAndClear(x) sendContent(x); x = ""; delay(1);
   #endif
 

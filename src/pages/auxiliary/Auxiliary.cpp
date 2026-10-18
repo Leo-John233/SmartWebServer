@@ -46,7 +46,6 @@ void auxiliarySliderRow(String &data, int channel, int field, const char *label,
 }
 
 void handleAux() {
-  if (status.auxiliaryFound == SD_TRUE && servePageShell(PAGE_AUXILIARY)) return;
   char temp[240] = "";
   char temp1[80] = "";
 

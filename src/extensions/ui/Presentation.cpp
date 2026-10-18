@@ -4,33 +4,20 @@
 #include "../web/Request.h"
 #include "../boardIo/Activity.h"
 
-// 固定大小分段读取 Flash；也可只发送 style/script 标签内的内容
+// Wi-Fi 直接使用内核的 Flash 发送接口，以太网保留原版字符串接口
 void sendPageResource(const char *content, size_t length) {
-  char part[1025];
-  for (size_t offset = 0; offset < length; offset += sizeof(part) - 1) {
-    const size_t count = min(sizeof(part) - 1, length - offset);
-    memcpy_P(part, content + offset, count);
-    part[count] = 0;
-    www.sendContent(part);
+  for (size_t offset = 0; offset < length; offset += 1024) {
+    const size_t count = min(size_t(1024), length - offset);
+    #if OPERATIONAL_MODE == WIFI
+      www.sendContent_P(content + offset, count);
+    #else
+      char part[1025];
+      memcpy_P(part, content + offset, count);
+      part[count] = 0;
+      www.sendContent(part);
+    #endif
     swsNetworkActivity();
   }
-}
-
-// 外壳不处理表单或带参数的命令，保持原有登录和设备控制接口语义
-bool servePageShell(int selected) {
-  if (www.method() != HTTP_GET || www.args() != 0 || !status.onStepFound) return false;
-  www.setContentLength(CONTENT_LENGTH_UNKNOWN);
-  www.sendHeader("Cache-Control", "no-store");
-  www.send(200, "text/html", String());
-  String data = FPSTR(html_head_begin);
-  data.concat(FPSTR(html_head_end));
-  data.concat(FPSTR(html_body_begin));
-  www.sendContentAndClear(data);
-  pageHeader(selected);
-  www.sendContent("<p id='sws-load' role='status'></p><iframe id='sws-frame' title=\"" L_UI_CONTENT "\"></iframe>");
-  sendPageResource(html_shell_script, sizeof(html_shell_script) - 1);
-  www.sendContent("");
-  return true;
 }
 
 // 只缓存静态外观资源，版本随本文件编译更新，刷入新固件后自动换地址
@@ -52,12 +39,14 @@ static void servePageControls() {
   const size_t controls = sizeof(html_page_controls) - 1 - skip - tail;
   const size_t editors = sizeof(html_settings_editors) - 1 - skip - tail;
   const size_t io = sizeof(html_board_io_script) - 1 - skip - tail;
-  www.setContentLength(controls + editors + io);
+  const size_t navigation = sizeof(html_page_navigation) - 1 - skip - tail;
+  www.setContentLength(controls + editors + io + navigation);
   www.sendHeader("Cache-Control", "public, max-age=31536000, immutable");
   www.send(200, "application/javascript; charset=utf-8", String());
   sendPageResource(html_page_controls + skip, controls);
   sendPageResource(html_settings_editors + skip, editors);
   sendPageResource(html_board_io_script + skip, io);
+  sendPageResource(html_page_navigation + skip, navigation);
 }
 
 void registerPageResources() {

@@ -1,42 +1,12 @@
 #pragma once
 #include "Text.h"
 
-// 导航仅加载当前标签内容，浏览器前进后退同步到同一内容窗口
-const char html_shell_script[] PROGMEM = R"UI(
+// 只增强原版页头外观，普通切页保留浏览器的链接、表单及历史记录
+const char html_page_navigation[] PROGMEM = R"UI(
 <script>
-(() => {
-  // 意外以普通地址打开内容页时直接纠正，避免出现嵌套导航
-  if (parent !== window && parent.swsNavigate) {
-    location.replace(location.pathname + '?view=1');
-    return;
-  }
-  const frame = document.getElementById('sws-frame'),
-    hint = document.getElementById('sws-load'),
-    links = [...document.querySelectorAll('.t a')];
-  let sequence = 0,
-    timer, pendingNavigation = null, requestedPath = '', waiting = false, timedOut = false;
-  // 加载期间只保留最后选择，旧页面传输完成后再加载，避免反复取消占用连接
-  function continueNavigation() {
-    if (!pendingNavigation) return false;
-    const next = pendingNavigation;
-    pendingNavigation = null;
-    queueMicrotask(() => swsNavigate(next.path, next.push));
-    return true;
-  }
-  function recover(ticket) {
-    if(ticket !== sequence)return;
-    clearTimeout(timer);
-    waiting=false;
-    if (continueNavigation()) return;
-    hint.textContent = )UI" SWS_JS_TEXT(L_UI_SLOW_LOAD) R"UI(;
-    frame.style.pointerEvents = '';
-    try {
-      const child=frame.contentWindow;
-      if(child.document.body)child.document.body.inert=false;
-      if(child.swsResumePolling)child.swsResumePolling();
-    } catch(e) {}
-    resize();
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  const links = [...document.querySelectorAll('.t a')];
+  if (!links.length) return;
   // 参考实心设备图标重绘剪影，望远镜保留倾斜镜筒、镜口与底座
   // 图形内嵌且继承导航颜色，离线可用并同步适配桌面和手机
   const icons = {
@@ -113,95 +83,43 @@ const char html_shell_script[] PROGMEM = R"UI(
   version.className = 'sws-version';
   version.textContent = document.querySelector('.t td:last-child')?.textContent || '';
   if (version.textContent) topbar.appendChild(version);
-  hint.before(topbar);
-  const normalize = (path) => (path === '/' ? '/index.htm' : path);
-  function resize() {
-    const bottom = matchMedia('(max-width:700px)').matches
-      ? document.querySelector('.t').getBoundingClientRect().height
-      : 0;
-    frame.style.height =
-      Math.max(180, innerHeight - frame.getBoundingClientRect().top - bottom) + 'px';
-  }
-  window.swsNavigate = async (path, push = false) => {
-    path = normalize(path);
-    if (!links.some((a) => a.pathname === path)) return;
-    closeMore();
-    if (waiting) { pendingNavigation = {path, push}; return; }
-    more.dataset.active = String(!['/index.htm', '/mount.htm', '/net.htm'].includes(path));
-    const ticket = ++sequence;
-    waiting=true; timedOut=false;
-    clearTimeout(timer);
-    hint.textContent = )UI" SWS_JS_TEXT(L_UI_OPENING) R"UI(;
-    frame.style.pointerEvents = 'none';
-    // 正在按住运动按钮时先松开并等待停止请求发送，再销毁旧内容页
-    try {
-      const child = frame.contentWindow;
-      if (child.swsPausePolling) child.swsPausePolling();
-      if (child.document.body) child.document.body.inert = true;
-      const stops = (child.swsMotionStops || []).map((stop) => stop()).filter(Boolean);
-      if (stops.length) {
-        let deadline;
-        try {
-          await Promise.race([Promise.all(stops),new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('stop timeout')),5000);})]);
-        } finally { clearTimeout(deadline); }
-      }
-    } catch (e) { recover(ticket); return; }
-    if (ticket !== sequence) return;
-    if (push && normalize(location.pathname) !== path) history.pushState({}, '', path);
-    links.forEach((a) => {
-      a.removeAttribute('style');
-      if (a.pathname === path) a.setAttribute('aria-current', 'page');
-      else a.removeAttribute('aria-current');
-    });
-    document.getElementById('sws-page-title').textContent = links.find(
-      (a) => a.pathname === path,
-    ).textContent;
-    document.getElementById('sws-page-description').textContent = '';
-    frame.title = document.getElementById('sws-page-title').textContent;
-    frame.style.visibility='hidden';
-    requestedPath = path;
-    frame.contentWindow.location.replace(path + '?view=1');
-    resize();
-    timer = setTimeout(() => {
-      if(ticket!==sequence)return;
-      timedOut=true;
-      try { frame.contentWindow.stop(); } catch(e) {}
-      recover(ticket);
-    }, 12000);
-  };
-  frame.addEventListener('load', () => {
-    if(timedOut)return;
-    // 公共资源失败时不把缺少样式和交互的旧布局当成已加载完成
-    try {
-      const child=frame.contentWindow, doc=child.document;
-      if(child.location.pathname!==requestedPath)return;
-      if(!doc.querySelector('.b') || !child.getComputedStyle(doc.documentElement).getPropertyValue('--bg').trim() ||
-         typeof child.swsWatchCommand!=='function') {
-        recover(sequence); return;
-      }
-    } catch(e) { recover(sequence); return; }
-    clearTimeout(timer);
-    waiting=false;
-    if (pendingNavigation?.path === requestedPath) pendingNavigation = null;
-    if (continueNavigation()) return;
-    hint.textContent = '';
-    frame.style.pointerEvents = '';
-    frame.style.visibility = '';
-    resize();
+  document.querySelector('.t').after(topbar);
+  const path = location.pathname === '/' ? '/index.htm' : location.pathname;
+  const selected = links.find(a => a.pathname === path) || links.find(a => a.hasAttribute('style'));
+  links.forEach(a => {
+    a.removeAttribute('style');
+    if (a === selected) a.setAttribute('aria-current', 'page');
   });
-  addEventListener('online', () => { if(waiting || timedOut) recover(sequence); });
-  addEventListener('resize', resize);
-  new ResizeObserver(resize).observe(document.querySelector('.t'));
-  links.forEach((a) =>
-    a.addEventListener('click', (e) => {
-      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
-      e.preventDefault();
-      swsNavigate(a.pathname, true);
-    }),
-  );
-  addEventListener('popstate', () => swsNavigate(location.pathname));
-  document.documentElement.classList.add('sws-shell');
-  swsNavigate(location.pathname);
-})();
-</script></body></html>
+  document.getElementById('sws-page-title').textContent = selected?.textContent || '';
+  more.dataset.active = String(selected && !['/index.htm', '/mount.htm', '/net.htm'].includes(selected.pathname));
+  document.documentElement.classList.add('sws-page');
+  let leaving = false;
+  // 浏览器从历史缓存恢复原文档时，允许再次通过原生链接切页
+  addEventListener('pageshow', () => { leaving = false; });
+  links.forEach(a => a.addEventListener('click', async event => {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    if (leaving) { event.preventDefault(); return; }
+    const stops = (window.swsMotionStops || []).map(stop => stop()).filter(Boolean);
+    // 没有待完成的运动停止时直接使用原生链接，不加入切页队列或固定等待
+    if (!stops.length) return;
+    event.preventDefault();
+    leaving = true;
+    if (window.swsPausePolling) swsPausePolling();
+    let deadline;
+    try {
+      await Promise.race([Promise.all(stops), new Promise((_, reject) => {
+        deadline = setTimeout(() => reject(Error('stop timeout')), 5000);
+      })]);
+      location.assign(a.href);
+    } catch (_) {
+      leaving = false;
+      if (window.swsResumePolling) swsResumePolling();
+      const hint = document.createElement('p');
+      hint.setAttribute('role', 'status');
+      hint.textContent = )UI" SWS_JS_TEXT(L_UI_SLOW_LOAD) R"UI(;
+      topbar.appendChild(hint);
+    } finally { clearTimeout(deadline); }
+  }));
+});
+</script>
 )UI";

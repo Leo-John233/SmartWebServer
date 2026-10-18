@@ -6,7 +6,6 @@
   #include "../../tasks/OnTask.h"
   #include "../../../libApp/cmd/Cmd.h"
   #include "../../../extensions/boardIo/Activity.h"
-  #include "../../../extensions/network/NetworkBudget.h"
 
   CmdServer::CmdServer(uint32_t port, long clientTimeoutMs, bool persist) {
     cmdSvr = nullptr;
@@ -28,13 +27,8 @@
     const unsigned long now = millis();
 
     // drop stale client socket (disconnected or timed out/hung)
-    bool timedOut = (long)(clientEndTimeMs - now) < 0;
-    #if NETWORK_LOAD_GUARD == ON
-      // 分轮处理不能把标准端口已收到的批量命令按空闲超时丢弃
-      if (cmdSvrClient.available() > 0) timedOut = false;
-    #endif
     if (cmdSvrClient &&
-       (!cmdSvrClient.connected() || timedOut)) {
+       (!cmdSvrClient.connected() || (long)(clientEndTimeMs - now) < 0)) {
       cmdSvrClient.stop();
       cmdBuffer[0] = 0;
       cmdBufferPos = 0;
@@ -44,10 +38,6 @@
     if (!cmdSvrClient && cmdSvr->hasClient()) {
       cmdSvrClient = cmdSvr->available();
       if (cmdSvrClient) {
-        #if NETWORK_LOAD_GUARD == ON
-          if (ESP.getFreeHeap() < swsNetwork::minimumHeap) { cmdSvrClient.stop(); return; }
-          cmdSvrClient.setTimeout(swsNetwork::writeWaitMs);
-        #endif
         clientEndTimeMs = now + clientTimeoutMs;
         cmdBuffer[0] = 0;
         cmdBufferPos = 0;
@@ -55,23 +45,13 @@
     }
 
     // check clients for data, if found get the command, pass to OnStep and pickup the response, then return the response to client
-    #if NETWORK_LOAD_GUARD == ON
-      unsigned bytes = 0, commands = 0;
-    #endif
     while (cmdSvrClient && cmdSvrClient.connected() && cmdSvrClient.available() > 0) {
-      #if NETWORK_LOAD_GUARD == ON
-        // 保留半帧和未读数据至下一轮，连续指令不能独占调度器
-        if (bytes >= swsNetwork::commandBytesPerTurn || commands >= swsNetwork::commandsPerTurn) break;
-      #endif
       // still active? push back disconnect
       if (persist) clientEndTimeMs = millis() + clientTimeoutMs;
 
       // get the data
       int c = cmdSvrClient.read();
       if (c < 0 || c > 255) break;
-      #if NETWORK_LOAD_GUARD == ON
-        bytes++;
-      #endif
       swsNetworkActivity();
       
       // insert into the command buffer
@@ -89,12 +69,7 @@
         // pickup response
         if (strlen(result) > 0) {
           if (cmdSvrClient && cmdSvrClient.connected()) {
-            #if NETWORK_LOAD_GUARD == ON
-              const size_t length = strlen(result);
-              if (cmdSvrClient.write((const uint8_t*)result, length) != length) cmdSvrClient.stop();
-            #else
-              cmdSvrClient.print(result);
-            #endif
+            cmdSvrClient.print(result);
             swsNetworkActivity();
           }
         }
@@ -102,9 +77,6 @@
         // reset command buffer
         cmdBuffer[0] = 0;
         cmdBufferPos = 0;
-        #if NETWORK_LOAD_GUARD == ON
-          commands++;
-        #endif
       } else tasks.yield();
     }
   }

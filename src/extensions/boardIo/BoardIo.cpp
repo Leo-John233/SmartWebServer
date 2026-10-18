@@ -77,9 +77,8 @@ void BoardIo::tick() {
 
 void BoardIo::networkActivity() {
   if (!started_ || !activityAvailable()) return;
-  // 原始上电连接流程自行闪灯；网络启动后交由此模块合并活动脉冲
+  // 网络回调只记录活动，输出与停止命令交由原有调度任务执行
   policy_.traffic(millis());
-  tick();
 }
 
 void swsNetworkActivity() { boardIo.networkActivity(); }

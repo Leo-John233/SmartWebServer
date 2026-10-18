@@ -202,28 +202,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 内容页使用独立文档，离开时由浏览器清理轮询与事件，导航和页头保持不动
-if (window.parent !== window && window.parent.swsNavigate) {
-  document.documentElement.classList.add('sws-embedded');
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('form').forEach((form) => {
-      if (form.method.toLowerCase() === 'get') {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'view';
-        input.value = '1';
-        form.appendChild(input);
-      }
-    });
-    document.querySelectorAll('.t a').forEach((a) =>
-      a.addEventListener('click', (e) => {
-        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-          e.preventDefault();
-          parent.swsNavigate(a.pathname, true);
-        }
-      }),
-    );
-  });
-}
 </script>
 )UI";

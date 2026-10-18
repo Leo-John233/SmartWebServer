@@ -11,7 +11,6 @@ extern void handleNotFound();
 void processRotatorGet();
 
 void handleRotator() {
-  if (status.rotatorFound == SD_TRUE && servePageShell(PAGE_ROTATOR)) return;
   char temp[240] = "";
 
   state.updateRotator(true);

@@ -12,7 +12,6 @@ void processMountGet();
 
 void handleMount()
 {
-  if (servePageShell(PAGE_MOUNT)) return;
   char temp[240] = "";
 
   state.updateMount(true);

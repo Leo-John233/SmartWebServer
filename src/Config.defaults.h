@@ -64,10 +64,6 @@
 #define COMMAND_SERVER                 BOTH      // BOTH, for STANDARD (port 9999) and PERSISTENT (ports 9996 to 9998)
 #endif                                           // or disable with OFF
 
-#ifndef NETWORK_LOAD_GUARD
-#define NETWORK_LOAD_GUARD             OFF
-#endif
-
 #ifndef STA_AP_FALLBACK
 #define STA_AP_FALLBACK                true      // activate SoftAP if station fails to connect
 #endif

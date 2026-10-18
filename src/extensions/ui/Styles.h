@@ -338,38 +338,6 @@ button.sws-secondary { background:#303030; border-color:var(--border); }
   .sws-account .sws-password-actions input, .sws-account-controls button { width:100%; }
 }
 
-html.sws-embedded body {
-  padding: 0;
-}
-html.sws-embedded .t {
-  display: none;
-}
-html.sws-embedded .b {
-  border: 0;
-  border-radius: 0;
-  padding: 20px;
-}
-
-#sws-frame {
-  display: block;
-  width: 100%;
-  border: 1px solid var(--border);
-  border-top: 0;
-  border-radius: 0 0 16px 16px;
-  background: #131313;
-}
-#sws-load {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-#sws-load:empty {
-  display: none;
-}
-html.sws-shell body {
-  overflow: hidden;
-}
-
 @media (min-width: 1500px) {
   .b1 {
     flex-basis: 340px;
@@ -381,8 +349,7 @@ html.sws-shell body {
     padding: 8px;
   }
   .t,
-  .b,
-  html.sws-embedded .b {
+  .b{
     padding: 14px;
   }
   .t td {
@@ -411,14 +378,7 @@ html.sws-shell body {
     grid-template-columns: 1fr !important;
   }
 }
-
-/* 桌面使用侧栏与内容区，手机使用底部导航并为触控留出空间 */
-html.sws-shell body {
-  padding: 0;
-  height: 100dvh;
-  overflow: hidden;
-}
-.sws-shell .t {
+.sws-page .t {
   position: fixed;
   inset: 0 auto 0 0;
   width: var(--sidebar-width);
@@ -431,21 +391,21 @@ html.sws-shell body {
   flex-direction: column;
   gap: 30px;
 }
-.sws-shell .t table,
-.sws-shell .t tbody,
-.sws-shell .t tr,
-.sws-shell .t td {
+.sws-page .t table,
+.sws-page .t tbody,
+.sws-page .t tr,
+.sws-page .t td {
   display: block;
   width: 100%;
   text-align: center;
 }
-.sws-shell .t td:last-child {
+.sws-page .t td:last-child {
   font-size: 11px;
   font-weight: 400;
   color: #808080;
   margin-top: 9px;
 }
-.sws-shell .t font {
+.sws-page .t font {
   font-size: 24px;
 }
 .sws-nav {
@@ -453,8 +413,8 @@ html.sws-shell body {
   flex-direction: column;
   gap: 10px;
 }
-.sws-shell .t a:link,
-.sws-shell .t a:visited {
+.sws-page .t a:link,
+.sws-page .t a:visited {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -466,7 +426,7 @@ html.sws-shell body {
   color: #9f9f9f;
   font-size: 14px;
 }
-.sws-shell .t a[aria-current='page'] {
+.sws-page .t a[aria-current='page'] {
   background: var(--nav-active) !important;
   color: #fff;
   box-shadow: none;
@@ -478,8 +438,8 @@ html.sws-shell body {
     align-items: center;
     overflow-y: auto;
   }
-  .sws-shell .t a:link,
-  .sws-shell .t a:visited {
+  .sws-page .t a:link,
+  .sws-page .t a:visited {
     flex-shrink: 0;
     flex-direction: column;
     justify-content: center;
@@ -535,30 +495,6 @@ html.sws-shell body {
   font-size: 12px;
   color: #959595;
   letter-spacing: 0.05em;
-}
-.sws-shell #sws-frame {
-  margin-left: var(--sidebar-width);
-  width: calc(100% - var(--sidebar-width));
-  border: 0;
-  border-radius: 0;
-  background: #101010;
-}
-.sws-shell #sws-load {
-  position: fixed;
-  right: 28px;
-  top: 8px;
-  font-size: 11px;
-  color: #8e8e8e;
-  z-index: 3;
-}
-
-html.sws-embedded body {
-  background: #101010;
-}
-html.sws-embedded .b {
-  background: transparent;
-  padding: 26px 30px;
-  gap: 24px;
 }
 .b1 {
   border-color: #303030;
@@ -740,7 +676,7 @@ h2.sws-section-title {
 }
 
 @media (max-width: 700px) {
-  .sws-shell .t {
+  .sws-page .t {
     inset: auto 0 0;
     width: 100%;
     height: calc(74px + env(safe-area-inset-bottom));
@@ -751,7 +687,7 @@ h2.sws-section-title {
     background: #161616;
     display: block;
   }
-  .sws-shell .t table,
+  .sws-page .t table,
   .sws-sidebar-note {
     display: none !important;
   }
@@ -762,8 +698,8 @@ h2.sws-section-title {
     overflow-x: auto;
     height: 64px;
   }
-  .sws-shell .t a:link,
-  .sws-shell .t a:visited {
+  .sws-page .t a:link,
+  .sws-page .t a:visited {
     flex: 1 0 64px;
     flex-direction: column;
     justify-content: center;
@@ -773,7 +709,7 @@ h2.sws-section-title {
     border-radius: 10px;
     min-width: 64px;
   }
-  .sws-shell .t a[aria-current='page'] {
+  .sws-page .t a[aria-current='page'] {
     box-shadow: none;
   }
   .sws-nav svg {
@@ -794,18 +730,6 @@ h2.sws-section-title {
   }
   .sws-brand-small {
     font-size: 11px;
-  }
-  .sws-shell #sws-frame {
-    margin-left: 0;
-    width: 100%;
-  }
-  .sws-shell #sws-load {
-    right: 12px;
-    top: 2px;
-    font-size: 10px;
-  }
-  html.sws-embedded .b {
-    padding: 18px 14px;
   }
   .sws-overview-grid,
   .sws-settings-grid {
@@ -1200,7 +1124,7 @@ h2.sws-section-title {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
-  .sws-shell .t .sws-extra-nav a {
+  .sws-page .t .sws-extra-nav a {
     min-height: 64px;
     flex-direction: row;
     justify-content: flex-start;
@@ -2577,7 +2501,7 @@ h2.sws-section-title {
 .sws-tracking-advanced h2 { font-size: 18px; margin: 0 0 16px; }
 
 /* 隐藏旧页头的名称区域，版本信息由原始服务端数据移至页头右侧 */
-.sws-shell .t td:last-child {
+.sws-page .t td:last-child {
   display: none;
 }
 .sws-version {
@@ -3506,6 +3430,20 @@ h2.sws-section-title {
   .sws-form-footer button {
     width: 100%;
   }
+}
+/* 原生页面直接排版，正文与页头共用文档，侧栏和底部导航保持可用 */
+html.sws-page body { padding: 0; min-height: 100dvh; overflow: auto; }
+.sws-page .b {
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 26px 30px;
+  gap: 24px;
+}
+@media (max-width: 700px) {
+  .sws-page .b { margin-left: 0; width: 100%; padding: 18px 14px calc(92px + env(safe-area-inset-bottom)); }
 }
 </style>
 )UI";
