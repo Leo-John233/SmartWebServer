@@ -627,6 +627,7 @@
 #define L_UI_ACCESS_ADDRESS "访问地址"
 #define L_UI_OTHER_NETWORKS "其他网络"
 #define L_UI_REFRESH "刷新"
+#define L_UI_SCAN_MANUAL_ONLY "请点击刷新搜索 Wi-Fi，切换页面不会启动扫描"
 #define L_UI_OTHER_NETWORK "其他网络…"
 #define L_UI_HIDDEN_NETWORK "手动添加或连接隐藏 Wi-Fi"
 #define L_UI_SSID "Wi-Fi 名称"

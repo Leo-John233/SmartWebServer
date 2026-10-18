@@ -25,7 +25,6 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     statusFailures = 0,
     current = null,
     networks = [],
-    autoScanned = false,
     listKey = '',
     enableDraft = false;
   const reads = new Set();
@@ -261,12 +260,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
            (s.message || '').startsWith()NET" SWS_JS_TEXT(L_UI_CONNECTED_ADDRESS) R"NET());
         message(connectionShown ? '' : (s.message || ''), s.failed, s.messageTarget === 'ap' ? 'ap' : 'sta');
       }
-      lock((s.connecting && !s.background) || s.pending);
-      // 自动扫描等待连接结束，手动刷新仍可优先于后台重连
-      if (!autoScanned && s.sta.enabled && !s.connecting && !working) {
-        autoScanned = true;
-        startScan(true);
-      }
+      lock(s.connecting || s.pending);
     } catch (e) {
       if (paused || ticket !== revision) return;
       statusFailures = Math.min(statusFailures + 1, 4);
@@ -278,13 +272,13 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       scheduleStatus(statusFailures ? Math.min(30000, 2500 * Math.pow(2, statusFailures)) : 2500);
     }
   }
-  async function scan(start = false, automatic = false) {
+  async function scan(start = false) {
     clearTimeout(scanTimer);
     if (scanBusy || paused || document.hidden) return;
     scanBusy = true;
     try {
       if (Date.now() - scanStarted >= 30000) throw Error()NET" SWS_JS_TEXT(L_UI_SCAN_TIMEOUT) R"NET();
-      const r = await api('scan', { start: start ? '1' : '0', automatic: automatic ? '1' : '0' });
+      const r = await api('scan', { start: start ? '1' : '0', automatic: '0' });
       if (paused) return;
       if (r.running) {
         return;
@@ -312,15 +306,15 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       } else scheduleStatus(0);
     }
   }
-  // 进入已开启 Wi-Fi 的页面和打开开关时自动搜索，也保留手动刷新入口
-  function startScan(automatic = false) {
+  // 只有刷新按钮或首次打开开关才搜索，查看页面及连接完成都只读取状态
+  function startScan() {
     if (scanning || working || !loaded) return;
     scanning = true;
     scanStarted = Date.now();
     clearTimeout(statusTimer);
     $('nw-scan-state').textContent = )NET" SWS_JS_TEXT(L_UI_SEARCHING) R"NET(;
     sync();
-    scan(true, automatic);
+    scan(true);
   }
   $('nw-scan').onclick = () => startScan();
   $('nw-manual').onclick = () => openNetwork(null, true);

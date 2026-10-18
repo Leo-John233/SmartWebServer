@@ -20,7 +20,7 @@ const char html_network_wifi[] PROGMEM = R"NET(
  R"NET(</strong><button type="button" id="nw-scan" class="nw-secondary">)NET"
  L_UI_REFRESH
  R"NET(</button></div>
-<p id="nw-scan-state" class="nw-note" role="status"></p><div id="nw-results" class="nw-networks"></div>
+<p id="nw-scan-state" class="nw-note" role="status">)NET" L_UI_SCAN_MANUAL_ONLY R"NET(</p><div id="nw-results" class="nw-networks"></div>
 <div class="nw-networks"><button type="button" id="nw-manual" class="nw-row"><span class="nw-network-copy">)NET"
  L_UI_OTHER_NETWORK
  R"NET(<span class="nw-network-meta">)NET"

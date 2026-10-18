@@ -624,6 +624,7 @@
 #define L_UI_ACCESS_ADDRESS "Adresă de acces"
 #define L_UI_OTHER_NETWORKS "Alte rețele"
 #define L_UI_REFRESH "Reîmprospătează"
+#define L_UI_SCAN_MANUAL_ONLY "Apasă Reîmprospătare pentru a căuta rețele Wi-Fi"
 #define L_UI_OTHER_NETWORK "Altă rețea…"
 #define L_UI_HIDDEN_NETWORK "Adăugați manual sau conectați un Wi-Fi ascuns"
 #define L_UI_SSID "Nume Wi-Fi"

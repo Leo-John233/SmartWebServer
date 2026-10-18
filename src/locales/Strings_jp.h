@@ -623,6 +623,7 @@
 #define L_UI_ACCESS_ADDRESS "アクセス先"
 #define L_UI_OTHER_NETWORKS "ほかのネットワーク"
 #define L_UI_REFRESH "更新"
+#define L_UI_SCAN_MANUAL_ONLY "更新を押して Wi-Fi を検索してください"
 #define L_UI_OTHER_NETWORK "別のネットワーク…"
 #define L_UI_HIDDEN_NETWORK "手動追加または非公開Wi-Fiに接続"
 #define L_UI_SSID "Wi-Fi名"

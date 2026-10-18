@@ -624,6 +624,7 @@
 #define L_UI_ACCESS_ADDRESS "Adresse d’accès"
 #define L_UI_OTHER_NETWORKS "Autres réseaux"
 #define L_UI_REFRESH "Actualiser"
+#define L_UI_SCAN_MANUAL_ONLY "Cliquez sur Actualiser pour rechercher un réseau Wi-Fi"
 #define L_UI_OTHER_NETWORK "Autre réseau…"
 #define L_UI_HIDDEN_NETWORK "Ajouter manuellement ou connecter un Wi-Fi masqué"
 #define L_UI_SSID "Nom Wi-Fi"

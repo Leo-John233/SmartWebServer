@@ -46,6 +46,14 @@ void reply(int code, const String &body) {
 }
 void error(int code, const String &message) { reply(code, "{\"error\":" + quote(message) + "}"); }
 bool apActive() { return (WiFi.getMode() & WIFI_AP) != 0; }
+// SDK 上电连接或掉线恢复时也可能正在关联，扫描不能打断这段过程
+bool stationAssociating() {
+  #ifdef ESP8266
+    return (WiFi.getMode() & WIFI_STA) && wifi_station_get_connect_status() == STATION_CONNECTING;
+  #else
+    return false;
+  #endif
+}
 String ipText(const uint8_t *ip) { return IPAddress(ip).toString(); }
 uint32_t ipNumber(const uint8_t *ip) {
   return ((uint32_t)ip[0] << 24) | ((uint32_t)ip[1] << 16) | ((uint32_t)ip[2] << 8) | ip[3];
@@ -150,7 +158,7 @@ String configJson() {
   json += ",\"ssid\":" + quote(a.ssid) + ",\"channel\":" + String(a.channel);
   json += ",\"ip\":" + quote(ipText(a.ip)) + ",\"gw\":" + quote(ipText(a.gw)) + ",\"sn\":" + quote(ipText(a.sn)) + "}";
   json += ",\"connected\":"; json += WiFi.status() == WL_CONNECTED ? "true" : "false";
-  json += ",\"connecting\":"; json += connecting ? "true" : "false";
+  json += ",\"connecting\":"; json += (connecting || stationAssociating()) ? "true" : "false";
   json += ",\"uptimeMs\":" + String(millis());
   json += ",\"lastStationStatus\":" + String(lastStationStatus);
   #ifdef ESP8266
@@ -176,15 +184,17 @@ void handleWifiNetwork() {
   const bool scanPoll = action == "scan" && www.arg("start") == "0";
   // 过期轮询不能启动新扫描，也不能打断另一个页面或后台发起的连接
   if (scanPoll && !scanning) { error(409, L_UI_SCAN_FAILED); return; }
-  // 状态读取后可能刚好开始重连，自动扫描仍需在设备端再次判断
-  if (action == "scan" && www.arg("automatic") == "1" && (connecting || pending)) {
-    error(409, L_UI_BUSY); return;
+  // 切页和旧浏览器的自动扫描只返回提示，不能触发新的无线操作
+  if (action == "scan" && !scanPoll) {
+    if (www.arg("start") != "1" || www.arg("automatic") == "1") {
+      error(409, L_UI_SCAN_MANUAL_ONLY); return;
+    }
+    if (connecting || pending || stationAssociating()) { error(409, L_UI_BUSY); return; }
   }
   if (pending || (connecting && !backgroundConnecting)) { error(409, L_UI_BUSY); return; }
 
   if (action == "scan") {
     if (!scanning) {
-      interruptBackgroundConnection();
       WiFi.persistent(false);
       scanAddedSta = !(WiFi.getMode() & WIFI_STA);
       WiFi.enableSTA(true); // 保留热点和已有路由器连接，只开启扫描需要的无线接口

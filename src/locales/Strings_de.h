@@ -632,6 +632,7 @@
 #define L_UI_ACCESS_ADDRESS "Zugriffsadresse"
 #define L_UI_OTHER_NETWORKS "Andere Netzwerke"
 #define L_UI_REFRESH "Aktualisieren"
+#define L_UI_SCAN_MANUAL_ONLY "Zum Suchen nach WLAN auf Aktualisieren klicken"
 #define L_UI_OTHER_NETWORK "Anderes Netzwerk…"
 #define L_UI_HIDDEN_NETWORK "Manuell hinzufügen oder verstecktes WLAN verbinden"
 #define L_UI_SSID "WLAN-Name"

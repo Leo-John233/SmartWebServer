@@ -79,7 +79,7 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 - `node tools/upstream-audit.cjs` 检查扩展接入及本地包含路径
 - `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>` 检查全部十种语言，范围同时包含 `src/pages/` 与 `src/extensions/`，编译清单缺少任一页面或扩展时必须重新生成
 - 抱闸检查使用 `brake-policy`、`board-io-backend`、`brake-reboot`、`controller-status-text`
-- 网络检查使用 `network-wifi-backend`、`network-wifi-performance`、`network-wifi-ui`
+- 网络检查使用 `network-wifi-backend`、`network-wifi-performance`、`network-wifi-ui`、`network-wifi-recovery`、`sta-navigation`、`sta-lifecycle`、`wifi-scan-history` 和 `esp8266-scan-behavior`
 - 页面检查使用 `coordinate-input`、`network-page`、`page-performance`、`page-header`、`native-first-paint`、`native-icon-paint`、`native-navigation` 和 `locales`
 - 使用 Arduino 工具链编译 ESP8266 与 ESP32，构建目录和临时文件放在忽略的输出目录
 
@@ -103,7 +103,7 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 | 页面导航 | 沿用原版在固件端输出页头和选中标签，保留原生链接、表单、路由及状态节点，外观脚本不再重建导航 |
 | 静态资源 | 样式链接位于 head，基础样式和网络页样式一并缓存，CSS/JS 使用内核 Flash 发送接口；图标直接随页头输出，不缓存设备状态 |
 | 状态与命令 | 保留原版 OnStepCmd 和 State 调度，校时、运动及附件命令不按抱闸状态过滤，保留短写检测与长反馈缓冲修复 |
-| 配网 | 保留已实测恢复的 AP+STA 流程、有限连接窗口、候选密码隔离及开关提交，仍使用 WiFi 原生接口与原版 NV 键 |
+| 配网 | 保留 AP+STA 流程、有限连接窗口、候选密码隔离及开关提交；切页不扫描，扫描不能中断后台连接或 SDK 关联，仍使用原生 WiFi 接口与原版 NV 键 |
 | 抱闸 | 保留独立策略和原版 OnTask 调度，未知反馈保持原电平，停止每轮最多三次；网络活动通知只记录时间，不调用停止逻辑 |
 | 存储与设置 | 保留缓存提交及失败重试修复，沿用 NV/KV 接口，不引入另一套存储格式 |
 | 布局、翻译与参数 | 保留能力条件、原命令参数及状态标识，继续检查七个页面、轴参数、附件、坐标、时区和语言宏 |
