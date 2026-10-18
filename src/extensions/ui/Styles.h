@@ -814,151 +814,6 @@ h2.sws-section-title {
   padding: 14px;
 }
 
-.sws-aux-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  align-items: start;
-}
-.sws-aux-grid > .sws-aux-card {
-  display: block;
-  text-align: left;
-  padding: 20px;
-  overflow-wrap: anywhere;
-}
-.sws-aux-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 14px;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #2c2c2c;
-}
-.sws-aux-title {
-  min-width: 0;
-}
-.sws-aux-title > span {
-  display: block;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.6;
-}
-.sws-aux-title h2 {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.6;
-  margin: 2px 0 0;
-  color: #d8d8d8;
-}
-.sws-aux-power {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
-  max-width: 45%;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.5;
-  font-variant-numeric: tabular-nums;
-}
-.sws-aux-power:empty {
-  display: none;
-}
-.sws-aux-power > span {
-  white-space: nowrap;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--field);
-}
-.sws-aux-row {
-  display: grid;
-  grid-template-columns: minmax(110px, 1fr) minmax(0, 1.7fr) 66px;
-  align-items: center;
-  gap: 12px;
-  min-height: 54px;
-  padding: 8px 0;
-}
-.sws-aux-row + .sws-aux-row {
-  border-top: 1px solid #252525;
-}
-.sws-aux-label {
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--muted);
-  font-weight: 400;
-}
-.sws-aux-controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-.sws-aux-value {
-  font-size: 13px;
-  line-height: 1.6;
-  text-align: right;
-  color: var(--readout);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.sws-aux-controls button {
-  flex: 1;
-  min-width: 0;
-  min-height: 38px;
-  margin: 0;
-  padding: 7px 10px;
-  font-size: 13px;
-  border-radius: 7px;
-}
-.sws-aux-controls input[type='range'] {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  height: 38px;
-  accent-color: #962525;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-@media (max-width: 800px) {
-  .sws-aux-grid {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 500px) {
-  .sws-aux-grid > .sws-aux-card {
-    padding: 16px;
-  }
-  .sws-aux-head {
-    gap: 10px;
-    padding-bottom: 12px;
-  }
-  .sws-aux-power {
-    gap: 4px;
-    max-width: 46%;
-  }
-  .sws-aux-power > span {
-    padding: 3px 6px;
-  }
-  .sws-aux-row {
-    grid-template-columns: 90px minmax(0, 1fr) 54px;
-    gap: 8px;
-  }
-  .sws-aux-label {
-    font-size: 12px;
-  }
-  .sws-aux-controls button {
-    font-size: 12px;
-    padding: 6px 4px;
-  }
-  .sws-aux-value {
-    font-size: 12px;
-  }
-}
 
 .sws-document {
   max-width: 960px;
@@ -2510,6 +2365,192 @@ h2.sws-section-title {
   }
 }
 
+/* 原生页面直接排版，正文与页头共用文档，侧栏和底部导航保持可用 */
+html.sws-page body { padding: 0; min-height: 100dvh; overflow: auto; }
+.sws-page .b {
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 26px 30px;
+  gap: 24px;
+}
+@media (max-width: 700px) {
+  .sws-page .b { margin-left: 0; width: 100%; padding: 18px 14px calc(92px + env(safe-area-inset-bottom)); }
+}
+
+.sws-device-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.sws-device-card-head h2 {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  color: #d8d8d8;
+}
+</style>
+)UI";
+
+// 按页面发送的专用主题，继续随 HTML 内联输出。
+const char html_auxiliary_styles[] PROGMEM = R"UI(
+<style>
+.sws-aux-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.sws-aux-grid > .sws-aux-card {
+  display: block;
+  text-align: left;
+  padding: 20px;
+  overflow-wrap: anywhere;
+}
+.sws-aux-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #2c2c2c;
+}
+.sws-aux-title {
+  min-width: 0;
+}
+.sws-aux-title > span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.sws-aux-title h2 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+  margin: 2px 0 0;
+  color: #d8d8d8;
+}
+.sws-aux-power {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 45%;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.sws-aux-power:empty {
+  display: none;
+}
+.sws-aux-power > span {
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--field);
+}
+.sws-aux-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) minmax(0, 1.7fr) 66px;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 8px 0;
+}
+.sws-aux-row + .sws-aux-row {
+  border-top: 1px solid #252525;
+}
+.sws-aux-label {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  font-weight: 400;
+}
+.sws-aux-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.sws-aux-value {
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: right;
+  color: var(--readout);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sws-aux-controls button {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  margin: 0;
+  padding: 7px 10px;
+  font-size: 13px;
+  border-radius: 7px;
+}
+.sws-aux-controls input[type='range'] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  height: 38px;
+  accent-color: #962525;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+@media (max-width: 800px) {
+  .sws-aux-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 500px) {
+  .sws-aux-grid > .sws-aux-card {
+    padding: 16px;
+  }
+  .sws-aux-head {
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+  .sws-aux-power {
+    gap: 4px;
+    max-width: 46%;
+  }
+  .sws-aux-power > span {
+    padding: 3px 6px;
+  }
+  .sws-aux-row {
+    grid-template-columns: 90px minmax(0, 1fr) 54px;
+    gap: 8px;
+  }
+  .sws-aux-label {
+    font-size: 12px;
+  }
+  .sws-aux-controls button {
+    font-size: 12px;
+    padding: 6px 4px;
+  }
+  .sws-aux-value {
+    font-size: 12px;
+  }
+}
+
+</style>
+)UI";
+
+// 按页面发送的专用主题，继续随 HTML 内联输出。
+const char html_accessory_styles[] PROGMEM = R"UI(
+<style>
 /* 调焦器与旋转器按位置、移动、参考位置和补偿组织 */
 .sws-accessory-layout {
   gap: 18px;
@@ -2552,19 +2593,8 @@ h2.sws-section-title {
   overflow-wrap: anywhere;
   background: var(--panel);
 }
-.sws-device-card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.sws-device-card-head h2 {
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 0;
-  color: #d8d8d8;
-}
+
+
 .sws-accessory-status {
   font-size: 12px;
   font-weight: 500;
@@ -2945,6 +2975,13 @@ h2.sws-section-title {
     gap: 6px;
   }
 }
+
+</style>
+)UI";
+
+// 按页面发送的专用主题，继续随 HTML 内联输出。
+const char html_encoder_styles[] PROGMEM = R"UI(
+<style>
 /* 编码器按同步操作、实时读数与两轴设置排列 */
 .sws-encoder-layout {
   gap: 20px;
@@ -3141,6 +3178,13 @@ h2.sws-section-title {
     padding: 10px 8px;
   }
 }
+
+</style>
+)UI";
+
+// 按页面发送的专用主题，继续随 HTML 内联输出。
+const char html_mount_detail_styles[] PROGMEM = R"UI(
+<style>
 /* 时间地点、限位与校准说明共用清楚的层级与紧凑表单 */
 .sws-mount .sws-advanced-grid {
   align-items: start;
@@ -3419,19 +3463,6 @@ h2.sws-section-title {
     width: 100%;
   }
 }
-/* 原生页面直接排版，正文与页头共用文档，侧栏和底部导航保持可用 */
-html.sws-page body { padding: 0; min-height: 100dvh; overflow: auto; }
-.sws-page .b {
-  margin-left: var(--sidebar-width);
-  width: calc(100% - var(--sidebar-width));
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 26px 30px;
-  gap: 24px;
-}
-@media (max-width: 700px) {
-  .sws-page .b { margin-left: 0; width: 100%; padding: 18px 14px calc(92px + env(safe-area-inset-bottom)); }
-}
+
 </style>
 )UI";

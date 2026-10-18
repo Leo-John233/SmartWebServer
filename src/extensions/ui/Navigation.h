@@ -4,14 +4,14 @@
 // 页头由固件直接输出，脚本只等待已发起的运动停止，不重建页面布局
 const char html_page_navigation[] PROGMEM = R"UI(
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const links = [...document.querySelectorAll('.sws-nav a')];
-  if (!links.length) return;
-  const topbar = document.querySelector('.sws-topbar');
+// 正文可能仍在传输，使用事件委托，让首屏可见时运动停止保护就已生效。
+(() => {
   let leaving = false;
   // 浏览器从历史缓存恢复原文档时，允许再次通过原生链接切页
   addEventListener('pageshow', () => { leaving = false; });
-  links.forEach(a => a.addEventListener('click', async event => {
+  document.addEventListener('click', async event => {
+    const a = event.target instanceof Element && event.target.closest('.sws-nav a');
+    if (!a) return;
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     if (leaving) { event.preventDefault(); return; }
     const stops = (window.swsMotionStops || []).map(stop => stop()).filter(Boolean);
@@ -36,9 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const hint = document.createElement('p');
       hint.setAttribute('role', 'status');
       hint.textContent = )UI" SWS_JS_TEXT(L_UI_SLOW_LOAD) R"UI(;
-      topbar.appendChild(hint);
+      const topbar = document.querySelector('.sws-topbar');
+      if (topbar) topbar.appendChild(hint);
     } finally { clearTimeout(deadline); }
-  }));
-});
+  });
+})();
 </script>
 )UI";

@@ -10,6 +10,6 @@ void handleNotFound() {
   String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
-  www.sendContent("<main class='sws-document sws-empty'><span class='sws-brand-small'>404</span><h1>" L_UI_NOT_FOUND "</h1><p>" L_UI_NOT_FOUND_NOTE "</p><a href='/index.htm' target='_top'>" L_UI_BACK_CONTROLLER "</a></main></body></html>");
+  www.sendContent("<main id='sws-nav-ready' class='sws-document sws-empty'><span class='sws-brand-small'>404</span><h1>" L_UI_NOT_FOUND "</h1><p>" L_UI_NOT_FOUND_NOTE "</p><a href='/index.htm' target='_top'>" L_UI_BACK_CONTROLLER "</a></main></body></html>");
   www.sendContent("");
 }

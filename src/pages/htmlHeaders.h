@@ -9,7 +9,7 @@ const char html_head_begin[] PROGMEM = "<!DOCTYPE HTML>\n"
                                   "<head>\n"
                                   "<meta charset='utf-8'/>\n"
                                   "<meta name='color-scheme' content='dark'>\n"
-                                  "<link rel='expect' blocking='render' href='#sws-page-ready'>\n"
+                                  "<link rel='expect' blocking='render' href='#sws-nav-ready'>\n"
                                   "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n"
                                   "<style>html,body{background:" COLOR_BODY_BACKGROUND ";color:" SWS_COLOR_TEXT ";color-scheme:dark}</style>\n";
 const char html_headerPec[] PROGMEM = "<meta http-equiv=\"refresh\" content=\"5; URL=/pec.htm\">\n";
