@@ -18,10 +18,13 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     paused = false,
     statusTimer = null,
     scanTimer = null,
+    messageTimer = null,
+    messageKey = '',
     revision = 0,
     lastNotice = '',
     messageTarget = 'sta',
     statusBusy = false,
+    statusError = false,
     statusFailures = 0,
     current = null,
     networks = [],
@@ -50,7 +53,12 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     clearTimeout(statusTimer);
     if (!paused && !document.hidden) statusTimer = setTimeout(status, delay);
   }
-  function message(text, error = false, target = 'sta') {
+  function message(text, error = false, target = 'sta', pending = false, renew = false) {
+    // 相同结果不因轮询延长显示，新的主动操作可以重新提示
+    const key = JSON.stringify([text, error, target, pending]);
+    if (!renew && key === messageKey) return;
+    clearTimeout(messageTimer);
+    messageKey = key;
     messageTarget = target;
     const active = $(target === 'ap' ? 'nw-ap-message' : 'nw-message');
     ['nw-message','nw-ap-message'].forEach(id => {
@@ -59,6 +67,9 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       node.className = 'nw-feedback' + (node === active && error ? ' nw-error' : '');
       node.hidden = !value;
     });
+    if (text && !pending) messageTimer = setTimeout(() => {
+      active.hidden = true;
+    }, error ? 8000 : 5000);
   }
   function sync() {
     $('nw-static').hidden = sta.elements.dhcp.checked;
@@ -88,6 +99,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     // 手动操作开始前取消旧状态读取，避免读请求占住设备连接
     if (params) {
       revision++;
+      statusError = false;
       reads.forEach(request => request.abort());
     }
     if (read) reads.add(controller);
@@ -225,6 +237,9 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     try {
       const s = await api('status');
       if (ticket !== revision || paused) return;
+      const firstStatus = !loaded;
+      if (statusError) message('', false, messageTarget);
+      statusError = false;
       current = s;
       statusFailures = 0;
       if (s.sta.enabled) enableDraft = false;
@@ -252,19 +267,25 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       $('nw-ap-ip').textContent = s.apActive ? s.apIp : '—';
       renderNetworks();
       // 已连接及访问地址已在网络卡片内显示，不在卡片外重复提示
-      const noticeKey = JSON.stringify([s.message, s.messageTarget, s.failed, s.connected, s.connecting, s.pending]);
-      if (noticeKey !== lastNotice) {
+      const noticeKey = JSON.stringify([s.message, s.messageTarget, s.failed]);
+      const outdatedAp = s.messageTarget === 'ap' && s.apActive &&
+        s.message === )NET" SWS_JS_TEXT(L_UI_AP_CLOSED) R"NET(;
+      if (noticeKey !== lastNotice || s.connecting || s.pending || outdatedAp) {
         lastNotice = noticeKey;
         const connectionShown = s.connected && !s.failed && !s.connecting && !s.pending &&
           (s.message === )NET" SWS_JS_TEXT(L_UI_CONNECTED) R"NET( ||
            (s.message || '').startsWith()NET" SWS_JS_TEXT(L_UI_CONNECTED_ADDRESS) R"NET());
-        message(connectionShown ? '' : (s.message || ''), s.failed, s.messageTarget === 'ap' ? 'ap' : 'sta');
+        // 首次进入不重播旧成功消息，热点已恢复时也不再提示关闭
+        const oldSuccess = firstStatus && !s.failed && !s.connecting && !s.pending;
+        message(connectionShown || oldSuccess || outdatedAp ? '' : (s.message || ''),
+          s.failed, s.messageTarget === 'ap' ? 'ap' : 'sta', !!(s.connecting || s.pending));
       }
       lock(s.connecting || s.pending);
     } catch (e) {
       if (paused || ticket !== revision) return;
       statusFailures = Math.min(statusFailures + 1, 4);
-      lastNotice = '';
+      statusError = true;
+      $('nw-sta-badge').textContent = )NET" SWS_JS_TEXT(L_UI_CONNECTION_LOST) R"NET(;
       message()NET" SWS_JS_TEXT(L_UI_CONNECTION_LOST) R"NET(, true, messageTarget);
       lock(false);
     } finally {
@@ -358,11 +379,11 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
         password: '',
       };
       const r = await api('connect', p);
-      message(r.message);
+      message(r.message, false, 'sta', false, true);
     } catch (e) {
       enableDraft = false;
       $('nw-enabled').checked = current.sta.enabled;
-      message(e.message, true);
+      message(e.message, true, 'sta', false, true);
     } finally {
       submitting = false;
       await status();
@@ -386,7 +407,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
       $('nw-dialog-error').textContent = '';
       try {
         const r = await api(action, p);
-        message(r.message, false, action === 'ap' ? 'ap' : 'sta');
+        message(r.message, false, action === 'ap' ? 'ap' : 'sta', false, true);
         form.elements.password.value = '';
         if (action === 'connect') {
           enableDraft = false;
@@ -394,7 +415,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
         }
       } catch (err) {
         if (action === 'connect') $('nw-dialog-error').textContent = err.message;
-        else message(err.message, true, 'ap');
+        else message(err.message, true, 'ap', false, true);
       } finally {
         submitting = false;
         lock(false);
@@ -407,6 +428,7 @@ const char html_network_wifi_script[] PROGMEM = R"NET(
     paused = true;
     revision++;
     clearTimeout(statusTimer); clearTimeout(scanTimer);
+    message('', false, messageTarget);
     reads.forEach(controller => controller.abort());
     if (pause) pause();
   };

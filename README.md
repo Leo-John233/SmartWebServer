@@ -446,3 +446,7 @@ KeyValue 主接口改为只读字符指针，并兼容原 String 调用；返回
 最终固件保存于本地忽略目录 `tests/output/ui-optimization-firmware/esp8266/` 和 `esp32/`，SHA-256、源代码提交号、编译数字与回归状态见 `tests/output/ui-optimization-delivery.json`。日志和对比证据保留；本轮临时构建目录、配置副本和测试可执行文件已清理。
 
 构建期间工作区的 `src/locales/Strings_cn.h` 出现单独的 Wi-Fi 提示缩短改动，已保留且未并入性能提交。上面的固件与回归使用本轮已提交代码和原提示文字；该额外文字改动未纳入固件或一致性验证。
+
+2026-10-19 配网操作提示：热点保存与关闭提示改为明确的操作结果，不再把 STA 静态地址称为路由器分配的 IP，也不把信道说明混入保存成功提示。成功反馈显示 5 秒、错误反馈显示 8 秒后隐藏，进行中的操作等待实际结果；同一状态轮询不延长或重播提示，首次进入不重播旧成功结果，热点恢复后不显示旧关闭消息。地址、热点开关与读取异常保留在状态区，主动重复操作可以重新提示，切页时清理计时器。实现限于 network/ui/Script.h 与九份语言资源（us 沿用 en），原服务、无线连接时序、接口和抱闸逻辑保持原样。
+
+本次已通过 network-feedback、network-wifi-ui、network-wifi-backend、network-wifi-performance、network-page 与 locales 回归，包含提示过期、重复轮询、新旧计时器、再次保存、断线恢复及九份语言资源的实际 C++ 展开；日志保留在 tests/output/network-feedback*.log。本次没有重新生成固件，需重新编译刷入后生效，先前保存的 bin 不包含此提示调整。
