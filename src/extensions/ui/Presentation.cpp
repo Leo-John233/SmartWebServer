@@ -11,8 +11,8 @@ bool pageClientConnected() {
   #endif
 }
 
-// 保留原版 String/sendContentAndClear；同一 head 共用 1 KB 缓冲，合并相邻的小模板。
-// 不增加请求、不缓存设备数据，发送调用结束后才让出原有任务调度。
+// 保留原版发送方式，同一次输出共用 1 KB 缓冲
+// 不增加请求，完整发送结束后才让出任务
 class PageResourceWriter {
   public:
     PageResourceWriter() { data_.reserve(1024); }
@@ -29,7 +29,7 @@ class PageResourceWriter {
       }
     }
     void finish() {
-      if (!data_.length()) return; // 空 HTTP 分块会结束整个响应，不能发送空缓冲。
+      if (!data_.length()) return; // 空分块会结束响应，不能发送空缓冲
       if (!connected()) { data_ = ""; return; }
       www.sendContentAndClear(data_);
       Y;
@@ -48,7 +48,7 @@ void sendPageResource(const char *content, size_t length) {
 }
 
 void pageAppearance(PageResourceWriter &writer) {
-  // 与原页面自己的脚本一样，只内联当前页面需要的增强内容。
+  // 首屏只发送完整样式和极简导航停止拦截
   const String page = www.uri();
   const bool mount = page == "/mount.htm";
   const bool controller = page == "/" || page == "/index.htm";
@@ -60,10 +60,16 @@ void pageAppearance(PageResourceWriter &writer) {
   if (mount) writer.append(html_mount_detail_styles, sizeof(html_mount_detail_styles) - 1);
   if (mount) writer.append(html_editor_styles, sizeof(html_editor_styles) - 1);
   if (controller) writer.append(html_board_io_styles, sizeof(html_board_io_styles) - 1);
-  writer.append(html_page_controls, sizeof(html_page_controls) - 1);
-  if (mount) writer.append(html_settings_editors, sizeof(html_settings_editors) - 1);
-  if (controller) writer.append(html_board_io_script, sizeof(html_board_io_script) - 1);
   writer.append(html_page_navigation, sizeof(html_page_navigation) - 1);
+}
+
+void pageScripts() {
+  PageResourceWriter writer;
+  const String page = www.uri();
+  writer.append(html_page_controls, sizeof(html_page_controls) - 1);
+  if (page == "/mount.htm") writer.append(html_settings_editors, sizeof(html_settings_editors) - 1);
+  if (page == "/" || page == "/index.htm") writer.append(html_board_io_script, sizeof(html_board_io_script) - 1);
+  writer.finish();
 }
 
 // 与原版一样在同一 HTML 响应中完成 head、样式和脚本，再输出页面正文

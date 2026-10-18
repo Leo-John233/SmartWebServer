@@ -85,7 +85,8 @@ void pageHeader(int selected) {
   data.concat(firmwareVersion.str);
   data.concat(F(" (OnStep"));
   if (status.getVersionStr(temp)) data.concat(temp); else data.concat(F("?"));
-  // 样式和完整导航已经就绪，允许先绘制；正文串口查询不再阻塞首屏。
+  // 导航标记先发出，增强脚本随后在同一响应内输出
   data.concat(F(")</span></header><span id='sws-nav-ready' hidden></span>"));
   www.sendContentAndClear(data);
+  pageScripts();
 }

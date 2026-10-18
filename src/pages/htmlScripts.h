@@ -4,21 +4,12 @@
 
 // Javascript for Ajax return
 const char html_script_ajax_get[] PROGMEM =
-"<script>\n"
-"function s(key,v1) {"
-  "var x=new XMLHttpRequest();"
-  "if(window.swsWatchCommand)swsWatchCommand(x);"
-  "x.open('GET','%s?'+key+'='+encodeURIComponent(v1)+'&x='+Date.now(),true);"
-  "x.send();"
-"}</script>\n";
+R"OPTI(<script>function s(key,v1){var x=new XMLHttpRequest;if(window.swsWatchCommand)swsWatchCommand(x);x.open("GET","%s?"+key+"="+encodeURIComponent(v1)+"&x="+Date.now(),true);x.send()}</script>
+)OPTI";
 
 const char html_script_ajax_shortcuts[] PROGMEM =
-"<script>\n"
-"function g(v1){s('dr',v1);}"
-"function gf(v1){s('dr',v1);autoFastRun();}"
-"function sf(key,v1){s(key,v1);autoFastRun();}"
-"let lzh; function sz(key,v1){clearTimeout(lzh);lzh=setTimeout(s," STR(AJAX_PAGE_LAZY_GET_MS) ",key,v1);}\n"
-"</script>\n";
+R"OPTI(<script>function g(v1){s("dr",v1)}function gf(v1){s("dr",v1);autoFastRun()}function sf(key,v1){s(key,v1);autoFastRun()}let lzh;function sz(key,v1){clearTimeout(lzh);lzh=setTimeout(s,)OPTI" STR(AJAX_PAGE_LAZY_GET_MS) R"OPTI(,key,v1)}</script>
+)OPTI";
 
 // Javascript for hold-to-run motion controls
 const char html_script_motion_controls_1[] PROGMEM =
@@ -62,143 +53,16 @@ const char html_script_motion_controls_2[] PROGMEM =
 
 // Javascript for Date/Time return
 const char html_script_ajax_date_time_return[] PROGMEM =
-"<script>\n"
-"function SetDateTime() {"
-"var d1 = new Date();"
-"var jan = new Date(d1.getFullYear(), 0, 1);"
-"var d = new Date(d1.getTime()-(jan.getTimezoneOffset()-d1.getTimezoneOffset())*60*1000);"
-"var f=document.getElementById('sws-site-form');"
-"if(f){var h=f.elements.u1.defaultValue,m=Array.from(f.elements.u2.options).find(o=>o.defaultSelected)?.value||'0';var w=(Math.abs(Number(h))*60+Number(m))*(h.startsWith('-')?-1:1);"
-"d=new Date(d1.getTime()-w*60000);}"
-"document.getElementById('dd').value = (f?d.getUTCDate():d.getDate());"
-"document.getElementById('dm').value = (f?d.getUTCMonth():d.getMonth());"
-"document.getElementById('dy').value = (f?d.getUTCFullYear():d.getFullYear());"
-"document.getElementById('th').value = (f?d.getUTCHours():d.getHours());"
-"document.getElementById('tm').value = (f?d.getUTCMinutes():d.getMinutes());"
-"document.getElementById('ts').value = (f?d.getUTCSeconds():d.getSeconds());"
-"}\n"
-"</script>\n";
+R"OPTI(<script>function SetDateTime(){var d1=new Date;var jan=new Date(d1.getFullYear(),0,1);var d=new Date(d1.getTime()-(jan.getTimezoneOffset()-d1.getTimezoneOffset())*60*1e3);var f=document.getElementById("sws-site-form");if(f){var h=f.elements.u1.defaultValue,m=Array.from(f.elements.u2.options).find(o=>o.defaultSelected)?.value||"0";var w=(Math.abs(Number(h))*60+Number(m))*(h.startsWith("-")?-1:1);d=new Date(d1.getTime()-w*6e4)}document.getElementById("dd").value=f?d.getUTCDate():d.getDate();document.getElementById("dm").value=f?d.getUTCMonth():d.getMonth();document.getElementById("dy").value=f?d.getUTCFullYear():d.getFullYear();document.getElementById("th").value=f?d.getUTCHours():d.getHours();document.getElementById("tm").value=f?d.getUTCMinutes():d.getMinutes();document.getElementById("ts").value=f?d.getUTCSeconds():d.getSeconds()}</script>
+)OPTI";
 
 // Javascript for Collapsibles
 const char html_script_collapsible[] PROGMEM =
-"<script>"
-"var cc = document.getElementsByClassName('collapsible');"
-"var i;"
-"for (i = 0; i < cc.length; i++) {"
-  "cc[i].addEventListener('click', function() {"
-    "this.classList.toggle('active');"
-    "var ct = this.nextElementSibling;"
-    "if (ct.style.display === 'block') { ct.style.display = 'none'; } else { ct.style.display = 'block'; }"
-  "});"
-"}"
-"</script>\n";
+R"OPTI(<script>var cc=document.getElementsByClassName("collapsible");var i;for(i=0;i<cc.length;i++){cc[i].addEventListener("click",function(){this.classList.toggle("active");var ct=this.nextElementSibling;if(ct.style.display==="block"){ct.style.display="none"}else{ct.style.display="block"}})}</script>
+)OPTI";
 
 // Javascript for Ajax active refresh of controls
 // be sure to define "var ajaxPage='control.txt';" etc.
 const char html_script_ajax[] PROGMEM =
-"<script>\n"
-"function pad(num, size) { var s = '000000000' + num; return s.substr(s.length-size); }\n"
-"function update_date_time() {\n"
-  "var now = new Date();\n"
-  "var element=document.getElementById('datetime'); if (!element) return;\n"
-  "var value = \n"
-  "(now.getUTCMonth()+1)+'/'+pad(now.getUTCDate().toString(),2)+'/'+pad(now.getUTCFullYear().toString().substr(-2),2)+' '+\n"
-  "pad(now.getUTCHours().toString(),2)+':'+pad(now.getUTCMinutes().toString(),2)+':'+pad(now.getUTCSeconds().toString(),2);\n"
-  "if (element.textContent!==value) element.textContent=value;\n"
-"}\n"
-R"JS(
-// 按请求完成时间安排下一次刷新，慢连接只保留一个状态请求。
-var autoTimer=null, autoRequest=null, autoDeadline=null, autoStarted=0, autoFastUntil=0, autoFailures=0, autoStopped=false;
-var autoHtmlValues=new WeakMap();
-function autoRate() {
-  return Date.now()<autoFastUntil ? )JS" STR(AJAX_PAGE_UPDATE_RATE_FAST_MS) R"JS( : )JS" STR(AJAX_PAGE_UPDATE_RATE_MS) R"JS(;
-}
-function autoSchedule(delay) {
-  clearTimeout(autoTimer);
-  if (!autoStopped && !document.hidden) autoTimer=setTimeout(autoRun,delay);
-}
-function autoFastRun() {
-  autoFastUntil=Date.now()+)JS" STR(AJAX_PAGE_UPDATE_FAST_SHED_MS) R"JS(;
-  if (!autoRequest) autoSchedule(autoRate());
-}
-function autoPause() {
-  clearTimeout(autoTimer);
-  clearTimeout(autoDeadline);
-  if (autoRequest) {
-    var request=autoRequest;
-    autoRequest=null;
-    request.abort();
-  }
-}
-window.swsPausePolling=function() { autoStopped=true; autoPause(); };
-window.swsResumePolling=function() { autoStopped=false; autoFailures=0; autoPause(); autoRun(); };
-function autoRun() {
-  if (autoStopped || document.hidden || autoRequest) return;
-  // 命令正在发送时让出下一次刷新机会，不改变命令的参数或发送顺序。
-  if (window.swsPendingCommands) { autoSchedule(autoRate()); return; }
-  var request=new XMLHttpRequest();
-  autoRequest=request;
-  autoStarted=Date.now();
-  function finish() {
-    if (autoRequest!==request) return;
-    clearTimeout(autoDeadline);
-    autoRequest=null;
-    if (request.status===200) {
-      try { pageReady(ajaxPage).call(request); autoFailures=0; }
-      catch (error) { autoFailures=Math.min(autoFailures+1,6); }
-    } else autoFailures=Math.min(autoFailures+1,6);
-    autoSchedule(autoFailures ? Math.min(30000,autoRate()*Math.pow(2,autoFailures)) : autoRate());
-  }
-  request.onreadystatechange=function() { if (request.readyState===4) finish(); };
-  request.onerror=request.ontimeout=finish;
-  request.timeout=5000;
-  // 独立截止时间防止浏览器漏发完成事件，终止旧请求后才安排下一次刷新。
-  autoDeadline=setTimeout(function() { if(autoRequest!==request)return; autoRequest=null; request.abort(); autoFailures=Math.min(autoFailures+1,6); autoSchedule(autoRate()); },5500);
-  request.open('GET',ajaxPage.toLowerCase()+'?nocache='+Date.now(),true);
-  request.send(null);
-}
-function pageReady(aPage) {
-  return function() {
-    if (this.readyState!==4 || this.status!==200) return;
-    var lines=this.responseText.split('\n');
-    for (var i=0;i<lines.length;i++) {
-      var j=lines[i].indexOf('|'), valueMode=false;
-      if (j===-1) { j=lines[i].indexOf('&'); valueMode=true; }
-      if (j<1) continue;
-      var key=lines[i].slice(0,j), value=lines[i].slice(j+1);
-      if (key==='call' && value==='update_date_time') { update_date_time(); continue; }
-      var element=document.getElementById(key);
-      if (!element) continue;
-      // 状态没有变化时不触发重排、重绘和控件观察器。
-      if (valueMode) {
-        if (element.value!==value) element.value=value;
-      } else if (value==='selected' || value==='unselected') {
-        var selected=String(value==='selected');
-        if (element.dataset.selected!==selected) element.dataset.selected=selected;
-      } else if (value==='disabled' || value==='enabled') {
-        var disabled=value==='disabled';
-        if (element.disabled!==disabled) element.disabled=disabled;
-      } else if (autoHtmlValues.get(element)!==value) {
-        if (element.innerHTML!==value) element.innerHTML=value;
-        autoHtmlValues.set(element,value);
-      }
-    }
-  };
-}
-// 页面完全加载后再轮询，避免状态请求堵在尚未传完的页面后面。
-window.addEventListener('load',autoRun);
-document.addEventListener('visibilitychange',function() {
-  if (document.hidden) autoPause();
-  else { autoFailures=0; autoRun(); }
-});
-window.addEventListener('pagehide',window.swsPausePolling);
-window.addEventListener('pageshow',function() { autoStopped=false; autoRun(); });
-function autoWake() {
-  if(autoStopped || document.hidden)return;
-  autoFailures=0;
-  if(autoRequest && Date.now()-autoStarted>5000)autoPause();
-  if(!autoRequest)autoRun();
-}
-window.addEventListener('online',autoWake);
-window.addEventListener('focus',autoWake);
-)JS" "</script>\n";
+R"OPTI(<script>function pad(num,size){var s="000000000"+num;return s.substr(s.length-size)}function update_date_time(){var now=new Date;var element=document.getElementById("datetime");if(!element)return;var value=now.getUTCMonth()+1+"/"+pad(now.getUTCDate().toString(),2)+"/"+pad(now.getUTCFullYear().toString().substr(-2),2)+" "+pad(now.getUTCHours().toString(),2)+":"+pad(now.getUTCMinutes().toString(),2)+":"+pad(now.getUTCSeconds().toString(),2);if(element.textContent!==value)element.textContent=value}var autoTimer=null,autoRequest=null,autoDeadline=null,autoStarted=0,autoFastUntil=0,autoFailures=0,autoStopped=false;var autoHtmlValues=new WeakMap;function autoRate(){return Date.now()<autoFastUntil?)OPTI" STR(AJAX_PAGE_UPDATE_RATE_FAST_MS) R"OPTI(:)OPTI" STR(AJAX_PAGE_UPDATE_RATE_MS) R"OPTI(}function autoSchedule(delay){clearTimeout(autoTimer);if(!autoStopped&&!document.hidden)autoTimer=setTimeout(autoRun,delay)}function autoFastRun(){autoFastUntil=Date.now()+)OPTI" STR(AJAX_PAGE_UPDATE_FAST_SHED_MS) R"OPTI(;if(!autoRequest)autoSchedule(autoRate())}function autoPause(){clearTimeout(autoTimer);clearTimeout(autoDeadline);if(autoRequest){var request=autoRequest;autoRequest=null;request.abort()}}window.swsPausePolling=function(){autoStopped=true;autoPause()};window.swsResumePolling=function(){autoStopped=false;autoFailures=0;autoPause();autoRun()};function autoRun(){if(autoStopped||document.hidden||autoRequest)return;if(window.swsPendingCommands){autoSchedule(autoRate());return}var request=new XMLHttpRequest;autoRequest=request;autoStarted=Date.now();function finish(){if(autoRequest!==request)return;clearTimeout(autoDeadline);autoRequest=null;if(request.status===200){try{pageReady(ajaxPage).call(request);autoFailures=0}catch(error){autoFailures=Math.min(autoFailures+1,6)}}else autoFailures=Math.min(autoFailures+1,6);autoSchedule(autoFailures?Math.min(3e4,autoRate()*Math.pow(2,autoFailures)):autoRate())}request.onreadystatechange=function(){if(request.readyState===4)finish()};request.onerror=request.ontimeout=finish;request.timeout=5e3;autoDeadline=setTimeout(function(){if(autoRequest!==request)return;autoRequest=null;request.abort();autoFailures=Math.min(autoFailures+1,6);autoSchedule(autoRate())},5500);request.open("GET",ajaxPage.toLowerCase()+"?nocache="+Date.now(),true);request.send(null)}function pageReady(aPage){return function(){if(this.readyState!==4||this.status!==200)return;var lines=this.responseText.split("\n");for(var i=0;i<lines.length;i++){var j=lines[i].indexOf("|"),valueMode=false;if(j===-1){j=lines[i].indexOf("&");valueMode=true}if(j<1)continue;var key=lines[i].slice(0,j),value=lines[i].slice(j+1);if(key==="call"&&value==="update_date_time"){update_date_time();continue}var element=document.getElementById(key);if(!element)continue;if(valueMode){if(element.value!==value)element.value=value}else if(value==="selected"||value==="unselected"){var selected=String(value==="selected");if(element.dataset.selected!==selected)element.dataset.selected=selected}else if(value==="disabled"||value==="enabled"){var disabled=value==="disabled";if(element.disabled!==disabled)element.disabled=disabled}else if(autoHtmlValues.get(element)!==value){if(element.innerHTML!==value)element.innerHTML=value;autoHtmlValues.set(element,value)}}}}window.addEventListener("load",autoRun);document.addEventListener("visibilitychange",function(){if(document.hidden)autoPause();else{autoFailures=0;autoRun()}});window.addEventListener("pagehide",window.swsPausePolling);window.addEventListener("pageshow",function(){autoStopped=false;autoRun()});function autoWake(){if(autoStopped||document.hidden)return;autoFailures=0;if(autoRequest&&Date.now()-autoStarted>5e3)autoPause();if(!autoRequest)autoRun()}window.addEventListener("online",autoWake);window.addEventListener("focus",autoWake);</script>
+)OPTI";

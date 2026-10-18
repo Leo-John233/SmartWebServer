@@ -22,33 +22,19 @@ const char html_main_css_begin[] PROGMEM =
 "<STYLE>";
 
 const char html_main_css_core[] PROGMEM =
-".clear { clear: both; } .a { background-color: " COLOR_BACKGROUND "; } "
-".t { padding: 10px 10px 20px 10px; border: 5px solid " COLOR_BORDER "; margin: 25px 25px 0px 25px;"
-"color: " COLOR_FOREGROUND "; background-color: " COLOR_BACKGROUND "; min-width: 36em; } "
-"input { text-align:center; padding: 2px; margin: 3px; font-weight: bold; width:5em; background-color: " COLOR_CONTROL "}"
-".b { padding: 10px; border-left: 5px solid " COLOR_BORDER "; border-right: 5px solid " COLOR_BORDER "; border-bottom: 5px solid " COLOR_BORDER "; margin: 0px 25px 25px 25px; color: " COLOR_FOREGROUND ";"
-"background-color: " COLOR_BACKGROUND "; min-width: 36em; } select { width:4em; font-weight: bold; background-color: " COLOR_CONTROL "; padding: 2px 2px; }"
-".c { color: " COLOR_CONTROL "; font-weight: bold; }"
-"h1 { text-align: right; } a:hover, a:active { background-color: " COLOR_LINK_BORDER "; } .y { color: " COLOR_ALERT "; font-weight: bold; }"
-"a:link, a:visited { background-color: " COLOR_LINK_BACKGROUND "; color: " COLOR_LINK "; border:1px solid " COLOR_LINK_BORDER "; padding: 5px 10px; margin: none; text-align: center; text-decoration: none; display: inline-block; }"
-"button:disabled { background-color: " COLOR_CONTROL_DISABLED_BACKGROUND "; color: " COLOR_CONTROL_DISABLED "; } button { background-color: " COLOR_CONTROL "; font-weight: bold; border-radius: 5px; margin: 2px; padding: 4px 8px; }";
+".clear{ clear: both}.a{ background-color: " COLOR_BACKGROUND "}input{ width:5em; background-color: " COLOR_CONTROL "}.b{ border-left: 5px solid " COLOR_BORDER "; border-right: 5px solid " COLOR_BORDER "; border-bottom: 5px solid " COLOR_BORDER "}select{ width:4em; background-color: " COLOR_CONTROL "}.c{ font-weight: bold}h1{ text-align: right}a:hover, a:active{ background-color: " COLOR_LINK_BORDER "}.y{ font-weight: bold}a:link, a:visited{ border:1px solid " COLOR_LINK_BORDER "; padding: 5px 10px; margin: none; text-align: center; text-decoration: none; display: inline-block}button{ background-color: " COLOR_CONTROL "}";
 
 const char html_main_css_no_select[] PROGMEM =
 "body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }";
 
 const char html_main_css_buttons[] PROGMEM = 
-".btns_left { margin-left: -1px; border-top-left-radius: 0px; border-bottom-left-radius: 0px; }"
-".btns_mid { margin-left: -1px; margin-right: -1px; border-top-left-radius: 0px; border-bottom-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; }"
-".btns_right { margin-right: -1px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; }";
+".btns_left{ margin-left: -1px; border-top-left-radius: 0px; border-bottom-left-radius: 0px}.btns_mid{ margin-left: -1px; margin-right: -1px; border-top-left-radius: 0px; border-bottom-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 0px}.btns_right{ margin-right: -1px; border-top-right-radius: 0px; border-bottom-right-radius: 0px}";
 
 const char html_main_css_control[] PROGMEM = 
-".b1 { float: left; border: 2px solid " COLOR_BORDER "; background-color: " COLOR_CONTROL_BACKGROUND "; text-align: center; margin: 5px; padding: 15px; padding-top: 3px; }"
-".gb {  font-weight: bold; font-size: 150%; font-family: 'Times New Roman', Times, serif; width: 60px; height: 50px; padding: 0px; touch-action: none; -webkit-touch-callout: none; }"
-".bb {  font-weight: bold; font-size: 105%; } .bbh {  font-weight: bold; font-size: 100%; height: 2.1em; touch-action: none; -webkit-touch-callout: none; }";
+".b1{ text-align: center}.gb{  font-weight: bold; font-size: 150%; width: 60px; height: 50px; padding: 0px; touch-action: none; -webkit-touch-callout: none}.bb{  font-weight: bold; font-size: 105%}.bbh{  font-weight: bold; font-size: 100%; height: 2.1em; touch-action: none; -webkit-touch-callout: none}";
 
 const char html_main_css_collapse[] PROGMEM =
-".collapsible { background-color: " COLOR_COLLAPSIBLE_BACKGROUND "; color: " COLOR_COLLAPSIBLE "; cursor: pointer; padding: 7px; width: 80%; border: none; text-align: left; outline: none; font-size: 14px; }"
-".active, .collapsible:hover { background-color: " COLOR_COLLAPSIBLE_ACTIVE_BACKGROUND "; } .content { padding: 2px 18px; display: none; overflow: hidden; background-color: " COLOR_COLLAPSIBLE_CONTENT_BACKGROUND "; }";
+".collapsible{ cursor: pointer; padding: 7px; outline: none; font-size: 14px}.content{ display: none; overflow: hidden}";
 
 const char html_main_css_end[] PROGMEM = 
 "</STYLE>";
