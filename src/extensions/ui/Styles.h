@@ -391,23 +391,7 @@ button.sws-secondary { background:#303030; border-color:var(--border); }
   flex-direction: column;
   gap: 30px;
 }
-.sws-page .t table,
-.sws-page .t tbody,
-.sws-page .t tr,
-.sws-page .t td {
-  display: block;
-  width: 100%;
-  text-align: center;
-}
-.sws-page .t td:last-child {
-  font-size: 11px;
-  font-weight: 400;
-  color: #808080;
-  margin-top: 9px;
-}
-.sws-page .t font {
-  font-size: 24px;
-}
+.sws-brand { font-size: 24px; font-weight: 700; text-align: center; }
 .sws-nav {
   display: flex;
   flex-direction: column;
@@ -687,7 +671,7 @@ h2.sws-section-title {
     background: #161616;
     display: block;
   }
-  .sws-page .t table,
+  .sws-brand,
   .sws-sidebar-note {
     display: none !important;
   }
@@ -1075,8 +1059,10 @@ h2.sws-section-title {
 .sws-extra-nav {
   display: contents;
 }
-.sws-nav-more {
-  display: none;
+.sws-nav-more, .sws-nav-toggle { display: none; }
+@media (max-width: 700px) {
+  .sws-nav-toggle { display: block; position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .sws-nav-toggle:focus-visible + .sws-nav-more { outline: 2px solid var(--text); }
 }
 
 @media (max-width: 700px) {
@@ -1119,7 +1105,7 @@ h2.sws-section-title {
     border-radius: 14px;
     box-shadow: 0 -12px 36px #0008;
   }
-  .sws-nav[data-expanded='true'] .sws-extra-nav {
+  .sws-nav-toggle:checked ~ .sws-extra-nav {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
@@ -2499,11 +2485,6 @@ h2.sws-section-title {
   font-size: 16px;
 }
 .sws-tracking-advanced h2 { font-size: 18px; margin: 0 0 16px; }
-
-/* 隐藏旧页头的名称区域，版本信息由原始服务端数据移至页头右侧 */
-.sws-page .t td:last-child {
-  display: none;
-}
 .sws-version {
   font-size: 11px;
   line-height: 1.5;

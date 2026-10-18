@@ -84,31 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // 下拉框代理原有按钮，后台状态更新仍通过原来的标识同步
 document.addEventListener('DOMContentLoaded', () => {
   const tracking = document.querySelector('.sws-tracking .b1');
-  // 方位控制标题去掉冒号，保留倍率与状态节点
-  const guideTitle = document.querySelector('.sws-guide>.b1>div:first-child');
-  if (guideTitle)
-    guideTitle.childNodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE)
-        node.textContent = node.textContent.replace(/[:：]\s*$/, '');
-    });
   document.querySelectorAll('.sws-choice-source').forEach((source) => {
     const buttons = [...source.querySelectorAll('button')];
     if (!buttons.length) return;
-    const label = document.createElement('label');
-    label.className = 'sws-choice';
-    const text = document.createElement('span');
-    text.textContent = source.dataset.label;
-    const select = document.createElement('select');
-    buttons.forEach((button, i) => {
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = button.title || button.textContent;
-      select.appendChild(option);
-    });
-    label.append(text, select);
-    source.before(label);
-    label.appendChild(source);
-    source.classList.add('sws-choice-originals');
+    const select = source.closest('.sws-choice')?.querySelector('select');
+    if (!select) return;
     select.onchange = () =>
       buttons[Number(select.value)].dispatchEvent(
         new PointerEvent('pointerdown', { bubbles: true }),
@@ -127,46 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     sync();
   });
-  if (tracking) {
-    const collapse = tracking.querySelector('.collapsible'), rates = document.createElement('div');
-    rates.className = 'sws-tracking-rates';
-    ['trk_sid','guide_r3','guide_r0'].forEach(id => {
-      const choice = document.getElementById(id)?.closest('.sws-choice');
-      if (choice) rates.appendChild(choice);
-    });
-    let block = collapse;
-    while (block && block.parentElement !== tracking) block = block.parentElement;
-    tracking.insertBefore(rates, block || null);
-    const advanced = document.querySelector('.sws-advanced-grid');
-    if (collapse && advanced) {
-      const card = document.createElement('section'), title = document.createElement('h2');
-      card.className = 'b1 sws-tracking-advanced';
-      title.textContent = )UI" SWS_JS_TEXT(L_TRACKING_SETTINGS) R"UI(;
-      card.append(title,block);
-      advanced.appendChild(card);
-    }
-  }
   const on = document.getElementById('trk_on'),
     off = document.getElementById('trk_off');
-  if (on && off) {
-    const wrap = document.createElement('div');
-    wrap.className = 'sws-track-switch';
-    const name = document.createElement('span');
-    name.textContent =
-      on.dataset.label || tracking.querySelector('div').textContent.replace(/:$/, '');
-    const toggle = document.createElement('button');
-    toggle.className = 'sws-switch';
-    toggle.type = 'button';
-    toggle.setAttribute('role', 'switch');
-    toggle.setAttribute('aria-label', name.textContent);
-    toggle.setAttribute('aria-checked', 'false');
-    on.before(wrap);
-    wrap.append(name, toggle);
-    on.hidden = true;
-    off.hidden = true;
-    const result = document.createElement('p');
-    result.className = 'sws-help'; result.setAttribute('role', 'status'); result.hidden = true;
-    wrap.after(result);
+  if (on && off && tracking) {
+    const toggle = tracking.querySelector('.sws-switch');
+    const result = tracking.querySelector('.sws-help[role=status]');
+    if (!toggle || !result) return;
+    if (on.dataset.selected === undefined) {
+      on.dataset.selected = toggle.getAttribute('aria-checked');
+      off.dataset.selected = String(on.dataset.selected !== 'true');
+    }
     let pending = false;
     toggle.onclick = async () => {
       if (pending) return;

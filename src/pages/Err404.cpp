@@ -6,11 +6,10 @@ void handleNotFound() {
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-store");
   www.send(404, "text/html", String());
-  String data = FPSTR(html_head_begin);
-  data.concat(FPSTR(html_head_end));
+  pageHead();
+  String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
-  pageAppearance();
   www.sendContent("<main class='sws-document sws-empty'><span class='sws-brand-small'>404</span><h1>" L_UI_NOT_FOUND "</h1><p>" L_UI_NOT_FOUND_NOTE "</p><a href='/index.htm' target='_top'>" L_UI_BACK_CONTROLLER "</a></main></body></html>");
   www.sendContent("");
 }

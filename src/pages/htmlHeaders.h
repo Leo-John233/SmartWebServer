@@ -5,7 +5,7 @@
 #include "../extensions/ui/Text.h"
 
 const char html_head_begin[] PROGMEM = "<!DOCTYPE HTML>\n"
-                                  "<html>\n"
+                                  "<html class='sws-page'>\n"
                                   "<head>\n"
                                   "<meta charset='utf-8'/>\n"
                                   "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n";

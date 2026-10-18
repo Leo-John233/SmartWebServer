@@ -61,18 +61,8 @@ void handleAux() {
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
 
-  String data = FPSTR(html_head_begin);
-  data.concat(FPSTR(html_main_css_begin));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_core));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_control));
-  data.concat(FPSTR(html_main_css_buttons));
-  data.concat(FPSTR(html_main_css_end));
-  data.concat(FPSTR(html_head_end));
-  www.sendContentAndClear(data);
-
-  // show this page
+  pageHead();
+  String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageHeader(PAGE_AUXILIARY);

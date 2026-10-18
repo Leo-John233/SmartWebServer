@@ -27,14 +27,26 @@ const char html_guidePad[] PROGMEM =
 "<button class='gb' ontouchstart=\"gt(event,'s1')\" ontouchend=\"gu(event,'s0')\" ontouchcancel=\"gu(event,'s0')\" ontouchmove=\"return gc(event)\" onpointerdown=\"gp(event,'s1')\" onpointerup=\"gs(event,'s0')\" onpointercancel=\"gs(event,'s0')\" oncontextmenu=\"return gc(event)\" type='button'>" BUTTON_S "</button></div>";
 
 const char html_guidePulseRates[] PROGMEM =
-"<div class='sws-choice-source sws-guide-choice' data-label='" L_GUIDING_RATE "'>"
+"<label class='sws-choice'><span>" L_GUIDING_RATE "</span><select class='sws-choice-select' aria-label='" L_GUIDING_RATE "' disabled>"
+"<option value='0'>" "0.25X" "</option>"
+"<option value='1'>" "0.5X" "</option>"
+"<option value='2'>" "1X" "</option>"
+"</select><span class='sws-choice-source sws-choice-originals'>"
 "<button id='guide_r0' class='btns_right' onpointerdown=\"g('R0')\" type='button'>0.25X</button>"
 "<button id='guide_r1' class='btns_mid' onpointerdown=\"g('R1')\" type='button'>0.5X</button>"
 "<button id='guide_r2' class='btns_left' onpointerdown=\"g('R2')\" type='button'>1X</button>"
-"</div>";
+"</span></label>";
 
 const char html_guideRates[] PROGMEM =
-"<div class='sws-choice-source sws-guide-choice' data-label='" L_MOVEMENT_RATE "'>"
+"<label class='sws-choice'><span>" L_MOVEMENT_RATE "</span><select class='sws-choice-select' aria-label='" L_MOVEMENT_RATE "' disabled>"
+"<option value='0'>" "2X" "</option>"
+"<option value='1'>" "4X" "</option>"
+"<option value='2'>" "8X" "</option>"
+"<option value='3'>" "20X" "</option>"
+"<option value='4'>" "48X" "</option>"
+"<option value='5'>" "MAX / 2" "</option>"
+"<option value='6'>" "MAX" "</option>"
+"</select><span class='sws-choice-source sws-choice-originals'>"
 "<button id='guide_r3' class='btns_right' onpointerdown=\"g('R3')\" type='button'>2X</button>"
 "<button id='guide_r4' class='btns_mid' onpointerdown=\"g('R4')\" type='button'>4X</button>"
 "<button id='guide_r5' class='btns_mid' onpointerdown=\"g('R5')\" type='button'>8X</button>"
@@ -42,4 +54,4 @@ const char html_guideRates[] PROGMEM =
 "<button id='guide_r7' class='btns_mid' onpointerdown=\"g('R7')\" type='button'>48X</button>"
 "<button id='guide_r8' class='btns_mid' onpointerdown=\"g('R8')\" type='button'>MAX / 2</button>"
 "<button id='guide_r9' class='btns_left' onpointerdown=\"g('R9')\" type='button'>MAX</button>"
-"</div>";
+"</span></label>";

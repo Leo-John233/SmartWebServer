@@ -8,12 +8,10 @@
 // create the related webpage tile
 void guideTile(String &data)
 {
-  char temp[240] = "";
-  char temp1[120] = "";
-
-  snprintf(temp1, sizeof(temp1), L_GUIDE " <span id='guide_rate' class='c'>%s</span>", GuideRatesStr[status.guideRate]);
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", temp1);
-  data.concat(temp);
+  // PC 和手机直接使用同一标题，不再依赖脚本删除模板附加的冒号
+  data.concat(F("<div class='b1' style='width:22em; min-height:15em;'><div style='float:left;'>" L_GUIDE " <span id='guide_rate' class='c'>"));
+  data.concat(GuideRatesStr[status.guideRate]);
+  data.concat(F("</span></div>"));
   data.concat(F("<div style='float: right; text-align: right;' id='guide_sta' class='c'>"));
   if (status.guiding) data.concat(L_SLEWING); else data.concat(L_INACTIVE);
   data.concat(F("</div><br />"));
@@ -26,23 +24,6 @@ void guideTile(String &data)
   data.concat(FPSTR(html_guidePad));
   www.sendContentAndClear(data);
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-  data.concat(temp);
-
-  data.concat(FPSTR("Guide rate, in x sidereal:<br />"));
-
-  snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
-  data.concat(temp);
-
-  data.concat(FPSTR(html_guidePulseRates));
-  www.sendContentAndClear(data);
-
-  data.concat(FPSTR(html_guideRates));
-  www.sendContentAndClear(data);
-
-  data.concat(FPSTR(html_form_end));
-
-  data.concat(FPSTR(html_collapsable_end));
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
 }

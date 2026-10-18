@@ -25,21 +25,8 @@ void handleMount()
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
 
-  String data = FPSTR(html_head_begin);
-  data.concat(FPSTR(html_main_css_begin));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_core));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_no_select));
-  data.concat(FPSTR(html_main_css_control));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_buttons));
-  data.concat(FPSTR(html_main_css_collapse));
-  data.concat(FPSTR(html_main_css_end));
-  data.concat(FPSTR(html_head_end));
-  www.sendContentAndClear(data);
-
-  // show this page
+  pageHead(true);
+  String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageHeader(PAGE_MOUNT);
@@ -82,6 +69,7 @@ void handleMount()
   data.concat(FPSTR(html_layout_mount_advanced));
   alignTile(data);
   if (status.pecEnabled) pecTile(data);
+  trackingSettingsTile(data);
   #if DISPLAY_COORDINATE_ORIGIN == ON
     coordinateTile(data);
   #endif

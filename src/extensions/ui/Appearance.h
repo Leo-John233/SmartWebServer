@@ -6,4 +6,6 @@
 #include "Controls.h"
 #include "Editors.h"
 #include "Navigation.h"
+#include "Icons.h"
+#include "../network/ui/Styles.h"
 #include "../boardIo/View.h"

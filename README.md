@@ -57,8 +57,8 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 - ESP8266 直接使用 ESP8266WebServer，ESP32 使用 WebServer；路由仍通过 www.on 登记，参数处理与回复格式沿用原接口
 - 标签通过原生链接直接打开完整页面，表单和浏览器前进后退由浏览器处理，取消 iframe 外壳、view 参数注入与加载队列
-- 公共导航脚本只整理外观；普通点击立即使用原生链接，只有正在执行运动停止时才等待停止队列完成，最多等待 5 秒，超时留在原页供重试
-- 公共样式和脚本继续由浏览器缓存，Wi-Fi 使用 sendContent_P 按至多 1024 字节发送 Flash 内容；以太网保留原生字符串发送方式
+- 页头、标题和选中标签由原版 pageHeader 直接输出，样式先在 head 加载，公共脚本不再重建导航；普通点击立即使用原生链接，只有正在执行运动停止时才等待停止队列完成，最多等待 5 秒，超时留在原页供重试
+- 基础样式、网络样式、公共脚本和图标由浏览器缓存，Wi-Fi 使用 sendContent_P 按至多 1024 字节发送 Flash 内容；以太网保留原生字符串发送方式
 - 网络活动回调只记录时间，不直接执行抱闸停止或 GPIO 更新，由原有 OnTask 任务每 20 ms 处理
 - 本地模拟与源码回归不能替代 ESP-07S 的实际无线及串口耗时验证
 
@@ -82,10 +82,10 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 - 控制器、赤道仪、网络以及可用的调焦器、旋转器、辅助和编码器标签共用黑色与柔和暗红主题
 - 卡片随屏幕宽度排列，手机端自动改为单列，数字输入框为数值和增减按钮留足空间
-- PC 使用左侧导航，手机使用底部导航与更多菜单，切换时仅加载当前标签内容，支持浏览器前进后退
+- PC 使用左侧导航，手机使用底部导航与更多菜单，切换时由原生链接打开完整页面，支持浏览器前进后退
 - 内容页使用独立文档，离开时清理原有轮询和事件，按住运动按钮时先发送停止请求并等待队列处理
 - 登录、表单和设备控制接口沿用原有处理逻辑，真实硬件仍需验证网络延迟下的切换与停止行为
-- `node tests/shared-pages-ui.cjs <输出目录>` 使用模拟数据验证共用主题、导航、登录、数字框、宽度适配和运动停止时序，控件预览从真实模板及中文语言宏展开，设备条件与数值由测试模拟，不等同于实机完整页面
+- `node tests/native-navigation.cjs` 验证完整页面导航、缓存、历史和运动停止等待；`node tests/native-first-paint.cjs` 验证桌面及手机延迟脚本前后的页头、导航和正文起点一致，设备数据仍采用模拟值
 - 控制器按状态、驱动器与高级设置分区，赤道仪优先显示方向控制、目标位置与跟踪
 - 调焦器、旋转器、编码器、辅助控制采用各自的操作分组，帮助、通信异常与 404 页面同步更新样式
 
@@ -96,7 +96,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 ## 导航图标
 
-- 导航采用内嵌实心 SVG，桌面侧栏和手机导航共用，设备离线时无需加载字体或图片
+- 导航采用由设备提供的可缓存实心 SVG，桌面侧栏和手机导航共用，无需连接互联网或加载外部字体
 - 赤道仪按参考图重绘为倾斜镜筒、镜口和底座，其他入口分别使用芯片、Wi-Fi、对焦镜头、旋转箭头、开关和编码盘
 - 造型参考 [MDI 望远镜](https://pictogrammers.com/library/mdi/icon/telescope/)、[芯片](https://pictogrammers.com/library/mdi/icon/chip/)、[镜头](https://pictogrammers.com/library/mdi/icon/camera-iris/)与[调节器](https://pictogrammers.com/library/mdi/icon/tune/)，路径在项目内重绘
 
@@ -142,9 +142,9 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 | 暗红、灰黑配色 | `extensions/ui/Palette.h` |
 | 公共布局与手机适配 | `extensions/ui/Styles.h` |
 | 页面分区 HTML | `extensions/ui/Layouts.h` |
-| 跟踪开关、倍率下拉框、坐标表单增强 | `extensions/ui/Controls.h` |
+| 原生跟踪开关和倍率的事件绑定、坐标表单增强 | `extensions/ui/Controls.h` |
 | 位置与限位编辑卡片、方向与时区选择、单一停放入口 | `extensions/ui/Editors.h` |
-| 侧栏、手机导航与标签切换 | `extensions/ui/Navigation.h` |
+| 侧栏、手机导航与标签切换 | `pages/Page.*`、`extensions/ui/Navigation.h`、`Icons.h` |
 | 界面资源分段输出 | `extensions/ui/Presentation.cpp` |
 | Wi-Fi 样式、HTML、浏览器脚本与渲染入口 | `extensions/network/ui/` |
 | Wi-Fi 配网处理与状态 | `extensions/network/NetworkWifi.cpp` |
@@ -158,7 +158,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 上游更新仍可能改动卡片的参数、设备条件或 HTML 标识，这些部分不能完全独立。合并时保留上游的业务修复，再核对下面的接入点；不要把新上游整份页面覆盖成本地旧页面：
 
 1. 原始路由、登录验证、页面参数处理及设备命令；新增坐标输入沿用 mount 接口，Wi-Fi 配网扩展仍在 `/net-wifi`。
-2. 页面头部的 `pageAppearance()`、原生页头链接，以及分区模板的输出位置。
+2. 页面头部的 `pageHead()`、原生 pageHeader 输出与链接，以及分区模板的输出位置。
 3. 卡片 `id`、表单 `name` 和 AJAX 键值；`Controls.h` 对已有控件的代理依赖这些标识。
 4. 已确认的后台修复：轴参数边界校验、附件目标边界、编码器第二轴恢复默认值、长语言标签缓冲区。它们保留在所属模块，不能作为样式覆盖处理。
 

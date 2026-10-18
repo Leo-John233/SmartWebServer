@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Tracking tile
 #include "TrackingTile.h"
+#include "GuideTile.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -16,10 +17,25 @@ void trackingTile(String &data)
   data.concat(state.trackStr);
   data.concat(F("</div><br /><hr>"));
 
+  // 开关和倍率直接输出最终结构，脚本只绑定原有命令与状态同步
+  data.concat(F("<div class='sws-track-switch'><span>" L_DEVICE_TRACKING "</span><button class='sws-switch' type='button' role='switch' aria-label='" L_DEVICE_TRACKING "' aria-checked='"));
+  data.concat(status.tracking ? F("true") : F("false"));
+  data.concat(F("' disabled></button></div><p class='sws-help' role='status' hidden></p>"));
   data.concat(FPSTR(html_trackingEnable));
+  data.concat(F("<div class='sws-tracking-rates'>"));
   data.concat(FPSTR(html_trackingPreset));
   www.sendContentAndClear(data);
-  data.concat(F("<hr>"));
+  data.concat(FPSTR(html_guideRates));
+  data.concat(FPSTR(html_guidePulseRates));
+  data.concat(F("</div>"));
+  data.concat(FPSTR(html_tile_end));
+  www.sendContentAndClear(data);
+}
+
+// 跟踪高级设置在原页面分区中直接输出，避免浏览器加载后搬动卡片
+void trackingSettingsTile(String &data) {
+  char temp[240] = "";
+  data.concat(F("<section class='b1 sws-tracking-advanced'><h2>" L_TRACKING_SETTINGS "</h2>"));
 
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
   data.concat(temp);
@@ -36,7 +52,7 @@ void trackingTile(String &data)
   data.concat(FPSTR(html_form_end));
 
   data.concat(FPSTR(html_collapsable_end));
-  data.concat(FPSTR(html_tile_end));
+  data.concat(F("</section>"));
   www.sendContentAndClear(data);
 }
 

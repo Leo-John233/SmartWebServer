@@ -26,19 +26,8 @@ void handleRotator() {
   www.send(200, "text/html", String());
 
   // send a standard http response header
-  String data = FPSTR(html_head_begin);
-  data.concat(FPSTR(html_main_css_begin));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_core));
-  data.concat(FPSTR(html_main_css_control));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_buttons));
-  data.concat(FPSTR(html_main_css_collapse));
-  data.concat(FPSTR(html_main_css_end));
-  data.concat(FPSTR(html_head_end));
-  www.sendContentAndClear(data);
-
-  // show this page
+  pageHead();
+  String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageHeader(PAGE_ROTATOR);

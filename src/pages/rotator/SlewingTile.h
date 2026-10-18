@@ -37,10 +37,16 @@ const char html_rotateSlewSpeed[] PROGMEM =
 "<div class='sws-accessory-live-rate'><span>" L_POSITIONING_SPEED "</span><strong id='rot_rate' class='c'>%s</strong></div>";
 
 const char html_rotateGotoSelect[] PROGMEM =
-"<div class='sws-choice-source' data-label='" L_POSITIONING_RATE "'>"
+"<label class='sws-choice'><span>" L_POSITIONING_RATE "</span><select class='sws-choice-select' aria-label='" L_POSITIONING_RATE "' disabled>"
+"<option value='0'>" L_VFAST "</option>"
+"<option value='1'>" L_FAST "</option>"
+"<option value='2'>" L_NORMAL "</option>"
+"<option value='3'>" L_SLOW "</option>"
+"<option value='4'>" L_VSLOW "</option>"
+"</select><span class='sws-choice-source sws-choice-originals'>"
   "<button id='rot_rate_vf' class='btns_right' onpointerdown=\"s('rot','vf')\" type='button'>" L_VFAST "</button>"
   "<button id='rot_rate_f' class='btns_mid' onpointerdown=\"s('rot','f')\"  type='button'>" L_FAST "</button>"
   "<button id='rot_rate_n' class='btns_mid' onpointerdown=\"s('rot','n')\"  type='button'>" L_NORMAL "</button>"
   "<button id='rot_rate_s' class='btns_mid' onpointerdown=\"s('rot','s')\"  type='button'>" L_SLOW "</button>"
   "<button id='rot_rate_vs' class='btns_left' onpointerdown=\"s('rot','vs')\" type='button'>" L_VSLOW "</button>"
-  "</div>\n";
+"</span></label>";

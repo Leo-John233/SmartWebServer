@@ -42,19 +42,8 @@ void handleNetwork() {
   www.send(200, "text/html", String());
 
   // send a standard http response header
-  String data = FPSTR(html_head_begin);
-  data.concat(FPSTR(html_main_css_begin));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_core));
-  data.concat(FPSTR(html_main_css_control));
-  www.sendContentAndClear(data);
-  data.concat(FPSTR(html_main_css_end));
-  // 保留开发分支的手机端网络页面样式
-  data.concat(FPSTR(html_network_css));
-  data.concat(FPSTR(html_head_end));
-  www.sendContentAndClear(data);
-
-  // show this page
+  pageHead();
+  String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageHeader(PAGE_NETWORK);

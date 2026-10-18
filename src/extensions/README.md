@@ -23,7 +23,8 @@ Arduino 会自动编译 `src/` 下的 `.cpp`，扩展实现只保留一份，不
 | --- | --- |
 | `SmartWebServer.ino` | `boardIo.initPins()`、`boardIo.begin()`、配网轮询、扩展路由及资源登记，保持原有启动顺序 |
 | `pages/Pages.h`、`pages/Page.h` | 扩展入口声明及公共资源接口 |
-| `pages/htmlHeaders.h`、页面处理函数 | 公共配色和文字宏，`pageAppearance()` 与分区模板 |
+| `pages/htmlHeaders.h`、页面处理函数 | 公共配色和文字宏，`pageHead()` 与分区模板 |
+| `pages/Page.*` | 沿用原版 `pageHeader()` 及能力条件，直接输出完整导航、当前标签和标题 |
 | `pages/network/Network.cpp` | 配网渲染入口，登录、OTA 和其他原版设置仍由本文件处理 |
 | `pages/index/StatusTile.cpp`、`AxisTile.cpp` | 活动灯与抱闸设置，读取同一次驱动反馈 |
 | `pages/mount/Mount.cpp` | 分派 `coord_action`，坐标校验和命令顺序在扩展中维护 |
@@ -79,10 +80,16 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 - `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>` 检查全部十种语言，范围同时包含 `src/pages/` 与 `src/extensions/`，编译清单缺少任一页面或扩展时必须重新生成
 - 抱闸检查使用 `brake-policy`、`board-io-backend`、`brake-reboot`、`controller-status-text`
 - 网络检查使用 `network-wifi-backend`、`network-wifi-performance`、`network-wifi-ui`
-- 页面检查使用 `coordinate-input`、`network-page`、`page-performance`、`shared-pages-ui`、`native-navigation`、`demo-entry` 和 `locales`
+- 页面检查使用 `coordinate-input`、`network-page`、`page-performance`、`page-header`、`native-first-paint`、`native-navigation` 和 `locales`
 - 使用 Arduino 工具链编译 ESP8266 与 ESP32，构建目录和临时文件放在忽略的输出目录
 
 资源长度使用编译期数组大小，避免每次发送先扫描 Flash；版本标签直接从 Flash 分段发送，避免为每页临时构建多个动态字符串。Wi-Fi 调用内核 sendContent_P，继续按至多 1024 字节分段输出，不缓存设备数据，也不改动运动指令和保护时序。
+
+页面沿用原版先输出 head、再输出页头和正文的顺序，公共样式链接放在 head 内，导航和标题由固件直接生成，浏览器首次绘制即可使用最终布局。公共脚本延后执行，不再创建或搬动导航节点，手机的更多菜单使用原生复选框与 CSS，脚本未加载时也可导航。
+
+跟踪开关、倍率下拉框及高级设置也由原页面直接输出，脚本只绑定原命令和状态标识，不再替换按钮或搬动设置卡片。方位控制标题在 PC 和手机使用同一份输出，不通过脚本补删冒号。
+
+原版基础样式、网络页样式和扩展样式合并为同一缓存资源，图标也作为 SVG 资源缓存，后续切页无需重复传输这些内容。页面继续使用普通链接和完整文档响应，设备能力判断及原有命令接口不变。
 
 本地测试和固件编译不能替代上电、真实串口反馈、并发访问与抱闸接线的实机验证。
 
@@ -93,8 +100,8 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 | 范围 | 处理与依据 |
 | --- | --- |
 | HTTP 与 TCP 传输 | 删除自定义 WebServer、防护配置与 TCP 分轮处理，直接回到原版接口，保留 80 字节回复缓冲区修复 |
-| 页面导航 | 删除 iframe 外壳、额外内容请求与切页队列，保留原生链接、表单、路由及状态节点，导航外观仍在扩展中维护 |
-| 静态资源 | 保留可缓存的 CSS/JS，使用内核 Flash 发送接口，避免每段构造临时 String，不缓存设备状态 |
+| 页面导航 | 沿用原版在固件端输出页头和选中标签，保留原生链接、表单、路由及状态节点，外观脚本不再重建导航 |
+| 静态资源 | 样式链接位于 head，基础样式和网络页样式一并缓存，CSS/JS/SVG 使用内核 Flash 发送接口，不缓存设备状态 |
 | 状态与命令 | 保留原版 OnStepCmd 和 State 调度，校时、运动及附件命令不按抱闸状态过滤，保留短写检测与长反馈缓冲修复 |
 | 配网 | 保留已实测恢复的 AP+STA 流程、有限连接窗口、候选密码隔离及开关提交，仍使用 WiFi 原生接口与原版 NV 键 |
 | 抱闸 | 保留独立策略和原版 OnTask 调度，未知反馈保持原电平，停止每轮最多三次；网络活动通知只记录时间，不调用停止逻辑 |

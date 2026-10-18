@@ -37,10 +37,16 @@ const char html_focuserSlewSpeed[] PROGMEM =
 "<div class='sws-accessory-live-rate'><span>" L_POSITIONING_SPEED "</span><strong id='foc_rate' class='c'>%s</strong></div>";
 
 const char html_focuserGotoSelect[] PROGMEM =
-"<div class='sws-choice-source' data-label='" L_POSITIONING_RATE "'>"
+"<label class='sws-choice'><span>" L_POSITIONING_RATE "</span><select class='sws-choice-select' aria-label='" L_POSITIONING_RATE "' disabled>"
+"<option value='0'>" L_VFAST "</option>"
+"<option value='1'>" L_FAST "</option>"
+"<option value='2'>" L_NORMAL "</option>"
+"<option value='3'>" L_SLOW "</option>"
+"<option value='4'>" L_VSLOW "</option>"
+"</select><span class='sws-choice-source sws-choice-originals'>"
   "<button id='foc_rate_vf' class='btns_right' onpointerdown=\"s('foc','vf')\" type='button'>" L_VFAST "</button>"
   "<button id='foc_rate_f' class='btns_mid' onpointerdown=\"s('foc','f')\"  type='button'>" L_FAST "</button>"
   "<button id='foc_rate_n' class='btns_mid' onpointerdown=\"s('foc','n')\"  type='button'>" L_NORMAL "</button>"
   "<button id='foc_rate_s' class='btns_mid' onpointerdown=\"s('foc','s')\"  type='button'>" L_SLOW "</button>"
   "<button id='foc_rate_vs' class='btns_left' onpointerdown=\"s('foc','vs')\" type='button'>" L_VSLOW "</button>"
-  "</div>\n";
+"</span></label>";
