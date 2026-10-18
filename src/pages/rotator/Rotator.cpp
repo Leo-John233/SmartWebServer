@@ -56,11 +56,15 @@ void handleRotator() {
 
   // 旋转、参考位置和补偿分区，消旋仅在设备支持时显示
   data.concat(FPSTR(html_layout_rotator_begin));
+  if (!pageClientConnected()) return;
   rotatorSlewingTile(data);
   data.concat(FPSTR(html_layout_accessory_home));
+  if (!pageClientConnected()) return;
   rotatorHomeTile(data);
   data.concat(FPSTR(html_layout_accessory_settings));
+  if (!pageClientConnected()) return;
   rotatorBacklashTile(data);
+  if (!pageClientConnected()) return;
   if (status.derotatorFound) deRotatorTile(data);
   data.concat(FPSTR(html_layout_accessory_end));
 

@@ -57,23 +57,34 @@ void handleMount()
 
   // 移动控制之后显示位置与限位，再显示坐标 GOTO 和其余设置
   data.concat(FPSTR(html_layout_mount_begin));
+  if (!pageClientConnected()) return;
   guideTile(data);
   data.concat(FPSTR(html_layout_mount_tracking));
+  if (!pageClientConnected()) return;
   trackingTile(data);
   data.concat(FPSTR(html_layout_mount_location));
+  if (!pageClientConnected()) return;
   siteTile(data);
+  if (!pageClientConnected()) return;
   limitsTile(data);
   data.concat(FPSTR(html_layout_mount_target));
+  if (!pageClientConnected()) return;
   gotoTile(data);
   data.concat(FPSTR(html_layout_mount_home));
+  if (!pageClientConnected()) return;
   homeParkTile(data);
   data.concat(FPSTR(html_layout_mount_library));
+  if (!pageClientConnected()) return;
   libraryTile(data);
   data.concat(FPSTR(html_layout_mount_advanced));
+  if (!pageClientConnected()) return;
   alignTile(data);
+  if (!pageClientConnected()) return;
   if (status.pecEnabled) pecTile(data);
+  if (!pageClientConnected()) return;
   trackingSettingsTile(data);
   #if DISPLAY_COORDINATE_ORIGIN == ON
+    if (!pageClientConnected()) return;
     coordinateTile(data);
   #endif
   data.concat(FPSTR(html_layout_mount_end));

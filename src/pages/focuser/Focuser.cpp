@@ -56,12 +56,16 @@ void handleFocuser() {
 
   // 主操作与参数区并排，手机端按操作顺序堆叠
   data.concat(FPSTR(html_layout_focuser_begin));
+  if (!pageClientConnected()) return;
   focuserSelectTile(data);
   data.concat(FPSTR(html_layout_focuser_motion));
+  if (!pageClientConnected()) return;
   focuserSlewingTile(data);
   data.concat(FPSTR(html_layout_accessory_home));
+  if (!pageClientConnected()) return;
   focuserHomeTile(data);
   data.concat(FPSTR(html_layout_accessory_settings));
+  if (!pageClientConnected()) return;
   focuserBacklashTcfTile(data);
   data.concat(FPSTR(html_layout_accessory_end));
 

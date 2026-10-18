@@ -3,6 +3,14 @@
 #include "../../pages/Pages.common.h"
 #include "../../lib/tasks/OnTask.h"
 
+bool pageClientConnected() {
+  #if OPERATIONAL_MODE == WIFI
+    return www.client().connected();
+  #else
+    return true;
+  #endif
+}
+
 // 保留原版 String/sendContentAndClear；同一 head 共用 1 KB 缓冲，合并相邻的小模板。
 // 不增加请求、不缓存设备数据，发送调用结束后才让出原有任务调度。
 class PageResourceWriter {
@@ -28,11 +36,7 @@ class PageResourceWriter {
     }
   private:
     bool connected() const {
-      #if OPERATIONAL_MODE == WIFI
-        return www.client().connected();
-      #else
-        return true;
-      #endif
+      return pageClientConnected();
     }
     String data_;
 };

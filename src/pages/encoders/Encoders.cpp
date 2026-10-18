@@ -56,9 +56,12 @@ void handleEncoders()
 
   // 同步状态与两轴参数分区排列，避免窄屏并排挤压
   data.concat(FPSTR(html_layout_encoders_begin));
+  if (!pageClientConnected()) return;
   syncTile(data);
   data.concat(FPSTR(html_layout_encoders_settings));
+  if (!pageClientConnected()) return;
   encAxisTile(0, data);
+  if (!pageClientConnected()) return;
   encAxisTile(1, data);
   data.concat(FPSTR(html_layout_encoders_end));
 

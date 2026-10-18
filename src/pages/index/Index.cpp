@@ -57,6 +57,7 @@ void handleRoot()
   data.concat(FPSTR(html_layout_controller_begin));
 
 
+  if (!pageClientConnected()) return;
   statusTile(data);
   data.concat(FPSTR(html_layout_controller_axes));
 
@@ -75,12 +76,14 @@ void handleRoot()
   data.concat(FPSTR(html_layout_controller_axes_end));
 
   #if DISPLAY_SERVO_MONITOR == ON
+    if (!pageClientConnected()) return;
     data.concat(F("<hr>"));
     servoTile(data);
     data.concat(F("<br class=\"clear\" />\n"));
   #endif
 
   #if DISPLAY_STALLGUARD_MONITOR == ON
+    if (!pageClientConnected()) return;
     data.concat(F("<hr>"));
     stallGuardTile(data);
     data.concat(F("<br class=\"clear\" />\n"));

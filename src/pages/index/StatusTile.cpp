@@ -8,6 +8,8 @@
 #include "../../lib/tasks/OnTask.h"
 #include "../../extensions/boardIo/Page.h"
 #include "../../extensions/boardIo/BoardIo.h"
+#include "../../extensions/ui/Template.h"
+#include "../../extensions/ui/Presentation.h"
 
 // create the related webpage tile
 void statusTile(String &data)
@@ -56,6 +58,7 @@ void statusTile(String &data)
   www.sendContentAndClear(data);
 
   int mountType = 0;
+  if (!pageClientConnected()) return;
   #if DRIVE_CONFIGURATION == ON
     if (status.getVersionMajor() >= 5)
     {
@@ -82,10 +85,8 @@ void statusTile(String &data)
   #if DRIVE_CONFIGURATION == ON
     if (mountType >= 1 && mountType <= 3)
     {
-      char mountForm[1024];
-      snprintf_P(mountForm, sizeof(mountForm), html_indexMountType,
-        mountType == 1 ? " selected" : "", mountType == 2 ? " selected" : "", mountType == 3 ? " selected" : "");
-      data.concat(mountForm);
+      const char *values[] = {mountType == 1 ? " selected" : "", mountType == 2 ? " selected" : "", mountType == 3 ? " selected" : ""};
+      appendPageTemplate(data, html_indexMountType, values, 3);
       www.sendContentAndClear(data);
     }
   #endif

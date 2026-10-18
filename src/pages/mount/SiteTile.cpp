@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Presentation.h"
 
 int get_temp_month;
 int get_temp_day;
@@ -22,6 +23,7 @@ void siteTile(String &data)
   data.concat(F("<div class='b1 sws-site sws-editor'><header class='sws-editor-heading'><h2>" L_POSITION_INFO "</h2><button class='sws-secondary sws-edit-button' type='button' data-edit-form='sws-site-form'>" SWS_EDIT_ICON L_EDIT_POSITION "</button></header>"));
   data.concat(F("<form id='sws-site-form' class='sws-settings-editor' method='get' action='/mount.htm'><div class='sws-site-fields'>"));
   // Longitude
+  if (!pageClientConnected()) return;
   data.concat(FPSTR(html_longMsg));
   if (!onStep.command(status.getVersionMajor() > 3 ? ":GgH#" : ":Gg#", reply))
     strcpy(reply, status.getVersionMajor() > 3 ? "+000*00:00" : "+000*00");
@@ -45,6 +47,7 @@ void siteTile(String &data)
   www.sendContentAndClear(data);
 
   // Latitude
+  if (!pageClientConnected()) return;
   data.concat(FPSTR(html_latMsg));
   if (!onStep.command(status.getVersionMajor() > 3 ? ":GtH#" : ":Gt#", reply))
     strcpy(reply, status.getVersionMajor() > 3 ? "+00*00:00" : "+00*00");
@@ -68,6 +71,7 @@ void siteTile(String &data)
   www.sendContentAndClear(data);
 
   // UTC Offset
+  if (!pageClientConnected()) return;
   data.concat(FPSTR(html_offsetMsg));
   if (!onStep.command(":GG#", reply)) strcpy(reply, "+00");
   reply[3] = 0;

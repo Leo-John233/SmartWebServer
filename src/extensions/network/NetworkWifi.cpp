@@ -163,6 +163,11 @@ String configJson() {
   json += ",\"lastStationStatus\":" + String(lastStationStatus);
   #ifdef ESP8266
     json += ",\"resetReason\":" + quote(ESP.getResetReason());
+    // 只读诊断用于区分重启、内存紧张与无线关联失败，不修改无线模式或重启热点
+    json += ",\"resetInfo\":" + quote(ESP.getResetInfo());
+    json += ",\"freeHeap\":" + String(ESP.getFreeHeap());
+    json += ",\"wifiMode\":" + String((int)WiFi.getMode());
+    json += ",\"apClients\":" + String(WiFi.softAPgetStationNum());
   #endif
   json += ",\"background\":"; json += backgroundConnecting ? "true" : "false";
   json += ",\"pending\":"; json += pending ? "true" : "false";

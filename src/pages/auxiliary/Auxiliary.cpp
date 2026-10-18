@@ -95,6 +95,7 @@ void handleAux() {
   data.concat(F("<div class='sws-device-layout sws-auxiliary'><div class='sws-aux-grid'>"));
   if (status.auxiliaryFound == SD_TRUE) {
     for (int i = 0; i < 8; i++) {
+      if (!pageClientConnected()) return;
       state.selectFeature(i);
       int purpose = state.featurePurpose(), channel = i + 1;
       if (purpose <= 0) continue;

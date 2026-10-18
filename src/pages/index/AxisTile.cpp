@@ -5,6 +5,7 @@
 #include "../KeyValue.h"
 #include "../Pages.common.h"
 #include "../../lib/tasks/OnTask.h"
+#include "../../extensions/ui/Presentation.h"
 #include <limits.h>
 #include <cmath>
 
@@ -56,6 +57,7 @@ bool axisTile(int axis, String &data)
       www.sendContentAndClear(data);
 
       // get axis parameter count
+      if (!pageClientConnected()) return false;
       snprintf(temp, sizeof(temp), ":GXA%d,0#", axis + 1);
       if (onStep.command(temp, temp1)) {
         int parameterCount = atoi(temp1);
@@ -64,6 +66,7 @@ bool axisTile(int axis, String &data)
         for (int parameterNumber = 1; parameterNumber <= parameterCount; parameterNumber++) {
           // 每条完整查询之间调度保护采样，长页面不能持续饿死反馈任务
           Y;
+          if (!pageClientConnected()) return false;
           snprintf(temp, sizeof(temp), ":GXA%d,%d#", axis + 1, parameterNumber);
           if (onStep.command(temp, temp1)) {
             // 无效回复不能继续使用未初始化或上一项的参数生成页面

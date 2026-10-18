@@ -1,6 +1,7 @@
 #include "Page.h"
 #include "View.h"
 #include "BoardIo.h"
+#include "../ui/Template.h"
 
 static const char *brakeMessage() {
   switch (boardIo.brakeState()) {
@@ -32,20 +33,18 @@ static const char *faultMessage() {
 
 void boardIoTile(String &data) {
   if (!boardIo.activityAvailable() && !boardIo.brakeAvailable()) return;
-  char buffer[1200];
   data.concat(FPSTR(html_board_io_begin));
   if (boardIo.activityAvailable()) {
     const char *enabled = boardIo.policy().activityEnabled() ? "true" : "false";
-    snprintf_P(buffer, sizeof(buffer), html_board_io_activity, enabled, enabled);
-    data.concat(buffer);
+    const char *values[] = {enabled, enabled};
+    appendPageTemplate(data, html_board_io_activity, values, 2);
   }
   if (boardIo.brakeAvailable()) {
     const char *enabled = boardIo.policy().protectionEnabled() ? "true" : "false";
     const bool locked = boardIo.policy().faultReason() != BrakeFault::None;
     const bool released = boardIo.policy().releaseBrake();
-    snprintf_P(buffer, sizeof(buffer), html_board_io_brake, enabled, enabled, brakeMessage(), faultMessage(),
-               locked && released ? "true" : "false");
-    data.concat(buffer);
+    const char *values[] = {enabled, enabled, brakeMessage(), faultMessage(), locked && released ? "true" : "false"};
+    appendPageTemplate(data, html_board_io_brake, values, 5);
   }
   data.concat(F("<p class='sws-io-error' role='alert'></p></section>"));
 }

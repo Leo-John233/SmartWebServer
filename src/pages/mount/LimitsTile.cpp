@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Presentation.h"
 
 // create the related webpage tile
 void limitsTile(String &data)
@@ -13,22 +14,28 @@ void limitsTile(String &data)
 
   data.concat(F("<div class='b1 sws-limits sws-editor'><header class='sws-editor-heading'><h2>" L_LIMITS_SETTINGS "</h2><button class='sws-secondary sws-edit-button' type='button' data-edit-form='sws-limits-form'>" SWS_EDIT_ICON L_EDIT_LIMITS "</button></header>"));
   // get backlash and limits
+  if (!pageClientConnected()) return;
   if (!onStep.command(":%BR#", reply)) strcpy(reply, "0");
   int backlashAxis1 = (int)strtol(&reply[0], NULL, 10);
 
+  if (!pageClientConnected()) return;
   if (!onStep.command(":%BD#", reply)) strcpy(reply, "0");
   int backlashAxis2 = (int)strtol(&reply[0], NULL, 10);
 
-   if (!onStep.command(":Gh#", reply)) strcpy(reply, "0");
+  if (!pageClientConnected()) return;
+  if (!onStep.command(":Gh#", reply)) strcpy(reply, "0");
   int minAlt = (int)strtol(&reply[0], NULL, 10);
 
+  if (!pageClientConnected()) return;
   if (!onStep.command(":Go#", reply)) strcpy(reply, "0");
   int maxAlt = (int)strtol(&reply[0], NULL, 10);
 
+  if (!pageClientConnected()) return;
   if (!onStep.command(":GXE9#", reply)) strcpy(reply, "0");
   int degPastMerE = (int)strtol(&reply[0], NULL, 10);
   degPastMerE = round((degPastMerE * 15.0) / 60.0);
 
+  if (!pageClientConnected()) return;
   if (!onStep.command(":GXEA#", reply)) strcpy(reply, "0");
   int degPastMerW = (int)strtol(&reply[0], NULL, 10);
   degPastMerW = round((degPastMerW * 15.0) / 60.0);

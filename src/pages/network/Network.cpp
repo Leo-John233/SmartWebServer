@@ -76,6 +76,7 @@ void handleNetwork() {
     #if OPERATIONAL_MODE == WIFI
       // 登录与新版设置存储沿用上游，路由器和热点设置保留开发版界面
       renderWifiNetwork(data);
+      if (!pageClientConnected()) return;
     #else
       snprintf_P(temp, sizeof(temp), html_tile_text_beg, "33em", "19em", "Ethernet"); data.concat(temp);
       data.concat(FPSTR(htmL_NETWORK_ETH_BEG));
