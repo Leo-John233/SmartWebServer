@@ -12,6 +12,7 @@
 #include "../Page.h"
 #include "../../extensions/ui/Layouts.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 extern int webTimeout;
 extern int cmdTimeout;
@@ -30,7 +31,6 @@ bool loginRequired = true;
 #endif
 
 void handleNetwork() {
-  char temp[420]  = "";
 
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
@@ -79,26 +79,23 @@ void handleNetwork() {
       renderWifiNetwork(data);
       if (!pageClientConnected()) return;
     #else
-      snprintf_P(temp, sizeof(temp), html_tile_text_beg, "33em", "19em", "Ethernet"); data.concat(temp);
+      appendPageFormat(data, html_tile_text_beg, "33em", "19em", "Ethernet");
       data.concat(FPSTR(htmL_NETWORK_ETH_BEG));
 
-      char temp1[140] = "";
-      for (int i = 0; i < 6; i++) {
-        char temp2[200];
-        snprintf(temp2, sizeof(temp2), "%s%02x:", temp1, ethernetManager.settings.mac[i]);
-        sstrcpy(temp1, temp2);
-      }
-      temp1[strlen(temp1) - 1] = 0;
+      char temp1[18];
+      const auto &mac = ethernetManager.settings.mac;
+      snprintf(temp1, sizeof(temp1), "%02x:%02x:%02x:%02x:%02x:%02x",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-      snprintf_P(temp, sizeof(temp), htmL_NET_MAC,"eth", temp1); data.concat(temp);
+      appendPageFormat(data, htmL_NET_MAC,"eth", temp1);
       www.sendContentAndClear(data);
 
-      snprintf_P(temp, sizeof(temp), htmL_NET_IP, "eth", (int)ethernetManager.settings.ip[0], "eth", (int)ethernetManager.settings.ip[1], "eth", (int)ethernetManager.settings.ip[2], "eth", (int)ethernetManager.settings.ip[3]); data.concat(temp);
-      snprintf_P(temp, sizeof(temp), htmL_NET_GW, "eth", (int)ethernetManager.settings.gw[0], "eth", (int)ethernetManager.settings.gw[1], "eth", (int)ethernetManager.settings.gw[2], "eth", (int)ethernetManager.settings.gw[3]); data.concat(temp);
-      snprintf_P(temp, sizeof(temp), htmL_NET_SN, "eth", (int)ethernetManager.settings.sn[0], "eth", (int)ethernetManager.settings.sn[1], "eth", (int)ethernetManager.settings.sn[2], "eth", (int)ethernetManager.settings.sn[3]); data.concat(temp);
+      appendPageFormat(data, htmL_NET_IP, "eth", (int)ethernetManager.settings.ip[0], "eth", (int)ethernetManager.settings.ip[1], "eth", (int)ethernetManager.settings.ip[2], "eth", (int)ethernetManager.settings.ip[3]);
+      appendPageFormat(data, htmL_NET_GW, "eth", (int)ethernetManager.settings.gw[0], "eth", (int)ethernetManager.settings.gw[1], "eth", (int)ethernetManager.settings.gw[2], "eth", (int)ethernetManager.settings.gw[3]);
+      appendPageFormat(data, htmL_NET_SN, "eth", (int)ethernetManager.settings.sn[0], "eth", (int)ethernetManager.settings.sn[1], "eth", (int)ethernetManager.settings.sn[2], "eth", (int)ethernetManager.settings.sn[3]);
       www.sendContentAndClear(data);
 
-      snprintf_P(temp, sizeof(temp), htmL_NETWORK_ETH_DHCP, ethernetManager.settings.dhcpEnabled ? "checked" : ""); data.concat(temp);
+      appendPageFormat(data, htmL_NETWORK_ETH_DHCP, ethernetManager.settings.dhcpEnabled ? "checked" : "");
 
       data.concat(FPSTR(htmL_NETWORK_ETH_END));
       data.concat(FPSTR(html_tile_end));
@@ -110,11 +107,11 @@ void handleNetwork() {
       OtaSettings otaSettings = {"", false};
       nv().kv().get("OTA_SETTINGS", otaSettings);
       
-      snprintf_P(temp, sizeof(temp), html_tile_text_beg, "33em", "10em", L_NETWORK_OTA_TITLE); data.concat(temp);
+      appendPageFormat(data, html_tile_text_beg, "33em", "10em", L_NETWORK_OTA_TITLE);
       data.concat(FPSTR(html_network_ota_begin));
       www.sendContentAndClear(data);
       #if DISPLAY_RESET_CONTROLS == OFF
-        snprintf_P(temp, sizeof(temp), html_network_ota_mode, otaSettings.enabled ? "checked" : ""); data.concat(temp);
+        appendPageFormat(data, html_network_ota_mode, otaSettings.enabled ? "checked" : "");
       #endif
       data.concat(FPSTR(html_network_ota_action));
       www.sendContentAndClear(data);
@@ -123,8 +120,8 @@ void handleNetwork() {
       www.sendContentAndClear(data);
     #endif
 
-    snprintf_P(temp, sizeof(temp), html_tile_text_beg, "33em", "10em", L_NETWORK_PERFORMANCE); data.concat(temp);
-    snprintf_P(temp, sizeof(temp), htmL_NETWORKSerial, cmdTimeout, webTimeout); data.concat(temp);
+    appendPageFormat(data, html_tile_text_beg, "33em", "10em", L_NETWORK_PERFORMANCE);
+    appendPageFormat(data, htmL_NETWORKSerial, cmdTimeout, webTimeout);
     data.concat(FPSTR(html_tile_end));
     www.sendContentAndClear(data);
 
@@ -134,8 +131,7 @@ void handleNetwork() {
     data.concat(FPSTR(html_layout_network_account_end));
   }
 
-  sstrcpy(temp, "</div></div><span id='sws-page-ready' hidden></span></body></html>");
-  data.concat(temp);
+  data.concat(F("</div></div><span id='sws-page-ready' hidden></span></body></html>"));
 
   www.sendContentAndClear(data);
   www.sendContent("");

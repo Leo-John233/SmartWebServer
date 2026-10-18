@@ -5,6 +5,7 @@
 #include "../Page.h"
 #include "../../extensions/ui/Layouts.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 #if ENCODERS == ON
 
@@ -12,7 +13,6 @@ void processEncodersGet();
 
 void handleEncoders()
 {
-  char temp[400] = "";
 
   state.updateMount(true);
 
@@ -47,8 +47,7 @@ void handleEncoders()
   }
 
   // scripts
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "enc-ajax-get.txt");
-  data.concat(temp);
+  appendPageFormat(data, html_script_ajax_get, "enc-ajax-get.txt");
 
   data.concat(F("<script>var ajaxPage='enc-ajax.txt';</script>\n"));
   www.sendContentAndClear(data);

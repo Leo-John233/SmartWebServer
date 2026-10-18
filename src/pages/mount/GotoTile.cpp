@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 #define KV_GTO_STATUS 0
 #define KV_GTO_I1 1
@@ -37,14 +38,11 @@ const char *goto_key[18] =
 // create the related webpage tile
 void gotoTile(String &data)
 {
-  char temp[640] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_COORD_GOTO);
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "22em", "15em", L_COORD_GOTO);
 
   data.concat(F("<div style='float: right; text-align: right;' id='gto_status' class='c'>"));
-  snprintf(temp, sizeof(temp), "%s", status.inGoto ? L_SLEWING : L_INACTIVE);
-  data.concat(temp);
+  data.concat(status.inGoto ? L_SLEWING : L_INACTIVE);
   data.concat(F("</div><div class='sws-pier-status'>" L_PIER_SIDE " <span id='gto_pier'>"));
   data.concat(state.pierSideStr);
   data.concat(F("</span></div><hr>"));
@@ -52,10 +50,8 @@ void gotoTile(String &data)
   // 坐标信息在左，常用定位操作在右
   data.concat(F("<div class='sws-goto-overview'>"));
   data.concat(FPSTR(html_mountPositionLabels));
-  snprintf_P(temp, sizeof(temp), html_mountPositionAxis1, state.indexAzmStr, state.indexRaStr, state.targetRaStr);
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_mountPositionAxis2, state.indexAltStr, state.indexDecStr, state.targetDecStr);
-  data.concat(temp);
+  appendPageFormat(data, html_mountPositionAxis1, state.indexAzmStr, state.indexRaStr, state.targetRaStr);
+  appendPageFormat(data, html_mountPositionAxis2, state.indexAltStr, state.indexDecStr, state.targetDecStr);
 
   www.sendContentAndClear(data);
 
@@ -70,14 +66,12 @@ void gotoTile(String &data)
   data.concat(F("<hr>"));
   www.sendContentAndClear(data);
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_CONTROLS "...");
 
   // 定位选项采用独立分组，长文字在窄屏自然换行
   data.concat(F("<div class='sws-option-grid'><div class='sws-option-row'>"));
   // Slew speed
-  snprintf_P(temp, sizeof(temp), html_slewSpeed, state.slewSpeedStr);
-  data.concat(temp);
+  appendPageFormat(data, html_slewSpeed, state.slewSpeedStr);
   data.concat(FPSTR(html_slewSpeedSelect));
   data.concat(F("</div>"));
 
@@ -90,15 +84,13 @@ void gotoTile(String &data)
   {
     if (status.mountType == MT_ALTAZM) {
       data.concat(FPSTR(html_gotoMfNow));
-      snprintf_P(temp, sizeof(temp), html_gotoMfPause, L_ORIENTATION_CHANGE_PAUSE);
-      data.concat(temp);
+      appendPageFormat(data, html_gotoMfPause, L_ORIENTATION_CHANGE_PAUSE);
     } else {
       data.concat(FPSTR(html_gotoMfAuto));
       if (status.hasMeridianFlipHomeModes() && (status.mountType == MT_GEM || status.mountType == MT_FORK)) {
         data.concat(FPSTR(html_gotoMfHome));
       } else {
-        snprintf_P(temp, sizeof(temp), html_gotoMfPause, L_MERIDIAN_FLIP_PAUSE);
-        data.concat(temp);
+        appendPageFormat(data, html_gotoMfPause, L_MERIDIAN_FLIP_PAUSE);
       }
     }
 
@@ -111,11 +103,9 @@ void gotoTile(String &data)
     data.concat(F("<br />"));
 
     if (status.mountType == MT_ALTAZM) {
-      snprintf_P(temp, sizeof(temp), html_gotoPreferredPierSide1, L_ORIENTATION_CHANGE_PPS, L_NORMAL, L_ALTERNATE);
-      data.concat(temp);
+      appendPageFormat(data, html_gotoPreferredPierSide1, L_ORIENTATION_CHANGE_PPS, L_NORMAL, L_ALTERNATE);
     } else {
-      snprintf_P(temp, sizeof(temp), html_gotoPreferredPierSide1, L_MERIDIAN_FLIP_PPS, L_EAST, L_WEST);
-      data.concat(temp);
+      appendPageFormat(data, html_gotoPreferredPierSide1, L_MERIDIAN_FLIP_PPS, L_EAST, L_WEST);
     }
     www.sendContentAndClear(data);
 

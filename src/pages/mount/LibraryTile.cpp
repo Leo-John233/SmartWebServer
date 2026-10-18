@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 int currentCatalog = 0;
 char currentCatName[12] = "";
@@ -17,7 +18,6 @@ unsigned long currentCatNameShowTime = 0;
 // create the related webpage tile
 void libraryTile(String &data)
 {
-  char temp[400] = "";
 
   // reset everything on page load
   currentCatalog = 0;
@@ -31,9 +31,8 @@ void libraryTile(String &data)
   // Scripts
   data.concat(FPSTR(html_script_ajax_library));
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_PAGE_LIBRARY);
   // 卡片标记用于响应式布局，不改变设备功能判断
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "22em", "15em", L_PAGE_LIBRARY);
   data.concat(F("<div class='sws-card-marker' data-card='library'></div>"));
   data.concat(F("<div style='float: right; text-align: right;' id='lib_free' class='c'>"));
   data.concat(onStep.commandString(":L?#"));
@@ -56,8 +55,7 @@ void libraryTile(String &data)
 
   data.concat(F("<hr>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_CONTROLS "...");
 
   // 数据框先于操作按钮，上传内容与动作在同一区域
   data.concat(FPSTR(html_libEditCatalog));

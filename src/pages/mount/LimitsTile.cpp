@@ -4,12 +4,12 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 #include "../../extensions/ui/Presentation.h"
 
 // create the related webpage tile
 void limitsTile(String &data)
 {
-  char temp[640] = "";
   char reply[120] = "";
 
   data.concat(F("<div class='b1 sws-limits sws-editor'><header class='sws-editor-heading'><h2>" L_LIMITS_SETTINGS "</h2><button class='sws-secondary sws-edit-button' type='button' data-edit-form='sws-limits-form'>" SWS_EDIT_ICON L_EDIT_LIMITS "</button></header>"));
@@ -42,24 +42,22 @@ void limitsTile(String &data)
 
   data.concat(F("<form id='sws-limits-form' class='sws-settings-editor sws-limits-form' method='get' action='/mount.htm'>"));
   // Overhead and Horizon Limits
-  snprintf_P(temp, sizeof(temp), html_configMaxAlt, maxAlt); data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_configMinAlt, minAlt); data.concat(temp);
+  appendPageFormat(data, html_configMaxAlt, maxAlt);
+  appendPageFormat(data, html_configMinAlt, minAlt);
 
   // Meridian Limits
   if (status.mountType == MT_GEM)
   {
-    snprintf_P(temp, sizeof(temp), html_configPastMerE, degPastMerE);
-    data.concat(temp);
+    appendPageFormat(data, html_configPastMerE, degPastMerE);
 
-    snprintf_P(temp, sizeof(temp), html_configPastMerW, degPastMerW);
-    data.concat(temp);
+    appendPageFormat(data, html_configPastMerW, degPastMerW);
   }
   else
     data.concat(F("<br />\n"));
 
   data.concat(F("<details class='sws-backlash-editor'><summary>" L_BACKLASH "</summary>"));
-  snprintf_P(temp, sizeof(temp), html_configBlAxis1, backlashAxis1); data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_configBlAxis2, backlashAxis2); data.concat(temp);
+  appendPageFormat(data, html_configBlAxis1, backlashAxis1);
+  appendPageFormat(data, html_configBlAxis2, backlashAxis2);
   data.concat(F("</details><div class='sws-editor-footer'><button type='reset' class='sws-secondary'>" L_UI_CANCEL "</button><button type='submit'>" L_SAVE_SETTINGS "</button></div></form></div>"));
   www.sendContentAndClear(data);
 }

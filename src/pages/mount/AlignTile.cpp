@@ -4,27 +4,25 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 // create the related webpage tile
 void alignTile(String &data)
 {
-  char temp[640] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_ALIGN);
   // 卡片标记用于响应式布局，不改变设备功能判断
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "22em", "15em", L_ALIGN);
   data.concat(F("<div class='sws-card-marker' data-card='align'></div>"));
 
   data.concat(F("<div style='float: right; text-align: right;' id='align_progress' class='c'>"));
   data.concat(state.alignProgress);
   data.concat(F("</div><br /><hr>"));
 
-  // 中文天极名称按 UTF-8 字节预留空间，避免越界破坏相邻数据
-  char poleName[32] = L_ZENITH;
-  if (status.mountType != MT_ALTAZM) { if (state.latitude < 0) strcpy(poleName, L_SCP); else strcpy(poleName, L_NCP); }
+  // 天极名称直接引用译文，避免复制到局部数组
+  const char *poleName = L_ZENITH;
+  if (status.mountType != MT_ALTAZM) poleName = state.latitude < 0 ? L_SCP : L_NCP;
 
-  snprintf_P(temp, sizeof(temp), html_alignCorrection, state.alignLrStr, state.alignUdStr, poleName);
-  data.concat(temp);
+  appendPageFormat(data, html_alignCorrection, state.alignLrStr, state.alignUdStr, poleName);
   www.sendContentAndClear(data);
 
   byte sc[3];
@@ -66,9 +64,7 @@ void alignTile(String &data)
   data.concat(FPSTR(html_alignAccept));
   for (int i = 0; i < n; i++)
   {
-    char temp2[240] = "";
-    sprintf_P(temp2, html_alignStart, i + 1, sc[i], sc[i], SIDEREAL_CH);
-    data.concat(temp2);
+    appendPageFormat(data, html_alignStart, i + 1, sc[i], sc[i], SIDEREAL_CH);
   }
   www.sendContentAndClear(data);
 
@@ -76,8 +72,7 @@ void alignTile(String &data)
 
   if (status.mountType != MT_ALTAZM)
   {
-    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-    data.concat(temp);
+    appendPageFormat(data, html_collapsable_beg, L_CONTROLS "...");
 
     data.concat(F("<h3 class='sws-refine-title'>" L_REFINE_POLAR_ALIGN "</h3>"));
     data.concat(FPSTR(html_alignRefine));

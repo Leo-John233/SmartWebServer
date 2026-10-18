@@ -4,18 +4,17 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 const char *getHomeParkStateStr();
 
 // create the related webpage tile
 void homeParkTile(String &data)
 {
-  char temp[640] = "";
   char reply[120] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_HOME_PARK_TITLE);
   // 卡片标记用于响应式布局，不改变设备功能判断
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "22em", "15em", L_HOME_PARK_TITLE);
   data.concat(F("<div class='sws-card-marker' data-card='homepark'></div>"));
   data.concat(F("<div style='float: right; text-align: right;' id='hp_sta' class='c'>"));
   data.concat(getHomeParkStateStr());
@@ -34,8 +33,7 @@ void homeParkTile(String &data)
   data.concat(F("</div></div></div>"));
   data.concat(F("<hr>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_CONTROLS "...");
 
   data.concat(F("<div class='sws-option-grid'>"));
   www.sendContentAndClear(data);
@@ -62,22 +60,18 @@ void homeParkTile(String &data)
           data.concat(F("<div style='margin-top: 0.5em';></div>"));
           www.sendContentAndClear(data);
 
-          snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
-          data.concat(temp);
+          appendPageFormat(data, html_collapsable_beg, L_SETTINGS "...");
 
           #ifdef HOME_SWITCH_DIRECTION_CONTROL
             data.concat(F(L_HOME_REV "<br />"));
             data.concat(html_homeReverse);
           #endif
 
-          snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
-          data.concat(temp);
+          appendPageFormat(data, html_form_begin, "mount.htm");
 
           data.concat(F(L_HOME_OFFSET "<br />"));
-          snprintf_P(temp, sizeof(temp), html_homeOffsetAxis1, homeOffsetAxis1);
-          data.concat(temp);
-          snprintf_P(temp, sizeof(temp), html_homeOffsetAxis2, homeOffsetAxis2);
-          data.concat(temp);
+          appendPageFormat(data, html_homeOffsetAxis1, homeOffsetAxis1);
+          appendPageFormat(data, html_homeOffsetAxis2, homeOffsetAxis2);
           data.concat(F("<button type='submit'>" L_UPLOAD "</button><br />\n"));
 
           data.concat(FPSTR(html_form_end));

@@ -6,30 +6,27 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 int _servo_axis = 0;
 
 // create the related webpage tile
 void servoTile(String &data)
 {
-  char temp[800] = "";
+  char temp[80]; temp[0] = 0;
 
   // javascript to keep servo canvas updated
-  strcpy_P(temp, html_servoScript1);
-  data.concat(temp);
+  data.concat(FPSTR(html_servoScript1));
   www.sendContentAndClear(data);
 
-  strcpy_P(temp, html_servoScript2);
-  data.concat(temp);
+  data.concat(FPSTR(html_servoScript2));
   www.sendContentAndClear(data);
 
-  strcpy_P(temp, html_servoScript3);
-  data.concat(temp);
+  data.concat(FPSTR(html_servoScript3));
   www.sendContentAndClear(data);
 
   // servo monitor tile start
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "28em", "15em", "Servo <span class='c'>Axis</span><span id='svoA' class='c'>?</span> Monitor");
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "28em", "15em", "Servo <span class='c'>Axis</span><span id='svoA' class='c'>?</span> Monitor");
   data.concat(F("<div style='float: right; text-align: right;'>"));
   data.concat(F("Delta <span id='svoD' class='c'>?</span> <span id='units'>?</span>, "));
   data.concat(F("Pwr <span id='svoP' class='c'>?</span>%"));
@@ -37,20 +34,18 @@ void servoTile(String &data)
 
   // allow selecting servo axis
   data.concat(F("<div>"));
-  snprintf_P(temp, sizeof(temp), html_servoSelect, 0, 0, 'x');
-  data.concat(temp);
+  appendPageFormat(data, html_servoSelect, 0, 0, 'x');
   for (int i=1; i<9; i++) {
     char command[10];
     snprintf(command, sizeof(command), ":GXS%d#", i);
     if (onStep.command(command, temp)) {
-      snprintf_P(temp, sizeof(temp), html_servoSelect, i, i, '0'+ i); data.concat(temp);
+      appendPageFormat(data, html_servoSelect, i, i, '0'+ i);
     }
   }
   data.concat(F("</div>"));
 
   // the servo canvas
-  strcpy_P(temp, html_servoGraph);
-  data.concat(temp);
+  data.concat(FPSTR(html_servoGraph));
 
   // servo monitor tile end
   data.concat(FPSTR(html_tile_end));

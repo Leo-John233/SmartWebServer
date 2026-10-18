@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 #include "../../lib/tasks/OnTask.h"
 #include "../../extensions/ui/Presentation.h"
 #include <limits.h>
@@ -15,7 +16,7 @@ bool decodeParameter(char* s, double *value, long *min, long *max, int *type, ch
 bool axisTile(int axis, String &data)
 {
   bool success = false;
-  char temp[320] = ""; // 完整容纳数值边界、长译文标签及新增的 label/span 标记。
+  char temp[160]; temp[0] = 0; // 命令和单项数值使用小缓冲
   char temp1[80] = "";
   double value;
   long min, max;
@@ -35,13 +36,11 @@ bool axisTile(int axis, String &data)
       snprintf(temp1, sizeof(temp1), "Axis%d " L_FOCUSER "%d", axis + 1, axis - 2);
     break;
   }
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "11em", temp1);
-  data.concat(temp);
+  appendPageFormat(data, html_tile_text_beg, "22em", "11em", temp1);
   data.concat(F("<br /><hr>"));
   if (axis == 0) state.updateBrakeDriverStatus();
   if (state.driverStatusStr[axis][0] == '?') strcpy(temp1, L_UNKNOWN); else strcpy(temp1, state.driverStatusStr[axis]);
-  snprintf_P(temp, sizeof(temp), html_indexDriverStatus, axis, temp1);
-  data.concat(temp);
+  appendPageFormat(data, html_indexDriverStatus, axis, temp1);
 
   data.concat(F("<hr>"));
   www.sendContentAndClear(data);
@@ -49,11 +48,9 @@ bool axisTile(int axis, String &data)
   #if DRIVE_CONFIGURATION == ON
     if (status.getVersionMajor() > 10 || (status.getVersionMajor() == 10 && status.getVersionMinor() >= 26)) {
 
-      snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
-      data.concat(temp);
+      appendPageFormat(data, html_collapsable_beg, L_SETTINGS "...");
 
-      snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
-      data.concat(temp);
+      appendPageFormat(data, html_form_begin, "index.htm");
       www.sendContentAndClear(data);
 
       // get axis parameter count
@@ -134,65 +131,54 @@ bool axisTile(int axis, String &data)
             switch (type) {
               // AXP_BOOLEAN, AXP_BOOLEAN_IMMEDIATE
               case 1: case 2: {
-                snprintf_P(temp, sizeof(temp), html_configAxisSelectStart, axis + 1, parameterNumber);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisSelectStart, axis + 1, parameterNumber);
                 int selection[4] = {-1, -2, 0, 1};
                 const char *selectionName[5] = {L_OFF, L_ON, L_OFF, L_ON};
                 for (int i = 0; i < 4; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
-                    snprintf_P(temp, sizeof(temp), valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    data.concat(temp);
+                    appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
                     www.sendContentAndClear(data);
                   }
                 }
-                snprintf_P(temp, sizeof(temp), html_configAxisSelectEnd, name);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisSelectEnd, name);
               } break;
 
               // AXP_INTEGER, AXP_INTEGER_IMMEDIATE
               case 3: case 4:
-                snprintf_P(temp, sizeof(temp), html_configAxisInt, valueInt, axis + 1, parameterNumber, min, max, name);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisInt, valueInt, axis + 1, parameterNumber, min, max, name);
               break;
 
               // AXP_FLOAT, AXP_FLOAT_IMMEDIATE
               case 5: case 6:
-                snprintf_P(temp, sizeof(temp), html_configAxisFloat, valueStr, axis + 1, parameterNumber, min, max, name);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisFloat, valueStr, axis + 1, parameterNumber, min, max, name);
               break;
 
               // AXP_POW2
               case 9: {
-                snprintf_P(temp, sizeof(temp), html_configAxisSelectStart, axis + 1, parameterNumber);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisSelectStart, axis + 1, parameterNumber);
                 int selection[9] = {1, 2, 4, 8, 16, 32, 64, 128, 256};
                 const char *selectionName[9] = {"1", "2", "4", "8", "16", "32", "64", "128", "256"};
                 for (int i = 0; i < 9; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
-                    snprintf_P(temp, sizeof(temp), valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    data.concat(temp);
+                    appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
                     www.sendContentAndClear(data);
                   }
                 }
-                snprintf_P(temp, sizeof(temp), html_configAxisSelectEnd, name);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisSelectEnd, name);
               } break;
 
               // AXP_DECAY
               case 10: {
-                snprintf_P(temp, sizeof(temp), html_configAxisSelectStart, axis + 1, parameterNumber);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisSelectStart, axis + 1, parameterNumber);
                 int selection[5] = {1, 2, 3, 4, 5};
                 const char *selectionName[5] = {L_ADV_DECAY_MIXED, L_ADV_DECAY_FAST, L_ADV_DECAY_SLOW, L_ADV_DECAY_SPREADCYCLE, L_ADV_DECAY_STEALTHCHOP};
                 for (int i = 0; i < 5; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
-                    snprintf_P(temp, sizeof(temp), valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    data.concat(temp);
+                    appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
                     www.sendContentAndClear(data);
                   }
                 }
-                snprintf_P(temp, sizeof(temp), html_configAxisSelectEnd, name);
-                data.concat(temp);
+                appendPageFormat(data, html_configAxisSelectEnd, name);
               } break;
               
             }
@@ -201,8 +187,7 @@ bool axisTile(int axis, String &data)
 
         data.concat(F("<br /><button type='submit'>" L_UPLOAD "</button> "));
         www.sendContentAndClear(data);
-        snprintf_P(temp, sizeof(temp), html_configAxisRevert, axis + 1);
-        data.concat(temp);
+        appendPageFormat(data, html_configAxisRevert, axis + 1);
         www.sendContentAndClear(data);
 
         success = true;

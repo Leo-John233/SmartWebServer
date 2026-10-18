@@ -4,6 +4,7 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 #include "../../extensions/ui/Presentation.h"
 
 int get_temp_month;
@@ -16,7 +17,6 @@ int get_temp_second;
 // create the related webpage tile
 void siteTile(String &data)
 {
-  char temp[640] = "";
   char reply[80] = "";
   bool negativeValue;
 
@@ -34,14 +34,11 @@ void siteTile(String &data)
   negativeValue = reply[0] == '-';
   convert.stripNumericStr(reply);
   if (negativeValue && atoi(reply) == 0) strcpy(reply, "-0");
-  snprintf_P(temp, sizeof(temp), html_ninput_wide, "g1", reply, "-180", "180", "&deg;");
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_ninput, "g2", &reply[5], "0", "60", "'");
-  data.concat(temp);
+  appendPageFormat(data, html_ninput_wide, "g1", reply, "-180", "180", "&deg;");
+  appendPageFormat(data, html_ninput, "g2", &reply[5], "0", "60", "'");
   if (status.getVersionMajor() > 3)
   {
-    snprintf_P(temp, sizeof(temp), html_ninput, "g3", &reply[8], "0", "60", "\"");
-    data.concat(temp);
+    appendPageFormat(data, html_ninput, "g3", &reply[8], "0", "60", "\"");
   }
   data.concat(F("</div></fieldset>"));
   www.sendContentAndClear(data);
@@ -58,14 +55,11 @@ void siteTile(String &data)
   negativeValue = reply[0] == '-';
   convert.stripNumericStr(reply);
   if (negativeValue && atoi(reply) == 0) strcpy(reply, "-0");
-  snprintf_P(temp, sizeof(temp), html_ninput_wide, "t1", reply, "-90", "90", "&deg;");
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_ninput, "t2", &reply[4], "0", "60", "'");
-  data.concat(temp);
+  appendPageFormat(data, html_ninput_wide, "t1", reply, "-90", "90", "&deg;");
+  appendPageFormat(data, html_ninput, "t2", &reply[4], "0", "60", "'");
   if (status.getVersionMajor() > 3)
   {
-    snprintf_P(temp, sizeof(temp), html_ninput, "t3", &reply[7], "0", "60", "\"");
-    data.concat(temp);
+    appendPageFormat(data, html_ninput, "t3", &reply[7], "0", "60", "\"");
   }
   data.concat(F("</div></fieldset>"));
   www.sendContentAndClear(data);
@@ -79,10 +73,8 @@ void siteTile(String &data)
   negativeValue = reply[0] == '-';
   convert.stripNumericStr(reply);
   if (negativeValue && atoi(reply) == 0) strcpy(reply, "-0");
-  snprintf_P(temp, sizeof(temp), html_ninput_wide, "u1", reply, "-14", "12", "h");
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_offsetMin, reply[4] == '0' ? "selected" : "", reply[4] == '3' ? "selected" : "", reply[4] == '4' ? "selected" : "");
-  data.concat(temp);
+  appendPageFormat(data, html_ninput_wide, "u1", reply, "-14", "12", "h");
+  appendPageFormat(data, html_offsetMin, reply[4] == '0' ? "selected" : "", reply[4] == '3' ? "selected" : "", reply[4] == '4' ? "selected" : "");
   data.concat(FPSTR(html_offsetFooterMsg));
   www.sendContentAndClear(data);
 
@@ -92,11 +84,11 @@ void siteTile(String &data)
   data.concat(FPSTR(html_localTime));
   data.concat(FPSTR(html_setDateTime));
   data.concat(F("</div>"));
-  snprintf_P(temp, sizeof(temp), html_date, state.dateStr); data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_time, state.timeStr); data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_sidereal, state.lastStr); data.concat(temp);
+  appendPageFormat(data, html_date, state.dateStr);
+  appendPageFormat(data, html_time, state.timeStr);
+  appendPageFormat(data, html_sidereal, state.lastStr);
   data.concat(FPSTR(html_browserTime));
-  snprintf_P(temp, sizeof(temp), html_site, state.latitudeStr, state.longitudeStr); data.concat(temp);
+  appendPageFormat(data, html_site, state.latitudeStr, state.longitudeStr);
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
 }

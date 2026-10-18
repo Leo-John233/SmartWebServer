@@ -6,13 +6,13 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../extensions/ui/Template.h"
 
 #if ENCODERS == ON
 
 // create the related webpage tile
 void encAxisTile(int axis, String &data)
 {
-  char temp[512] = "";
   char ticksPerDegStr[32] = "";
   float ticksPerDeg = 0;
   bool reverse = false;
@@ -23,31 +23,26 @@ void encAxisTile(int axis, String &data)
     ticksPerDeg = encoders.settings.axis1.ticksPerDeg;
     reverse = encoders.settings.axis1.reverse == ON;
     diffTo = encoders.settings.axis1.diffTo;
-    snprintf_P(temp, sizeof(temp), html_encoderAxisBegin, "Axis1 RA/Azm");
+    appendPageFormat(data, html_encoderAxisBegin, "Axis1 RA/Azm");
   }
   else if (axis == 1)
   {
     ticksPerDeg = encoders.settings.axis2.ticksPerDeg;
     reverse = encoders.settings.axis2.reverse == ON;
     diffTo = encoders.settings.axis2.diffTo;
-    snprintf_P(temp, sizeof(temp), html_encoderAxisBegin, "Axis2 Dec/Alt");
+    appendPageFormat(data, html_encoderAxisBegin, "Axis2 Dec/Alt");
   }
-  data.concat(temp);
   data.concat(F("<div class='sws-encoder-readings'>"));
 
   if (axis == 0)
   {
-    snprintf_P(temp, sizeof(temp), html_encoderAngle, 1, state.encAngleAxis1Str);
-    data.concat(temp);
-    snprintf_P(temp, sizeof(temp), html_mountAngle, 1, state.angleAxis1Str, 1, state.diffAngleAxis1Str);
-    data.concat(temp);
+    appendPageFormat(data, html_encoderAngle, 1, state.encAngleAxis1Str);
+    appendPageFormat(data, html_mountAngle, 1, state.angleAxis1Str, 1, state.diffAngleAxis1Str);
   }
   else if (axis == 1)
   {
-    snprintf_P(temp, sizeof(temp), html_encoderAngle, 2, state.encAngleAxis2Str);
-    data.concat(temp);
-    snprintf_P(temp, sizeof(temp), html_mountAngle, 2, state.angleAxis2Str, 2, state.diffAngleAxis2Str);
-    data.concat(temp);
+    appendPageFormat(data, html_encoderAngle, 2, state.encAngleAxis2Str);
+    appendPageFormat(data, html_mountAngle, 2, state.angleAxis2Str, 2, state.diffAngleAxis2Str);
   }
 
   data.concat(F("</div><dl class='sws-encoder-values'>"));
@@ -55,32 +50,24 @@ void encAxisTile(int axis, String &data)
   dtostrf(ticksPerDeg, 1, 3, ticksPerDegStr);
   convert.stripNumericStr(ticksPerDegStr);
 
-  snprintf_P(temp, sizeof(temp), html_encAxisValueTpd, ticksPerDegStr);
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_encAxisValueReverse, reverse ? L_ON : L_OFF);
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_encAxisValueSyncThreshold, diffTo);
-  data.concat(temp);
+  appendPageFormat(data, html_encAxisValueTpd, ticksPerDegStr);
+  appendPageFormat(data, html_encAxisValueReverse, reverse ? L_ON : L_OFF);
+  appendPageFormat(data, html_encAxisValueSyncThreshold, diffTo);
   www.sendContentAndClear(data);
 
   data.concat(F("</dl>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_SETTINGS "...");
   data.concat(FPSTR(html_encFormBegin));
 
-  snprintf_P(temp, sizeof(temp), html_encAxisTpd, axis + 1, ticksPerDegStr, 1, 100000L);
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_encAxisReverse, axis + 1, reverse ? 1 : 0);
-  data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_encAxisSyncThreshold, axis + 1, diffTo);
-  data.concat(temp);
+  appendPageFormat(data, html_encAxisTpd, axis + 1, ticksPerDegStr, 1, 100000L);
+  appendPageFormat(data, html_encAxisReverse, axis + 1, reverse ? 1 : 0);
+  appendPageFormat(data, html_encAxisSyncThreshold, axis + 1, diffTo);
   www.sendContentAndClear(data);
 
   data.concat(F("<div class='sws-encoder-form-actions'>"));
   data.concat(FPSTR(html_encUpload));
-  snprintf_P(temp, sizeof(temp), html_encAxisRevert, axis + 1);
-  data.concat(temp);
+  appendPageFormat(data, html_encAxisRevert, axis + 1);
 
   data.concat(FPSTR(html_encFormEnd));
   data.concat(FPSTR(html_collapsable_end));

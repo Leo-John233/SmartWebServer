@@ -12,12 +12,16 @@ void processAuxGet();
 
 // 通道名称来自主控配置，作为文本输出并保留完整名称
 void auxiliaryName(String &data, const char *name) {
+  const char *start = name;
   for (const char *c = name; *c; ++c) {
+    if (*c != '&' && *c != '<' && *c != '>') continue;
+    if (c != start) data.concat(start, c - start);
     if (*c == '&') data.concat(F("&amp;"));
     else if (*c == '<') data.concat(F("&lt;"));
     else if (*c == '>') data.concat(F("&gt;"));
-    else { char text[2] = {*c, 0}; data.concat(text); }
+    start = c + 1;
   }
+  if (*start) data.concat(start);
 }
 
 // 每行固定为标签、操作和读数，沿用原有状态节点与请求参数
