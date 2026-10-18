@@ -10,11 +10,31 @@ extern bool loginRequired;
 namespace {
 bool scanning = false, scanAddedSta = false, connecting = false, failed = false;
 bool networkAdopted = false, backgroundConnecting = false, wasConnected = false;
-bool authenticationRejected = false;
+bool authenticationRejected = false, stationAssociated = false, addressTimedOut = false;
+int lastStationStatus = 0;
+uint8_t lastDisconnectReason = 0;
 uint8_t pending = 0; // 1 表示连接路由器，2 表示设置热点，先返回网页响应再切换网络
 unsigned long scheduledAt = 0, scanStarted = 0;
 swsWifi::StationConnection stationConnection;
 swsWifi::StationReconnect stationReconnect;
+#ifdef ESP8266
+WiFiEventHandler stationAssociatedEvent, stationDisconnectedEvent, stationAddressTimeoutEvent;
+// 事件只记录当前连接结果，不在 SDK 回调中切换模式或重连
+void watchStation() {
+  if (stationAssociatedEvent) return;
+  stationAssociatedEvent = WiFi.onStationModeConnected([](const WiFiEventStationModeConnected &) {
+    if (connecting && !stationConnection.preparing()) stationAssociated = true;
+  });
+  stationDisconnectedEvent = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected &event) {
+    if (!connecting || stationConnection.preparing()) return;
+    stationAssociated = false;
+    lastDisconnectReason = event.reason;
+  });
+  stationAddressTimeoutEvent = WiFi.onStationModeDHCPTimeout([]() {
+    if (connecting && !stationConnection.preparing()) addressTimedOut = true;
+  });
+}
+#endif
 // 上游将路由器参数和密码独立保存，提交时一起暂存并在应用时更新
 WifiSettings proposed;
 StationSettings proposedStation;
@@ -98,24 +118,32 @@ void interruptBackgroundConnection() {
 }
 // 发起连接后立即返回，由主循环判断成功或超时
 bool configureStation() {
-  authenticationRejected = wasConnected = false;
+  authenticationRejected = wasConnected = stationAssociated = addressTimedOut = false;
+  lastStationStatus = lastDisconnectReason = 0;
+  #ifdef ESP8266
+    watchStation();
+  #endif
   // 网页连接由本状态机管理，避免 SDK 重连与网页重试同时争用无线接口
   WiFi.setAutoReconnect(false);
   if (!WiFi.enableSTA(true)) return false;
   WiFi.disconnect();
-  // 沿用旧版调用顺序，一次完成配置和连接，后续主循环只读取结果
-  StationSettings &s = connectionStation();
-  IPAddress zero((uint32_t)0);
-  const bool configured = s.dhcpEnabled ? WiFi.config(zero, zero, zero) :
-    WiFi.config(IPAddress(s.ip), IPAddress(s.gw), IPAddress(s.sn), IPAddress(s.gw));
-  if (!configured) return false;
-  WiFi.begin(s.ssid, connectionPassword().password);
-  stationConnection.begin(millis());
+  stationConnection.prepare(millis());
   connecting = true;
   wifiManager.networkBusy = true;
   failed = false;
   notice = L_UI_CONNECTING_NOTE;
   noticeTarget = "sta";
+  return true;
+}
+// 准备完成后只配置并连接一次，等待期间不再次断开或重发
+bool startStation() {
+  StationSettings &s = connectionStation();
+  IPAddress zero((uint32_t)0);
+  const bool configured = s.dhcpEnabled ? WiFi.config(zero, zero, zero) :
+    WiFi.config(IPAddress(s.ip), IPAddress(s.gw), IPAddress(s.sn), IPAddress(s.gw));
+  if (!configured) return false;
+  stationConnection.begin(millis());
+  WiFi.begin(s.ssid, connectionPassword().password);
   return true;
 }
 void connectionFailed(const String &reason) {
@@ -149,6 +177,9 @@ String configJson() {
   json += ",\"ip\":" + quote(ipText(a.ip)) + ",\"gw\":" + quote(ipText(a.gw)) + ",\"sn\":" + quote(ipText(a.sn)) + "}";
   json += ",\"connected\":"; json += WiFi.status() == WL_CONNECTED ? "true" : "false";
   json += ",\"connecting\":"; json += connecting ? "true" : "false";
+  json += ",\"wifiStatus\":" + String(lastStationStatus);
+  json += ",\"disconnectReason\":" + String(lastDisconnectReason);
+  json += ",\"associated\":"; json += stationAssociated ? "true" : "false";
   json += ",\"background\":"; json += backgroundConnecting ? "true" : "false";
   json += ",\"pending\":"; json += pending ? "true" : "false";
   json += ",\"failed\":"; json += failed ? "true" : "false";
@@ -371,7 +402,8 @@ void pollWifiNetwork() {
   }
   if (connecting) {
     const int connection = WiFi.status();
-    if (connection == WL_CONNECT_FAILED) {
+    lastStationStatus = connection;
+    if (!stationConnection.preparing() && connection == WL_CONNECT_FAILED) {
       #ifdef ESP8266
         authenticationRejected = authenticationRejected || wifi_station_get_connect_status() == STATION_WRONG_PASSWORD;
       #endif
@@ -380,9 +412,11 @@ void pollWifiNetwork() {
     // SDK 切换模式和断开连接会消耗时间，不能用本轮开始时的旧时间减去新起点
     const uint32_t connectionNow = millis();
     const swsWifi::StationConnection::Action action = stationConnection.poll(connectionNow,
-      connection == WL_CONNECTED, connection == WL_CONNECT_FAILED || connection == WL_NO_SSID_AVAIL,
-      ipNumber(&ip[0]) != 0 && ipNumber(&mask[0]) != 0);
-    if (action == swsWifi::StationConnection::Success) {
+      connection == WL_CONNECTED, connection == WL_CONNECT_FAILED || connection == WL_NO_SSID_AVAIL || addressTimedOut,
+      ipNumber(&ip[0]) != 0 && ipNumber(&mask[0]) != 0, stationAssociated || connection == WL_CONNECTED);
+    if (action == swsWifi::StationConnection::Start) {
+      if (!startStation()) connectionFailed(L_UI_APPLY_IP_FAILED);
+    } else if (action == swsWifi::StationConnection::Success) {
       AccessPointSettings &a = wifiManager.settings.ap;
       if (apActive() && overlap(a.ip, a.sn, &ip[0], &mask[0])) {
         connectionFailed(L_UI_DHCP_OVERLAP);
@@ -400,7 +434,8 @@ void pollWifiNetwork() {
         }
       }
     } else if (action == swsWifi::StationConnection::Failed) {
-      connectionFailed(L_UI_CONNECT_FAILED);
+      connectionFailed(connection == WL_NO_SSID_AVAIL ? L_UI_WIFI_NOT_FOUND :
+        addressTimedOut || stationAssociated || connection == WL_CONNECTED ? L_UI_WIFI_ADDRESS_TIMEOUT : L_UI_CONNECT_FAILED);
     }
   }
   #if STA_AUTO_RECONNECT == true
