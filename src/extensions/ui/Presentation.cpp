@@ -3,21 +3,24 @@
 #include "../../pages/Pages.common.h"
 #include "../web/Request.h"
 #include "../boardIo/Activity.h"
+#include "../../lib/tasks/OnTask.h"
 
-// Wi-Fi 直接使用内核的 Flash 发送接口，以太网保留原版字符串接口
+// Wi-Fi 交由内核分段发送，避免每个小块重新开始等待超时
 void sendPageResource(const char *content, size_t length) {
-  for (size_t offset = 0; offset < length; offset += 1024) {
-    const size_t count = min(size_t(1024), length - offset);
-    #if OPERATIONAL_MODE == WIFI
-      www.sendContent_P(content + offset, count);
-    #else
+  if (!length) return;
+  #if OPERATIONAL_MODE == WIFI
+    www.sendContent_P(content, length);
+  #else
+    for (size_t offset = 0; offset < length; offset += 1024) {
+      const size_t count = min(size_t(1024), length - offset);
       char part[1025];
       memcpy_P(part, content + offset, count);
       part[count] = 0;
       www.sendContent(part);
-    #endif
-    swsNetworkActivity();
-  }
+    }
+  #endif
+  swsNetworkActivity();
+  Y;
 }
 
 // 只缓存静态外观资源，版本随本文件编译更新，刷入新固件后自动换地址

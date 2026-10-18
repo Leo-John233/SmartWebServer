@@ -83,7 +83,7 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 - 页面检查使用 `coordinate-input`、`network-page`、`page-performance`、`page-header`、`native-first-paint`、`native-icon-paint`、`native-navigation` 和 `locales`
 - 使用 Arduino 工具链编译 ESP8266 与 ESP32，构建目录和临时文件放在忽略的输出目录
 
-资源长度使用编译期数组大小，避免每次发送先扫描 Flash；版本标签直接从 Flash 分段发送，避免为每页临时构建多个动态字符串。Wi-Fi 调用内核 sendContent_P，继续按至多 1024 字节分段输出，不缓存设备数据，也不改动运动指令和保护时序。
+资源长度使用编译期数组大小，避免每次发送先扫描 Flash；Wi-Fi 每个资源直接调用一次内核 sendContent_P，由内核分段，避免外层每 1024 字节重新开始发送等待。返回后使用原有 OnTask 调度，以太网仍使用固定缓冲区。验证使用 resource-send-stall 和 page-performance，不缓存设备数据。
 
 页面沿用原版先输出 head、再输出页头和正文的顺序，公共样式链接放在 head 内，导航和标题由固件直接生成，浏览器首次绘制即可使用最终布局。公共脚本延后执行，不再创建或搬动导航节点，手机的更多菜单使用原生复选框与 CSS，脚本未加载时也可导航。
 
