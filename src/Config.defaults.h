@@ -65,7 +65,7 @@
 #endif                                           // or disable with OFF
 
 #ifndef NETWORK_LOAD_GUARD
-#define NETWORK_LOAD_GUARD              ON
+#define NETWORK_LOAD_GUARD             OFF
 #endif
 
 #ifndef STA_AP_FALLBACK
