@@ -14,32 +14,30 @@
 #define PAGE_NETWORK 6
 
 #include "../extensions/ui/Presentation.h"
+#include "../extensions/ui/Icons.h"
 void pageHeader(int selected);
-
-// 图标引用保留在原生链接中，选中状态由服务端输出
-#define SWS_NAV_ICON(name) "<svg viewBox='0 0 32 32' aria-hidden='true' focusable='false'><use href='/sws-ui.svg?v=" __DATE__ "-" __TIME__ "#" name "'></use></svg>"
 
 const char html_onstep_page_begin[] PROGMEM = "<div class='b'>\n";
 
 const char html_links_idx_begin[] PROGMEM = "<a href='/index.htm' ";
-const char html_links_idx_end[] PROGMEM = ">" SWS_NAV_ICON("index") "<span>" L_CONTROLLER "</span></a>";
+const char html_links_idx_end[] PROGMEM = ">" SWS_NAV_ICON(index) "<span>" L_CONTROLLER "</span></a>";
 
 const char html_links_mnt_begin[] PROGMEM = "<a href='/mount.htm' ";
-const char html_links_mnt_end[] PROGMEM = ">" SWS_NAV_ICON("mount") "<span>" L_PAGE_MOUNT "</span></a>";
+const char html_links_mnt_end[] PROGMEM = ">" SWS_NAV_ICON(mount) "<span>" L_PAGE_MOUNT "</span></a>";
 
 const char html_links_rot_begin[] PROGMEM = "<a href='/rotator.htm' ";
-const char html_links_rot_end[] PROGMEM = ">" SWS_NAV_ICON("rotator") "<span>" L_ROTATOR "</span></a>";
+const char html_links_rot_end[] PROGMEM = ">" SWS_NAV_ICON(rotator) "<span>" L_ROTATOR "</span></a>";
 
 const char html_links_foc_begin[] PROGMEM = "<a href='/focuser.htm' ";
-const char html_links_foc_end[] PROGMEM = ">" SWS_NAV_ICON("focuser") "<span>" L_FOCUSER "</span></a>";
+const char html_links_foc_end[] PROGMEM = ">" SWS_NAV_ICON(focuser) "<span>" L_FOCUSER "</span></a>";
 
 const char html_links_aux_begin[] PROGMEM = "<a href='/auxiliary.htm' ";
-const char html_links_aux_end[] PROGMEM = ">" SWS_NAV_ICON("auxiliary") "<span>" L_PAGE_AUXILIARY "</span></a>";
+const char html_links_aux_end[] PROGMEM = ">" SWS_NAV_ICON(auxiliary) "<span>" L_PAGE_AUXILIARY "</span></a>";
 
 const char html_links_enc_begin[] PROGMEM = "<a href='/enc.htm' ";
-const char html_links_enc_end[] PROGMEM = ">" SWS_NAV_ICON("enc") "<span>" L_PAGE_ENCODERS "</span></a>";
+const char html_links_enc_end[] PROGMEM = ">" SWS_NAV_ICON(enc) "<span>" L_PAGE_ENCODERS "</span></a>";
 
 const char html_links_net_begin[] PROGMEM = "<a href='/net.htm' ";
-const char html_links_net_end[] PROGMEM = ">" SWS_NAV_ICON("net") "<span>" L_PAGE_NETWORK "</span></a>";
+const char html_links_net_end[] PROGMEM = ">" SWS_NAV_ICON(net) "<span>" L_PAGE_NETWORK "</span></a>";
 
 const char html_links_selected[] PROGMEM = " aria-current='page' ";

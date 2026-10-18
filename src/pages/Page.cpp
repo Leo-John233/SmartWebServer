@@ -17,26 +17,28 @@ void pageHeader(int selected) {
   if (selected == PAGE_CONTROLLER) data.concat(FPSTR(html_links_selected));
   data.concat(FPSTR(html_links_idx_end));
 
+  www.sendContentAndClear(data);
   if (status.mountFound == SD_TRUE) {
     data.concat(FPSTR(html_links_mnt_begin));
     if (selected == PAGE_MOUNT) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_mnt_end));
+    www.sendContentAndClear(data);
   }
 
   if (status.onStepFound) {
     data.concat(FPSTR(html_links_net_begin));
     if (selected == PAGE_NETWORK) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_net_end));
+    www.sendContentAndClear(data);
   }
   bool extras = status.rotatorFound == SD_TRUE || status.focuserFound == SD_TRUE || status.auxiliaryFound == SD_TRUE;
   #if ENCODERS == ON
     extras = extras || status.mountFound == SD_TRUE;
   #endif
-  www.sendContentAndClear(data);
   if (extras) {
     data.concat(F("<input type='checkbox' id='sws-nav-toggle' class='sws-nav-toggle' aria-label='" L_UI_MORE "'><label class='sws-nav-more' for='sws-nav-toggle' data-active='"));
     data.concat(selected >= PAGE_ROTATOR && selected <= PAGE_ENCODERS ? F("true") : F("false"));
-    data.concat(F("'>" SWS_NAV_ICON("more") "<span>" L_UI_MORE "</span></label><div class='sws-extra-nav'>"));
+    data.concat(F("'>" SWS_NAV_ICON(more) "<span>" L_UI_MORE "</span></label><div class='sws-extra-nav'>"));
   }
 
   if (status.rotatorFound == SD_TRUE) {
@@ -50,12 +52,14 @@ void pageHeader(int selected) {
     data.concat(FPSTR(html_links_foc_begin));
     if (selected == PAGE_FOCUSER) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_foc_end));
+    www.sendContentAndClear(data);
   }
 
   if (status.auxiliaryFound == SD_TRUE) {
     data.concat(FPSTR(html_links_aux_begin));
     if (selected == PAGE_AUXILIARY) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_aux_end));
+    www.sendContentAndClear(data);
   }
 
   #if ENCODERS == ON
@@ -63,6 +67,7 @@ void pageHeader(int selected) {
       data.concat(FPSTR(html_links_enc_begin));
       if (selected == PAGE_ENCODERS) data.concat(FPSTR(html_links_selected));
       data.concat(FPSTR(html_links_enc_end));
+      www.sendContentAndClear(data);
     }
   #endif
   if (extras) data.concat(F("</div>"));

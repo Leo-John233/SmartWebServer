@@ -57,17 +57,9 @@ static void servePageControls() {
   sendPageResource(html_page_navigation + skip, navigation);
 }
 
-static void servePageIcons() {
-  www.setContentLength(sizeof(html_navigation_icons) - 1);
-  www.sendHeader("Cache-Control", "public, max-age=31536000, immutable");
-  www.send(200, "image/svg+xml", String());
-  sendPageResource(html_navigation_icons, sizeof(html_navigation_icons) - 1);
-}
-
 void registerPageResources() {
   registerPageHandler("/sws-ui.css", servePageStyles);
   registerPageHandler("/sws-ui.js", servePageControls);
-  registerPageHandler("/sws-ui.svg", servePageIcons);
 }
 
 // 帮助和错误页面也复用同一缓存，不缓存设备数据、表单或登录状态

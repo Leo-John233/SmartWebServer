@@ -58,7 +58,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 - ESP8266 直接使用 ESP8266WebServer，ESP32 使用 WebServer；路由仍通过 www.on 登记，参数处理与回复格式沿用原接口
 - 标签通过原生链接直接打开完整页面，表单和浏览器前进后退由浏览器处理，取消 iframe 外壳、view 参数注入与加载队列
 - 页头、标题和选中标签由原版 pageHeader 直接输出，样式先在 head 加载，公共脚本不再重建导航；普通点击立即使用原生链接，只有正在执行运动停止时才等待停止队列完成，最多等待 5 秒，超时留在原页供重试
-- 基础样式、网络样式、公共脚本和图标由浏览器缓存，Wi-Fi 使用 sendContent_P 按至多 1024 字节发送 Flash 内容；以太网保留原生字符串发送方式
+- 基础样式、网络样式和公共脚本由浏览器缓存；图标直接随页头输出，避免外部 SVG 到达后补绘，Wi-Fi 使用 sendContent_P 按至多 1024 字节发送 Flash 内容；以太网保留原生字符串发送方式
 - 网络活动回调只记录时间，不直接执行抱闸停止或 GPIO 更新，由原有 OnTask 任务每 20 ms 处理
 - 本地模拟与源码回归不能替代 ESP-07S 的实际无线及串口耗时验证
 
@@ -96,7 +96,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 
 ## 导航图标
 
-- 导航采用由设备提供的可缓存实心 SVG，桌面侧栏和手机导航共用，无需连接互联网或加载外部字体
+- 导航采用内嵌实心 SVG，桌面侧栏和手机导航共用，直接随原生页头输出，不额外请求图标资源或加载外部字体
 - 赤道仪按参考图重绘为倾斜镜筒、镜口和底座，其他入口分别使用芯片、Wi-Fi、对焦镜头、旋转箭头、开关和编码盘
 - 造型参考 [MDI 望远镜](https://pictogrammers.com/library/mdi/icon/telescope/)、[芯片](https://pictogrammers.com/library/mdi/icon/chip/)、[镜头](https://pictogrammers.com/library/mdi/icon/camera-iris/)与[调节器](https://pictogrammers.com/library/mdi/icon/tune/)，路径在项目内重绘
 
