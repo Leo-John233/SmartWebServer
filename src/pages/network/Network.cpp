@@ -47,6 +47,7 @@ void handleNetwork() {
     if (!www.client().connected()) return;
   #endif
   String data;
+  data.reserve(1024);
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageHeader(PAGE_NETWORK);

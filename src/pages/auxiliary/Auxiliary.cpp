@@ -66,6 +66,7 @@ void handleAux() {
     if (!www.client().connected()) return;
   #endif
   String data;
+  data.reserve(1024);
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageHeader(PAGE_AUXILIARY);
@@ -190,6 +191,7 @@ void auxAjaxGet() {
 
 void auxAjax() {
   String data="";
+  data.reserve(1024);
   char temp[120]="";
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);

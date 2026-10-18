@@ -30,6 +30,7 @@ void handleMount()
     if (!www.client().connected()) return;
   #endif
   String data;
+  data.reserve(1024);
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   pageHeader(PAGE_MOUNT);
@@ -119,6 +120,7 @@ void mountAjaxGet()
 void mountAjax()
 {
   String data = "";
+  data.reserve(1024);
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");

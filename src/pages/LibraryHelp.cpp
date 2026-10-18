@@ -9,6 +9,7 @@ void handleLibraryHelp() {
   www.send(200, "text/html", String());
   pageHead();
   String data;
+  data.reserve(1024);
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
   data.concat(F("<main id='sws-nav-ready' class='sws-document'><header><h1>" L_PAGE_LIBRARY "</h1><a href='/mount.htm' target='_top'>" L_PAGE_MOUNT "</a></header><section>"));
