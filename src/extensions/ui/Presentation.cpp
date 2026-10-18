@@ -9,6 +9,10 @@ void sendPageResource(const char *content, size_t length) {
   char part[1025];
   String data;
   for (size_t offset = 0; offset < length; offset += 1024) {
+    #if OPERATIONAL_MODE == WIFI
+      // 快速切页会取消旧请求；停止为已经断开的客户端复制和发送模板。
+      if (!www.client().connected()) return;
+    #endif
     const size_t count = min(size_t(1024), length - offset);
     memcpy_P(part, content + offset, count);
     part[count] = 0;
@@ -20,13 +24,17 @@ void sendPageResource(const char *content, size_t length) {
 }
 
 void pageAppearance() {
-  sendPageResource(html_network_css, sizeof(html_network_css) - 1);
+  // 与原页面自己的脚本一样，只内联当前页面需要的增强内容。
+  const String page = www.uri();
+  const bool mount = page == "/mount.htm";
+  const bool controller = page == "/" || page == "/index.htm";
+  if (page == "/net.htm") sendPageResource(html_network_css, sizeof(html_network_css) - 1);
   sendPageResource(html_shared_styles, sizeof(html_shared_styles) - 1);
-  sendPageResource(html_editor_styles, sizeof(html_editor_styles) - 1);
-  sendPageResource(html_board_io_styles, sizeof(html_board_io_styles) - 1);
+  if (mount) sendPageResource(html_editor_styles, sizeof(html_editor_styles) - 1);
+  if (controller) sendPageResource(html_board_io_styles, sizeof(html_board_io_styles) - 1);
   sendPageResource(html_page_controls, sizeof(html_page_controls) - 1);
-  sendPageResource(html_settings_editors, sizeof(html_settings_editors) - 1);
-  sendPageResource(html_board_io_script, sizeof(html_board_io_script) - 1);
+  if (mount) sendPageResource(html_settings_editors, sizeof(html_settings_editors) - 1);
+  if (controller) sendPageResource(html_board_io_script, sizeof(html_board_io_script) - 1);
   sendPageResource(html_page_navigation, sizeof(html_page_navigation) - 1);
 }
 

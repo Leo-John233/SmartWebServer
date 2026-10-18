@@ -8,13 +8,15 @@ const char html_head_begin[] PROGMEM = "<!DOCTYPE HTML>\n"
                                   "<html class='sws-page'>\n"
                                   "<head>\n"
                                   "<meta charset='utf-8'/>\n"
+                                  "<meta name='color-scheme' content='dark'>\n"
+                                  "<link rel='expect' blocking='render' href='#sws-page-ready'>\n"
                                   "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n"
                                   "<style>html,body{background:" COLOR_BODY_BACKGROUND ";color:" SWS_COLOR_TEXT ";color-scheme:dark}</style>\n";
 const char html_headerPec[] PROGMEM = "<meta http-equiv=\"refresh\" content=\"5; URL=/pec.htm\">\n";
 const char html_headerIdx[] PROGMEM = "<meta http-equiv=\"refresh\" content=\"5; URL=/index.htm\">\n";
 const char html_head_end[] PROGMEM = "</head>\n";
 const char html_body_begin[] PROGMEM = "<body bgcolor='" COLOR_BODY_BACKGROUND "'>\n";
-const char html_page_and_body_end[] PROGMEM = "</div></body></html>\n";
+const char html_page_and_body_end[] PROGMEM = "</div><span id='sws-page-ready' hidden></span></body></html>\n";
 
 const char html_main_css_begin[] PROGMEM = 
 "<STYLE>";

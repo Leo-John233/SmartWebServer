@@ -43,6 +43,9 @@ void handleNetwork() {
 
   // send a standard http response header
   pageHead();
+  #if OPERATIONAL_MODE == WIFI
+    if (!www.client().connected()) return;
+  #endif
   String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
@@ -129,7 +132,7 @@ void handleNetwork() {
     data.concat(FPSTR(html_layout_network_account_end));
   }
 
-  sstrcpy(temp, "</div></div></body></html>");
+  sstrcpy(temp, "</div></div><span id='sws-page-ready' hidden></span></body></html>");
   data.concat(temp);
 
   www.sendContentAndClear(data);

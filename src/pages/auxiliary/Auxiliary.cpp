@@ -62,6 +62,9 @@ void handleAux() {
   www.send(200, "text/html", String());
 
   pageHead();
+  #if OPERATIONAL_MODE == WIFI
+    if (!www.client().connected()) return;
+  #endif
   String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);

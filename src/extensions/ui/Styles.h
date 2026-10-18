@@ -4,6 +4,13 @@
 // 只负责排版与外观，不读取或发送设备命令
 const char html_shared_styles[] PROGMEM = R"UI(
 <style>
+/* 原生整页导航：浏览器保留旧画面，正文就绪后直接替换，不做淡入闪动。
+   不支持跨文档过渡的浏览器忽略这些规则，继续普通链接导航。 */
+@view-transition { navigation: auto; }
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; }
+::view-transition-new(root) { mix-blend-mode: normal; }
 :root {
   color-scheme: dark;
   --bg: )UI" COLOR_BODY_BACKGROUND R"UI(;

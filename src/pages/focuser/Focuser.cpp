@@ -27,6 +27,9 @@ void handleFocuser() {
 
   // send a standard http response header
   pageHead();
+  #if OPERATIONAL_MODE == WIFI
+    if (!www.client().connected()) return;
+  #endif
   String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);

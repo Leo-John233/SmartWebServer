@@ -26,6 +26,9 @@ void handleRoot()
   www.send(200, "text/html", String());
 
   pageHead();
+  #if OPERATIONAL_MODE == WIFI
+    if (!www.client().connected()) return;
+  #endif
   String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);
@@ -62,6 +65,10 @@ void handleRoot()
   if (status.getVersionMajor() >= 10) numAxes = 9;
   for (int axis = 0; axis < numAxes; axis++)
   {
+    #if OPERATIONAL_MODE == WIFI
+      // 只取消已断开页面的只读查询，不中断已经开始的串口事务。
+      if (!www.client().connected()) return;
+    #endif
     if (axisTile(axis, data)) numShown++;
   }
 

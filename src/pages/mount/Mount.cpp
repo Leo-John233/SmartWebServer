@@ -26,6 +26,9 @@ void handleMount()
   www.send(200, "text/html", String());
 
   pageHead(true);
+  #if OPERATIONAL_MODE == WIFI
+    if (!www.client().connected()) return;
+  #endif
   String data;
   data.concat(FPSTR(html_body_begin));
   www.sendContentAndClear(data);

@@ -15,8 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     if (leaving) { event.preventDefault(); return; }
     const stops = (window.swsMotionStops || []).map(stop => stop()).filter(Boolean);
-    // 没有待完成的运动停止时直接使用原生链接，不加入切页队列或固定等待
-    if (!stops.length) return;
+    // 普通跳转等待新页面提交期间旧文档仍存活，先取消只读轮询，释放连接。
+    // 不取消命令，也不接管链接；历史返回由原 pageshow 恢复轮询。
+    if (!stops.length) {
+      if (window.swsPausePolling) swsPausePolling();
+      return;
+    }
     event.preventDefault();
     leaving = true;
     if (window.swsPausePolling) swsPausePolling();
