@@ -4,6 +4,7 @@
 #include "NetworkBudget.h"
 
 // 兼容同步 WebServer 的独立传输适配层，不改变页面与设备命令的处理逻辑
+// 防护关闭时全部沿用内核，包括发送等待和短写处理
 class SwsWebServer : public ESP8266WebServer {
   public:
     explicit SwsWebServer(int port) : ESP8266WebServer(port) {}
@@ -45,8 +46,6 @@ class SwsWebServer : public ESP8266WebServer {
         if (_currentStatus == HC_WAIT_CLOSE) releaseClient();
         handling = false;
       }
-    #endif
-
   protected:
     size_t _currentClientWrite(const char* data, size_t length) override {
       if (!prepareWrite()) return 0;
@@ -63,32 +62,29 @@ class SwsWebServer : public ESP8266WebServer {
 
   private:
     bool prepareWrite() {
-      #if NETWORK_LOAD_GUARD == ON
-        if (!_currentClient.connected()) return false;
-        // 生成页面期间新连接也会占用堆，每次写入前继续为 Wi-Fi 保留内存
-        if (ESP.getFreeHeap() < swsNetwork::minimumHeap) {
-          _currentClient.stop();
-          return false;
-        }
-        if (!responseStarted) { responseStarted = true; responseStart = millis(); }
-        if (swsNetwork::elapsed(millis(), responseStart, swsNetwork::responseLimitMs)) {
-          _currentClient.stop();
-          return false;
-        }
-      #endif
+      if (!_currentClient.connected()) return false;
+      // 生成页面期间新连接也会占用堆，每次写入前继续为 Wi-Fi 保留内存
+      if (ESP.getFreeHeap() < swsNetwork::minimumHeap) {
+        _currentClient.stop();
+        return false;
+      }
+      if (!responseStarted) { responseStarted = true; responseStart = millis(); }
+      if (swsNetwork::elapsed(millis(), responseStart, swsNetwork::responseLimitMs)) {
+        _currentClient.stop();
+        return false;
+      }
       _currentClient.setTimeout(swsNetwork::writeWaitMs);
       return true;
     }
-    #if NETWORK_LOAD_GUARD == ON
-      bool handling = false;
-      bool responseStarted = false;
-      uint32_t responseStart = 0;
+    bool handling = false;
+    bool responseStarted = false;
+    uint32_t responseStart = 0;
 
-      void releaseClient() {
-        _currentClient.stop();
-        _currentClient = WiFiClient();
-        _currentStatus = HC_NONE;
-        _currentUpload.reset();
-      }
+    void releaseClient() {
+      _currentClient.stop();
+      _currentClient = WiFiClient();
+      _currentStatus = HC_NONE;
+      _currentUpload.reset();
+    }
     #endif
 };

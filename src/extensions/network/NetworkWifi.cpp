@@ -3,6 +3,7 @@
 #if OPERATIONAL_MODE == WIFI
 #include "../../lib/wifi/WifiManager.h"
 #include "StationConnection.h"
+#include "StationIdentity.h"
 #include "StationReconnect.h"
 
 extern bool loginRequired;
@@ -111,6 +112,7 @@ bool configureStation() {
   const bool configured = s.dhcpEnabled ? WiFi.config(zero, zero, zero) :
     WiFi.config(IPAddress(s.ip), IPAddress(s.gw), IPAddress(s.sn), IPAddress(s.gw));
   if (!configured) return false;
+  swsWifi::applyStationHostname();
   WiFi.begin(s.ssid, connectionPassword().password);
   stationConnection.begin(millis());
   connecting = true;

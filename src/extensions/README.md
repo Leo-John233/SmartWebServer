@@ -30,8 +30,11 @@ Arduino 会自动编译 `src/` 下的 `.cpp`，扩展实现只保留一份，不
 | `libApp/status/State.h`、`State.cpp`、`StateController.cpp` | 保护反馈更新声明及调用，驱动文本格式化入口 |
 | `libApp/cmd/Cmd.cpp`、Wi-Fi 与以太网命令服务 | 网络活动通知，协议帧和回复语义保持原有约定 |
 | `lib/wifi/webServer/WebServer.*` | ESP8266 使用 `SwsWebServer`，ESP32 继续使用内核提供的服务 |
+| `lib/wifi/WifiManager.cpp` | STA 开启后调用 `network/StationIdentity.h` 应用 DHCP 主机名，网页配网复用同一方法 |
 
 相对于 `src/` 的路径见上表。本地保留 `tools/upstream-audit.cjs` 时，可用它生成差异清单；该工具不随固件仓库跟踪，实际合并按上表审查即可。
+
+`NETWORK_LOAD_GUARD` 关闭时，`SwsWebServer` 仅调用内核构造函数，不覆盖请求处理或传输方法；内存限制、发送限时及短写关闭仅在显式启用防护时编译。
 
 以下修改仍属于原模块，不能只靠搬迁目录消除合并工作：
 

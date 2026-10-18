@@ -5,6 +5,7 @@
 
 #include "../tasks/OnTask.h"
 #include "../nv/Nv.h"
+#include "../../extensions/network/StationIdentity.h"
 
 #if STA_AUTO_RECONNECT == true
   void reconnectStationWrapper() { wifiManager.reconnectStation(); }
@@ -28,9 +29,11 @@ bool WifiManager::init() {
     char name[32] = HOST_NAME;
     strtohostname(name);
 
-    #if MDNS_SERVER == ON
-      WiFi.hostname(name);
-    #endif
+    // DHCP 名称不依赖 mDNS，先开启 STA 再设置名称
+    if (settings.stationEnabled) {
+      WiFi.enableSTA(true);
+      swsWifi::applyStationHostname();
+    }
 
     if (settings.accessPointEnabled == false && settings.stationEnabled == false) {
       VF("MSG: WiFi, re-enabling access point mode to prevent lock-out!");
