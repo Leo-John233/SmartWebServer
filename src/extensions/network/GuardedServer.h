@@ -24,7 +24,8 @@ class SwsWebServer : public ESP8266WebServer {
           _currentStatus = HC_WAIT_READ;
           _statusChange = millis();
           responseStarted = false;
-          _currentClient.setNoDelay(true);
+          // 网页有大量短分段，合并小包以减少快速切页时的 TCP 队列占用
+          _currentClient.setNoDelay(false);
         }
 
         // 在解析请求及生成页面前退让，避免并发连接把剩余堆耗尽
@@ -63,6 +64,12 @@ class SwsWebServer : public ESP8266WebServer {
   private:
     bool prepareWrite() {
       #if NETWORK_LOAD_GUARD == ON
+        if (!_currentClient.connected()) return false;
+        // 生成页面期间新连接也会占用堆，每次写入前继续为 Wi-Fi 保留内存
+        if (ESP.getFreeHeap() < swsNetwork::minimumHeap) {
+          _currentClient.stop();
+          return false;
+        }
         if (!responseStarted) { responseStarted = true; responseStart = millis(); }
         if (swsNetwork::elapsed(millis(), responseStart, swsNetwork::responseLimitMs)) {
           _currentClient.stop();

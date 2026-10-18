@@ -14,11 +14,20 @@ const char html_shell_script[] PROGMEM = R"UI(
     hint = document.getElementById('sws-load'),
     links = [...document.querySelectorAll('.t a')];
   let sequence = 0,
-    timer, requestedPath = '', waiting = false, timedOut = false;
+    timer, pendingNavigation = null, requestedPath = '', waiting = false, timedOut = false;
+  // 加载期间只保留最后选择，旧页面传输完成后再加载，避免反复取消占用连接
+  function continueNavigation() {
+    if (!pendingNavigation) return false;
+    const next = pendingNavigation;
+    pendingNavigation = null;
+    queueMicrotask(() => swsNavigate(next.path, next.push));
+    return true;
+  }
   function recover(ticket) {
     if(ticket !== sequence)return;
     clearTimeout(timer);
     waiting=false;
+    if (continueNavigation()) return;
     hint.textContent = )UI" SWS_JS_TEXT(L_UI_SLOW_LOAD) R"UI(;
     frame.style.pointerEvents = '';
     try {
@@ -117,6 +126,7 @@ const char html_shell_script[] PROGMEM = R"UI(
     path = normalize(path);
     if (!links.some((a) => a.pathname === path)) return;
     closeMore();
+    if (waiting) { pendingNavigation = {path, push}; return; }
     more.dataset.active = String(!['/index.htm', '/mount.htm', '/net.htm'].includes(path));
     const ticket = ++sequence;
     waiting=true; timedOut=false;
@@ -172,6 +182,8 @@ const char html_shell_script[] PROGMEM = R"UI(
     } catch(e) { recover(sequence); return; }
     clearTimeout(timer);
     waiting=false;
+    if (pendingNavigation?.path === requestedPath) pendingNavigation = null;
+    if (continueNavigation()) return;
     hint.textContent = '';
     frame.style.pointerEvents = '';
     frame.style.visibility = '';
