@@ -248,6 +248,19 @@ void WifiManager::readSettings() {
   settingsReady = true;
 }
 
+bool WifiManager::saveStationEnabled(bool enabled) {
+  if (!settingsReady) return false;
+  #ifdef NV_WIFI_SETTINGS
+    WifiSettings saved = settings;
+    saved.stationEnabled = enabled;
+    if (nv().kv().put("WIFI_SETTINGS", saved) != KvPartition::Status::Ok) return false;
+    // 连接前完成提交，不能把开关只留在延迟写缓存中
+    return nv().active().commit() == NvDevice::IoStatus::Ok;
+  #else
+    return true;
+  #endif
+}
+
 void WifiManager::writeSettings() {
   if (!settingsReady) return;
 

@@ -93,6 +93,9 @@ class WifiManager {
     // write settings to NV
     void writeSettings();
 
+    // 只保存 STA 开关，不写入尚未验证的网络参数和密码
+    bool saveStationEnabled(bool enabled);
+
     // currently selected station
     StationSettings *sta;
 
