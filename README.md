@@ -391,3 +391,5 @@ brake-task-scheduling.cjs 进一步提取当前 OnTask 的 Tasks::yield 和 Task
 验证 node tests/network-wifi-sdk-history.cjs 对照 cd5d42be、7bfba6ed 和当前代码，覆盖暂时失败后的 SDK 恢复权限；node tests/wifi-settings-reboot.cjs 使用真实 KV16/KV32 和延迟提交层，覆盖立即重启、保存失败及旧密码保留。目标路由器连接与 ESP-07S 重启现象仍需实机确认。
 
 网络页面登录后访问 `/net-wifi?action=status`，可读取 `uptimeMs`（运行毫秒数）、ESP8266 的 `resetReason`（最近一次启动原因）和 `lastStationStatus`（最近一次连接轮询的 SDK 状态，ESP8266 中 0 空闲、1 连接中、2 密码错误、3 未找到网络、4 连接失败、5 已获取地址）。失败清理后仍保留最后状态，便于区分固件重启与无线掉线；接口不返回密码，也不向 OnStep 串口输出诊断信息。
+
+页面请求模块在六个原生处理入口先设置原串口超时与清理接收，再仅在 args 大于零时处理表单参数，最后更新状态生成页面。纯切页省去参数查找，提交后的首屏使用更新后的状态。Focuser 补偿卡片复用入口状态，不重复查询；Servo 和 StallGuard 仅在可见文档重绘，500 ms 周期不变。删除未使用的 goto_key 数组，串口命令、BoardIo 和 AJAX 接口保持原样。

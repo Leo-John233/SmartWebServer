@@ -33,7 +33,7 @@ void focuserBacklashTcfTile(String &data)
   snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS);
   data.concat(temp);
 
-  state.updateFocuser();
+
 
   if (status.focuserPresent[state.focuserSelected - 1]) {
 

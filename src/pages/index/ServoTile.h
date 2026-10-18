@@ -31,6 +31,7 @@ const char html_servoScript1[] PROGMEM =
   "var svy=0;\n"
 
   "function updateServo() {\n"
+    "if(document.hidden)return;"
     "var canvas=document.getElementById('servoCanvas');"
     "var ctx=canvas.getContext('2d');\n"
 

@@ -14,12 +14,12 @@ void handleRoot()
 {
   char temp[240] = "";
 
-  state.updateController(true);
-
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
 
-  processIndexGet();
+  // 仅处理已提交参数，再读取最新状态供首屏显示
+  if (www.args() > 0) processIndexGet();
+  state.updateController(true);
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");

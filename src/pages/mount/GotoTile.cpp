@@ -25,16 +25,6 @@
 #define KV_GTO_RATE_S 16
 #define KV_GTO_RATE_VS 17
 
-const char *goto_key[18] =
-{
-  "gto_rate",
-  "gto_rate_vf",
-  "gto_rate_f",
-  "gto_rate_n",
-  "gto_rate_s",
-  "gto_rate_vs"
-};
-
 // create the related webpage tile
 void gotoTile(String &data)
 {

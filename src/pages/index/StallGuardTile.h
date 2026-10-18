@@ -31,6 +31,7 @@ const char html_stallGuardScript_1[] PROGMEM =
   "var sglastTrip=-1;\n"
 
   "function updateStallGuard(){"
+    "if(document.hidden)return;"
     "var canvas=document.getElementById('stallGuardCanvas');"
     "var ctx=canvas.getContext('2d');"
     "var sgText=document.getElementById('sgV').innerText;"

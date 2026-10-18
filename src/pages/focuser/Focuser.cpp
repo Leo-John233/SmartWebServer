@@ -13,13 +13,13 @@ void processFocuserGet();
 void handleFocuser() {
   char temp[240] = "";
 
-  state.updateFocuser(true);
-  if (status.focuserFound != SD_TRUE) { handleNotFound(); return; }
-
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
 
-  processFocuserGet();
+  // 仅处理已提交参数，再读取最新状态供首屏显示
+  if (www.args() > 0) processFocuserGet();
+  state.updateFocuser(true);
+  if (status.focuserFound != SD_TRUE) { handleNotFound(); return; }
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-cache");
