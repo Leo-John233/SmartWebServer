@@ -21,7 +21,7 @@ Arduino 会自动编译 `src/` 下的 `.cpp`，扩展实现只保留一份，不
 
 | 原版位置 | 需要保留的接入内容 |
 | --- | --- |
-| `SmartWebServer.ino` | `boardIo.initPins()`、`boardIo.begin()`、配网轮询、扩展路由及资源登记，保持原有启动顺序 |
+| `SmartWebServer.ino` | `boardIo.initPins()`、`boardIo.begin()`、配网轮询和扩展路由，保持原有启动顺序 |
 | `pages/Pages.h`、`pages/Page.h` | 扩展入口声明及公共资源接口 |
 | `pages/htmlHeaders.h`、页面处理函数 | 公共配色和文字宏，`pageHead()` 与分区模板 |
 | `pages/Page.*` | 沿用原版 `pageHeader()` 及能力条件，直接输出完整导航、当前标签和标题 |
@@ -36,6 +36,8 @@ Arduino 会自动编译 `src/` 下的 `.cpp`，扩展实现只保留一份，不
 相对于 `src/` 的路径见上表。本地保留 `tools/upstream-audit.cjs` 时，可用它生成差异清单；该工具不随固件仓库跟踪，实际合并按上表审查即可。
 
 实验性网络防护、NETWORK_LOAD_GUARD 配置和自定义 WebServer 子类已删除。HTTP 请求调度、发送等待及 TCP 命令处理均沿用原版实现。
+
+网页按原版在同一个 HTML 响应中输出样式、脚本和正文，不登记独立 CSS/JS 资源。较大的界面模板通过有界 String 分段复制，仍使用原有 sendContentAndClear；完整发送调用之间让出 OnTask 调度，避免新增抱闸采样被长页面饿死。
 
 以下修改仍属于原模块，不能只靠搬迁目录消除合并工作：
 

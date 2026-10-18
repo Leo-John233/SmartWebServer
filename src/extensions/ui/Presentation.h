@@ -6,4 +6,3 @@
 void pageAppearance();
 void pageHead(bool preventSelection = false);
 void sendPageResource(const char *content, size_t length);
-void registerPageResources();

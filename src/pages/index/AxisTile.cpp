@@ -4,6 +4,9 @@
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
+#include "../../lib/tasks/OnTask.h"
+#include <limits.h>
+#include <cmath>
 
 bool decodeParameter(char* s, double *value, long *min, long *max, int *type, char *name);
 
@@ -59,9 +62,14 @@ bool axisTile(int axis, String &data)
 
         // show controls
         for (int parameterNumber = 1; parameterNumber <= parameterCount; parameterNumber++) {
+          // 每条完整查询之间调度保护采样，长页面不能持续饿死反馈任务
+          Y;
           snprintf(temp, sizeof(temp), ":GXA%d,%d#", axis + 1, parameterNumber);
           if (onStep.command(temp, temp1)) {
-            decodeParameter(temp1, &value, &min, &max, &type, name);
+            // 无效回复不能继续使用未初始化或上一项的参数生成页面
+            if (!decodeParameter(temp1, &value, &min, &max, &type, name)) continue;
+            // 非有限值或超出整数转换范围的反馈不能进入控件格式化
+            if (!std::isfinite(value) || value < LONG_MIN || value > LONG_MAX) continue;
 
             // name lookup, for locale specific strings
             if (name[0] == '$') {
@@ -116,7 +124,8 @@ bool axisTile(int axis, String &data)
 
             long valueInt = lround(value);
             char valueStr[24];
-            dtostrf(value, 1, 3, valueStr);
+            const int valueLength = snprintf(valueStr, sizeof(valueStr), "%.3f", value);
+            if (valueLength < 0 || valueLength >= (int)sizeof(valueStr)) continue;
             convert.stripNumericStr(valueStr, true);
 
             switch (type) {
@@ -273,6 +282,8 @@ void axisTileGet()
     for (int parameterNumber = 1; parameterNumber <= parameterCount; parameterNumber++) {
       snprintf(argStr, sizeof(argStr), "a%dp%dvalue", axisNumber, parameterNumber);
       String parameterValue = www.arg(argStr);
+      // 页面跳过异常参数后，保存其余设置不能向主控发送空值
+      if (parameterValue.equals(EmptyStr)) continue;
       snprintf(command, sizeof(command), ":SXA%d,%d,%s#", axisNumber, parameterNumber, parameterValue.c_str());
       onStep.commandBool(command);
     }

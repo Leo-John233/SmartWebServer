@@ -287,7 +287,6 @@ Again:
   // ----------------------------------------------------------------------------------------
 
   VLF("MSG: Set webpage handlers"); // 设置网页路由处理程序
-  registerPageResources();
   registerPageHandler("/index.htm", handleRoot);
   registerPageHandler("/index-ajax-get.txt", indexAjaxGet);
   registerPageHandler("/index.txt", indexAjax);

@@ -147,5 +147,7 @@ BrakeState BoardIoPolicy::brakeState(bool connected, uint32_t now) const {
 }
 
 bool BoardIoPolicy::feedbackDue(uint32_t now) const {
-  return !feedbackSeen_ || uint32_t(now - feedbackAt_) >= PollIntervalMs;
+  // 无效回复后按一秒探测，避免每秒四次串口超时持续挤占网页处理
+  const uint32_t interval = feedbackSeen_ && !feedback_.driverValid ? FeedbackStaleMs : PollIntervalMs;
+  return !feedbackSeen_ || uint32_t(now - feedbackAt_) >= interval;
 }

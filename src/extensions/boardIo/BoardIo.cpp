@@ -40,8 +40,8 @@ void BoardIo::begin() {
   #endif
   // 无法建立输出监控任务时维持初始化电平；启用保护时仍保持启动抱闸
   if (!tasks.add(20, 0, true, 1, pollBoardOutputs, "BoardIO")) { startFailed_ = true; return; }
-  // 低于命令通道及网页，缺失驱动的查询不能抢占用户操作
-  if (brakeAvailable() && !tasks.add(BoardIoPolicy::PollIntervalMs, 0, true, 4, pollBoardDriver, "RaBrake")) {
+  // 采样与超时检查同级，网页让出调度时不能只运行检查而饿死采样
+  if (brakeAvailable() && !tasks.add(BoardIoPolicy::PollIntervalMs, 0, true, 1, pollBoardDriver, "RaBrake")) {
     startFailed_ = true;
     return;
   }
