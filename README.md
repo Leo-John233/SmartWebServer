@@ -8,7 +8,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 - 配置文件：`Config.h` 和 `Extended.config.h`
 - 网页首页：设备地址 `/`
 - 直接用 Arduino IDE 打开本目录的工程即可编译，不需要 Node 或 Vue
-- 使用 Arduino CLI：`arduino-cli compile --warnings all --fqbn esp8266:esp8266:nodemcuv2 .`（ESP8266），或 `arduino-cli compile --warnings all --fqbn esp32:esp32:esp32 .`（ESP32）
+- 使用 Arduino CLI：`arduino-cli compile --clean --jobs 1 --warnings all --fqbn esp8266:esp8266:nodemcuv2 .`（ESP8266），或 `arduino-cli compile --clean --jobs 1 --warnings all --fqbn esp32:esp32:esp32 .`（ESP32），两个目标依次验证
 - 本地保留测试和演示工具时，可安装浏览器测试依赖：`npm ci --prefix tests --ignore-scripts`；预览服务：`node demo/server.cjs`
 
 固件源码位于根目录和 `src/`；原版项目说明保存在 `README.upstream.md`，许可证为 `LICENSE`
@@ -34,7 +34,7 @@ Arduino 工程入口：仓库根目录的 `SmartWebServer.ino`
 - 密码框右侧可显示或隐藏密码，无密码网络自动识别，不再使用密码相关的复选框
 - 设备保留当前已保存网络的密码，再次选择该网络时可直接连接或填写新密码替换，状态接口只返回是否已记住密码
 - 已提交的密码在当前页面内按网络名称暂存，失败后再次选择同一网络可恢复输入，取消未提交的输入不会记住，刷新或离开页面后清除
-- 连接期间的 SDK 策略恢复到 7bfba6ed 之前的 cd5d42be：SWS 一次完成配置和连接，允许 SDK 在 25 秒窗口内处理短暂失败，不在中途再次断开并发起连接；超时后关闭 SDK 恢复与 STA，保留 AP
+- 连接和失败清理以 10 月 16 日的 05a60f41 为对照：SWS 一次完成配置和连接，允许 SDK 在 25 秒窗口内处理短暂失败；超时只断开路由器并清空 SDK 当前连接目标，保持 AP+STA 模式，不关闭 STA 或重启已有热点
 - 已保存且开启的网络仍会上电自动连接；SDK 可自行恢复短暂断线，SWS 在启动回退或掉线后等待 30 秒补充一次后台连接，明确超时后停止搜索，等待手动重试，关闭开关后停止
 - ESP8266 SDK 明确报告密码错误或发现地址配置冲突时提示修改；未验证的新密码不覆盖设备原有凭据，连接新网络失败后仍保留先前已知网络，可手动重新连接
 - 后台重连与单次连接时序分别由 `StationReconnect.h` 和 `StationConnection.h` 管理，不依赖网页保持打开；后台重连期间仍可刷新列表、换网或关闭 Wi-Fi，用户操作优先且保留热点入口
@@ -270,15 +270,15 @@ SWS 不再按抱闸状态过滤网页、TCP 或串口命令，也不会因抱闸
 
 `/net-wifi` 的 POST `action=scan` 使用 `start=1` 启动扫描，后续轮询使用 `start=0`。自动启动额外传入 `automatic=1`。无扫描任务时的过期轮询返回 409，不会再启动扫描或断开 STA。为兼容旧调用，未提供 `start` 时仍按启动请求处理。
 
-连接失败沿用 7bfba6ed 的清理流程，断开并关闭 STA 接口，保留 AP，停止自动搜索直到手动重试或重启。AP 有客户端不会阻止手动或上电自动连接，STA 成功后保持 AP/STA 共存。ESP8266 内核 2.4.2 的 `scanDelete()` 只释放结果，不取消正在进行的扫描，因此无人读取结果时，在 30 秒之后等待 SDK 扫描完成再回收结果和恢复原模式。等待过程不阻塞主循环；SDK 未结束扫描期间不接受新的配网操作。
+连接失败恢复 05a60f41 的断开流程，移除 7bfba6ed 引入的关闭 STA 操作，已有热点继续使用 AP+STA 模式，不重新启动热点。SDK 当前连接目标清空，SWS 不继续发起后台尝试，等待手动重试或重启。只有用户关闭 STA 开关时才关闭 STA 接口。AP 有客户端不会阻止手动或上电自动连接，STA 成功后保持 AP/STA 共存。ESP8266 内核 2.4.2 的 `scanDelete()` 只释放结果，不取消正在进行的扫描，因此无人读取结果时，在 30 秒之后等待 SDK 扫描完成再回收结果和恢复原模式。等待过程不阻塞主循环；SDK 未结束扫描期间不接受新的配网操作。
 
 本地验证使用 `node tests/network-wifi-recovery.cjs`、`node tests/network-wifi-backend.cjs` 和 `node tests/network-wifi-performance.cjs`，覆盖过期轮询、自动扫描竞争、失败后停止搜索、扫描清理和页面操作。测试、工具和编译产物继续由 Git 忽略。
 
 已移除命令过滤模块，校时、校准状态及附件查询均沿用原始串口通路，避免因 SWS 误拦截造成时间同步无效或误报 OnStep 失联。
 
-实机可用版本早于 7bfba6ed，因此连接恢复以 cd5d42be 为对照：撤回 7bfba6ed 首次加入的连接期间关闭 SDK 自动恢复和暂时失败立即中断；保留有限等待、失败后停止搜索、密码验证后保存、无效请求隔离和扫描轮询修复，扩展仍集中在 src/extensions/network。
+根据实机反馈继续追溯到 10 月 16 日的 05a60f41：连接期间保留 SDK 自动恢复，网页接管时也不关闭该策略；失败后只断开，不切换无线模式。保留有限等待、失败后停止搜索、密码验证后保存、无效请求隔离和扫描轮询修复，扩展仍集中在 src/extensions/network。
 
-本地对比测试 node tests/network-wifi-history.cjs 使用同一组场景验证历史版本、修复前版本和当前代码，检查单次调用、成功共存与失败清理；模拟无线接口不能证明实机无线稳定性，仍需 ESP-07S 刷入后验证。固件编译一次只运行一个任务，并使用 --jobs 1，避免电脑卡顿。
+本地对比测试 node tests/network-wifi-oct16.cjs 使用真实历史源码验证 05a60f41、7bfba6ed、49c010ba 和当前代码，检查手机连接热点时 STA 超时是否改变模式或重启热点；node tests/network-wifi-history.cjs 检查单次调用、成功共存与失败清理。模拟无线接口不能证明实机无线稳定性，仍需 ESP-07S 验证。固件仅做验证编译，每次使用 --clean --jobs 1，不并行运行不同目标，结束后删除临时构建目录，旧缓存和产物不复用。
 
 时间同步沿用手机当前时间和设备已保存时区，不需要定位权限。手动解锁继续直接松闸并暂停自动保护；命令转发始终保持原始行为，不再依赖抱闸状态。保留历史单次写入超时；新增内存限制和 TCP 分轮处理当前关闭。
 
@@ -286,6 +286,8 @@ SWS 不再按抱闸状态过滤网页、TCP 或串口命令，也不会因抱闸
 
 本地验证 node tests/navigation-burst.cjs 覆盖手机尺寸下慢页面加载期间连续切换 20 次，仅发送当前页与最终标签请求且不取消当前传输；node tests/navigation-recovery.cjs 保留加载超时、停止队列超时和静态资源失败恢复，node tests/network-load-guard.cjs 覆盖页面输出中途内存下降及客户端离开。浏览器与原内核状态机测试不能代替实机 AP 稳定性验证。
 
-本次撤回 4399ff0c 的 250 ms 准备阶段、三组 SDK 事件订阅和双阶段计时。连接期间恢复早期 SDK 自动恢复行为，但单次窗口仍为 25 秒，SWS 不重复调用 begin；失败后关闭 STA 并保留热点。只有已验证的网络参数和密码才会被保存，开关意图单独在连接前完成提交。界面在设置待应用期间也显示用户刚提交的开关值，避免短暂回显旧状态。
+已撤回 4399ff0c 的 250 ms 准备阶段、三组 SDK 事件订阅和双阶段计时。单次连接窗口仍为 25 秒，SWS 不重复调用 begin；失败后仅断开路由器，已有热点继续保持 AP+STA 模式。只有已验证的网络参数和密码才会被保存，开关意图单独在连接前完成提交。界面在设置待应用期间也显示用户刚提交的开关值，避免短暂回显旧状态。
 
 验证 node tests/network-wifi-sdk-history.cjs 对照 cd5d42be、7bfba6ed 和当前代码，覆盖暂时失败后的 SDK 恢复权限；node tests/wifi-settings-reboot.cjs 使用真实 KV16/KV32 和延迟提交层，覆盖立即重启、保存失败及旧密码保留。目标路由器连接与 ESP-07S 重启现象仍需实机确认。
+
+网络页面登录后访问 `/net-wifi?action=status`，可读取 `uptimeMs`（运行毫秒数）、ESP8266 的 `resetReason`（最近一次启动原因）和 `lastStationStatus`（最近一次连接轮询的 SDK 状态，ESP8266 中 0 空闲、1 连接中、2 密码错误、3 未找到网络、4 连接失败、5 已获取地址）。失败清理后仍保留最后状态，便于区分固件重启与无线掉线；接口不返回密码，也不向 OnStep 串口输出诊断信息。

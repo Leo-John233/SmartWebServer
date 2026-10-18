@@ -11,6 +11,7 @@ namespace {
 bool scanning = false, scanAddedSta = false, connecting = false, failed = false;
 bool networkAdopted = false, backgroundConnecting = false, wasConnected = false;
 bool authenticationRejected = false;
+int lastStationStatus = 0;
 uint8_t pending = 0; // 1 表示连接路由器，2 表示设置热点，先返回网页响应再切换网络
 unsigned long scheduledAt = 0, scanStarted = 0;
 swsWifi::StationConnection stationConnection;
@@ -99,7 +100,8 @@ void interruptBackgroundConnection() {
 // 发起连接后立即返回，由主循环判断成功或超时
 bool configureStation() {
   authenticationRejected = wasConnected = false;
-  // 恢复 cd5d42be 的 SDK 连接恢复策略，仅在本次有时限的连接期间启用
+  lastStationStatus = 0;
+  // 由 SDK 维护本次连接，主循环负责总等待时限
   if (!WiFi.enableSTA(true)) return false;
   WiFi.setAutoReconnect(true);
   WiFi.disconnect();
@@ -122,10 +124,8 @@ void connectionFailed(const String &reason) {
   connecting = backgroundConnecting = false;
   failed = true;
   wifiManager.networkBusy = false;
-  WiFi.setAutoReconnect(false);
+  // 沿用 10 月 16 日的失败清理，只断开路由器，不切换 AP+STA 模式
   WiFi.disconnect();
-  // 恢复旧版失败清理，关闭 STA 搜索并保留 AP，等待用户手动重试
-  WiFi.enableSTA(false);
   stationCandidate = false;
   stationReconnect.failed();
   bool available = apActive() || startAp();
@@ -149,6 +149,11 @@ String configJson() {
   json += ",\"ip\":" + quote(ipText(a.ip)) + ",\"gw\":" + quote(ipText(a.gw)) + ",\"sn\":" + quote(ipText(a.sn)) + "}";
   json += ",\"connected\":"; json += WiFi.status() == WL_CONNECTED ? "true" : "false";
   json += ",\"connecting\":"; json += connecting ? "true" : "false";
+  json += ",\"uptimeMs\":" + String(millis());
+  json += ",\"lastStationStatus\":" + String(lastStationStatus);
+  #ifdef ESP8266
+    json += ",\"resetReason\":" + quote(ESP.getResetReason());
+  #endif
   json += ",\"background\":"; json += backgroundConnecting ? "true" : "false";
   json += ",\"pending\":"; json += pending ? "true" : "false";
   json += ",\"failed\":"; json += failed ? "true" : "false";
@@ -296,7 +301,6 @@ void pollWifiNetwork() {
     networkAdopted = true;
     wifiManager.webManaged = true;
     WiFi.persistent(false);
-    WiFi.setAutoReconnect(false);
     const bool saved = wifiManager.stationEnabledAtBoot || wifiManager.settings.stationEnabled;
     stationReconnect.init(saved, now);
     if (saved) wifiManager.settings.stationEnabled = true;
@@ -373,9 +377,14 @@ void pollWifiNetwork() {
   }
   if (connecting) {
     const int connection = WiFi.status();
+    #ifdef ESP8266
+      lastStationStatus = wifi_station_get_connect_status();
+    #else
+      lastStationStatus = connection;
+    #endif
     if (connection == WL_CONNECT_FAILED) {
       #ifdef ESP8266
-        authenticationRejected = authenticationRejected || wifi_station_get_connect_status() == STATION_WRONG_PASSWORD;
+        authenticationRejected = authenticationRejected || lastStationStatus == STATION_WRONG_PASSWORD;
       #endif
     }
     IPAddress ip = WiFi.localIP(), mask = WiFi.subnetMask();
