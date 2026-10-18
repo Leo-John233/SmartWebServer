@@ -93,7 +93,7 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 
 正文取消也覆盖各卡片之间和轴参数逐项读取，位置与限位在下一条只读串口查询前检查。pageClientConnected 只读取原生客户端连接，不引入服务器适配类、请求队列、串口过滤或全局取消标记；其他客户端和保护采样不会被取消。已提交的控制处理维持原流程。
 
-Template.h 只支持界面模板的 %s 和 %%，以 65 字节临时片段追加现有 String。工作状态及抱闸卡片使用它消除 1024/1200 字节整卡栈缓冲和相应格式模板副本，原模板与十种语言输出不变。page-template.cjs 验证逐字节一致、UTF-8、百分号、替换边界和长值；esp8266-stack-audit.cjs 使用实际 nodemcuv2 编译参数与 Xtensa 汇编入口记录函数栈帧。旧工具链的 .su 报告为空，不把它当作零占用。
+Template.h 的 appendPageTemplate 支持界面模板的 %s 和 %%，以 65 字节临时片段追加现有 String。工作状态及抱闸卡片使用它消除 1024/1200 字节整卡栈缓冲和相应格式模板副本，原模板与十种语言输出不变。page-template.cjs 验证逐字节一致、UTF-8、百分号、替换边界和长值；esp8266-stack-audit.cjs 使用实际 nodemcuv2 编译参数与 Xtensa 汇编入口记录函数栈帧。旧工具链的 .su 报告为空，不把它当作零占用。
 
 仅 ESP8266 的既有网络状态接口补充 resetInfo、freeHeap、wifiMode、apClients；只读诊断不调用模式切换或重新启动热点。用户已再次在 AP 模式复现无线踢线，代码级取消和栈改进不能代替后续实机验证。
 
@@ -124,7 +124,7 @@ KeyValue.h/.cpp 采用只读文本参数和兼容 String 重载，组装返回�
 | --- | --- |
 | HTTP 与 TCP 传输 | 删除自定义 WebServer、防护配置与 TCP 分轮处理，直接回到原版接口，保留 80 字节回复缓冲区修复 |
 | 页面导航 | 沿用原版在固件端输出页头和选中标签，保留原生链接、表单、路由及状态节点，外观脚本不再重建导航 |
-| 静态资源 | 样式链接位于 head，基础样式和网络页样式一并缓存，CSS/JS 使用内核 Flash 发送接口；图标直接随页头输出，不缓存设备状态 |
+| 静态资源 | 样式与脚本在原生同一次 HTML 响应中内联输出，样式和运动停止委托在 head，增强脚本在导航标记之后，图标直接随页头输出 |
 | 状态与命令 | 保留原版 OnStepCmd 和 State 调度，校时、运动及附件命令不按抱闸状态过滤，保留短写检测与长反馈缓冲修复 |
 | 配网 | 保留 AP+STA 流程、有限连接窗口、候选密码隔离及开关提交；切页不扫描，扫描不能中断后台连接或 SDK 关联，仍使用原生 WiFi 接口与原版 NV 键 |
 | 抱闸 | 保留独立策略和原版 OnTask 调度，未知反馈保持原电平，停止每轮最多三次；网络活动通知只记录时间，不调用停止逻辑 |
@@ -134,3 +134,25 @@ KeyValue.h/.cpp 采用只读文本参数和兼容 String 重载，组装返回�
 包含路径检查、原版 TCP 回放与本地自动化用于验证上述边界；模拟器不会连接串口。真实无线耗时、串口响应及驱动反馈仍需目标硬件验证，本记录不把静态审查当作全部功能的实机通过证明。
 
 页面请求模块在六个原生处理入口先设置原串口超时与清理接收，再仅在 args 大于零时处理表单参数，最后更新状态生成页面。纯切页省去参数查找，提交后的首屏使用更新后的状态。Focuser 补偿卡片复用入口状态，不重复查询；Servo 和 StallGuard 仅在可见文档重绘，500 ms 周期不变。删除未使用的 goto_key 数组，串口命令、BoardIo 和 AJAX 接口保持原样。
+
+本轮最终量化结果见根目录 README 的“本轮页面性能优化验证”：七页导航标记前均减少传输字节和发送调用，十语言 210 组样式与节点对比通过。新增 appendPageFormat 支持现有模板使用的字符串、字符、整数及浮点格式，使用 96 字节格式结果缓冲，普通 %s 直接追加完整文本；不将该辅助函数作为任意 printf 格式的通用替代。真实 Xtensa 辅助函数帧为 240 字节，需和调用者同时计入。所有测试产物留在 tests/output，验证后清理本轮临时构建与配置副本，代码构建不等同于实机无线或串口耗时验证。
+
+本轮必要的原页面接入清单（相对于 src/pages）
+
+| 文件 | 修改边界 |
+| --- | --- |
+| Page.cpp | 导航标记发送后调用 pageScripts，仍使用原 pageHeader 和原生完整页面 |
+| KeyValue.h/.cpp | const char* 主接口和 const String& 兼容入口，预留容量后拼接，原编码不变 |
+| htmlHeaders.h / htmlScripts.h | 清理被覆盖的旧 CSS 属性、压缩内联空白和注释，保留节点及宏 |
+| index/Index.cpp、mount/Mount.cpp、rotator/Rotator.cpp、focuser/Focuser.cpp、auxiliary/Auxiliary.cpp、encoders/Encoders.cpp | 有参数才处理提交，提交先于状态更新，String data 预留容量 |
+| mount/AlignTile.cpp、GotoTile.cpp、HomeParkTile.cpp、LimitsTile.cpp、SiteTile.cpp、LibraryTile.cpp | 使用扩展格式化辅助函数追加原模板，缩小临时数组；删除未使用 goto_key |
+| index/AxisTile.cpp、ServoTile.cpp、encoders/AxisTile.cpp | 缩小输出缓冲，整段脚本直接追加，设备回复解析缓冲保持不变 |
+| network/Network.cpp | 小段追加原模板、MAC 单次格式化，原登录和设置处理不变 |
+| auxiliary/Auxiliary.cpp | 名称分段转义，不依赖旧内核私有接口 |
+| focuser/BacklashTcfTile.cpp | 复用入口已刷新的状态 |
+| index/ServoTile.h、StallGuardTile.h | document.hidden 时跳过重绘，定时周期不变 |
+| Err404.cpp、LibraryHelp.cpp 及各页面 AJAX | 仅为 String data 增加预留容量，保留原路由和回复 |
+
+最终压缩同时删除 24 段只用于源码说明的 CSS 注释，最低压缩级别默认不会删除这些注释，因此显式清理后再次验证样式。根 README 的字节与发送表已包含此精简。
+
+最终 nodemcuv2 / ESP32 依次 clean、jobs 1、warnings all 编译通过，程序分别 624248 / 1174645 字节，静态 RAM 50740 / 52900 字节。编译警告、快照范围和清理结果见根 README；临时构建目录清理后保留日志、固件、JSON 及汇编证据。编译期间中文网络提示的独立工作区改动保留未提交，本轮性能验证按已提交源码快照报告。
