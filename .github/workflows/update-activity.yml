@@ -1,15 +1,13 @@
-
 name: Update Repository Activity
 
 on:
+  # Refresh immediately on activity in any functional branch.
   push:
     branches:
       - "**"
       - "!SmartWebServer-Original"
-
   workflow_dispatch:
-
-  # 每周一北京时间 09:27 检查
+  # Beijing time: Monday 09:27 (UTC Monday 01:27)
   schedule:
     - cron: "27 1 * * 1"
 
@@ -25,44 +23,41 @@ permissions:
 
 jobs:
   decide:
-    name: Check refresh schedule
+    name: Check adaptive refresh schedule
     runs-on: ubuntu-latest
-
     outputs:
       refresh: ${{ steps.direct.outputs.refresh || steps.timer.outputs.refresh }}
 
     steps:
-      # 有新 Push 或手动运行时直接刷新
-      - name: Immediate refresh
+      - name: Refresh immediately on Push or manual run
         id: direct
         if: github.event_name != 'schedule'
-        run: |
-          echo "refresh=true" >> "$GITHUB_OUTPUT"
+        run: echo "refresh=true" >> "$GITHUB_OUTPUT"
 
-      # 定时任务才需要计算周期
-      - name: Checkout repository
+      - name: Checkout default branch
         if: github.event_name == 'schedule'
         uses: actions/checkout@v6
         with:
           ref: SmartWebServer-FeatureRelease
           fetch-depth: 1
 
-      - name: Fetch branch activity and reset clock
+      - name: Fetch latest branch tips and hidden clock
         if: github.event_name == 'schedule'
         shell: bash
         run: |
           set -euo pipefail
-
           git fetch --no-tags --depth=1 origin \
             "+refs/heads/*:refs/remotes/origin/*" --prune
 
-          TAG="sws-activity-refresh-clock"
-
-          if git ls-remote --exit-code --tags \
-            origin "refs/tags/$TAG" > /dev/null 2>&1; then
-
-            git fetch --no-tags origin \
-              "+refs/tags/$TAG:refs/tags/$TAG"
+          CLOCK_REF="refs/notes/sws-activity-refresh-clock"
+          if git ls-remote --exit-code origin "$CLOCK_REF" >/dev/null; then
+            git fetch --no-tags origin "+$CLOCK_REF:$CLOCK_REF"
+          else
+            code=$?
+            if [[ "$code" -ne 2 ]]; then
+              echo "::error::Unable to inspect the remote Git Notes clock."
+              exit "$code"
+            fi
           fi
 
       - name: Calculate adaptive interval
@@ -76,95 +71,62 @@ jobs:
           import time
 
           def git(*args):
-              return subprocess.check_output(
-                  ["git", *args],
-                  text=True,
-              ).strip()
+              return subprocess.check_output(["git", *args], text=True).strip()
 
           latest = 0
-
-          refs = git(
+          # Each new non-Original branch is discovered automatically.
+          branches = git(
               "for-each-ref",
               "--format=%(refname:short)%09%(committerdate:unix)",
               "refs/remotes/origin/",
           )
-
-          for line in refs.splitlines():
+          for line in branches.splitlines():
               if "\t" not in line:
                   continue
-
               name, timestamp = line.split("\t", 1)
-
-              if name in (
-                  "origin/HEAD",
-                  "origin/SmartWebServer-Original",
-              ):
+              if name in ("origin/HEAD", "origin/SmartWebServer-Original"):
                   continue
-
               if timestamp.isdigit():
                   latest = max(latest, int(timestamp))
 
-          # 读取手动重置时间
-          tag_time = git(
-              "for-each-ref",
-              "--format=%(taggerdate:unix)",
-              "refs/tags/sws-activity-refresh-clock",
+          # Git Notes holds the last manual reset; the ref is invisible in Tags.
+          clock = subprocess.run(
+              ["git", "log", "-1", "--format=%ct", "refs/notes/sws-activity-refresh-clock"],
+              capture_output=True,
+              text=True,
+              check=False,
           )
-
-          if tag_time.isdigit():
-              latest = max(latest, int(tag_time))
+          if clock.returncode == 0 and clock.stdout.strip().isdigit():
+              latest = max(latest, int(clock.stdout.strip()))
 
           if latest == 0:
-              refresh = True
-              reason = "No activity clock found"
-
+              refresh, reason = True, "No recorded activity; initialize by refreshing"
           else:
-              days = max(
-                  0,
-                  int((time.time() - latest) / 86400),
-              )
-
-              weeks = days // 7
-
-              if days < 7:
-                  refresh = False
-                  reason = "Recently refreshed by push"
-
-              elif days < 28:
-                  interval = 1
-                  refresh = True
-                  reason = "Weekly refresh"
-
-              elif days < 56:
-                  interval = 2
-                  refresh = weeks % interval == 0
-                  reason = "Biweekly refresh"
-
-              elif days < 112:
-                  interval = 4
-                  refresh = weeks % interval == 0
-                  reason = "Four-week refresh"
-
-              elif days < 182:
-                  interval = 8
-                  refresh = weeks % interval == 0
-                  reason = "Eight-week refresh"
-
+              elapsed_days = max(0, (int(time.time()) - latest) // 86400)
+              elapsed_weeks = (elapsed_days + 1) // 7  # Allow one day of cron jitter
+              if elapsed_days < 6:
+                  refresh, reason = False, "Recent activity: no scheduled refresh needed"
+              elif elapsed_days >= 182:
+                  refresh, reason = False, "Paused after 26 weeks of inactivity"
               else:
-                  refresh = False
-                  reason = "Automatic refresh paused"
+                  if elapsed_days < 28:
+                      interval = 1
+                  elif elapsed_days < 56:
+                      interval = 2
+                  elif elapsed_days < 112:
+                      interval = 4
+                  else:
+                      interval = 8
+                  refresh = elapsed_weeks % interval == 0
+                  reason = (
+                      f"{elapsed_days} inactive days; "
+                      f"scheduled refresh every {interval} week(s)"
+                  )
 
           print(reason)
-          print(f"Refresh: {refresh}")
-
-          with open(
-              os.environ["GITHUB_OUTPUT"],
-              "a",
-              encoding="utf-8",
-          ) as output:
-              output.write(
-                  f"refresh={str(refresh).lower()}\n"
-              )
+          print(f"Refresh dashboard: {refresh}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"refresh={str(refresh).lower()}\n")
           PY
 
   build:
@@ -184,16 +146,11 @@ jobs:
         run: |
           git fetch --no-tags origin \
             "+refs/heads/*:refs/remotes/origin/*" --prune
-
-          git for-each-ref \
-            --format='%(refname:short)' \
-            'refs/remotes/origin/'
+          git for-each-ref --format='%(refname:short)' 'refs/remotes/origin/'
 
       - name: Fetch upstream project
         run: |
-          git remote add upstream \
-            https://github.com/hjd1964/SmartWebServer.git
-
+          git remote add upstream https://github.com/hjd1964/SmartWebServer.git
           git fetch --no-tags upstream \
             "+refs/heads/main:refs/remotes/upstream/main"
 
@@ -218,7 +175,6 @@ jobs:
     name: Deploy activity
     runs-on: ubuntu-latest
     needs: build
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -228,18 +184,15 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # 手动刷新部署成功后重置周期
   reset-clock:
-    name: Reset activity refresh clock
+    name: Reset hidden activity clock
     runs-on: ubuntu-latest
     needs: deploy
-
     if: >-
       ${{
         github.event_name == 'workflow_dispatch' &&
         needs.deploy.result == 'success'
       }}
-
     permissions:
       contents: write
 
@@ -250,20 +203,30 @@ jobs:
           ref: SmartWebServer-FeatureRelease
           fetch-depth: 1
 
-      - name: Reset clock tag
+      - name: Load existing hidden clock
         shell: bash
         run: |
           set -euo pipefail
+          CLOCK_REF="refs/notes/sws-activity-refresh-clock"
+          if git ls-remote --exit-code origin "$CLOCK_REF" >/dev/null; then
+            git fetch --no-tags origin "+$CLOCK_REF:$CLOCK_REF"
+          else
+            code=$?
+            if [[ "$code" -ne 2 ]]; then
+              echo "::error::Unable to inspect the remote Git Notes clock."
+              exit "$code"
+            fi
+          fi
 
+      - name: Reset clock in Git Notes
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          TAG="sws-activity-refresh-clock"
-
-          git tag -fa "$TAG" \
-            -m "Activity refresh clock reset" HEAD
-
-          git push --force origin "refs/tags/$TAG"
-
-          echo "Activity refresh cycle reset."
+          CLOCK_REF="refs/notes/sws-activity-refresh-clock"
+          git notes --ref="$CLOCK_REF" add -f \
+            -m "Activity refresh clock reset $(date -u +%FT%TZ)" HEAD
+          git push origin "$CLOCK_REF:$CLOCK_REF"
+          echo "Hidden activity clock updated successfully."
