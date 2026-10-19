@@ -1,0 +1,211 @@
+
+name: Adaptive Upstream Sync
+
+on:
+  # 每周一北京时间 09:17 触发
+  schedule:
+    - cron: "17 1 * * 1"
+
+  # 支持手动触发，手动运行重置检查周期
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-original
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync SmartWebServer Original
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 检出 Original 分支
+      - name: Checkout Original
+        uses: actions/checkout@v4
+        with:
+          ref: SmartWebServer-Original
+          fetch-depth: 1
+
+      # 2. 获取上次同步计时标签
+      - name: Load sync clock
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="sws-upstream-sync-clock"
+
+          REMOTE_TAG=$(
+            git ls-remote --tags origin "refs/tags/$TAG"
+          )
+
+          if [[ -n "$REMOTE_TAG" ]]; then
+            git fetch --no-tags origin \
+              "+refs/tags/$TAG:refs/tags/$TAG"
+          fi
+
+      # 3. 根据上次更新的时间决定是否检查上游
+      - name: Calculate adaptive schedule
+        id: cadence
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          import time
+
+          TAG = "sws-upstream-sync-clock"
+
+          raw = subprocess.check_output(
+              [
+                  "git",
+                  "for-each-ref",
+                  "--format=%(taggerdate:unix)",
+                  f"refs/tags/{TAG}",
+              ],
+              text=True,
+          ).strip()
+
+          initialize = not bool(raw)
+          manual = os.environ.get(
+              "GITHUB_EVENT_NAME"
+          ) == "workflow_dispatch"
+
+          if manual:
+              check = True
+              reason = "Manual sync requested"
+
+          elif initialize:
+              check = True
+              reason = "Initial sync"
+
+          else:
+              now = int(time.time())
+              elapsed = max(
+                  0,
+                  (now - int(raw)) // 86400,
+              )
+
+              if elapsed >= 182:
+                  check = False
+                  reason = "Automatic sync paused"
+
+              elif elapsed < 7:
+                  check = False
+                  reason = "Too soon to check again"
+
+              else:
+                  if elapsed < 28:
+                      interval = 1
+                  elif elapsed < 56:
+                      interval = 2
+                  elif elapsed < 112:
+                      interval = 4
+                  else:
+                      interval = 8
+
+                  week = elapsed // 7
+
+                  check = week % interval == 0
+
+                  reason = (
+                      f"{elapsed} inactive days, "
+                      f"checking every {interval} weeks"
+                  )
+
+          with open(
+              os.environ["GITHUB_OUTPUT"],
+              "a",
+              encoding="utf-8",
+          ) as output:
+              output.write(
+                  f"do_check={str(check).lower()}\n"
+              )
+              output.write(
+                  f"initialize={str(initialize).lower()}\n"
+              )
+
+          print(reason)
+          print(f"Check upstream: {check}")
+          PY
+
+      # 4. 只在计划允许时检查上游
+      - name: Fetch and fast-forward upstream
+        id: update
+        if: steps.cadence.outputs.do_check == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # 获取 Original 的完整历史
+          if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+            git fetch --unshallow --no-tags \
+              origin SmartWebServer-Original
+          fi
+
+          # 配置上游仓库
+          git remote add upstream \
+            https://github.com/hjd1964/SmartWebServer.git
+
+          git fetch --no-tags upstream main
+
+          CURRENT=$(git rev-parse HEAD)
+          UPSTREAM=$(git rev-parse FETCH_HEAD)
+
+          # 必须保持原有 Git 历史
+          if ! git merge-base --is-ancestor \
+            "$CURRENT" "$UPSTREAM"; then
+
+            echo "::error::Git history diverged. Sync aborted."
+            exit 1
+          fi
+
+          # 没有新提交时不更新仓库
+          if [[ "$CURRENT" == "$UPSTREAM" ]]; then
+            echo "Upstream unchanged."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 只允许 Fast-forward
+          git merge --ff-only "$UPSTREAM"
+
+          # 更新 Original 分支
+          git push origin \
+            HEAD:refs/heads/SmartWebServer-Original
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+          echo "Original synchronized successfully."
+
+      # 5. 上游有更新或手动触发时重置周期
+      - name: Reset adaptive sync clock
+        if: >-
+          ${{
+            steps.cadence.outputs.do_check == 'true' &&
+            (
+              github.event_name == 'workflow_dispatch' ||
+              steps.update.outputs.changed == 'true' ||
+              steps.cadence.outputs.initialize == 'true'
+            )
+          }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          TAG="sws-upstream-sync-clock"
+
+          git tag -fa "$TAG" \
+            -m "Sync clock reset $(date -u +%FT%TZ)" \
+            HEAD
+
+          # 仅更新计时标签，不强制推送 Original
+          git push --force origin "refs/tags/$TAG"
+
+          echo "Adaptive sync clock reset."
