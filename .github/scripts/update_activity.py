@@ -195,9 +195,13 @@ def load_full_history(ref: str) -> list[dict]:
 
 
 def combine_histories(histories: list[list[dict]]) -> list[dict]:
-    """不同分支分别累计，故意不对 SHA 去重。"""
+    """按完整 Commit SHA 跨分支去重，保留每次真实提交的唯一记录。"""
+    unique: dict[str, dict] = {}
+    for branch_history in histories:
+        for commit in branch_history:
+            unique.setdefault(commit["sha"], commit)
     return sorted(
-        (commit for commits in histories for commit in commits),
+        unique.values(),
         key=lambda c: (c["datetime"], c["sha"]), reverse=True,
     )
 
@@ -675,7 +679,7 @@ def main() -> None:
         recent_histories[BASE_BRANCH], OUTPUT_DIR / "recent-changes.svg", BASE_BRANCH
     )
 
-    # 排除 Original 以及额外配置排除项，分支间相同的提交仍各自累计
+    # 排除 Original 及其他配置排除项，汇总时按完整 Commit SHA 去重
     all_recent = combine_histories(list(recent_histories.values()))
     all_full = combine_histories(list(full_histories.values()))
     scope = f"{len(branches)} 个分支"
@@ -690,7 +694,7 @@ def main() -> None:
         "refs": {branch: git("rev-parse", branch_ref(branch)).strip()
                  for branch in branches},
         "generated_at": datetime.now(TZ).isoformat(),
-        "counting_method": "sum_per_branch_without_sha_deduplication",
+        "counting_method": "unique_full_commit_sha_across_active_branches",
         "total_commits": stats["total_commits"],
         "contributors": stats["contributors"],
         "maintainer_commits": stats["authors"].get(MAINTAINER, 0),
@@ -699,7 +703,7 @@ def main() -> None:
         "upstream": upstream,
         "filters": {
             "activity": "排除机器人和只修改 README 或 .github 的提交",
-            "statistics": "有效分支全部非机器人提交 各分支分别累计",
+            "statistics": "有效分支全部非机器人提交 按完整 SHA 跨分支去重",
         },
     }
     (OUTPUT_DIR / "repository-summary.json").write_text(
