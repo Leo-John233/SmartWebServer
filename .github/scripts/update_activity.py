@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import fnmatch
 import hashlib
 import html
@@ -12,6 +13,7 @@ from datetime import date, datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from urllib.request import Request, urlopen
 
 # 配置
 ROOT = Path(__file__).resolve().parents[2]
@@ -464,7 +466,43 @@ def generate_activity_svg(history: list[dict], output: Path, scope: str) -> None
 
 # 仓库统计 项目维护 上游信息
 
-def avatar(cx: int, cy: int, bg: str, fg: str) -> list[str]:
+@lru_cache(maxsize=8)
+def github_avatar_data_uri(username: str) -> str | None:
+    """Download each GitHub avatar once and embed it directly in the SVG."""
+    request = Request(
+        f"https://github.com/{username}.png?size=96",
+        headers={"User-Agent": "SmartWebServer-Activity/1.0"},
+    )
+    try:
+        with urlopen(request, timeout=10) as response:
+            mime = response.headers.get_content_type()
+            picture = response.read(300_001)
+        if mime not in {"image/png", "image/jpeg", "image/webp"}:
+            print(f"Unsupported GitHub avatar format for {username}: {mime}")
+            return None
+        if not picture or len(picture) > 300_000:
+            print(f"Invalid GitHub avatar size for {username}")
+            return None
+        encoded = base64.b64encode(picture).decode("ascii")
+        return f"data:{mime};base64,{encoded}"
+    except (OSError, ValueError) as exc:
+        print(f"Could not load GitHub avatar for {username}: {exc}")
+        return None
+
+
+def avatar(
+    cx: int, cy: int, bg: str, fg: str, username: str | None = None
+) -> list[str]:
+    """Round GitHub avatar; retain the original icon as a network fallback."""
+    data_uri = github_avatar_data_uri(username) if username else None
+    if data_uri:
+        clip_id = f"avatar-clip-{cx}-{cy}"
+        return [
+            f'<defs><clipPath id="{clip_id}"><circle cx="{cx}" cy="{cy}" r="19"/></clipPath></defs>',
+            f'<circle cx="{cx}" cy="{cy}" r="19" fill="{bg}"/>',
+            f'<image href="{data_uri}" x="{cx - 19}" y="{cy - 19}" width="38" height="38" '
+            f'preserveAspectRatio="xMidYMid slice" clip-path="url(#{clip_id})"/>',
+        ]
     return [
         f'<circle cx="{cx}" cy="{cy}" r="19" fill="{bg}"/>',
         f'<circle cx="{cx}" cy="{cy - 6}" r="5" fill="{fg}"/>',
@@ -497,8 +535,8 @@ def generate_statistics_svg(
         line(168),
         '<text class="text subheading" x="28" y="195">项目维护</text>',
     ])
-    svg += avatar(48, 235, "#ddf4ff", "#0969da")
-    svg += avatar(576, 235, "#fff1cc", "#9a6700")
+    svg += avatar(48, 235, "#ddf4ff", "#0969da", "Leo-John233")
+    svg += avatar(576, 235, "#fff1cc", "#9a6700", "hjd1964")
     leo_count = stats["authors"].get(MAINTAINER, 0)
     svg.append(svg_link(MAINTAINER, "https://github.com/Leo-John233", 80, 229))
     svg.append(f'<text class="text muted" x="80" y="253">二次开发维护者 · {leo_count:,} 次提交</text>')
