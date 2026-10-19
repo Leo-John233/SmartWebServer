@@ -146,8 +146,8 @@ def discover_branches() -> list[str]:
 
     if not branches:
         raise RuntimeError(
-            f"没有找到匹配 {BRANCH_PATTERN!r} 的分支。"
-            "请确认 Workflow 已 fetch 全部远程分支。"
+            f"没有找到匹配 {BRANCH_PATTERN} 的分支\n"
+            "请确认 Workflow 已获取全部远程分支"
         )
 
     return branches
@@ -266,7 +266,7 @@ def summarize_scope(files: list[str] | tuple[str, ...]) -> str:
     if len(scopes) == 1:
         return scopes[0]
     if len(scopes) == 2:
-        return f"{scopes[0]} + {scopes[1]}"
+        return f"{scopes[0]} 和 {scopes[1]}"
     return "多个目录"
 
 
@@ -414,9 +414,9 @@ def truncate(text: str, length: int) -> str:
 
 
 COMMON_STYLE = """
-.text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+.text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei","PingFang SC",Helvetica,Arial,sans-serif}
 .card{fill:#fff;stroke:#d0d7de;stroke-width:1}
-.title{fill:#24292f;font-size:22px;font-weight:400}
+.title{fill:#24292f;font-size:23px;font-weight:600}
 .header{fill:#57606a;font-size:14px;font-weight:600}
 .normal{fill:#24292f;font-size:15px;font-weight:400}
 .bold{fill:#24292f;font-size:15px;font-weight:600}
@@ -424,16 +424,26 @@ COMMON_STYLE = """
 .link{fill:#0969da;font-size:15px;font-weight:600}
 .divider{stroke:#d8dee4;stroke-width:1}
 .badge{fill:#ddf4ff;stroke:#54aeff;stroke-width:1}
-.badge-text{fill:#0969da;font-size:12px;font-weight:600}
+.badge-text{fill:#0969da;font-size:13px;font-weight:600}
 .good{fill:#1a7f37;font-size:14px;font-weight:600}
 .warn{fill:#9a6700;font-size:14px;font-weight:600}
 @media(prefers-color-scheme:dark){
 .card{fill:#0d1117;stroke:#30363d}.title,.normal,.bold{fill:#c9d1d9}
 .header,.secondary{fill:#8b949e}.link{fill:#58a6ff}.divider{stroke:#21262d}
-.badge{fill:#122117;stroke:#238636}.badge-text,.good{fill:#3fb950}.warn{fill:#d29922}
+.badge{fill:#121d2f;stroke:#1f6feb}.badge-text{fill:#79c0ff}.good{fill:#3fb950}.warn{fill:#d29922}
 }
 """
 
+
+def section_header(title: str, subtitle: str, badge: str, width: int) -> list[str]:
+    badge_width = max(100, 32 + sum(13 if ord(char) > 127 else 7 for char in badge))
+    badge_x = width - badge_width - 1
+    return [
+        f'<text class="text title" x="0" y="29">{svg_text(title)}</text>',
+        f'<text class="text secondary" x="0" y="57">{svg_text(subtitle)}</text>',
+        f'<rect class="badge" x="{badge_x}" y="4" width="{badge_width}" height="32" rx="6" ry="6"/>',
+        f'<text class="text badge-text" x="{badge_x + badge_width / 2}" y="25" text-anchor="middle">{svg_text(badge)}</text>',
+    ]
 
 def write_svg(path: Path, lines: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -451,8 +461,7 @@ def generate_recent_svg(history: list[dict], output: Path, branch: str) -> None:
     hidden_count = max(0, len(commits) - len(visible))
 
     width = 1120
-    title_y = 29
-    card_y = 50
+    card_y = 80
     header_h = 46
     row_h = 46
     footer_h = 46
@@ -465,7 +474,12 @@ def generate_recent_svg(history: list[dict], output: Path, branch: str) -> None:
     svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img">',
         "<style>", COMMON_STYLE, "</style>",
-        f'<text class="text title" x="0" y="{title_y}">最近 {RECENT_DAYS} 天代码提交 {len(commits)} 次 · {svg_text(branch)}</text>',
+        *section_header(
+            "最近代码修改",
+            f"统计范围 {branch}",
+            f"近 {RECENT_DAYS} 天 {len(commits):,} 次提交",
+            width,
+        ),
         f'<rect class="card" x="0.5" y="{card_y + 0.5}" width="1118" height="{card_h - 1}" rx="6" ry="6"/>',
         f'<text class="text header" x="{date_x}" y="{card_y + 29}">日期</text>',
         f'<text class="text header" x="{author_x}" y="{card_y + 29}">修改者</text>',
@@ -485,7 +499,7 @@ def generate_recent_svg(history: list[dict], output: Path, branch: str) -> None:
             subject = truncate(commit["subject"], 47)
             scope = truncate(commit["scope"], 20)
             if commit["file_count"] > 1:
-                scope += f" · {commit['file_count']}"
+                scope += f" {commit['file_count']} 个文件"
             url = commit_url(commit["sha"])
             svg.extend(
                 [
@@ -508,7 +522,7 @@ def generate_recent_svg(history: list[dict], output: Path, branch: str) -> None:
     svg.append(f'<line class="divider" x1="0" y1="{footer_y}" x2="1119" y2="{footer_y}"/>')
     footer_text = "仅统计实际代码或项目文件修改"
     if hidden_count:
-        footer_text += f" · 另有 {hidden_count} 条未显示"
+        footer_text += f" 另有 {hidden_count} 条未显示"
     svg.append(
         f'<text class="text secondary" x="30" y="{footer_y + 29}">{svg_text(footer_text)}</text>'
     )
@@ -563,12 +577,13 @@ def generate_activity_svg(
     today = datetime.now(TZ).date()
     first_day = today - timedelta(days=364)
 
-    width, height = 1120, 278
-    card_y, card_w, card_h = 44, 1119, 233
+    width = 1120
+    card_y, card_w, card_h = 80, 1119, 233
+    height = card_y + card_h + 1
     cell, gap = 14, 5
     step = cell + gap
-    grid_left, grid_top = 80, 94
-    month_y, footer_y, legend_x = 84, 253, 872
+    grid_left, grid_top = 80, card_y + 50
+    month_y, footer_y, legend_x = card_y + 40, card_y + 209, 872
 
     offset_to_sunday = (first_day.weekday() + 1) % 7
     grid_start = first_day - timedelta(days=offset_to_sunday)
@@ -577,7 +592,12 @@ def generate_activity_svg(
     svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img">',
         "<style>", ACTIVITY_STYLE, "</style>",
-        f'<text class="text title" x="0" y="26">{total} contributions in the last year · {svg_text(branch)}</text>',
+        *section_header(
+            "近一年代码活动",
+            f"统计范围 {branch}" + (" 按提交 SHA 去重" if all_branches else ""),
+            f"{total:,} 次提交",
+            width,
+        ),
         f'<rect class="card" x="0.5" y="{card_y + 0.5}" width="{card_w - 1}" height="{card_h - 1}" rx="6" ry="6"/>',
     ]
 
@@ -618,7 +638,7 @@ def generate_activity_svg(
         )
 
     activity_note = (
-        "Valid code changes only · unique commits across all branches"
+        "Valid code changes deduplicated across all branches"
         if all_branches else "Valid code changes only"
     )
     svg.append(
@@ -647,7 +667,7 @@ def generate_statistics_svg(
     top = stats["top"]
 
     width = 1120
-    card_y = 44
+    card_y = 80
     metric_h = 92
     contributors_title_h = 48
     row_h = 42
@@ -669,7 +689,12 @@ def generate_statistics_svg(
     svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img">',
         "<style>", COMMON_STYLE, "</style>",
-        f'<text class="text title" x="0" y="26">Repository statistics · {svg_text(branch)}</text>',
+        *section_header(
+            "仓库统计",
+            f"统计范围 {branch}" + (" 按提交 SHA 去重" if all_branches else ""),
+            "完整提交历史",
+            width,
+        ),
         f'<rect class="card" x="0.5" y="{card_y + 0.5}" width="1118" height="{card_h - 1}" rx="6" ry="6"/>',
     ]
 
@@ -710,9 +735,9 @@ def generate_statistics_svg(
         )
 
     svg.append(f'<line class="divider" x1="0" y1="{footer_y}" x2="1119" y2="{footer_y}"/>')
-    date_range = f"{stats['first_date'].isoformat()} – {stats['last_date'].isoformat()}"
+    date_range = f"{stats['first_date'].isoformat()} 至 {stats['last_date'].isoformat()}"
     history_note = (
-        "All branches · commits deduplicated by SHA"
+        "All branch commits deduplicated by SHA"
         if all_branches else "Based on the complete Git history of this branch"
     )
     svg.append(
@@ -764,8 +789,7 @@ def collect_branch_info(
 
 def generate_branch_statistics_svg(branches: list[dict], output: Path) -> None:
     width = 1120
-    title_y = 29
-    card_y = 50
+    card_y = 80
     header_h = 46
     row_h = 48
     footer_h = 44
@@ -784,13 +808,18 @@ def generate_branch_statistics_svg(branches: list[dict], output: Path) -> None:
     svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img">',
         "<style>", COMMON_STYLE, "</style>",
-        f'<text class="text title" x="0" y="{title_y}">Branches · 当前 {len(branches)} 个分支</text>',
+        *section_header(
+            "分支对比",
+            f"对比基准 {BASE_BRANCH}",
+            f"{len(branches)} 个分支",
+            width,
+        ),
         f'<rect class="card" x="0.5" y="{card_y + 0.5}" width="1118" height="{card_h - 1}" rx="6" ry="6"/>',
         f'<text class="text header" x="{x_branch}" y="{card_y + 29}">分支</text>',
         f'<text class="text header" x="{x_role}" y="{card_y + 29}">类型</text>',
-        f'<text class="text header" x="{x_ahead}" y="{card_y + 29}">Ahead</text>',
-        f'<text class="text header" x="{x_behind}" y="{card_y + 29}">Behind</text>',
-        f'<text class="text header" x="{x_recent}" y="{card_y + 29}">近7天</text>',
+        f'<text class="text header" x="{x_ahead}" y="{card_y + 29}">领先提交</text>',
+        f'<text class="text header" x="{x_behind}" y="{card_y + 29}">落后提交</text>',
+        f'<text class="text header" x="{x_recent}" y="{card_y + 29}">近 {RECENT_DAYS} 天</text>',
         f'<text class="text header" x="{x_date}" y="{card_y + 29}">最近更新</text>',
         f'<text class="text header" x="{x_subject}" y="{card_y + 29}">最近提交</text>',
         f'<line class="divider" x1="0" y1="{card_y + header_h}" x2="1119" y2="{card_y + header_h}"/>',
@@ -801,15 +830,15 @@ def generate_branch_statistics_svg(branches: list[dict], output: Path) -> None:
         for i, info in enumerate(branches):
             row_top = rows_top + i * row_h
             baseline = row_top + 31
-            ahead_text = str(info["ahead"]) if info["comparable"] else "—"
-            behind_text = str(info["behind"]) if info["comparable"] else "—"
+            ahead_text = str(info["ahead"]) if info["comparable"] else "不适用"
+            behind_text = str(info["behind"]) if info["comparable"] else "不适用"
             subject = truncate(info["latest_subject"], 30)
             svg.extend(
                 [
                     f'<a href="{svg_text(info["url"])}"><text class="text link" x="{x_branch}" y="{baseline}">{svg_text(truncate(info["branch"], 33))}</text></a>',
                     f'<text class="text normal" x="{x_role}" y="{baseline}">{svg_text(info["role"])}</text>',
-                    f'<text class="text good" x="{x_ahead}" y="{baseline}">↑ {svg_text(ahead_text)}</text>',
-                    f'<text class="text warn" x="{x_behind}" y="{baseline}">↓ {svg_text(behind_text)}</text>',
+                    f'<text class="text good" x="{x_ahead}" y="{baseline}">{svg_text(ahead_text)}</text>',
+                    f'<text class="text warn" x="{x_behind}" y="{baseline}">{svg_text(behind_text)}</text>',
                     f'<text class="text normal" x="{x_recent}" y="{baseline}">{svg_text(info["recent7"])}</text>',
                     f'<text class="text secondary" x="{x_date}" y="{baseline}">{svg_text(info["latest_date"])}</text>',
                     f'<text class="text normal" x="{x_subject}" y="{baseline}">{svg_text(subject)}</text>',
@@ -822,7 +851,7 @@ def generate_branch_statistics_svg(branches: list[dict], output: Path) -> None:
     footer_y = rows_top + rows * row_h
     svg.append(f'<line class="divider" x1="0" y1="{footer_y}" x2="1119" y2="{footer_y}"/>')
     svg.append(
-        f'<text class="text secondary" x="28" y="{footer_y + 28}">Ahead / Behind 均相对于 {svg_text(BASE_BRANCH)}；无共同祖先时显示 —</text>'
+        f'<text class="text secondary" x="28" y="{footer_y + 28}">领先和落后按提交数计算 无共同祖先时显示不适用</text>'
     )
     svg.append("</svg>")
     write_svg(output, svg)
@@ -834,6 +863,7 @@ def generate_branch_statistics_svg(branches: list[dict], output: Path) -> None:
 
 
 def generate_index_html(branches: list[dict]) -> None:
+    asset_version = datetime.now(TZ).strftime("%Y%m%d%H%M%S%f")
     page_data = [
         {
             "branch": item["branch"],
@@ -848,7 +878,7 @@ def generate_index_html(branches: list[dict]) -> None:
 
     options = '<option value="">所有分支</option>\n' + "\n".join(
         f'<option value="{html.escape(item["branch"], quote=True)}">'
-        f'{html.escape(item["branch"])} · {html.escape(item["role"])}</option>'
+        f'{html.escape(item["branch"])} {html.escape(item["role"])}</option>'
         for item in branches
     )
 
@@ -863,13 +893,13 @@ def generate_index_html(branches: list[dict]) -> None:
 <title>SmartWebServer Repository Activity</title>
 <style>
 :root{{color-scheme:light dark}}
-body{{margin:0;padding:32px;background:#fff;color:#24292f;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}}
+body{{margin:0;padding:32px;background:#fff;color:#24292f;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei","PingFang SC",Helvetica,Arial,sans-serif}}
 main{{width:min(1120px,100%);margin:0 auto}}
 h1{{font-size:28px;margin:0 0 18px}}
 .toolbar{{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 26px}}
 .toolbar label{{font-weight:600}}
 select{{font:inherit;padding:8px 34px 8px 10px;border:1px solid #d0d7de;border-radius:6px;background:#fff;color:#24292f}}
-.meta{{color:#57606a;font-size:14px}}
+.meta{{color:#57606a;font-size:14px;white-space:pre-line;line-height:1.6;flex-basis:100%}}
 img{{display:block;width:100%;height:auto;margin:0 0 30px}}
 a{{color:#0969da;text-decoration:none}}a:hover{{text-decoration:underline}}
 .footer{{margin:24px 0 32px;color:#57606a;font-size:15px}}
@@ -885,10 +915,10 @@ a{{color:#0969da;text-decoration:none}}a:hover{{text-decoration:underline}}
 <span id="meta" class="meta"></span>
 </div>
 
-<img id="recent" src="recent-changes.svg" alt="Recent Changes">
-<img id="activity" src="repository-activity.svg" alt="Repository Activity">
-<img id="statistics" src="repository-statistics.svg" alt="Repository Statistics">
-<img src="branch-statistics.svg" alt="Branch Statistics">
+<img id="recent" src="recent-changes.svg?v={asset_version}" alt="Recent Changes">
+<img id="activity" src="repository-activity.svg?v={asset_version}" alt="Repository Activity">
+<img id="statistics" src="repository-statistics.svg?v={asset_version}" alt="Repository Statistics">
+<img src="branch-statistics.svg?v={asset_version}" alt="Branch Statistics">
 
 <div class="footer">
 <a href="{html.escape(repository_url(), quote=True)}">返回 GitHub Repository</a>
@@ -897,32 +927,41 @@ a{{color:#0969da;text-decoration:none}}a:hover{{text-decoration:underline}}
 <script>
 const branches = {page_data_json};
 const baseBranch = {base_branch_json};
+const assetVersion = "{asset_version}";
 const select = document.getElementById('branch');
 const meta = document.getElementById('meta');
 const recent = document.getElementById('recent');
 const activity = document.getElementById('activity');
 const statistics = document.getElementById('statistics');
 
+function assetUrl(path) {{
+  return path + '?v=' + encodeURIComponent(assetVersion);
+}}
+
 function applyBranch(name) {{
   const item = branches.find(x => x.branch === name);
   if (!item) {{
     select.value = '';
-    recent.src = 'recent-changes.svg';
-    activity.src = 'repository-activity.svg';
-    statistics.src = 'repository-statistics.svg';
-    meta.textContent = `汇总 ${{branches.length}} 个分支并按提交 SHA 去重；最近代码修改显示 ${{baseBranch}}。`;
+    recent.src = assetUrl('recent-changes.svg');
+    activity.src = assetUrl('repository-activity.svg');
+    statistics.src = assetUrl('repository-statistics.svg');
+    meta.textContent = `汇总 ${{branches.length}} 个分支并按提交 SHA 去重
+最近 {RECENT_DAYS} 天代码修改显示 ${{baseBranch}}`;
     history.replaceState(null, '', '#scope=all');
     return;
   }}
   select.value = item.branch;
   const prefix = `branches/${{item.slug}}/`;
-  recent.src = prefix + 'recent-changes.svg';
-  activity.src = prefix + 'repository-activity.svg';
-  statistics.src = prefix + 'repository-statistics.svg';
+  recent.src = assetUrl(prefix + 'recent-changes.svg');
+  activity.src = assetUrl(prefix + 'repository-activity.svg');
+  statistics.src = assetUrl(prefix + 'repository-statistics.svg');
   if (item.comparable) {{
-    meta.textContent = `相对 ${{baseBranch}}：↑ ${{item.ahead}} ahead · ↓ ${{item.behind}} behind`;
+    meta.textContent = `与 ${{baseBranch}} 对比
+领先 ${{item.ahead}} 次提交
+落后 ${{item.behind}} 次提交`;
   }} else {{
-    meta.textContent = '与基准分支无共同祖先';
+    meta.textContent = `与 ${{baseBranch}} 无共同祖先
+无法比较领先和落后提交数`;
   }}
   history.replaceState(null, '', '#branch=' + encodeURIComponent(item.branch));
 }}
@@ -958,15 +997,16 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     branches = discover_branches()
-    print("自动发现分支：", ", ".join(branches))
+    print(f"自动发现 {len(branches)} 个分支")
+    print("\n".join(branches))
 
     if BASE_BRANCH not in branches:
         raise RuntimeError(
-            f"基准分支 {BASE_BRANCH!r} 不在自动发现结果中。"
-            f"当前匹配规则为 {BRANCH_PATTERN!r}。"
+            f"基准分支 {BASE_BRANCH} 不在自动发现结果中\n"
+            f"当前匹配规则为 {BRANCH_PATTERN}"
         )
     if len({safe_slug(branch) for branch in branches}) != len(branches):
-        raise RuntimeError("分支输出目录发生冲突，请检查分支名称。")
+        raise RuntimeError("分支输出目录发生冲突\n请检查分支名称")
 
     recent_histories: dict[str, list[dict]] = {}
     full_histories: dict[str, list[dict]] = {}
@@ -975,11 +1015,11 @@ def main() -> None:
         ref = branch_ref(branch)
         print(f"读取 {branch} 最近一年有效代码历史")
         recent_history = load_recent_history(ref)
-        print(f"  有效提交：{len(recent_history)}")
+        print(f"  有效提交 {len(recent_history)}")
 
         print(f"读取 {branch} 完整历史")
         full_history = load_full_history(ref)
-        print(f"  完整提交：{len(full_history)}")
+        print(f"  完整提交 {len(full_history)}")
 
         recent_histories[branch] = recent_history
         full_histories[branch] = full_history
@@ -999,7 +1039,7 @@ def main() -> None:
     # README 的最近修改保留发布分支；两项仓库统计汇总所有分支。
     all_recent_history = merge_histories(list(recent_histories.values()))
     all_full_history = merge_histories(list(full_histories.values()))
-    aggregate_label = f"All branches ({len(branches)})"
+    aggregate_label = f"所有 {len(branches)} 个分支"
 
     generate_recent_svg(
         recent_histories[BASE_BRANCH], OUTPUT_DIR / "recent-changes.svg", BASE_BRANCH
@@ -1037,18 +1077,22 @@ def main() -> None:
         "activity_last_year": sum(contribution_counts(all_recent_history).values()),
         "recent_changes_branch": BASE_BRANCH,
         "filters": {
-            "activity": "代码或项目文件修改；排除机器人及仅修改忽略路径的提交",
-            "statistics": "所有分支完整提交历史；排除机器人提交",
+            "activity": "代码或项目文件修改 排除机器人及仅修改忽略路径的提交",
+            "statistics": "所有分支完整提交历史 排除机器人提交",
         },
     }
     (OUTPUT_DIR / "repository-summary.json").write_text(
         json.dumps(scope_data, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    print("全分支去重汇总：", json.dumps(scope_data, ensure_ascii=False))
-    print(f"生成完成：{OUTPUT_DIR}")
+    print("所有分支按提交 SHA 去重汇总")
+    print(f"完整提交 {summary['total_commits']}")
+    print(f"贡献者 {summary['contributors']}")
+    print(f"最近一年有效提交 {scope_data['activity_last_year']}")
+    print(f"生成完成 {OUTPUT_DIR}")
 
 
 if __name__ == "__main__":
     main()
+
 
 
