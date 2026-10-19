@@ -1,19 +1,17 @@
-
 name: Adaptive Upstream Sync
 
 on:
-  # 每周一北京时间 09:17 触发
+  # Beijing time: Monday 09:17 (UTC Monday 01:17)
   schedule:
     - cron: "17 1 * * 1"
-
-  # 支持手动触发，手动运行重置检查周期
+  # Manual runs always check upstream and reset the cycle after success.
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: sync-upstream-original
+  group: smartwebserver-upstream-sync
   cancel-in-progress: false
 
 jobs:
@@ -22,116 +20,84 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 检出 Original 分支
+      # The workflow file lives on FeatureRelease; only the checkout targets Original.
       - name: Checkout Original
         uses: actions/checkout@v4
         with:
           ref: SmartWebServer-Original
           fetch-depth: 1
 
-      # 2. 获取上次同步计时标签
-      - name: Load sync clock
+      # Keep the clock in Git Notes so it does not appear under Releases / Tags.
+      - name: Load hidden sync clock
         shell: bash
         run: |
           set -euo pipefail
-
-          TAG="sws-upstream-sync-clock"
-
-          REMOTE_TAG=$(
-            git ls-remote --tags origin "refs/tags/$TAG"
-          )
-
-          if [[ -n "$REMOTE_TAG" ]]; then
-            git fetch --no-tags origin \
-              "+refs/tags/$TAG:refs/tags/$TAG"
+          CLOCK_REF="refs/notes/sws-upstream-sync-clock"
+          if git ls-remote --exit-code origin "$CLOCK_REF" >/dev/null; then
+            git fetch --no-tags origin "+$CLOCK_REF:$CLOCK_REF"
+          else
+            code=$?
+            if [[ "$code" -ne 2 ]]; then
+              echo "::error::Unable to inspect the remote Git Notes clock."
+              exit "$code"
+            fi
           fi
 
-      # 3. 根据上次更新的时间决定是否检查上游
-      - name: Calculate adaptive schedule
+      - name: Decide whether to check upstream
         id: cadence
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           python3 - <<'PY'
           import os
           import subprocess
           import time
 
-          TAG = "sws-upstream-sync-clock"
-
-          raw = subprocess.check_output(
-              [
-                  "git",
-                  "for-each-ref",
-                  "--format=%(taggerdate:unix)",
-                  f"refs/tags/{TAG}",
-              ],
+          clock = subprocess.run(
+              ["git", "log", "-1", "--format=%ct", "refs/notes/sws-upstream-sync-clock"],
+              capture_output=True,
               text=True,
-          ).strip()
-
-          initialize = not bool(raw)
-          manual = os.environ.get(
-              "GITHUB_EVENT_NAME"
-          ) == "workflow_dispatch"
+              check=False,
+          )
+          raw = clock.stdout.strip() if clock.returncode == 0 else ""
+          initialize = not raw.isdigit()
+          manual = os.environ["EVENT_NAME"] == "workflow_dispatch"
 
           if manual:
-              check = True
-              reason = "Manual sync requested"
-
+              should_check, reason = True, "Manual run: check and reset the clock"
           elif initialize:
-              check = True
-              reason = "Initial sync"
-
+              should_check, reason = True, "No note clock: initialize after checking"
           else:
-              now = int(time.time())
-              elapsed = max(
-                  0,
-                  (now - int(raw)) // 86400,
-              )
+              elapsed_days = max(0, (int(time.time()) - int(raw)) // 86400)
+              elapsed_weeks = (elapsed_days + 1) // 7  # Allow one day of cron jitter
 
-              if elapsed >= 182:
-                  check = False
-                  reason = "Automatic sync paused"
-
-              elif elapsed < 7:
-                  check = False
-                  reason = "Too soon to check again"
-
+              if elapsed_days >= 182:
+                  should_check, reason = False, "Paused after 26 weeks of inactivity"
+              elif elapsed_days < 6:
+                  should_check, reason = False, "Less than seven days since last reset"
               else:
-                  if elapsed < 28:
+                  if elapsed_days < 28:
                       interval = 1
-                  elif elapsed < 56:
+                  elif elapsed_days < 56:
                       interval = 2
-                  elif elapsed < 112:
+                  elif elapsed_days < 112:
                       interval = 4
                   else:
                       interval = 8
-
-                  week = elapsed // 7
-
-                  check = week % interval == 0
-
+                  should_check = elapsed_weeks % interval == 0
                   reason = (
-                      f"{elapsed} inactive days, "
-                      f"checking every {interval} weeks"
+                      f"{elapsed_days} days since last reset; "
+                      f"checking every {interval} week(s)"
                   )
 
-          with open(
-              os.environ["GITHUB_OUTPUT"],
-              "a",
-              encoding="utf-8",
-          ) as output:
-              output.write(
-                  f"do_check={str(check).lower()}\n"
-              )
-              output.write(
-                  f"initialize={str(initialize).lower()}\n"
-              )
-
           print(reason)
-          print(f"Check upstream: {check}")
+          print(f"Check upstream: {should_check}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"do_check={str(should_check).lower()}\n")
+              output.write(f"initialize={str(initialize).lower()}\n")
           PY
 
-      # 4. 只在计划允许时检查上游
       - name: Fetch and fast-forward upstream
         id: update
         if: steps.cadence.outputs.do_check == 'true'
@@ -139,49 +105,36 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 获取 Original 的完整历史
+          # A complete local history is required for the ancestry check.
           if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
-            git fetch --unshallow --no-tags \
-              origin SmartWebServer-Original
+            git fetch --unshallow --no-tags origin SmartWebServer-Original
           fi
 
-          # 配置上游仓库
-          git remote add upstream \
-            https://github.com/hjd1964/SmartWebServer.git
+          git remote add upstream https://github.com/hjd1964/SmartWebServer.git
+          git fetch --no-tags upstream "+refs/heads/main:refs/remotes/upstream/main"
 
-          git fetch --no-tags upstream main
+          CURRENT="$(git rev-parse HEAD)"
+          UPSTREAM="$(git rev-parse refs/remotes/upstream/main)"
 
-          CURRENT=$(git rev-parse HEAD)
-          UPSTREAM=$(git rev-parse FETCH_HEAD)
-
-          # 必须保持原有 Git 历史
-          if ! git merge-base --is-ancestor \
-            "$CURRENT" "$UPSTREAM"; then
-
-            echo "::error::Git history diverged. Sync aborted."
+          if ! git merge-base --is-ancestor "$CURRENT" "$UPSTREAM"; then
+            echo "::error::Original is not an ancestor of upstream/main. Sync stopped without modifying history."
             exit 1
           fi
 
-          # 没有新提交时不更新仓库
           if [[ "$CURRENT" == "$UPSTREAM" ]]; then
-            echo "Upstream unchanged."
+            echo "Upstream unchanged; no branch update needed."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # 只允许 Fast-forward
           git merge --ff-only "$UPSTREAM"
-
-          # 更新 Original 分支
-          git push origin \
-            HEAD:refs/heads/SmartWebServer-Original
-
+          git push origin HEAD:refs/heads/SmartWebServer-Original
           echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "Original fast-forwarded to upstream/main."
 
-          echo "Original synchronized successfully."
-
-      # 5. 上游有更新或手动触发时重置周期
-      - name: Reset adaptive sync clock
+      # Git Notes refs are independent of branches and software-release tags.
+      # Reset when the run is manual, when upstream actually changed, or on first setup.
+      - name: Reset hidden sync clock
         if: >-
           ${{
             steps.cadence.outputs.do_check == 'true' &&
@@ -194,18 +147,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           git config user.name "github-actions[bot]"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          TAG="sws-upstream-sync-clock"
-
-          git tag -fa "$TAG" \
-            -m "Sync clock reset $(date -u +%FT%TZ)" \
-            HEAD
-
-          # 仅更新计时标签，不强制推送 Original
-          git push --force origin "refs/tags/$TAG"
-
-          echo "Adaptive sync clock reset."
+          CLOCK_REF="refs/notes/sws-upstream-sync-clock"
+          git notes --ref="$CLOCK_REF" add -f \
+            -m "Sync clock reset $(date -u +%FT%TZ)" HEAD
+          git push origin "$CLOCK_REF:$CLOCK_REF"
+          echo "Hidden upstream-sync clock updated successfully."
