@@ -185,10 +185,6 @@ arduino-cli compile --clean --jobs 1 --warnings all --fqbn esp32:esp32:esp32 .
 
 上游项目：[hjd1964/SmartWebServer](https://github.com/hjd1964/SmartWebServer)，原作者 Howard Dutton
 
-当前维护记录中的上游集成基线为 **SWS 2.10h**，对应提交 [193a818](https://github.com/Leo-John233/SmartWebServer/commit/193a81809f5b19b3afa2a8c58f18291c2f0b0475)本仓库在此基础上维护中文界面与功能扩展
-
-相关仓库：[Leo-John233/OnStep](https://github.com/Leo-John233/OnStep)
-
 本项目采用 GNU General Public License v3.0，具体条款见 [LICENSE](LICENSE)感谢上游作者及各位贡献者
 
 <!-- repository-activity:start -->
