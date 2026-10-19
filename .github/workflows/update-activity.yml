@@ -1,3 +1,4 @@
+
 name: Update Repository Activity
 
 on:
@@ -5,9 +6,12 @@ on:
     branches:
       - "**"
       - "!SmartWebServer-Original"
+
   workflow_dispatch:
+
+  # 每周一北京时间 09:27 检查
   schedule:
-    - cron: "15 0 * * *"
+    - cron: "27 1 * * 1"
 
 concurrency:
   group: repository-activity-pages
@@ -20,9 +24,155 @@ permissions:
   id-token: write
 
 jobs:
+  decide:
+    name: Check refresh schedule
+    runs-on: ubuntu-latest
+
+    outputs:
+      refresh: ${{ steps.direct.outputs.refresh || steps.timer.outputs.refresh }}
+
+    steps:
+      # 有新 Push 或手动运行时直接刷新
+      - name: Immediate refresh
+        id: direct
+        if: github.event_name != 'schedule'
+        run: |
+          echo "refresh=true" >> "$GITHUB_OUTPUT"
+
+      # 定时任务才需要计算周期
+      - name: Checkout repository
+        if: github.event_name == 'schedule'
+        uses: actions/checkout@v6
+        with:
+          ref: SmartWebServer-FeatureRelease
+          fetch-depth: 1
+
+      - name: Fetch branch activity and reset clock
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags --depth=1 origin \
+            "+refs/heads/*:refs/remotes/origin/*" --prune
+
+          TAG="sws-activity-refresh-clock"
+
+          if git ls-remote --exit-code --tags \
+            origin "refs/tags/$TAG" > /dev/null 2>&1; then
+
+            git fetch --no-tags origin \
+              "+refs/tags/$TAG:refs/tags/$TAG"
+          fi
+
+      - name: Calculate adaptive interval
+        id: timer
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          import time
+
+          def git(*args):
+              return subprocess.check_output(
+                  ["git", *args],
+                  text=True,
+              ).strip()
+
+          latest = 0
+
+          refs = git(
+              "for-each-ref",
+              "--format=%(refname:short)%09%(committerdate:unix)",
+              "refs/remotes/origin/",
+          )
+
+          for line in refs.splitlines():
+              if "\t" not in line:
+                  continue
+
+              name, timestamp = line.split("\t", 1)
+
+              if name in (
+                  "origin/HEAD",
+                  "origin/SmartWebServer-Original",
+              ):
+                  continue
+
+              if timestamp.isdigit():
+                  latest = max(latest, int(timestamp))
+
+          # 读取手动重置时间
+          tag_time = git(
+              "for-each-ref",
+              "--format=%(taggerdate:unix)",
+              "refs/tags/sws-activity-refresh-clock",
+          )
+
+          if tag_time.isdigit():
+              latest = max(latest, int(tag_time))
+
+          if latest == 0:
+              refresh = True
+              reason = "No activity clock found"
+
+          else:
+              days = max(
+                  0,
+                  int((time.time() - latest) / 86400),
+              )
+
+              weeks = days // 7
+
+              if days < 7:
+                  refresh = False
+                  reason = "Recently refreshed by push"
+
+              elif days < 28:
+                  interval = 1
+                  refresh = True
+                  reason = "Weekly refresh"
+
+              elif days < 56:
+                  interval = 2
+                  refresh = weeks % interval == 0
+                  reason = "Biweekly refresh"
+
+              elif days < 112:
+                  interval = 4
+                  refresh = weeks % interval == 0
+                  reason = "Four-week refresh"
+
+              elif days < 182:
+                  interval = 8
+                  refresh = weeks % interval == 0
+                  reason = "Eight-week refresh"
+
+              else:
+                  refresh = False
+                  reason = "Automatic refresh paused"
+
+          print(reason)
+          print(f"Refresh: {refresh}")
+
+          with open(
+              os.environ["GITHUB_OUTPUT"],
+              "a",
+              encoding="utf-8",
+          ) as output:
+              output.write(
+                  f"refresh={str(refresh).lower()}\n"
+              )
+          PY
+
   build:
     name: Generate activity
+    needs: decide
+    if: needs.decide.outputs.refresh == 'true'
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout statistics generator
         uses: actions/checkout@v6
@@ -32,13 +182,20 @@ jobs:
 
       - name: Fetch all repository branches
         run: |
-          git fetch --no-tags origin "+refs/heads/*:refs/remotes/origin/*" --prune
-          git for-each-ref --format='%(refname:short)' 'refs/remotes/origin/'
+          git fetch --no-tags origin \
+            "+refs/heads/*:refs/remotes/origin/*" --prune
+
+          git for-each-ref \
+            --format='%(refname:short)' \
+            'refs/remotes/origin/'
 
       - name: Fetch upstream project
         run: |
-          git remote add upstream https://github.com/hjd1964/SmartWebServer.git
-          git fetch --no-tags upstream "+refs/heads/main:refs/remotes/upstream/main"
+          git remote add upstream \
+            https://github.com/hjd1964/SmartWebServer.git
+
+          git fetch --no-tags upstream \
+            "+refs/heads/main:refs/remotes/upstream/main"
 
       - name: Generate repository activity
         env:
@@ -61,10 +218,52 @@ jobs:
     name: Deploy activity
     runs-on: ubuntu-latest
     needs: build
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # 手动刷新部署成功后重置周期
+  reset-clock:
+    name: Reset activity refresh clock
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' &&
+        needs.deploy.result == 'success'
+      }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v6
+        with:
+          ref: SmartWebServer-FeatureRelease
+          fetch-depth: 1
+
+      - name: Reset clock tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          TAG="sws-activity-refresh-clock"
+
+          git tag -fa "$TAG" \
+            -m "Activity refresh clock reset" HEAD
+
+          git push --force origin "refs/tags/$TAG"
+
+          echo "Activity refresh cycle reset."
