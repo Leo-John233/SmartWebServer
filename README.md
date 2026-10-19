@@ -187,12 +187,19 @@ arduino-cli compile --clean --jobs 1 --warnings all --fqbn esp32:esp32:esp32 .
 
 本项目采用 GNU General Public License v3.0，具体条款见 [LICENSE](LICENSE)感谢上游作者及各位贡献者
 
+
 <!-- repository-activity:start -->
 
 <a name="最近代码修改"></a>
- 
+
+![最近代码修改](https://leo-john233.github.io/SmartWebServer/recent-changes.svg)
+
 [查看发布分支完整提交记录](https://github.com/Leo-John233/SmartWebServer/commits/SmartWebServer-FeatureRelease)
-  
+
+![代码活动热力图](https://leo-john233.github.io/SmartWebServer/repository-activity.svg)
+
+![仓库统计](https://leo-john233.github.io/SmartWebServer/repository-statistics.svg)
+
 [查看分支统计与切换页面](https://leo-john233.github.io/SmartWebServer/)
 
 <!-- repository-activity:end -->
