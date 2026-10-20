@@ -10,11 +10,14 @@
 
 | 分支 | 用途 |
 | --- | --- |
-| [SmartWebServer-FeatureRelease](https://github.com/Leo-John233/SmartWebServer/tree/SmartWebServer-FeatureRelease) | 当前默认分支，用于发布本仓库的功能版本，首次使用可从此分支开始 |
-| [SmartWebServer-FeatureDev](https://github.com/Leo-John233/SmartWebServer/tree/SmartWebServer-FeatureDev) | 功能开发与调整分支，适合参与开发、验证改动和反馈问题 |
-| [SmartWebServer-Original](https://github.com/Leo-John233/SmartWebServer/tree/SmartWebServer-Original) | 上游源码对照分支，用于查看原版实现和核对上游更新 |
+| [SmartWebServer-FeatureRelease](https://github.com/Leo-John233/SmartWebServer/tree/SmartWebServer-FeatureRelease) | 默认发布分支，推荐普通用户使用 |
+| [SmartWebServer-Original](https://github.com/Leo-John233/SmartWebServer/tree/SmartWebServer-Original) | 上游 [hjd1964/SmartWebServer](https://github.com/hjd1964/SmartWebServer) 的 `main` 基线，自动同步并保留完整 Git 历史 |
 
-不同分支的源码与提交历史可能存在差异下载、编译和提交问题时，请注明所用分支及提交编号
+### 其他分支
+
+![其他分支预览](https://leo-john233.github.io/SmartWebServer/branch-preview.svg)
+
+[查看更多分支及切换统计](https://leo-john233.github.io/SmartWebServer/)
 
 ## 主要功能
 
