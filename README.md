@@ -17,8 +17,6 @@
 
 ![其他分支预览](https://leo-john233.github.io/SmartWebServer/branch-preview.svg)
 
-[查看更多分支及切换统计](https://leo-john233.github.io/SmartWebServer/)
-
 ## 主要功能
 
 | 功能 | 说明 |
