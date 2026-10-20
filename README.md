@@ -14,7 +14,6 @@
 | [SmartWebServer-Original](https://github.com/Leo-John233/SmartWebServer/tree/SmartWebServer-Original) | 上游 [hjd1964/SmartWebServer](https://github.com/hjd1964/SmartWebServer) 的 `main` 基线，自动同步并保留完整 Git 历史 |
 
 ### 其他分支
-
 ![其他分支预览](https://leo-john233.github.io/SmartWebServer/branch-preview.svg)
 
 ## 主要功能
