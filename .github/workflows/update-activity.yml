@@ -156,6 +156,8 @@ jobs:
 
       - name: Generate repository activity
         env:
+          # Public repository metadata and commit-author association
+          GITHUB_TOKEN: ${{ github.token }}
           ACTIVITY_TIMEZONE: Asia/Shanghai
           ACTIVITY_BASE_BRANCH: SmartWebServer-FeatureRelease
           ACTIVITY_ORIGINAL_BRANCH: SmartWebServer-Original
