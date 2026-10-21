@@ -145,8 +145,9 @@ void handleAux() {
         data.concat(F("</div><span class='sws-aux-value'>"));
         if (purpose == DEW_HEATER) {
           dtostrf(celsiusToNativeRelative(state.featureValue4()), 3, 1, temp1);
-          snprintf(temp, sizeof(temp), "&Delta;<span id='x%dv4'>%s</span>&deg;" TEMPERATURE_UNITS_ABV, channel, temp1);
-          data.concat(temp);
+          // 温差文本直接追加，避免小缓冲截断完整数值和标签
+          static const char heaterReading[] PROGMEM = "&Delta;<span id='x%dv4'>%s</span>&deg;" TEMPERATURE_UNITS_ABV;
+          appendPageFormat(data, heaterReading, channel, temp1);
         }
         data.concat(F("</span></div>"));
         www.sendContentAndClear(data);
