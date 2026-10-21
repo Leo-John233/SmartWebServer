@@ -53,7 +53,7 @@ const char html_network_css[] PROGMEM = R"NET(
   margin: 8px 0 16px;
 }
 
-.nw-card label {
+.nw-card label, .nw-card .nw-toggle {
   display: block;
   margin: 14px 0 6px;
 }
@@ -295,7 +295,7 @@ const char html_network_css[] PROGMEM = R"NET(
   gap: 16px;
   margin: 18px 0;
 }
-.nw-switch-line label {
+.nw-switch-line > span {
   margin: 0;
 }
 .nw-switch {
@@ -438,5 +438,11 @@ const char html_network_css[] PROGMEM = R"NET(
     max-width: 100%;
   }
 }
+
+/* 只有开关本体响应切换，文字和空白保持普通指针 */
+.nw-switch-line,.nw-switch-line>span,.nw-card .nw-toggle { cursor:default; -webkit-tap-highlight-color:transparent; }
+.nw-card :is(a,button,input,select,textarea,label,summary,[role='switch']) { -webkit-tap-highlight-color:transparent; }
+.nw-card :is(button,summary,[role='switch']) { -webkit-user-select:none; user-select:none; }
+.nw-card :is(a,button,input,select,textarea,summary):focus:not(:focus-visible) { outline:none; }
 </style>
 )NET";

@@ -87,7 +87,7 @@ const char htmL_NET_SN[] PROGMEM =
     ;
   #else
     const char html_network_ota_mode[] PROGMEM =
-    "<label class='sws-ota-mode'><input type='checkbox' name='otaen' value='1' %s><span>" L_NETWORK_EN_OTA "</span></label>";
+    "<div class='sws-ota-mode'><input type='checkbox' name='otaen' value='1' aria-label=\"" L_NETWORK_EN_OTA "\" %s><span>" L_NETWORK_EN_OTA "</span></div>";
     const char html_network_ota_action[] PROGMEM =
     "<button type='submit'>" L_SAVE_SETTINGS "</button></form>\n";
   #endif
