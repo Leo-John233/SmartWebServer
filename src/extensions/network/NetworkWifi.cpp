@@ -112,6 +112,12 @@ bool configureStation() {
   lastStationStatus = 0;
   // 由 SDK 维护本次连接，主循环负责总等待时限
   if (!WiFi.enableSTA(true)) return false;
+  // 空闲时也保持接收，避免省电休眠影响路由器连接
+  #ifdef ESP8266
+    WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  #elif defined(ESP32)
+    WiFi.setSleep(false);
+  #endif
   WiFi.setAutoReconnect(true);
   WiFi.disconnect();
   // 沿用旧版调用顺序，一次完成配置和连接，后续主循环只读取结果
@@ -130,14 +136,18 @@ bool configureStation() {
   noticeTarget = "sta";
   return true;
 }
-void connectionFailed(const String &reason) {
-  connecting = backgroundConnecting = false;
+void connectionFailed(const String &reason, bool allowSdkRecovery = false) {
+  const bool background = backgroundConnecting;
+  connecting = false;
   failed = true;
   wifiManager.networkBusy = false;
-  // 沿用 10 月 16 日的失败清理，只断开路由器，不切换 AP+STA 模式
-  WiFi.disconnect();
+  // 后台超时且热点无人使用时保留 SDK 恢复机会，网页操作仍可优先接管
+  if (!background || !allowSdkRecovery || WiFi.softAPgetStationNum() > 0) WiFi.disconnect();
   stationCandidate = false;
-  stationReconnect.failed();
+  if (background) stationReconnect.retryLater(millis());
+  else stationReconnect.failed();
+  // 保留后台标记，让用户操作能中断仍在搜索的 SDK
+  backgroundConnecting = background;
   bool available = apActive() || startAp();
   const String feedback = authenticationRejected ? String(L_UI_WIFI_AUTH_FAILED) : reason;
   notice = feedback + (available ? L_UI_AP_AVAILABLE : L_UI_AP_FAILED);
@@ -326,10 +336,17 @@ void pollWifiNetwork() {
   }
   if (!connecting && !pending) {
     const bool linked = WiFi.status() == WL_CONNECTED;
-    if (linked && !wasConnected) stationReconnect.online(now);
+    if (linked && !wasConnected) {
+      stationReconnect.online(now);
+      if (backgroundConnecting) {
+        backgroundConnecting = false;
+        failed = false;
+        if (strcmp(noticeTarget, "sta") == 0) notice = L_UI_CONNECTED_ADDRESS + WiFi.localIP().toString();
+      }
+    }
     if (!linked && wasConnected) {
       stationReconnect.lost(now);
-      if (wifiManager.settings.stationEnabled && !apActive()) startAp();
+      // 先留出 SDK 快速恢复的时间，到后台重连时再确保热点入口
     }
     wasConnected = linked;
   }
@@ -429,13 +446,14 @@ void pollWifiNetwork() {
         }
       }
     } else if (action == swsWifi::StationConnection::Failed) {
-      connectionFailed(L_UI_CONNECT_FAILED);
+      connectionFailed(L_UI_CONNECT_FAILED, true);
     }
   }
   #if STA_AUTO_RECONNECT == true
-    // 已保存网络启动失败或掉线后允许一次恢复，明确失败后等待手动重试
+    // 已保存网络每隔三十秒允许恢复，热点有人操作时暂缓主动重连
     if (stationReconnect.due(now) && wifiManager.settings.stationEnabled && !connecting && !scanning && !pending &&
         WiFi.status() != WL_CONNECTED) {
+      if (WiFi.softAPgetStationNum() > 0) { stationReconnect.defer(now); return; }
       backgroundConnecting = true;
       if (!apActive()) startAp();
       if (!configureStation()) connectionFailed(L_UI_APPLY_IP_FAILED);
