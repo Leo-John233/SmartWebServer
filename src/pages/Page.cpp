@@ -17,19 +17,19 @@ void pageHeader(int selected) {
   if (selected == PAGE_CONTROLLER) data.concat(FPSTR(html_links_selected));
   data.concat(FPSTR(html_links_idx_end));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
   if (status.mountFound == SD_TRUE) {
     data.concat(FPSTR(html_links_mnt_begin));
     if (selected == PAGE_MOUNT) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_mnt_end));
-    www.sendContentAndClear(data);
+    if (data.length() >= 768) { www.sendContentAndClear(data); }
   }
 
   if (status.onStepFound) {
     data.concat(FPSTR(html_links_net_begin));
     if (selected == PAGE_NETWORK) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_net_end));
-    www.sendContentAndClear(data);
+    if (data.length() >= 768) { www.sendContentAndClear(data); }
   }
   bool extras = status.rotatorFound == SD_TRUE || status.focuserFound == SD_TRUE || status.auxiliaryFound == SD_TRUE;
   #if ENCODERS == ON
@@ -45,21 +45,21 @@ void pageHeader(int selected) {
     data.concat(FPSTR(html_links_rot_begin));
     if (selected == PAGE_ROTATOR) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_rot_end));
-    www.sendContentAndClear(data);
+    if (data.length() >= 768) { www.sendContentAndClear(data); }
   }
 
   if (status.focuserFound == SD_TRUE) {
     data.concat(FPSTR(html_links_foc_begin));
     if (selected == PAGE_FOCUSER) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_foc_end));
-    www.sendContentAndClear(data);
+    if (data.length() >= 768) { www.sendContentAndClear(data); }
   }
 
   if (status.auxiliaryFound == SD_TRUE) {
     data.concat(FPSTR(html_links_aux_begin));
     if (selected == PAGE_AUXILIARY) data.concat(FPSTR(html_links_selected));
     data.concat(FPSTR(html_links_aux_end));
-    www.sendContentAndClear(data);
+    if (data.length() >= 768) { www.sendContentAndClear(data); }
   }
 
   #if ENCODERS == ON
@@ -67,7 +67,7 @@ void pageHeader(int selected) {
       data.concat(FPSTR(html_links_enc_begin));
       if (selected == PAGE_ENCODERS) data.concat(FPSTR(html_links_selected));
       data.concat(FPSTR(html_links_enc_end));
-      www.sendContentAndClear(data);
+      if (data.length() >= 768) { www.sendContentAndClear(data); }
     }
   #endif
   if (extras) data.concat(F("</div>"));

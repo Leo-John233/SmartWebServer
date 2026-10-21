@@ -84,7 +84,7 @@ void trackingTileAjax(String &data)
   data.concat(keyValueBoolSelected("trk_lun", status.tracking && state.trackingLunar));
   data.concat(keyValueBoolSelected("trk_king", status.tracking && state.trackingKing));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

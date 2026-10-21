@@ -82,7 +82,7 @@ void pecTileAjax(String &data)
   } else { data.concat(L_PEC_UNK); }
   data.concat("\n");
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

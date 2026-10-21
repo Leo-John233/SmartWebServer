@@ -297,7 +297,7 @@ void libraryTileAjax(String &data)
     downloadCatalogData = false;
   }
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

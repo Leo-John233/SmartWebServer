@@ -137,7 +137,6 @@ bool axisTile(int axis, String &data)
                 for (int i = 0; i < 4; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
                     appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    www.sendContentAndClear(data);
                   }
                 }
                 appendPageFormat(data, html_configAxisSelectEnd, name);
@@ -161,7 +160,6 @@ bool axisTile(int axis, String &data)
                 for (int i = 0; i < 9; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
                     appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    www.sendContentAndClear(data);
                   }
                 }
                 appendPageFormat(data, html_configAxisSelectEnd, name);
@@ -175,13 +173,13 @@ bool axisTile(int axis, String &data)
                 for (int i = 0; i < 5; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
                     appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    www.sendContentAndClear(data);
                   }
                 }
                 appendPageFormat(data, html_configAxisSelectEnd, name);
               } break;
               
             }
+            www.sendContentAndClear(data);
           }
         }
 
@@ -221,7 +219,7 @@ void axisTileAjax(int axis, String &data)
   if (state.driverStatusStr[axis][0] == '?') strcpy(temp1, L_UNKNOWN); else strcpy(temp1, state.driverStatusStr[axis]);
   data.concat(keyValueString(temp, temp1));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

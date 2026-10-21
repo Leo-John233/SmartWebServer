@@ -86,7 +86,7 @@ void stallGuardTileAjax(String &data)
   data.concat(keyValueBoolEnabled("sgax8", _stallguard_axis == 0));
   data.concat(keyValueBoolEnabled("sgax9", _stallguard_axis == 0));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

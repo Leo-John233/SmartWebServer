@@ -29,7 +29,7 @@ void deRotatorTileAjax(String &data)
   if (status.mountType == MT_ALTAZM) {
     data.concat(keyValueToggleBoolSelected("rot_on", "rot_off", state.rotatorDerotate));
     data.concat(keyValueBoolSelected("rot_rev", state.rotatorDerotateReverse));
-    www.sendContentAndClear(data);
+    if (data.length() >= 768) { www.sendContentAndClear(data); }
   }
 }
 

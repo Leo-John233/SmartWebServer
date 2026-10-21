@@ -140,7 +140,7 @@ void statusTileAjax(String &data)
     data.concat("\n");
   #endif
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

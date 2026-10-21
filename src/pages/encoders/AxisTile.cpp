@@ -83,7 +83,7 @@ void encAxisTileAjax(String &data) {
   data.concat(keyValueString("diff_a2", state.diffAngleAxis2Str));
   data.concat(keyValueString("enc_a2", state.encAngleAxis2Str));
   data.concat(keyValueString("raw_a2", state.angleAxis2Str));
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

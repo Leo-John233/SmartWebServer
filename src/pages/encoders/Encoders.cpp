@@ -96,6 +96,7 @@ void encAjax()
   syncTileAjax(data);
   encAxisTileAjax(data);
   
+  www.sendContentAndClear(data);
   www.sendContent("");
 
   state.lastMountPageLoadTime = millis();

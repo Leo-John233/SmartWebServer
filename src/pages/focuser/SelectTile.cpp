@@ -62,7 +62,7 @@ void focuserSelectTileAjax(String &data)
   data.concat(keyValueBoolSelected("foc4_sel", state.focuserSelected == 4));
   data.concat(keyValueBoolSelected("foc5_sel", state.focuserSelected == 5));
   data.concat(keyValueBoolSelected("foc6_sel", state.focuserSelected == 6));
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

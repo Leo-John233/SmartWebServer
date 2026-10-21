@@ -102,7 +102,7 @@ void siteTileAjax(String &data)
   data.concat(keyValueString("site_long", state.longitudeStr));
   data.concat(keyValueString("site_lat", state.latitudeStr));
   data.concat(keyValueString("call", "update_date_time"));
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

@@ -80,7 +80,7 @@ void focuserBacklashTcfTileAjax(String &data)
   data.concat(keyValueString("f_tcf_db", state.focuserDeadbandStr, " " L_UNIT_STEPS));
   data.concat(keyValueString("f_tcf_coef", state.focuserTcfCoefStr));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

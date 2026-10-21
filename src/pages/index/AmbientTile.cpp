@@ -32,7 +32,7 @@ void ambientTileAjax(String &data)
   data.concat(F("tphd_h|")); data.concat(state.siteHumidityStr); data.concat("\n");
   data.concat(F("tphd_d|")); data.concat(state.siteDewPointStr); data.concat("\n");
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

@@ -49,7 +49,7 @@ void focuserSlewingTileAjax(String &data)
   s = keyValueBoolSelected("foc_rate_f", state.focuserGotoRate == 4); data.concat(s);
   s = keyValueBoolSelected("foc_rate_vf", state.focuserGotoRate == 5); data.concat(s);
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

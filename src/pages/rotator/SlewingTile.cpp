@@ -49,7 +49,7 @@ void rotatorSlewingTileAjax(String &data)
   s = keyValueBoolSelected("rot_rate_f", state.rotatorGotoRate == 4); data.concat(s);
   s = keyValueBoolSelected("rot_rate_vf", state.rotatorGotoRate == 5); data.concat(s);
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep
