@@ -63,13 +63,7 @@ const char html_libEditCatalog[] PROGMEM =
 const char html_libCatalogHelp[] PROGMEM =
 "<br /><a href='libraryHelp.htm'>" L_CAT_HELP "</a><br />";
 
-// Javascript for library status
+// 星表状态脚本只压缩空白，原有操作和显示文字不变
 const char html_script_ajax_library[] PROGMEM =
-"<script>\n"
-"function t(key,v) { if (v.length==0) v='DELETE'; s(key,v.replace(/ /g, '_')); }\n"
-"function busy() {\n"
-  "document.getElementById('lib_message').innerHTML='Working...';"
-  "document.getElementById('cat_upload').disabled=true;"
-  "document.getElementById('cat_download').disabled=true;"
-"}\n"
-"</script>\n";
+R"OPTI(<script>function t(key,v){if(v.length==0)v="DELETE";s(key,v.replace(/ /g,"_"))}function busy(){document.getElementById("lib_message").innerHTML="Working...";document.getElementById("cat_upload").disabled=true;document.getElementById("cat_download").disabled=true}</script>
+)OPTI";
