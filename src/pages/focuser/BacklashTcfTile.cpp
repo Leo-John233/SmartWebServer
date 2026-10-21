@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Focuser Backlash and TCF tile
 #include "BacklashTcfTile.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -8,54 +9,41 @@
 // create the related webpage tile
 void focuserBacklashTcfTile(String &data)
 {
-  char temp[240] = "";
-
   data.concat(F("<div class='b1 sws-accessory-parameter-card'><div class='sws-device-card-head'><h2>" L_BACKLASH " / " L_TCF_COEF "</h2><span id='f_temp' class='sws-accessory-status c'>"));
-  snprintf_P(temp, sizeof(temp), L_TEMPERATURE " %s", state.focuserTemperatureStr);
-  data.concat(temp);
+  appendPageFormat(data, L_TEMPERATURE " %s", state.focuserTemperatureStr);
   data.concat(F("</span></div><div class='sws-accessory-metrics'>"));
 
-  snprintf_P(temp, sizeof(temp), html_backlashValue, state.focuserBacklashStr);
-  data.concat(temp);
+  appendPageFormat(data, html_backlashValue, state.focuserBacklashStr);
 
-  snprintf_P(temp, sizeof(temp), html_tcfEnableValue, state.focuserTcfEnable ? L_ON : L_OFF);
-  data.concat(temp);
+  appendPageFormat(data, html_tcfEnableValue, state.focuserTcfEnable ? L_ON : L_OFF);
 
-  snprintf_P(temp, sizeof(temp), html_tcfDeadbandValue, state.focuserDeadbandStr);
-  data.concat(temp);
+  appendPageFormat(data, html_tcfDeadbandValue, state.focuserDeadbandStr);
   www.sendContentAndClear(data);
 
-  snprintf_P(temp, sizeof(temp), html_tcfCoefValue, state.focuserTcfCoefStr);
-  data.concat(temp);
+  appendPageFormat(data, html_tcfCoefValue, state.focuserTcfCoefStr);
 
   data.concat(F("</div>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS);
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_SETTINGS);
 
 
 
   if (status.focuserPresent[state.focuserSelected - 1]) {
 
-    snprintf_P(temp, sizeof(temp), html_form_begin, "focuser.htm");
-    data.concat(temp);
+    appendPageFormat(data, html_form_begin, "focuser.htm");
 
     // Backlash
-    snprintf_P(temp, sizeof(temp), html_backlash, state.focuserBacklashStr);
-    data.concat(temp);
+    appendPageFormat(data, html_backlash, state.focuserBacklashStr);
 
     // TCF Enable
-    snprintf_P(temp, sizeof(temp), html_tcfEnable, state.focuserTcfEnable ? "" : "selected", state.focuserTcfEnable ? "selected" : "");
-    data.concat(temp);
+    appendPageFormat(data, html_tcfEnable, state.focuserTcfEnable ? "" : "selected", state.focuserTcfEnable ? "selected" : "");
 
     // TCF Deadband
-    snprintf_P(temp, sizeof(temp), html_tcfDeadband, state.focuserDeadbandStr);
-    data.concat(temp);
+    appendPageFormat(data, html_tcfDeadband, state.focuserDeadbandStr);
     www.sendContentAndClear(data);
 
     // TCF Coef
-    snprintf_P(temp, sizeof(temp), html_tcfCoef, state.focuserTcfCoefStr);
-    data.concat(temp);
+    appendPageFormat(data, html_tcfCoef, state.focuserTcfCoefStr);
     data.concat(F("<div class='sws-accessory-form-actions'><button type='submit'>" L_SAVE_SETTINGS "</button></div>\n"));
 
     data.concat(FPSTR(html_form_end));

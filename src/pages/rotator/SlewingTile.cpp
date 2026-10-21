@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Rotator Slewing tile
 #include "SlewingTile.h"
+#include "../../extensions/ui/Template.h"
 #include <stdlib.h>
 
 #include "../KeyValue.h"
@@ -9,7 +10,6 @@
 // 位置读数、目标输入与手动移动分别分组
 void rotatorSlewingTile(String &data)
 {
-  char temp[240] = "";
   data.concat(F("<div class='b1 sws-accessory-motion-card'><div class='sws-device-card-head'><h2>" L_ROTATOR "</h2><span id='rot_sta' class='sws-accessory-status c'>"));
   data.concat(state.rotatorSlewing ? L_ACTIVE : L_INACTIVE);
   data.concat(F("</span></div><div class='sws-accessory-position'><span>" L_CURRENT "</span><strong id='rotatorpos' class='c'>"));
@@ -28,8 +28,7 @@ void rotatorSlewingTile(String &data)
   data.concat(F("</div>"));
   if (status.getVersionMajor() >= 10) {
     data.concat(FPSTR(html_rotateGotoSelect));
-    snprintf_P(temp, sizeof(temp), html_rotateSlewSpeed, state.rotateSlewSpeedStr);
-    data.concat(temp);
+    appendPageFormat(data, html_rotateSlewSpeed, state.rotateSlewSpeedStr);
   }
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);

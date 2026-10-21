@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Telescope control related functions
 #include "Mount.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Page.h"
@@ -12,8 +13,6 @@ void processMountGet();
 
 void handleMount()
 {
-  char temp[240] = "";
-
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
 
@@ -47,8 +46,7 @@ void handleMount()
   }
 
   // scripts
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "mount-ajax-get.txt");
-  data.concat(temp);
+  appendPageFormat(data, html_script_ajax_get, "mount-ajax-get.txt");
   data.concat(FPSTR(html_script_ajax_shortcuts));
   data.concat(FPSTR(html_script_ajax_date_time_return));
   data.concat(F("<script>var ajaxPage='mount-ajax.txt';</script>\n"));
@@ -104,11 +102,13 @@ void mountAjaxGet()
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
 
+  const String drive = www.arg("dr");
+
   // 坐标操作返回本次结果，避免与其他控制参数混合执行
-  if (www.arg("dr").equals("T1") || www.arg("dr").equals("T0")) {
+  if (drive.equals("T1") || drive.equals("T0")) {
     // 跟踪开关必须返回主控的实际应答，不能用 HTTP 200 代替设备成功
     char reply[80] = "";
-    const bool received = onStep.command(www.arg("dr").equals("T1") ? ":Te#" : ":Td#", reply);
+    const bool received = onStep.command(drive.equals("T1") ? ":Te#" : ":Td#", reply);
     www.sendContent(!strcmp(reply, "0") ? "rejected" : !received ? "timeout" : !strcmp(reply, "1") ? "ok" : "invalid");
   }
   else if (!www.arg("coord_action").equals(EmptyStr)) gotoCoordinatesGet();
@@ -141,7 +141,7 @@ void mountAjax()
   else
   {
     // Disable everything
-    char keys_en[27][8] = {
+    static const char keys_en[27][8] = {
       "c_goto", "bzr_off", "bzr_on", "mfa_off", "mfa_on", "mfp_off", "mfp_on",
       "sr_vf", "sr_f", "sr_n", "sr_s", "sr_vs", "trk_off", "trk_on", "alg1",
       "alg2", "alg3", "alga", "rpa", "trk_sid", "trk_sol", "trk_lun",
@@ -149,7 +149,7 @@ void mountAjax()
     };
     for (int i = 0; i < 27; i++) data.concat(keyValueBoolEnabled(keys_en[i], false));
 
-    char keys_str[14][18] = {
+    static const char keys_str[14][18] = {
       "date_ut", "time_ut", "time_lst", "site_long", "site_lat", "pier_side", "idx_a1", 
       "idx_a2", "tgt_a1", "tgt_a2", "track", "align_progress", "align_lr", "align_ud",
     };
@@ -164,6 +164,7 @@ void mountAjax()
 
 void processMountGet()
 {
+  if (www.args() == 0) return;
   siteTileGet();
   homeParkTileGet();
   #if DISPLAY_COORDINATE_ORIGIN == ON

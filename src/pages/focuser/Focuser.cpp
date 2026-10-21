@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Focuser
 #include "Focuser.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Page.h"
@@ -11,8 +12,6 @@ extern void handleNotFound();
 void processFocuserGet();
 
 void handleFocuser() {
-  char temp[240] = "";
-
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
 
@@ -47,8 +46,7 @@ void handleFocuser() {
   }
 
   // scripts
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "focuser-ajax-get.txt");
-  data.concat(temp);
+  appendPageFormat(data, html_script_ajax_get, "focuser-ajax-get.txt");
   data.concat(FPSTR(html_script_ajax_shortcuts));
   data.concat(F("<script>var ajaxPage='focuser-ajax.txt';</script>\n"));
   www.sendContentAndClear(data);
@@ -111,6 +109,7 @@ void focuserAjax()
 
 void processFocuserGet()
 {
+  if (www.args() == 0) return;
   focuserSelectTileGet();
   focuserHomeTileGet();
   focuserSlewingTileGet();

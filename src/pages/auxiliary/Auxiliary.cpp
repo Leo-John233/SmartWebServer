@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Telescope auxiliary feature related functions 
 #include "Auxiliary.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../Page.h"
 #include "../Pages.common.h"
@@ -54,7 +55,7 @@ void auxiliarySliderRow(String &data, int channel, int field, const char *label,
 }
 
 void handleAux() {
-  char temp[240] = "";
+  char temp[80] = "";
   char temp1[80] = "";
 
   SERIAL_ONSTEP.setTimeout(webTimeout);
@@ -90,8 +91,7 @@ void handleAux() {
   }
 
   // scripts
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "auxiliary-ajax-get.txt");
-  data.concat(temp);
+  appendPageFormat(data, html_script_ajax_get, "auxiliary-ajax-get.txt");
   data.concat(FPSTR(html_script_ajax_shortcuts));
 
   // active ajax page is: auxAjax();
@@ -140,8 +140,8 @@ void handleAux() {
           const char *dewLabel = "DP " L_DP_MSG " (&deg;F)";
         #endif
         auxiliaryRowBegin(data, channel, 1, purpose == SWITCH ? "" : dewLabel);
-        snprintf_P(temp, sizeof(temp), html_auxOnSwitch, channel, channel); data.concat(temp);
-        snprintf_P(temp, sizeof(temp), html_auxOffSwitch, channel, channel); data.concat(temp);
+        appendPageFormat(data, html_auxOnSwitch, channel, channel);
+        appendPageFormat(data, html_auxOffSwitch, channel, channel);
         data.concat(F("</div><span class='sws-aux-value'>"));
         if (purpose == DEW_HEATER) {
           dtostrf(celsiusToNativeRelative(state.featureValue4()), 3, 1, temp1);
@@ -291,6 +291,7 @@ void auxAjax() {
 }
 
 void processAuxGet() {
+  if (www.args() == 0) return;
   String v;
   char temp[80] = "";
   char temp1[40] = "";

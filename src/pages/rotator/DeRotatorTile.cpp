@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // DeRotator tile
 #include "DeRotatorTile.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -8,10 +9,7 @@
 // create the related webpage tile
 void deRotatorTile(String &data)
 {
-  char temp[240] = "";
-
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_DEROTATOR);
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "22em", "13em", L_DEROTATOR);
   data.concat(F("<br /><hr>"));
 
   data.concat(FPSTR(html_controlDeRotate));

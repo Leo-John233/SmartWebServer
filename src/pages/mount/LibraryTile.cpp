@@ -81,7 +81,7 @@ void libraryTileAjax(String &data)
   data.concat(L_RECS_AVAIL);
   data += "\n";
 
-  data.concat("cat_message|" + currentObject + "\n");
+  data.concat(keyValueString("cat_message", currentObject));
   data.concat(F("cat_name|")); data.concat(currentCatName); data.concat("\n");
 
   if (currentCatalog > 0) {
@@ -119,7 +119,7 @@ void libraryTileAjax(String &data)
 
   if (showMessage != "")
   {
-    data.concat("lib_message|" + showMessage + "\n");
+    data.concat(keyValueString("lib_message", showMessage));
     showMessage = "";
   }
 

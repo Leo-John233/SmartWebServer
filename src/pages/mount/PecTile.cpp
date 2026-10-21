@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // PEC tile
 #include "PecTile.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -8,11 +9,8 @@
 // create the related webpage tile
 void pecTile(String &data)
 {
-  char temp[240] = "";
-
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_PAGE_PEC);
+  appendPageFormat(data, html_tile_beg, "22em", "15em", L_PAGE_PEC);
   // 卡片标记用于响应式布局，不改变设备功能判断
-  data.concat(temp);
   data.concat(F("<div class='sws-card-marker' data-card='pec'></div>"));
   data.concat(F("<br /><hr>"));
 
@@ -23,8 +21,7 @@ void pecTile(String &data)
   data.concat(F("<br /><hr>"));
 
   // display pec controls
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_CONTROLS "...");
 
   if (status.pecEnabled) {
     data.concat(FPSTR(html_pecControls1));
@@ -40,17 +37,14 @@ void pecTile(String &data)
 
   // display steps per worm rotation
   data.concat(F("<div style='margin-top: 0.5em';></div>"));
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_SETTINGS "...");
 
   char response[80];
   if (status.pecEnabled && onStep.command(":GXE7#", response)) {
-    snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
-    data.concat(temp);
+    appendPageFormat(data, html_form_begin, "mount.htm");
 
     long value = strtol(response, NULL, 10);
-    snprintf_P(temp, sizeof(temp), html_configAxisSpwr, value, 0, 129600000L);
-    data.concat(temp);
+    appendPageFormat(data, html_configAxisSpwr, value, 0, 129600000L);
     data.concat(F("<br /><button type='submit'>" L_UPLOAD "</button><br />\n"));
 
     data.concat(FPSTR(html_form_end));

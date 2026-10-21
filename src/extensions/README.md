@@ -95,6 +95,8 @@ ui/Controls.h 的单选事件委托只代理原有按钮操作，立即显示本
 
 Page.cpp 的导航输出及原生 TileAjax 输出边界使用 768 字节阈值合并小片段，接口结束前统一发送余量；编码器接口末尾必须保留发送。原 WebServer.h 的 sendContentAndClear 是多语句宏，条件调用必须使用大括号。AxisTile.cpp 仅将选项循环内的发送移至整项生成后，不改查询、解码或 TileGet。
 
+剩余页面格式化沿用 ui/Template.h 的 appendPageFormat，避免先将整段 HTML 放入 240 字节局部数组；设备回复仍使用小缓冲。Mount.cpp 仅复用 dr 参数、静态保存失联键名；AxisTile.cpp 仅静态保存选项表并缩小查询命令缓冲；process*Get 的空参数保护不进入 TileGet。同步上游时按这些显示与入口边界核对，不承诺未来同一行修改零文本冲突。
+
 普通导航在点击时暂停旧文档的只读轮询，保留浏览器原生跳转；运动停止确认及历史返回恢复仍保留。navigation-poll-lifecycle.cjs 验证慢速导航不再保留旧状态连接，page-cancel-lifecycle.cjs 执行真实赤道仪处理函数验证断线跳过正文读取。
 
 正文取消也覆盖各卡片之间和轴参数逐项读取，位置与限位在下一条只读串口查询前检查。pageClientConnected 只读取原生客户端连接，不引入服务器适配类、请求队列、串口过滤或全局取消标记；其他客户端和保护采样不会被取消。已提交的控制处理维持原流程。

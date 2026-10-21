@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // The home page, status information
 #include "Index.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../Page.h"
 #include "../../extensions/ui/Layouts.h"
@@ -12,8 +13,6 @@ void processIndexGet();
 
 void handleRoot()
 {
-  char temp[240] = "";
-
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
 
@@ -50,8 +49,7 @@ void handleRoot()
   www.sendContentAndClear(data);
   data.concat(FPSTR(html_script_ajax));
   www.sendContentAndClear(data);
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "index-ajax-get.txt");
-  data.concat(temp);
+  appendPageFormat(data, html_script_ajax_get, "index-ajax-get.txt");
   www.sendContentAndClear(data);
 
   // 概况与驱动分区展示，详细参数在卡片内展开
@@ -94,8 +92,7 @@ void handleRoot()
     data.concat(FPSTR(html_layout_controller_advanced));
     if (numShown == 0) data.concat(F("<br />" L_ADV_SET_NO_EDIT "<br />"));
 
-    snprintf_P(temp, sizeof(temp), html_form_begin, "index.htm");
-    data.concat(temp);
+    appendPageFormat(data, html_form_begin, "index.htm");
 
     data.concat(F("<br /><button name='advanced' type='submit' "));
     if (numShown == 0) data.concat(F("value='enable'>" L_ADV_ENABLE "</button>")); else data.concat(F("value='disable'>" L_ADV_DISABLE "</button>"));
@@ -170,6 +167,7 @@ void indexAjax() {
 
 void processIndexGet()
 {
+  if (www.args() == 0) return;
   String ssa = www.arg("advanced");
   if (ssa.equals("enable"))
   {

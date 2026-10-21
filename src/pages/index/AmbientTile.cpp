@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Ambient tile
 #include "AmbientTile.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -10,14 +11,12 @@
 // create the related webpage tile
 void ambientTile(String &data)
 {
-  char temp[240] = "";
-
   // 环境指标直接并入控制器概览，保留原有显示开关与刷新标识
   // Ambient conditions
-  snprintf_P(temp, sizeof(temp), html_indexTPHD, L_AMBIENT_TEMPERATURE, 't', state.siteTemperatureStr); data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_indexTPHD, L_PRESSURE, 'p', state.sitePressureStr); data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_indexTPHD, L_HUMIDITY, 'h', state.siteHumidityStr); data.concat(temp);
-  snprintf_P(temp, sizeof(temp), html_indexTPHD, L_DEW_POINT, 'd', state.siteDewPointStr); data.concat(temp);
+  appendPageFormat(data, html_indexTPHD, L_AMBIENT_TEMPERATURE, 't', state.siteTemperatureStr);
+  appendPageFormat(data, html_indexTPHD, L_PRESSURE, 'p', state.sitePressureStr);
+  appendPageFormat(data, html_indexTPHD, L_HUMIDITY, 'h', state.siteHumidityStr);
+  appendPageFormat(data, html_indexTPHD, L_DEW_POINT, 'd', state.siteDewPointStr);
   www.sendContentAndClear(data);
 
 
