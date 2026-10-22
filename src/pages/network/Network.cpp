@@ -138,6 +138,7 @@ void handleNetwork() {
 }
 
 void processNetworkGet() {
+  if (www.args() == 0) return;
   String v;
   
   bool updateNV = false;

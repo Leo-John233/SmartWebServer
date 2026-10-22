@@ -10,7 +10,8 @@ class StationReconnect {
     void online(uint32_t now) { knownNetwork = true; blocked = false; next = now + 30000; }
     void lost(uint32_t now) { next = now + 30000; }
     void defer(uint32_t now) { next = now + 30000; }
-    // 沿用旧版失败后等待手动修改的策略，避免持续搜索反复影响热点
+    // 已验证网络后台超时后稍后再试，手动配网失败仍等待用户处理
+    void retryLater(uint32_t now) { blocked = false; next = now + 30000; }
     void failed() { blocked = true; }
     bool due(uint32_t now) const { return knownNetwork && !blocked && int32_t(now - next) >= 0; }
     bool known() const { return knownNetwork; }

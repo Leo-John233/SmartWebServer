@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // StallGuard monitor tile
 #include "StallGuardTile.h"
+#include "../../extensions/ui/Template.h"
 
 #if DISPLAY_STALLGUARD_MONITOR == ON
 
@@ -12,7 +13,7 @@ int _stallguard_axis = 0;
 // create the related webpage tile
 void stallGuardTile(String &data)
 {
-  char temp[240] = "";
+  char temp[80] = "";
 
   data.concat(FPSTR(html_stallGuardScript_1));
   www.sendContentAndClear(data);
@@ -21,22 +22,19 @@ void stallGuardTile(String &data)
   data.concat(FPSTR(html_stallGuardScript_3));
   www.sendContentAndClear(data);
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "28em", "13em", "StallGuard <span class='c'>Axis</span><span id='sgA' class='c'>?</span> Monitor");
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "28em", "13em", "StallGuard <span class='c'>Axis</span><span id='sgA' class='c'>?</span> Monitor");
   data.concat(F("<div style='float: right; text-align: right;'>"));
   data.concat(F("SG <span id='sgV' class='c'>?</span>, "));
   data.concat(F("Trip <span id='sgT' class='c'>?</span>"));
   data.concat(F("</div><br /><hr>"));
 
   data.concat(F("<div>"));
-  snprintf_P(temp, sizeof(temp), html_stallGuardSelect, 0, 0, 'x');
-  data.concat(temp);
+  appendPageFormat(data, html_stallGuardSelect, 0, 0, 'x');
   for (int i = 1; i <= 9; i++) {
     char command[12];
     snprintf(command, sizeof(command), ":GXSG%d#", i);
     if (onStep.command(command, temp)) {
-      snprintf_P(temp, sizeof(temp), html_stallGuardSelect, i, i, '0' + i);
-      data.concat(temp);
+      appendPageFormat(data, html_stallGuardSelect, i, i, '0' + i);
     }
   }
   data.concat(F("</div><br />"));
@@ -86,7 +84,7 @@ void stallGuardTileAjax(String &data)
   data.concat(keyValueBoolEnabled("sgax8", _stallguard_axis == 0));
   data.concat(keyValueBoolEnabled("sgax9", _stallguard_axis == 0));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

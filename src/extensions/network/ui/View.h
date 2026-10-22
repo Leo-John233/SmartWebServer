@@ -7,9 +7,11 @@ const char html_network_wifi[] PROGMEM = R"NET(
 <p class="nw-note">)NET"
  L_UI_STATION_NOTE
  R"NET(</p>
-<div class="nw-switch-line"><label for="nw-enabled">)NET"
+<div class="nw-switch-line"><span>)NET"
  L_UI_WIFI_CONNECT
- R"NET(</label><input id="nw-enabled" class="nw-switch" type="checkbox" role="switch"></div>
+ R"NET(</span><input id="nw-enabled" class="nw-switch" type="checkbox" role="switch" aria-label=")NET"
+ L_UI_WIFI_CONNECT
+ R"NET("></div>
 <div id="nw-sta-state" aria-live="polite"><span id="nw-sta-badge" class="nw-note">)NET"
  L_UI_LOADING
  R"NET(</span><p id="nw-message" class="nw-feedback" role="status" aria-live="polite" hidden></p><div id="nw-current" class="nw-networks"></div><dl id="nw-access" class="nw-access" hidden><dt>)NET"
@@ -59,9 +61,11 @@ const char html_network_wifi[] PROGMEM = R"NET(
  R"NET(</dt><dd id="nw-sta-ip">—</dd></div><div><dt>)NET"
  L_UI_SIGNAL
  R"NET(</dt><dd id="nw-sta-signal">—</dd></div></dl>
-<div class="nw-switch-line"><label for="nw-dhcp">)NET"
+<div class="nw-switch-line"><span>)NET"
  L_UI_DHCP
- R"NET(</label><input id="nw-dhcp" class="nw-switch" name="dhcp" type="checkbox" role="switch"></div><div id="nw-static">
+ R"NET(</span><input id="nw-dhcp" class="nw-switch" name="dhcp" type="checkbox" role="switch" aria-label=")NET"
+ L_UI_DHCP
+ R"NET("></div><div id="nw-static">
 <label>)NET"
  L_UI_STATIC_IP
  R"NET(<input name="ip" inputmode="decimal" placeholder="192.168.1.55"></label>
@@ -92,9 +96,11 @@ const char html_network_wifi[] PROGMEM = R"NET(
 <dl class="nw-state-values"><div><dt>)NET"
  L_UI_ACCESS_ADDRESS
  R"NET(</dt><dd id="nw-ap-ip">—</dd></div></dl></div>
-<form id="nw-ap"><label class="nw-toggle"><input name="enabled" type="checkbox">)NET"
+<form id="nw-ap"><div class="nw-toggle"><input name="enabled" type="checkbox" role="switch" aria-label=")NET"
  L_UI_AP_ENABLE
- R"NET(</label>
+ R"NET(">)NET"
+ L_UI_AP_ENABLE
+ R"NET(</div>
 <label>)NET"
  L_UI_AP_NAME
  R"NET(<input name="ssid" maxlength="31" required autocomplete="off"></label>

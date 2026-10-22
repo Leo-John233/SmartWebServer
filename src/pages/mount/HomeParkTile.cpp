@@ -103,7 +103,7 @@ void homeParkTileAjax(String &data)
 
   data.concat(keyValueToggleBoolSelected("auto_on", "auto_off", status.autoHome));
     
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

@@ -94,7 +94,7 @@ void alignTileAjax(String &data)
   data.concat(keyValueBoolEnabled("alg3", !status.tracking && !status.parked && status.atHome));
   data.concat(keyValueBoolEnabled("alga", status.tracking && status.aligning));
   data.concat(keyValueBoolEnabled("rpa", status.tracking && !status.aligning));
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

@@ -46,7 +46,7 @@ void guideTileAjax(String &data)
   data.concat(keyValueBoolSelected("guide_r8", status.guideRate == 8));
   data.concat(keyValueBoolSelected("guide_r9", status.guideRate == 9));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

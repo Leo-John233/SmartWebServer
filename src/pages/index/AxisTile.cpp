@@ -16,7 +16,7 @@ bool decodeParameter(char* s, double *value, long *min, long *max, int *type, ch
 bool axisTile(int axis, String &data)
 {
   bool success = false;
-  char temp[160]; temp[0] = 0; // 命令和单项数值使用小缓冲
+  char temp[32]; temp[0] = 0; // 命令和单项数值使用小缓冲
   char temp1[80] = "";
   double value;
   long min, max;
@@ -132,12 +132,11 @@ bool axisTile(int axis, String &data)
               // AXP_BOOLEAN, AXP_BOOLEAN_IMMEDIATE
               case 1: case 2: {
                 appendPageFormat(data, html_configAxisSelectStart, axis + 1, parameterNumber);
-                int selection[4] = {-1, -2, 0, 1};
-                const char *selectionName[5] = {L_OFF, L_ON, L_OFF, L_ON};
+                static const int selection[4] = {-1, -2, 0, 1};
+                static const char *const selectionName[5] = {L_OFF, L_ON, L_OFF, L_ON};
                 for (int i = 0; i < 4; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
                     appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    www.sendContentAndClear(data);
                   }
                 }
                 appendPageFormat(data, html_configAxisSelectEnd, name);
@@ -156,12 +155,11 @@ bool axisTile(int axis, String &data)
               // AXP_POW2
               case 9: {
                 appendPageFormat(data, html_configAxisSelectStart, axis + 1, parameterNumber);
-                int selection[9] = {1, 2, 4, 8, 16, 32, 64, 128, 256};
-                const char *selectionName[9] = {"1", "2", "4", "8", "16", "32", "64", "128", "256"};
+                static const int selection[9] = {1, 2, 4, 8, 16, 32, 64, 128, 256};
+                static const char *const selectionName[9] = {"1", "2", "4", "8", "16", "32", "64", "128", "256"};
                 for (int i = 0; i < 9; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
                     appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    www.sendContentAndClear(data);
                   }
                 }
                 appendPageFormat(data, html_configAxisSelectEnd, name);
@@ -170,18 +168,18 @@ bool axisTile(int axis, String &data)
               // AXP_DECAY
               case 10: {
                 appendPageFormat(data, html_configAxisSelectStart, axis + 1, parameterNumber);
-                int selection[5] = {1, 2, 3, 4, 5};
-                const char *selectionName[5] = {L_ADV_DECAY_MIXED, L_ADV_DECAY_FAST, L_ADV_DECAY_SLOW, L_ADV_DECAY_SPREADCYCLE, L_ADV_DECAY_STEALTHCHOP};
+                static const int selection[5] = {1, 2, 3, 4, 5};
+                static const char *const selectionName[5] = {L_ADV_DECAY_MIXED, L_ADV_DECAY_FAST, L_ADV_DECAY_SLOW, L_ADV_DECAY_SPREADCYCLE, L_ADV_DECAY_STEALTHCHOP};
                 for (int i = 0; i < 5; i++) {
                   if (selection[i] >= min && selection[i] <= max) {
                     appendPageFormat(data, valueInt == selection[i] ? html_configAxisSelectOptionSelected : html_configAxisSelectOption, selection[i], selectionName[i]);
-                    www.sendContentAndClear(data);
                   }
                 }
                 appendPageFormat(data, html_configAxisSelectEnd, name);
               } break;
               
             }
+            www.sendContentAndClear(data);
           }
         }
 
@@ -221,7 +219,7 @@ void axisTileAjax(int axis, String &data)
   if (state.driverStatusStr[axis][0] == '?') strcpy(temp1, L_UNKNOWN); else strcpy(temp1, state.driverStatusStr[axis]);
   data.concat(keyValueString(temp, temp1));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

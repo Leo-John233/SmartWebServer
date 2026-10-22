@@ -29,7 +29,7 @@ void syncTile(String &data)
 void syncTileAjax(String &data)
 {
   data.concat(keyValueToggleBoolSelected("enc_as_on", "enc_as_off", encoders.settings.autoSync));
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

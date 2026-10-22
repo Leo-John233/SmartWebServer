@@ -101,8 +101,8 @@ const char html_board_io_activity[] PROGMEM =
   "<p>" L_IO_ACTIVITY_HELP "</p></div>";
 const char html_board_io_brake[] PROGMEM =
   "<div class='sws-io-control'><h3>" L_IO_BRAKE_TITLE "</h3>"
-  "<label class='sws-io-auto'>"
-  "<button type='button' id='sws-io-protection' class='sws-switch' role='switch' aria-label=\"" L_IO_BRAKE_AUTO "\" aria-checked='%s' data-selected='%s' data-setting='protection'></button></label>"
+  "<div class='sws-io-auto'>"
+  "<button type='button' id='sws-io-protection' class='sws-switch' role='switch' aria-label=\"" L_IO_BRAKE_AUTO "\" aria-checked='%s' data-selected='%s' data-setting='protection'></button></div>"
   "<p>" L_IO_BRAKE_HELP "</p><div class='sws-io-status-row'>"
   "<div class='sws-io-status-detail'>"
   "<div id='sws-io-brake-state' class='sws-io-status' role='status'>%s</div>"

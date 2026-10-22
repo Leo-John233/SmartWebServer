@@ -14,10 +14,9 @@
 // create the related webpage tile
 void statusTile(String &data)
 {
-  char temp[240] = "";
+  char temp[80] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "11em", L_STATE);
-  data.concat(temp);
+  appendPageFormat(data, html_tile_text_beg, "22em", "11em", L_STATE);
   // 状态和环境数据共享紧凑指标区，设置仍保留在独立展开区
   data.concat(F("<br /><hr><div class='sws-metrics'>"));
 
@@ -32,23 +31,19 @@ void statusTile(String &data)
     }
   }
 
-  snprintf_P(temp, sizeof(temp), html_indexGeneralError, state.lastErrorStr);
-  data.concat(temp);
+  appendPageFormat(data, html_indexGeneralError, state.lastErrorStr);
 
   if (status.getVersionMajor() < 10)
   {
-    snprintf_P(temp, sizeof(temp), html_indexWorkload, state.workLoadStr);
-    data.concat(temp);
+    appendPageFormat(data, html_indexWorkload, state.workLoadStr);
   }
 
   #if DISPLAY_INTERNAL_TEMPERATURE == ON
-    snprintf_P(temp, sizeof(temp), html_indexTemp, L_INTERNAL_TEMP ":", 'm', state.controllerTemperatureStr);
-    data.concat(temp);
+    appendPageFormat(data, html_indexTemp, L_INTERNAL_TEMP ":", 'm', state.controllerTemperatureStr);
   #endif
 
   #if OPERATIONAL_MODE == WIFI
-    snprintf_P(temp, sizeof(temp), html_indexSignalStrength, state.signalStrengthStr);
-    data.concat(temp);
+    appendPageFormat(data, html_indexSignalStrength, state.signalStrengthStr);
   #endif
 
   #if DISPLAY_WEATHER == ON
@@ -70,15 +65,13 @@ void statusTile(String &data)
 
   if (displayCollapsable)
   {
-    snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS "...");
-    data.concat(temp);
+    appendPageFormat(data, html_collapsable_beg, L_SETTINGS "...");
     www.sendContentAndClear(data);
   }
 
   const int settingColumns = int(boardIo.activityAvailable()) + int(boardIo.brakeAvailable()) + int(mountType >= 1 && mountType <= 3);
   if (settingColumns) {
-    snprintf_P(temp, sizeof(temp), html_indexSettingsBegin, settingColumns);
-    data.concat(temp);
+    appendPageFormat(data, html_indexSettingsBegin, settingColumns);
   }
   boardIoTile(data);
 
@@ -140,7 +133,7 @@ void statusTileAjax(String &data)
     data.concat("\n");
   #endif
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

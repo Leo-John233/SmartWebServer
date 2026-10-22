@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Rotator Backlash tile
 #include "BacklashTile.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -8,7 +9,6 @@
 // create the related webpage tile
 void rotatorBacklashTile(String &data)
 {
-  char temp[240] = "";
   char temp1[32] = "";
 
   if (!onStep.command(":rb#", temp1)) strcpy(temp1, "0");
@@ -16,17 +16,13 @@ void rotatorBacklashTile(String &data)
 
   data.concat(F("<div class='b1 sws-accessory-parameter-card'><div class='sws-device-card-head'><h2>" L_BACKLASH "</h2></div>"));
 
-  snprintf_P(temp, sizeof(temp), html_backlashValue, backlash);
-  data.concat(temp);
+  appendPageFormat(data, html_backlashValue, backlash);
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_SETTINGS);
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_SETTINGS);
 
-  snprintf_P(temp, sizeof(temp), html_form_begin, "rotator.htm");
-  data.concat(temp);
+  appendPageFormat(data, html_form_begin, "rotator.htm");
 
-  snprintf_P(temp, sizeof(temp), html_configBlAxis3, backlash);
-  data.concat(temp);
+  appendPageFormat(data, html_configBlAxis3, backlash);
   data.concat(F("<div class='sws-accessory-form-actions'><button type='submit'>" L_SAVE_SETTINGS "</button></div>\n"));
 
   data.concat(FPSTR(html_form_end));

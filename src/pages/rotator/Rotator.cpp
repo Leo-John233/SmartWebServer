@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Rotator
 #include "Rotator.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../Page.h"
 #include "../../extensions/ui/Layouts.h"
@@ -11,8 +12,6 @@ extern void handleNotFound();
 void processRotatorGet();
 
 void handleRotator() {
-  char temp[240] = "";
-
   SERIAL_ONSTEP.setTimeout(webTimeout);
   onStep.serialRecvFlush();
 
@@ -47,8 +46,7 @@ void handleRotator() {
   }
 
   // scripts
-  snprintf_P(temp, sizeof(temp), html_script_ajax_get, "rotator-ajax-get.txt");
-  data.concat(temp);
+  appendPageFormat(data, html_script_ajax_get, "rotator-ajax-get.txt");
   data.concat(FPSTR(html_script_ajax_shortcuts));
   data.concat(F("<script>var ajaxPage='rotator-ajax.txt';</script>\n"));
   www.sendContentAndClear(data);
@@ -110,6 +108,7 @@ void rotatorAjax()
 
 void processRotatorGet()
 {
+  if (www.args() == 0) return;
   rotatorHomeTileGet();
   rotatorSlewingTileGet();
   if (status.derotatorFound) deRotatorTileGet();

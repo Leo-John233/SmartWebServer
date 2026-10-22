@@ -171,7 +171,7 @@ void gotoTileAjax(String &data)
     }
   }
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

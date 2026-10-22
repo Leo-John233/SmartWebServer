@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Tracking tile
 #include "TrackingTile.h"
+#include "../../extensions/ui/Template.h"
 #include "GuideTile.h"
 
 #include "../KeyValue.h"
@@ -9,10 +10,7 @@
 // create the related webpage tile
 void trackingTile(String &data)
 {
-  char temp[240] = "";
-
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "15em", L_TRACKING);
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "22em", "15em", L_TRACKING);
   data.concat(F("<div style='float: right; text-align: right;' id='track' class='c'>"));
   data.concat(state.trackStr);
   data.concat(F("</div><br /><hr>"));
@@ -34,14 +32,11 @@ void trackingTile(String &data)
 
 // 跟踪高级设置在原页面分区中直接输出，避免浏览器加载后搬动卡片
 void trackingSettingsTile(String &data) {
-  char temp[240] = "";
   data.concat(F("<section class='b1 sws-tracking-advanced'><h2>" L_TRACKING_SETTINGS "</h2>"));
 
-  snprintf_P(temp, sizeof(temp), html_collapsable_beg, L_CONTROLS "...");
-  data.concat(temp);
+  appendPageFormat(data, html_collapsable_beg, L_CONTROLS "...");
 
-  snprintf_P(temp, sizeof(temp), html_form_begin, "mount.htm");
-  data.concat(temp);
+  appendPageFormat(data, html_form_begin, "mount.htm");
   if (status.mountType != MT_ALTAZM || status.getVersionMajor() >= 10)
   {
     data.concat(FPSTR(html_trackingCompensationType));
@@ -84,7 +79,7 @@ void trackingTileAjax(String &data)
   data.concat(keyValueBoolSelected("trk_lun", status.tracking && state.trackingLunar));
   data.concat(keyValueBoolSelected("trk_king", status.tracking && state.trackingKing));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

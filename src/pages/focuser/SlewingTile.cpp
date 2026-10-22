@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Focuser Slewing tile
 #include "SlewingTile.h"
+#include "../../extensions/ui/Template.h"
 #include <stdlib.h>
 
 #include "../KeyValue.h"
@@ -9,7 +10,6 @@
 // 位置读数、目标输入与手动移动分别分组
 void focuserSlewingTile(String &data)
 {
-  char temp[240] = "";
   data.concat(F("<div class='b1 sws-accessory-motion-card'><div class='sws-device-card-head'><h2>" L_FOCUSER "</h2><span id='foc_sta' class='sws-accessory-status c'>"));
   data.concat(state.focuserSlewing ? L_ACTIVE : L_INACTIVE);
   data.concat(F("</span></div><div class='sws-accessory-position'><span>" L_CURRENT "</span><strong id='focuserpos' class='c'>"));
@@ -28,8 +28,7 @@ void focuserSlewingTile(String &data)
   data.concat(F("</div>"));
   if (status.getVersionMajor() >= 10) {
     data.concat(FPSTR(html_focuserGotoSelect));
-    snprintf_P(temp, sizeof(temp), html_focuserSlewSpeed, state.focuserSlewSpeedStr);
-    data.concat(temp);
+    appendPageFormat(data, html_focuserSlewSpeed, state.focuserSlewSpeedStr);
   }
   data.concat(FPSTR(html_tile_end));
   www.sendContentAndClear(data);
@@ -49,7 +48,7 @@ void focuserSlewingTileAjax(String &data)
   s = keyValueBoolSelected("foc_rate_f", state.focuserGotoRate == 4); data.concat(s);
   s = keyValueBoolSelected("foc_rate_vf", state.focuserGotoRate == 5); data.concat(s);
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

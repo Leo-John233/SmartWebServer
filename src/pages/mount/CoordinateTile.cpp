@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Coordinate basis tile
 #include "CoordinateTile.h"
+#include "../../extensions/ui/Template.h"
 
 #if DISPLAY_COORDINATE_ORIGIN == ON
 
@@ -9,10 +10,7 @@
 // create the related webpage tile
 void coordinateTile(String &data)
 {
-  char temp[240] = "";
-
-  snprintf_P(temp, sizeof(temp), html_tile_text_beg, "22em", "15em", L_COORD_ORIGIN_TITLE);
-  data.concat(temp);
+  appendPageFormat(data, html_tile_text_beg, "22em", "15em", L_COORD_ORIGIN_TITLE);
   data.concat(F("<br /><hr>"));
   data.concat(FPSTR(html_coordinateBasis));
   data.concat(FPSTR(html_tile_end));

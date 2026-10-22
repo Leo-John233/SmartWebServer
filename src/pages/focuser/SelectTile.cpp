@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Focuser Select tile
 #include "SelectTile.h"
+#include "../../extensions/ui/Template.h"
 
 #include "../KeyValue.h"
 #include "../Pages.common.h"
@@ -8,10 +9,9 @@
 // create the related webpage tile
 void focuserSelectTile(String &data)
 {
-  char temp[240] = "";
+  char temp[80] = "";
 
-  snprintf_P(temp, sizeof(temp), html_tile_beg, "22em", "13em", L_HINT_FOC_SEL);
-  data.concat(temp);
+  appendPageFormat(data, html_tile_beg, "22em", "13em", L_HINT_FOC_SEL);
   data.concat(F("<div class='sws-focuser-select'>"));
 
   if (status.focuserCount >= 1 && state.focuserSelected == 0) state.focuserSelected = 1;
@@ -62,7 +62,7 @@ void focuserSelectTileAjax(String &data)
   data.concat(keyValueBoolSelected("foc4_sel", state.focuserSelected == 4));
   data.concat(keyValueBoolSelected("foc5_sel", state.focuserSelected == 5));
   data.concat(keyValueBoolSelected("foc6_sel", state.focuserSelected == 6));
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep

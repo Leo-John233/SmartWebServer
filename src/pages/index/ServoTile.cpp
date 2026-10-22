@@ -110,7 +110,7 @@ void servoTileAjax(String &data)
   data.concat(keyValueBoolEnabled("svax8", _servo_axis == 0));
   data.concat(keyValueBoolEnabled("svax9", _servo_axis == 0));
 
-  www.sendContentAndClear(data);
+  if (data.length() >= 768) { www.sendContentAndClear(data); }
 }
 
 // pass related data back to OnStep
