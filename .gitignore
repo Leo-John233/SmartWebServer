@@ -24,6 +24,10 @@
 # 保留各级 README 说明
 !README*.md
 
+# 保留开发指南与修改日志
+!/docs/DEVELOPMENT.md
+!/docs/CHANGELOG.md
+
 # 本地开发工具、缓存、依赖和生成目录统一忽略
 /tests/
 /tools/
