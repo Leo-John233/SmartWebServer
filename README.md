@@ -4,7 +4,7 @@
 
 本分支保留原生网页与控制协议，并维护中文界面、网页配网、坐标输入和板载功能扩展
 
-项目介绍与发布入口见 [仓库首页](.github/README.md)，本文说明源码使用、开发维护和验证记录
+项目介绍与发布入口见 [发布分支首页](https://github.com/Leo-John233/SmartWebServer/tree/SmartWebServer-FeatureRelease)，本文说明源码使用、开发维护和验证记录
 
 ## 快速开始
 
@@ -63,7 +63,6 @@ arduino-cli compile --clean --jobs 1 --warnings all --fqbn esp32:esp32:esp32 .
 
 | 路径 | 内容 |
 | --- | --- |
-| [.github/README.md](.github/README.md) | GitHub 仓库首页 |
 | [README.md](README.md) | 本分支的开发与维护说明 |
 | [SmartWebServer.ino](SmartWebServer.ino) | 固件入口与初始化 |
 | [Config.h](Config.h) | 主要编译配置 |
