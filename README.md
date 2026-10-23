@@ -4,7 +4,9 @@
 
 本仓库基于 [Howard Dutton 的 SmartWebServer](https://github.com/hjd1964/SmartWebServer) 维护，提供中文界面、统一主题、网页配网、坐标输入和板载功能扩展网页随固件编译并由设备直接提供，使用浏览器即可访问
 
-**快速导航：** [分支说明](#分支说明) · [主要功能](#主要功能) · [快速开始](#快速开始) · [网络设置](#网络设置) · [赤经轴抱闸](#赤经轴抱闸) · [开发维护](#开发维护) · [仓库动态](#最近代码修改)
+**快速导航：** [分支说明](#分支说明) · [主要功能](#主要功能) · [快速开始](#快速开始) · [网络设置](#网络设置) · [赤经轴抱闸](#赤经轴抱闸) · [本地演示](#本地演示) · [开发维护](#开发维护) · [仓库动态](#最近代码修改)
+
+**文档入口：** [开发维护指南](docs/DEVELOPMENT.md) · [本地演示说明](demo/README.md) · [修改日志](docs/CHANGELOG.md)
 
 ## 分支说明
 
@@ -145,21 +147,45 @@ arduino-cli compile --clean --jobs 1 --warnings all --fqbn esp32:esp32:esp32 .
 
 实现与接入说明见 [扩展维护说明](src/extensions/README.md)，源码位于 [src/extensions/boardIo/](src/extensions/boardIo/)
 
+## 本地演示
+
+[demo/](demo/) 保存电脑上运行的模拟网页，用于查看界面和验证交互，使用模拟设备数据，不连接真实硬件
+
+运行演示需要 Node.js、PATH 中的 g++，以及本地保留的演示与测试脚本
+
+仓库仅跟踪演示说明，服务脚本与测试工具不随源码完整提供，仅检出仓库时不能直接启动演示
+
+在已具备本地工具的环境中，从仓库根目录运行
+
+```powershell
+node demo/server.cjs
+```
+
+浏览器打开 <http://127.0.0.1:8765/>，停止服务时按 Ctrl+C
+
+文件用途、可模拟功能与检查方法见 [本地演示说明](demo/README.md)
+
 ## 项目结构
+
+根目录保留项目入口，`docs/` 集中保存文档，`demo/` 保留演示程序，生成文件统一放在 `tests/output/`
 
 | 路径 | 内容 |
 | --- | --- |
 | [SmartWebServer.ino](SmartWebServer.ino) | Arduino 工程入口与初始化 |
 | [Config.h](Config.h) | 主要编译配置 |
 | [Extended.config.h](Extended.config.h) | 网络、管理密码和其他扩展配置 |
+| [docs/](docs/) | 文档索引、开发维护指南与修改日志 |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | 工程配置、编译、维护与本地验证 |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | 按日期整理的修改、回归和构建记录 |
+| [demo/](demo/) | 本地模拟网页与演示说明，演示脚本不加入版本控制 |
 | [src/pages/](src/pages/) | 各功能页面、表单与状态接口 |
 | [src/extensions/](src/extensions/) | 主题、配网、板载功能、状态解析及坐标输入扩展 |
 | [src/locales/](src/locales/) | 多语言资源 |
 | [src/pinmaps/](src/pinmaps/) | 平台引脚映射 |
 | [src/lib/](src/lib/) | 基础库与硬件支持 |
 | [src/libApp/](src/libApp/) | 应用层状态与命令处理 |
-| [.github/scripts/update_activity.py](.github/scripts/update_activity.py) | 仓库动态与统计页面生成脚本 |
-| [.github/workflows/update-activity.yml](.github/workflows/update-activity.yml) | 统计生成及 GitHub Pages 部署工作流 |
+| [.github/scripts/update_activity.py](https://github.com/Leo-John233/SmartWebServer/blob/SmartWebServer-FeatureRelease/.github/scripts/update_activity.py) | 发布分支中的仓库动态与统计页面生成脚本 |
+| [.github/workflows/update-activity.yml](https://github.com/Leo-John233/SmartWebServer/blob/SmartWebServer-FeatureRelease/.github/workflows/update-activity.yml) | 发布分支中的统计生成及 GitHub Pages 部署工作流 |
 
 ## 开发维护
 
@@ -169,9 +195,11 @@ arduino-cli compile --clean --jobs 1 --warnings all --fqbn esp32:esp32:esp32 .
 
 参与开发或提交问题时，建议提供开发板型号、主控及 SWS 版本、所用分支和提交编号，并描述复现步骤与实际现象问题可提交到 [Issues](https://github.com/Leo-John233/SmartWebServer/issues)，代码修改可通过 Pull Request 讨论
 
-详细接入点与上游合并步骤见 [扩展维护说明](src/extensions/README.md)历史改动可查阅 [提交记录](https://github.com/Leo-John233/SmartWebServer/commits/SmartWebServer-FeatureRelease)
+工程配置、编译与验证方法见 [开发维护指南](docs/DEVELOPMENT.md)，扩展接入和上游合并步骤见 [扩展维护说明](src/extensions/README.md)
 
-本地测试、对照与演示脚本未随仓库完整提供维护记录中涉及这些工具的命令，需要具备相应本地文件后才能执行
+历史修改与对应验证结果见 [修改日志](docs/CHANGELOG.md)，逐次提交可查阅 [Git 历史](https://github.com/Leo-John233/SmartWebServer/commits/SmartWebServer-FeatureRelease)
+
+本地测试、对照与演示脚本未随仓库完整提供，维护记录中涉及这些工具的命令，需要具备相应本地文件后才能执行
 
 ## 验证范围与已知限制
 
