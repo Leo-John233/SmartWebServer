@@ -66,9 +66,15 @@ void BoardIo::tick() {
     }
     policy_.advanceRelease(millis());
     updateDriverTaskInterval();
-    if (status.onStepFound && status.mountFound == SD_TRUE && policy_.feedbackDue(millis()) && !driverTaskKicked_) {
-      tasks.immediate(driverTask_);
-      driverTaskKicked_ = true;
+    if (status.onStepFound && status.mountFound == SD_TRUE && policy_.feedbackDue(millis())) {
+      if (policy_.feedbackPriorityBoostDue(millis()) && !driverTaskPromoted_) {
+        tasks.setPriority(driverTask_, 1);
+        driverTaskPromoted_ = true;
+      }
+      if (!driverTaskKicked_) {
+        tasks.immediate(driverTask_);
+        driverTaskKicked_ = true;
+      }
     }
   }
   #if SWS_ACTIVITY_LED_PIN != OFF
@@ -95,10 +101,17 @@ void swsNetworkActivity() { boardIo.networkActivity(); }
 void BoardIo::pollDriver() {
   if (!started_ || !brakeAvailable()) return;
   driverTaskKicked_ = false;
-  if (servicing_) return;
+  if (servicing_) {
+    restoreDriverTaskPriority();
+    return;
+  }
   updateDriverTaskInterval();
-  if (!policy_.feedbackDue(millis())) return;
+  if (!policy_.feedbackDue(millis())) {
+    restoreDriverTaskPriority();
+    return;
+  }
   if (!status.onStepFound || status.mountFound != SD_TRUE) {
+    restoreDriverTaskPriority();
     tick();
     return;
   }
@@ -108,7 +121,14 @@ void BoardIo::pollDriver() {
   policy_.feedback(feedback, millis());
   updateDriverTaskInterval();
   servicing_ = false;
+  restoreDriverTaskPriority();
   tick();
+}
+
+void BoardIo::restoreDriverTaskPriority() {
+  if (!driverTask_ || !driverTaskPromoted_) return;
+  tasks.setPriority(driverTask_, 4);
+  driverTaskPromoted_ = false;
 }
 
 void BoardIo::updateDriverTaskInterval() {

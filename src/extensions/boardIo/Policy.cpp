@@ -45,10 +45,7 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
     feedbackSeen_ = true;
     return;
   }
-  if (!fresh(now)) {
-    if (released_) latch(BrakeFault::Stale);
-    invalidate();
-  }
+  if (!fresh(now)) invalidate();
   feedback_ = value;
   feedbackSeen_ = true;
   if (!fresh(now)) {
@@ -75,11 +72,13 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
 
 void BoardIoPolicy::checkFeedback(bool connected, uint32_t now) {
   if (manual_) return;
-  if (!connected || !fresh(now)) {
+  if (!connected) {
     invalidate();
-    if (released_) latch(!connected ? BrakeFault::Disconnected : BrakeFault::Stale);
+    if (released_) latch(BrakeFault::Disconnected);
+  } else if (!fresh(now)) {
+    invalidate();
   }
-  // 失联、超时和无效反馈均不改变原有电平，手动解锁仍可显式松闸
+  // 反馈超龄只要求重新采样，失联和无效反馈仍进入保护停止流程
 }
 
 void BoardIoPolicy::advanceRelease(uint32_t now) {
@@ -153,4 +152,16 @@ bool BoardIoPolicy::feedbackDue(uint32_t now) const {
   if (!feedbackSeen_) return true;
   if (stopWaitActive() && int32_t(feedback_.sampledAt - stopAt_) <= 0) return true;
   return uint32_t(now - feedback_.sampledAt) >= feedbackPollInterval();
+}
+
+bool BoardIoPolicy::feedbackPriorityBoostDue(uint32_t now) const {
+  if (!feedbackDue(now)) return false;
+  if (!feedbackSeen_) return true;
+  if (stopWaitActive()) {
+    if (int32_t(feedback_.sampledAt - stopAt_) <= 0) {
+      return uint32_t(now - stopAt_) >= StopPollIntervalMs + StopFeedbackPriorityBoostMs;
+    }
+    return uint32_t(now - feedback_.sampledAt) >= StopPollIntervalMs + StopFeedbackPriorityBoostMs;
+  }
+  return uint32_t(now - feedback_.sampledAt) >= PollIntervalMs + FeedbackPriorityBoostMs;
 }

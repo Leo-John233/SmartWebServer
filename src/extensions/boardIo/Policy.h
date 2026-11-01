@@ -8,7 +8,7 @@ enum class BrakeFault : uint8_t { None, Driver, Feedback, Disconnected, Stale, P
 // 独立保护策略，不依赖串口协议、GPIO、网页或存储
 class BoardIoPolicy {
 public:
-  enum : uint32_t { PollIntervalMs = 1500, StopPollIntervalMs = 250, FeedbackStaleMs = 2000, StopFeedbackStaleMs = 1000, ReadyMs = 500, StopRetryMs = 2000, MaxStopAttempts = 3 };
+  enum : uint32_t { PollIntervalMs = 1500, StopPollIntervalMs = 250, FeedbackStaleMs = 2000, StopFeedbackStaleMs = 1000, FeedbackPriorityBoostMs = 100, StopFeedbackPriorityBoostMs = 40, ReadyMs = 500, StopRetryMs = 2000, MaxStopAttempts = 3 };
   void configure(bool activity, bool protection, uint32_t now);
   void traffic(uint32_t now);
   void feedback(const ProtectionFeedback &feedback, uint32_t now);
@@ -30,6 +30,7 @@ public:
   BrakeFault faultReason() const { return reason_; }
   const ProtectionStopResult &lastStopResult() const { return stopResult_; }
   bool feedbackDue(uint32_t now) const;
+  bool feedbackPriorityBoostDue(uint32_t now) const;
   uint32_t feedbackPollInterval() const { return stopWaitActive() ? StopPollIntervalMs : PollIntervalMs; }
 
 private:
