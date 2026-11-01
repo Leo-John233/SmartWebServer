@@ -38,6 +38,7 @@ void handleNetwork() {
   processNetworkGet();
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
 

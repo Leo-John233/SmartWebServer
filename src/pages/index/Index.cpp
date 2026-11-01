@@ -21,6 +21,7 @@ void handleRoot()
   state.updateController(true);
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
 
@@ -123,6 +124,7 @@ void handleRoot()
 void indexAjaxGet()
 {
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
 
@@ -136,6 +138,7 @@ void indexAjax() {
   data.reserve(1024);
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
   // 本机设置状态在主控掉线时也继续返回。

@@ -29,7 +29,12 @@ void BoardIoPolicy::configure(bool activity, bool protection, uint32_t now) {
 void BoardIoPolicy::traffic(uint32_t now) { trafficSeen_ = true; trafficAt_ = now; }
 
 bool BoardIoPolicy::fresh(uint32_t now) const {
-  return feedbackSeen_ && feedback_.driverValid && uint32_t(now - feedback_.sampledAt) <= FeedbackStaleMs;
+  const uint32_t staleAfter = stopWaitActive() ? StopFeedbackStaleMs : FeedbackStaleMs;
+  return feedbackSeen_ && feedback_.driverValid && uint32_t(now - feedback_.sampledAt) <= staleAfter;
+}
+
+bool BoardIoPolicy::stopWaitActive() const {
+  return reason_ != BrakeFault::None && released_ && stopAttempts_ && stopResult_.complete();
 }
 
 void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
@@ -37,7 +42,6 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
   if (feedbackSeen_ && int32_t(value.sampledAt - feedback_.sampledAt) <= 0) return;
   if (manual_) {
     feedback_ = value;
-    feedbackAt_ = now;
     feedbackSeen_ = true;
     return;
   }
@@ -46,7 +50,6 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
     invalidate();
   }
   feedback_ = value;
-  feedbackAt_ = now;
   feedbackSeen_ = true;
   if (!fresh(now)) {
     invalidate();
@@ -64,7 +67,7 @@ void BoardIoPolicy::feedback(const ProtectionFeedback &value, uint32_t now) {
   if (reason_ != BrakeFault::None && released_ && stopAttempts_ && stopResult_.complete() &&
       int32_t(value.sampledAt - stopAt_) > 0 && value.standstill) {
     if (!standstillSeen_) { standstillSeen_ = true; standstillAt_ = value.sampledAt; }
-    else if (uint32_t(value.sampledAt - standstillAt_) >= PollIntervalMs) {
+    else if (uint32_t(value.sampledAt - standstillAt_) >= StopPollIntervalMs) {
       released_ = false;
     }
   } else standstillSeen_ = false;
@@ -147,7 +150,7 @@ BrakeState BoardIoPolicy::brakeState(bool connected, uint32_t now) const {
 }
 
 bool BoardIoPolicy::feedbackDue(uint32_t now) const {
-  // 无效回复后按一秒探测，避免每秒四次串口超时持续挤占网页处理
-  const uint32_t interval = feedbackSeen_ && !feedback_.driverValid ? FeedbackStaleMs : PollIntervalMs;
-  return !feedbackSeen_ || uint32_t(now - feedbackAt_) >= interval;
+  if (!feedbackSeen_) return true;
+  if (stopWaitActive() && int32_t(feedback_.sampledAt - stopAt_) <= 0) return true;
+  return uint32_t(now - feedback_.sampledAt) >= feedbackPollInterval();
 }

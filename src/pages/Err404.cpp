@@ -5,6 +5,7 @@
 void handleNotFound() {
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
   www.sendHeader("Cache-Control", "no-store");
+  www.sendHeader("Connection", "close");
   www.send(404, "text/html", String());
   pageHead();
   String data;

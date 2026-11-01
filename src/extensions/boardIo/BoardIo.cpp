@@ -40,10 +40,14 @@ void BoardIo::begin() {
   #endif
   // 无法建立输出监控任务时维持初始化电平；启用保护时仍保持启动抱闸
   if (!tasks.add(20, 0, true, 1, pollBoardOutputs, "BoardIO")) { startFailed_ = true; return; }
-  // 采样与超时检查同级，网页让出调度时不能只运行检查而饿死采样
-  if (brakeAvailable() && !tasks.add(BoardIoPolicy::PollIntervalMs, 0, true, 1, pollBoardDriver, "RaBrake")) {
-    startFailed_ = true;
-    return;
+  if (brakeAvailable()) {
+    driverTask_ = tasks.add(0, 0, true, 4, pollBoardDriver, "RaBrake");
+    if (!driverTask_) { startFailed_ = true; return; }
+    // 始终使用微秒单位，切换轮询周期时不改变调度时钟
+    tasks.setPeriodMicros(driverTask_, BoardIoPolicy::PollIntervalMs * 1000UL);
+    driverTaskIntervalMs_ = BoardIoPolicy::PollIntervalMs;
+    tasks.immediate(driverTask_);
+    driverTaskKicked_ = true;
   }
   started_ = true;
   tick();
@@ -61,6 +65,11 @@ void BoardIo::tick() {
       policy_.stopResult(result, millis());
     }
     policy_.advanceRelease(millis());
+    updateDriverTaskInterval();
+    if (status.onStepFound && status.mountFound == SD_TRUE && policy_.feedbackDue(millis()) && !driverTaskKicked_) {
+      tasks.immediate(driverTask_);
+      driverTaskKicked_ = true;
+    }
   }
   #if SWS_ACTIVITY_LED_PIN != OFF
     const bool lit = policy_.ledLit(status.onStepFound, LED_STATUS_ON_STATE == LOW, now);
@@ -84,7 +93,11 @@ void BoardIo::networkActivity() {
 void swsNetworkActivity() { boardIo.networkActivity(); }
 
 void BoardIo::pollDriver() {
-  if (!started_ || servicing_ || !brakeAvailable() || !policy_.feedbackDue(millis())) return;
+  if (!started_ || !brakeAvailable()) return;
+  driverTaskKicked_ = false;
+  if (servicing_) return;
+  updateDriverTaskInterval();
+  if (!policy_.feedbackDue(millis())) return;
   if (!status.onStepFound || status.mountFound != SD_TRUE) {
     tick();
     return;
@@ -93,8 +106,22 @@ void BoardIo::pollDriver() {
   servicing_ = true;
   const ProtectionFeedback feedback = port_->sample();
   policy_.feedback(feedback, millis());
+  updateDriverTaskInterval();
   servicing_ = false;
   tick();
+}
+
+void BoardIo::updateDriverTaskInterval() {
+  if (!driverTask_) return;
+  const bool connected = status.onStepFound && status.mountFound == SD_TRUE;
+  const uint32_t interval = connected ? policy_.feedbackPollInterval() : BoardIoPolicy::PollIntervalMs;
+  if (interval == driverTaskIntervalMs_) return;
+  tasks.setPeriodMicros(driverTask_, interval * 1000UL);
+  driverTaskIntervalMs_ = interval;
+  if (interval == BoardIoPolicy::StopPollIntervalMs) {
+    tasks.immediate(driverTask_);
+    driverTaskKicked_ = true;
+  }
 }
 
 bool BoardIo::setProtectionPort(ProtectionPort &port) {

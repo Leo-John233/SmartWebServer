@@ -104,6 +104,7 @@ void pollCmdSvr() {
 void setup(void) {
   boardIo.initPins();
   #if OPERATIONAL_MODE == WIFI
+    WiFi.persistent(false);
     WiFi.disconnect();
     WiFi.softAPdisconnect(true); // 断开之前的 WiFi 连接，重置状态
   #endif
@@ -287,6 +288,10 @@ Again:
   // ----------------------------------------------------------------------------------------
 
   VLF("MSG: Set webpage handlers"); // 设置网页路由处理程序
+  registerPageHandler("/favicon.ico", []() {
+    www.sendHeader("Connection", "close");
+    www.send(204);
+  });
   registerPageHandler("/index.htm", handleRoot);
   registerPageHandler("/index-ajax-get.txt", indexAjaxGet);
   registerPageHandler("/index.txt", indexAjax);

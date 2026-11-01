@@ -67,6 +67,7 @@ void handleAux() {
   if (status.auxiliaryFound != SD_TRUE) { handleNotFound(); return; }
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
 
@@ -190,6 +191,7 @@ void handleAux() {
 
 void auxAjaxGet() {
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
 
@@ -204,6 +206,7 @@ void auxAjax() {
   char temp[120]="";
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
 
