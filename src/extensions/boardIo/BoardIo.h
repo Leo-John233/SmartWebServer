@@ -23,11 +23,17 @@ public:
   BrakeState brakeState() const;
 
 private:
+  void updateDriverTaskInterval();
+  void restoreDriverTaskPriority();
   BoardIoPolicy policy_;
   ProtectionPort *port_ = nullptr;
+  uint8_t driverTask_ = 0;
+  uint32_t driverTaskIntervalMs_ = 0;
   bool started_ = false;
   bool startFailed_ = false;
   bool servicing_ = false;
+  bool driverTaskKicked_ = false;
+  bool driverTaskPromoted_ = false;
   int ledLevel_ = -1, brakeLevel_ = -1;
 };
 

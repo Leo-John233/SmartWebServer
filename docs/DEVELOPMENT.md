@@ -185,11 +185,11 @@ ESP8266 还提供最近一次启动原因、重置信息、空闲堆内存、无
 
 1. 上电先保持抱闸，输出任务或采样任务启动失败时继续保持 LOW
 2. 自动保护开启且本次运行没有故障锁定时，有效无故障反馈连续保持至少 500 ms 才松闸
-3. 驱动故障、反馈无效、失联、反馈超过 1 秒未更新或关闭网页保护时，锁定本次事件并启动停止流程
+3. 驱动故障、实际查询失败、失联或关闭网页保护时，锁定本次事件并启动停止流程；反馈年龄超过 2 秒只进入待重新采样状态，不单独锁定故障或发送停止命令
 4. 先发送 `:Q#` 终止运动，再发送 `:Td#` 关闭跟踪，分别记录两条命令的结果
 5. 停止失败时每隔 2 秒重试，每轮连同首次最多尝试 3 次，等待期间保持当前抱闸电平
 6. 两条命令均成功后，必须收到停止流程结束之后的至少两帧有效静止反馈，且跨度至少 250 ms，才输出 LOW 抱闸
-7. 无效、过期或不带 `ST` 的反馈会清除未完成的静止确认，不使用固定倒计时强制抱闸
+7. 无效、不带 `ST` 或已过期的反馈会清除未完成的静止确认；年龄过期只等待新采样，不使用固定倒计时强制抱闸
 8. 故障锁定不会因反馈恢复、刷新页面或切换开关而自动解除，重新上电后重新执行启动检查
 
 正常静止本身不会触发抱闸，单独出现 `ST` 也不会启动故障停止流程
@@ -205,13 +205,15 @@ ESP8266 还提供最近一次启动原因、重置信息、空闲堆内存、无
 
 ### 反馈与验证边界
 
-状态使用现有 `:GXU1#`，正常采样间隔为 250 ms，无效反馈后每秒探测一次，单次读取超时为 200 ms
+BoardIo 采样任务默认使用 OnTask priority 4；启动时尚无反馈会先以 priority 1 查询一帧，完成实际查询后恢复 priority 4。正常 `:GXU1#` 采样间隔为 1500 ms。反馈超过正常 2000 ms 或停止等待 1000 ms 的年龄阈值后，只进入待重新采样状态。已有反馈到期后再延迟 100 ms 仍未采样，任务临时提升到 priority 1；停止等待按 250 ms 周期，到期后再延迟 40 ms 仍未采样时临时提升到 priority 1。只有实际查询完成后才恢复 priority 4。单次读取超时仍为 200 ms。
+
+命令层缓存成功的 `:GXU1#` 回复 1500 ms，并保留发送前的原始采样时间；保护任务最多消费一次缓存内容。反馈年龄超期本身不会发送 `Q`/`Td`，也不会锁存旧的 `Stale` 状态；实际驱动故障、查询失败、断联或关闭保护仍进入停止流程。停止确认使用停止命令完成后的两条独立有效静止反馈，采样时间必须晚于停止命令完成时间且至少相隔 250 ms，两帧到齐后才输出 LOW 抱闸。调度仍为协作式，不提供硬实时保证；若高优先级同步工作阻塞采样任务，优先级提升也不能保证查询及时执行。没有新的两帧静止反馈时，输出保持 HIGH 松闸。
 
 反馈必须符合 `ST`、`OA`、`OB`、`GA`、`GB`、`OT`、`PW`、`GF` 的字段定义，七类故障中任一置位均按故障处理
 
 `ST` 不是机械轴速反馈，`GXU1` 也不能证明保持电流建立、驱动初始化完成或主控全部运动结束
 
-当前实现未验证机械安全性，实际接线、上电电平、串口反馈和抱闸动作仍需在目标设备上检查
+当前实现未验证机械安全性，实际接线、上电电平、串口反馈、长时间高负载访问和抱闸动作仍需在目标设备上检查
 
 ## 开发维护
 
@@ -269,20 +271,35 @@ node demo/server.cjs
 
 | 检查内容 | 本地命令 |
 | --- | --- |
+| 当前 STA/抱闸综合回归 | `node tests/sta-brake-suite.cjs`（顺序运行，报告项也会记录） |
 | 原版接口与命令 | `node tests/page-interfaces.cjs` |
 | 模板输出与首屏 | `node tests/page-template.cjs` 和 `node tests/native-first-paint.cjs` |
 | 导航与状态轮询 | `node tests/native-navigation.cjs` 和 `node tests/page-performance.cjs` |
-| 配网后端与恢复 | `node tests/network-wifi-backend.cjs` 和 `node tests/network-wifi-recovery.cjs` |
+| 配网后端与连接历史 | `node tests/network-wifi-backend.cjs` 和 `node tests/network-wifi-history.cjs` |
 | 配网界面与提示 | `node tests/network-wifi-ui.cjs <输出目录>` 和 `node tests/network-feedback.cjs` |
 | 页面多语言与布局 | `node tests/pages-languages.cjs <输出目录>` 和 `node tests/locales.cjs` |
 | 坐标与设备参数 | `node tests/coordinate-input.cjs` 和 `node tests/axis-page.cjs <HTML输出路径>` |
-| 抱闸策略与适配 | `node tests/brake-policy.cjs` 和 `node tests/board-io-backend.cjs` |
+| 抱闸策略、调度与回复缓存 | `node tests/brake-policy.cjs`、`node tests/brake-task-scheduling.cjs`、`node tests/brake-gxu1-cache.cjs` 和 `node tests/board-io-backend.cjs` |
 | 重启与设置保存 | `node tests/brake-reboot.cjs` 和 `node tests/nv-critical-commit.cjs` |
 | 第三方命令转发 | `node tests/tracking-transport.cjs` |
 
 全部语言的工具链检查使用 `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>`
 
 编译清单由 Arduino CLI 的 `compile --only-compilation-database` 生成，语言切换在隔离副本中进行
+
+上一轮历史结果（`tests/output/sta-brake-20261102/`）：2026-11-02 本地 71 项串行回归完成，64 项断言通过、7 项诊断报告生成、0 项失败；源码哈希保护确认测试没有修改固件源码。ESP8266 nodemcuv2 与 ESP32 `esp32:esp32:esp32` clean build 均通过，均为 jobs 1、warnings all。ESP8266 程序 633800 字节、静态 RAM 50620 字节、可用 31300 字节；ESP32 程序 1184081 字节、静态 RAM 53012 字节、可用 274668 字节。两个构建各有 459 个源码、头文件和配置文件与构建快照一致。本轮 72 项回归与 ESP8266 验证结果见[扩展验证记录](../src/extensions/README.md)。
+
+上一轮同轮用实际 Xtensa 对象、按最终 ESP8266 编译参数生成 AF1 对照，测得五个页面入口帧如下：
+
+| 页面入口 | AF1（字节） | 上一轮构建（字节） | 差值 |
+| --- | ---: | ---: | ---: |
+| Root / `handleRoot()` | 96 | 96 | 0 |
+| Mount / `handleMount()` | 80 | 80 | 0 |
+| Focuser / `handleFocuser()` | 80 | 80 | 0 |
+| Rotator / `handleRotator()` | 96 | 96 | 0 |
+| Aux / `handleAux()` | 272 | 272 | 0 |
+
+AF1 在这五个入口中没有 240 字节局部临时数组，因此上一轮不宣称减少了 240 字节。入口帧仅表示函数 prologue 对栈指针的调整，不代表调用链峰值或总运行栈。两个平台的十种语言各检查 46 个页面/扩展翻译单元均通过；ESP32 语言检查中的可选 PCH 全量矩阵仍检查全部文件，记录了 20 个当前语言副本上的有效 `.gch` 命中。双平台 12 个归档文件的 SHA-256 与原构建文件一致。上一轮最终日志保留一个 `StateMount.cpp` signed/unsigned 比较警告和一个 ESP32 SDK `esp32-hal-uart.c` 非 void 函数返回值警告。上一轮 953 个临时目录清理完成，所有报告和构建证据均保留。
 
 程序、截图、快照和日志统一放在 `tests/output/`，该目录不提交到 Git
 
@@ -291,6 +308,8 @@ node demo/server.cjs
 - 编译通过只说明代码可构建，不能证明真实无线、串口和机械动作正常
 - ESP-07S 曾出现热点可见但终端掉线或暂时无法加入的情况，仍需实机定位
 - 切页卡顿和偶发空白需要结合设备运行时间、复位原因、连接状态与串口反馈验证
+- 原生 ESP8266 SDK 默认响应已带 `Connection: close`，但 `handleClient` 仍可能在处理排队的空闲连接时等待；探针报告约 5040 ms 和 15120 ms 的等待窗口。这是 SDK 基线诊断，显式响应头不消除该等待，也不证明它是切页问题根因
+- 页面发送或其他高优先级同步工作若阻塞采样任务，反馈年龄会进入待重新采样状态；超龄本身不会触发停止或抱闸，实际查询失败、驱动故障、断联和关闭保护仍会请求停止。停止后两条新静止反馈尚未到达前输出保持 HIGH；协作式任务不提供硬实时保证
 - 新增坐标输入仅支持 JNOW 赤经赤纬，尚未提供 J2000 或方位高度转换
 - 不同日期的验证对应各自的源码快照，历史结果不能直接视为当前设备验证结果
 

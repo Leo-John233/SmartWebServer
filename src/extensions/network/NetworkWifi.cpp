@@ -40,7 +40,15 @@ String quote(const String &value) {
   }
   return out + '"';
 }
+void disableStationSleep() {
+  #ifdef ESP8266
+    if (WiFi.getSleepMode() != WIFI_NONE_SLEEP) WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  #elif defined(ESP32)
+    if (WiFi.getSleep()) WiFi.setSleep(false);
+  #endif
+}
 void reply(int code, const String &body) {
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-store");
   www.send(code, "application/json; charset=utf-8", body);
 }
@@ -112,12 +120,7 @@ bool configureStation() {
   lastStationStatus = 0;
   // 由 SDK 维护本次连接，主循环负责总等待时限
   if (!WiFi.enableSTA(true)) return false;
-  // 空闲时也保持接收，避免省电休眠影响路由器连接
-  #ifdef ESP8266
-    WiFi.setSleepMode(WIFI_NONE_SLEEP);
-  #elif defined(ESP32)
-    WiFi.setSleep(false);
-  #endif
+  disableStationSleep();
   WiFi.setAutoReconnect(true);
   WiFi.disconnect();
   // 沿用旧版调用顺序，一次完成配置和连接，后续主循环只读取结果
@@ -213,6 +216,7 @@ void handleWifiNetwork() {
       WiFi.persistent(false);
       scanAddedSta = !(WiFi.getMode() & WIFI_STA);
       WiFi.enableSTA(true); // 保留热点和已有路由器连接，只开启扫描需要的无线接口
+      disableStationSleep();
       wifiManager.networkBusy = true;
       WiFi.scanDelete();
       int result = WiFi.scanNetworks(true, false);
@@ -327,6 +331,7 @@ void pollWifiNetwork() {
   if (!networkAdopted) {
     networkAdopted = true;
     wifiManager.webManaged = true;
+    if (WiFi.getMode() & WIFI_STA) disableStationSleep();
     WiFi.persistent(false);
     const bool saved = wifiManager.stationEnabledAtBoot || wifiManager.settings.stationEnabled;
     stationReconnect.init(saved, now);

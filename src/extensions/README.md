@@ -79,10 +79,10 @@ node tools/upstream-audit.cjs <待检查原版引用> <已集成原版版本>
 本地测试、演示和对照脚本不加入版本控制，`tests/` 与 `tools/` 整体忽略，`demo/` 只保留 README 说明。现有本地文件继续保留；新环境缺少这些脚本时，按接入清单核对包含路径，并执行两个目标的真实固件编译。
 
 - `node tools/upstream-audit.cjs` 检查扩展接入及本地包含路径
-- `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>` 检查全部十种语言，范围同时包含 `src/pages/` 与 `src/extensions/`，编译清单缺少任一页面或扩展时必须重新生成
-- 抱闸检查使用 `brake-policy`、`board-io-backend`、`brake-reboot`、`controller-status-text`
-- 网络检查使用 `network-wifi-backend`、`network-wifi-performance`、`network-wifi-ui`、`network-wifi-recovery`、`sta-navigation`、`sta-lifecycle`、`wifi-scan-history` 和 `esp8266-scan-behavior`
-- 页面检查使用 `coordinate-input`、`network-page`、`page-performance`、`page-header`、`native-first-paint`、`native-icon-paint`、`native-navigation` 和 `locales`
+- `node tests/sta-brake-suite.cjs --list` 查看当前本地回归入口、报告项、维护工具和已退休实验；`node tests/sta-brake-suite.cjs` 按顺序运行适用回归
+- 回归日志、清单和机器可读报告保存在 `tests/output/sta-brake-20261102/`；原始测试脚本和中间产物属于本地文件，不随仓库发布
+- `node tests/firmware-languages.cjs <compile_commands.json> <输出目录>` 使用最终平台编译命令检查十种语言，范围同时包含 `src/pages/` 与 `src/extensions/`
+- 两个平台完整编译后核对各自源码快照，再使用 ESP8266 最终编译数据库比较 Root、Mount、Focuser、Rotator 和 Aux 五个入口的实际 Xtensa 栈帧
 - 使用 Arduino 工具链编译 ESP8266 与 ESP32，构建目录和临时文件放在忽略的输出目录
 
 资源长度使用编译期数组大小。主题仍在原版 HTML 响应内联输出，使用原生 String / sendContentAndClear，并将新增大模板限制为每段 1024 字节。PageResourceWriter 在一次 head 内共用 1 KB String，合并相邻小片段，完成后输出不足一段的尾部；不发送空分块。每个完整发送调用结束后才让出任务；Wi-Fi 客户端断开后停止后续模板输出，各功能页在主题输出后检查连接并跳过后续正文查询。没有独立公共资源端点、缓存资源服务器、iframe 或异步页面替换层。
@@ -143,7 +143,7 @@ KeyValue.h/.cpp 采用只读文本参数和兼容 String 重载，组装返回�
 
 页面请求模块在六个原生处理入口先设置原串口超时与清理接收，再仅在 args 大于零时处理表单参数，最后更新状态生成页面。纯切页省去参数查找，提交后的首屏使用更新后的状态。Focuser 补偿卡片复用入口状态，不重复查询；Servo 和 StallGuard 仅在可见文档重绘，500 ms 周期不变。删除未使用的 goto_key 数组，串口命令、BoardIo 和 AJAX 接口保持原样。
 
-本轮最终量化结果见 [修改日志中的页面性能优化验证](../../docs/CHANGELOG.md#本轮页面性能优化验证)：七页导航标记前均减少传输字节和发送调用，十语言 210 组样式与节点对比通过。新增 appendPageFormat 支持现有模板使用的字符串、字符、整数及浮点格式，使用 96 字节格式结果缓冲，普通 %s 直接追加完整文本；不将该辅助函数作为任意 printf 格式的通用替代。真实 Xtensa 辅助函数帧为 240 字节，需和调用者同时计入。所有测试产物留在 tests/output，验证后清理本轮临时构建与配置副本，代码构建不等同于实机无线或串口耗时验证。
+本轮最终量化结果见 [修改日志中的页面性能优化验证](../../docs/CHANGELOG.md#本轮页面性能优化验证)：七页导航标记前均减少传输字节和发送调用，十语言 210 组样式与节点对比通过。新增 appendPageFormat 支持现有模板使用的字符串、字符、整数及浮点格式，使用 96 字节格式结果缓冲，普通 %s 直接追加完整文本；不将该辅助函数作为任意 printf 格式的通用替代。历史记录中的 240 字节 Xtensa 辅助函数帧属于单个 helper，不是五个页面入口帧或整条调用链峰值；2026-11-02 的五入口 AF1/current 实测见本节后文。所有测试产物留在 tests/output，验证后清理本轮临时构建与配置副本，代码构建不等同于实机无线或串口耗时验证。
 
 本轮必要的原页面接入清单（相对于 src/pages）
 
@@ -176,3 +176,31 @@ KeyValue.h/.cpp 采用只读文本参数和兼容 String 重载，组装返回�
 NetworkWifi.cpp 每次启用 STA 后明确关闭无线休眠，断线先留出 SDK 自动恢复时间，避免立即开启 AP 抢信道。StationReconnect.h 区分手动失败与已验证网络后台超时；后台超时后仍可按 30 秒间隔恢复，热点有客户端时暂缓主动重连，手动操作优先接管。手动错误密码仍停止搜索，候选凭据隔离、保存条件、原生 WiFi 接口及 NV 键不变。真实代码通过 372 组连接生命周期与 47820 次状态读取，未把模拟通过解释为实机掉线根因已经确认。
 
 完整页面及 AJAX 发送次数、实际 Xtensa 入口栈帧、最终双平台构建与清理记录统一见 [2026-10-21 修改日志](../../docs/CHANGELOG.md#2026-10-21)。完整页面因新交互增加约 4.2～4.6 KB，导航与状态响应合并不代表每个完整页面均减少发送或字节；不宣称将来上游修改相同行也能零文本冲突。本轮各功能模块独立中文提交，仅保留本地。
+
+## 2026-11-02 STA、HTTP 与保护采样
+
+STA 接口启用时关闭 Wi-Fi 省电模式；冷启动在执行无线断开和热点复位前调用 `WiFi.persistent(false)`，避免该复位路径触发不必要的配置 Flash 写入。这些设置保持现有 AP/STA 接入流程，不证明无线掉线或切页延迟的根因。
+
+每个直接开始 HTTP 响应的入口都显式发送 `Connection: close`。原生 SDK 默认响应已带该头；显式响应头用于保持各路由策略一致。ESP8266 `handleClient` 仍可能在处理排队的空闲连接时等待，这项改动不能消除该等待或证明它是切页问题根因。`/favicon.ico` 在 404 回退前返回空的 204；原有完整 404 页面保留。
+
+BoardIo 采样任务默认使用 OnTask priority 4；启动时尚无反馈会先以 priority 1 查询一帧，完成实际查询后恢复 priority 4。正常 `:GXU1#` 查询间隔为 1500 ms，已有反馈到期后 100 ms 仍未采样时临时提升到 priority 1。命令层记录成功回复和发送前的原始采样时间，保护任务可在 1500 ms 内消费一次缓存；驱动回复解析保持原样。停止命令成功后采样切换为 250 ms；到期后 40 ms 仍未采样时临时提升到 priority 1，完成实际查询后恢复 priority 4。只有停止之后两条独立的有效 `ST` 静止反馈且采样时间至少相隔 250 ms，才会输出 LOW 抱闸。
+
+普通反馈年龄超过 2000 ms、停止等待中的反馈年龄超过 1000 ms 时只标记为待重新采样；超龄本身不会发送 `Q`/`Td` 或把旧的 `Stale` 状态锁存为故障。实际驱动故障、查询失败、断联或关闭保护仍进入停止流程。停止命令完成后若没有两条新的有效静止反馈，GPIO 会保持 HIGH 松闸。该协作式调度不提供硬实时保证，优先级提升不能保证被同步阻塞的任务及时运行；软件模拟和编译不证明长时间实机访问、无线丢包率、主控响应或机械安全。
+
+原生 ESP8266 SDK 空闲连接审计会记录约 5040 ms 和 15120 ms 的排队等待窗口。它是 SDK 基线诊断，不是页面优化成功指标，也不证明真实设备切页耗时或故障根因。
+
+以下均为上一轮历史结果，不包含本次采样优先级调整，不能视为当前源码验证。2026-11-02 上一轮本地 71 项串行回归完成：64 项断言通过、7 项诊断报告生成、0 项失败；源码哈希保护确认当时测试没有改动固件源码。ESP8266 nodemcuv2 与 ESP32 `esp32:esp32:esp32` clean build 当时均通过，均为 jobs 1、warnings all；ESP8266 程序 633800 字节、静态 RAM 50620 字节、可用 31300 字节，ESP32 程序 1184081 字节、静态 RAM 53012 字节、可用 274668 字节。两个构建当时各有 459 个源码、头文件和配置文件与构建快照一致。历史日志、清单和报告见 `tests/output/sta-brake-20261102/`。
+
+同轮使用实际 Xtensa 对象和 AF1 编译参数核对五个页面入口函数帧：
+
+| 页面入口 | AF1（字节） | 上一轮构建（字节） | 差值 |
+| --- | ---: | ---: | ---: |
+| Root | 96 | 96 | 0 |
+| Mount | 80 | 80 | 0 |
+| Focuser | 80 | 80 | 0 |
+| Rotator | 96 | 96 | 0 |
+| Aux | 272 | 272 | 0 |
+
+上一轮使用实际 Xtensa 对象和 AF1 编译参数检查的五个入口在 AF1 中均没有 240 字节局部临时数组；上一轮不宣称因此节省了 240 字节。该指标只表示函数入口的栈指针调整，不代表调用链峰值或运行时总栈需求。上一轮历史语言检查在两个平台的十种语言下各检查 46 个页面/扩展翻译单元；本次语言包未修改，这些结果不是本次复测。ESP32 语言检查中的可选 PCH 当时只包装原平台 `Arduino.h`，全量矩阵仍检查全部文件；报告记录了 20 个当前语言副本上的有效 `.gch` 命中。双平台 12 个归档文件的 SHA-256 与当时原构建文件一致。上一轮最终构建日志中有一个 `StateMount.cpp` signed/unsigned 比较警告和一个 ESP32 SDK `esp32-hal-uart.c` 非 void 函数返回值警告。上一轮 953 个临时目录清理完成，suite 报告、失败尝试、源码快照、固件和后构建证据保留。
+
+本轮面向 ESP-07S 的 72 项串行回归全部完成：65 项断言通过、7 项诊断报告生成、0 项失败；suite 源码哈希保持不变。ESP8266 `esp8266:esp8266:nodemcuv2` clean build 以 jobs 1、warnings all 完成，程序 634080 字节，全局变量 50628 字节，可用 31292 字节；相较本轮 before 快照增加 280 字节程序空间和 8 字节全局变量。459 份源文件、头文件与配置文件校验一致。该构建有一个 `StateMount.cpp` signed/unsigned 比较警告。报告和构建证据见 `tests/output/brake-starvation-20261102/`。本轮未完成可选 ESP32 兼容构建，也未重复上一轮十语言×46翻译单元矩阵；不将它们记为本轮通过。

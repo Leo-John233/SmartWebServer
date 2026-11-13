@@ -69,6 +69,7 @@ void boardIoTileAjax(String &data) {
 // 独立的 SWS 设置接口，不把本机 IO 设置传给 OnStep，也不复用运动命令
 void handleBoardIo() {
   www.sendHeader("Cache-Control", "no-store");
+  www.sendHeader("Connection", "close");
   if (www.method() == HTTP_POST) {
     const String action = www.arg("action");
     if (action != "") {

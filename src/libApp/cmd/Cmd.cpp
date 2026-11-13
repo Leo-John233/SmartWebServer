@@ -3,6 +3,7 @@
 
 #include "Cmd.h"
 #include "../../locales/Locale.h"
+#include "../../extensions/boardIo/OnStepProtection.h"
 
 int webTimeout = TIMEOUT_WEB;
 int cmdTimeout = TIMEOUT_COMMAND;
@@ -97,8 +98,11 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
 
   // send the command
   response[0] = 0;
+  const bool driverQuery = cmd && !strcmp(cmd, ":GXU1#");
+  const uint32_t driverSampledAt = driverQuery ? millis() : 0;
   const size_t written = SERIAL_ONSTEP.print(cmd);
   if (written != strlen(cmd)) {
+    if (driverQuery) onStepProtection.recordDriverQuery(response, false, driverSampledAt);
     #ifdef ESP32
       xSemaphoreGive(xMutex);
     #endif
@@ -188,6 +192,7 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
   unsigned long timeout = millis() + (unsigned long)timeOutMs;
   if (noResponse) {
     response[0] = 0;
+    if (driverQuery) onStepProtection.recordDriverQuery(response, false, driverSampledAt);
     #ifdef ESP32
       xSemaphoreGive(xMutex);
     #endif
@@ -199,10 +204,12 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       delay(0);
     }
     if ((long)(timeout - millis()) <= 0) { DF("WRN: cmd "); D(cmd); DLF(" timed out"); }
+    const bool received = response[0] != 0;
+    if (driverQuery) onStepProtection.recordDriverQuery(response, received, driverSampledAt);
     #ifdef ESP32
       xSemaphoreGive(xMutex);
     #endif
-    return (response[0] != 0);
+    return received;
   } else {
     // get full response, '#' terminated
     int responsePos = 0;
@@ -218,11 +225,13 @@ bool OnStepCmd::processCommand(const char* cmd, char* response, long timeOutMs) 
       delay(0);
     }
     if ((long)(timeout - millis()) <= 0) { DF("WRN: cmd \""); D(cmd); DLF("\" timed out"); }
+    const size_t n = strlen(response);
+    const bool received = (n > 0) && (response[n - 1] == '#');
+    if (driverQuery) onStepProtection.recordDriverQuery(response, received, driverSampledAt);
     #ifdef ESP32
       xSemaphoreGive(xMutex);
     #endif
-    const size_t n = strlen(response);
-    return (n > 0) && (response[n - 1] == '#');
+    return received;
   }
 }
 

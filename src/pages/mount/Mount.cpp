@@ -21,6 +21,7 @@ void handleMount()
   state.updateMount(true);
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/html", String());
 
@@ -99,6 +100,7 @@ void handleMount()
 void mountAjaxGet()
 {
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
 
@@ -123,6 +125,7 @@ void mountAjax()
   data.reserve(1024);
 
   www.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  www.sendHeader("Connection", "close");
   www.sendHeader("Cache-Control", "no-cache");
   www.send(200, "text/plain", String());
 

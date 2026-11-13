@@ -26,23 +26,55 @@ bool OnStepProtection::decodeDriver(const char *reply, ProtectionFeedback &feedb
 
 ProtectionFeedback OnStepProtection::sample() {
   ProtectionFeedback feedback;
-  feedback.sampledAt = millis();
-  driverValid_ = false;
+  const uint32_t now = millis();
+  const bool cacheFresh = driverReceived_ && uint32_t(now - sampledAt_) <= ReplyCacheMs;
+  const bool cacheUnconsumed = !consumedSeen_ || int32_t(sampledAt_ - consumedAt_) > 0;
+  if (cacheFresh && cacheUnconsumed) {
+    feedback.sampledAt = sampledAt_;
+    decodeDriver(driverReply_, feedback);
+    driverValid_ = feedback.driverValid;
+    consumedAt_ = sampledAt_;
+    consumedSeen_ = true;
+    return feedback;
+  }
+
+  driverValid_ = driverReceived_ = false;
   driverReply_[0] = 0;
+  sampledAt_ = now;
+  queryRecorded_ = false;
   const bool received = onStep.processCommand(":GXU1#", driverReply_, 200);
+  if (!queryRecorded_) recordDriverQuery(driverReply_, received, sampledAt_);
+  feedback.sampledAt = sampledAt_;
+  if (received && driverReceived_) decodeDriver(driverReply_, feedback);
+  driverValid_ = feedback.driverValid;
+  consumedAt_ = sampledAt_;
+  consumedSeen_ = true;
+  return feedback;
+}
+
+void OnStepProtection::recordDriverQuery(const char *reply, bool received, uint32_t sampledAt) {
+  queryRecorded_ = true;
+  sampledAt_ = sampledAt;
+  driverReceived_ = received && reply;
+  driverValid_ = false;
+  if (!driverReceived_) { driverReply_[0] = 0; return; }
+  if (reply != driverReply_) {
+    const size_t length = strlen(reply);
+    if (length >= sizeof(driverReply_)) { driverReceived_ = false; driverReply_[0] = 0; return; }
+    memcpy(driverReply_, reply, length + 1);
+  }
   const size_t length = strlen(driverReply_);
   if (length && driverReply_[length - 1] == '#') driverReply_[length - 1] = 0;
-  if (received) decodeDriver(driverReply_, feedback);
-  sampledAt_ = feedback.sampledAt;
-  driverValid_ = feedback.driverValid;
-  return feedback;
+  ProtectionFeedback parsed;
+  parsed.sampledAt = sampledAt_;
+  driverValid_ = decodeDriver(driverReply_, parsed);
 }
 
 bool OnStepProtection::latestDriverReply(char *reply, size_t capacity) const {
   if (!reply || !capacity) return false;
   reply[0] = 0;
   // 页面只使用保护任务的同一份新鲜反馈，采样失败后不能继续显示旧状态
-  if (!driverValid_ || uint32_t(millis() - sampledAt_) > 1000 || strlen(driverReply_) >= capacity) return false;
+  if (!driverReceived_ || !driverValid_ || uint32_t(millis() - sampledAt_) > ReplyCacheMs || strlen(driverReply_) >= capacity) return false;
   strcpy(reply, driverReply_);
   return true;
 }
